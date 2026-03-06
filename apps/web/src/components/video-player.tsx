@@ -1,17 +1,29 @@
 import { MediaPlayer, MediaProvider, Track } from "@vidstack/react";
 import { DefaultVideoLayout, defaultLayoutIcons } from "@vidstack/react/player/layouts/default";
 
-export function VideoPlayer() {
+const DEMO_SRC = "https://files.vidstack.io/sprite-fight/720p.mp4";
+const DEMO_POSTER = "https://files.vidstack.io/sprite-fight/poster.webp";
+const DEMO_TITLE = "Sprite Fight";
+const DEMO_THUMBNAILS = "https://files.vidstack.io/sprite-fight/thumbnails.vtt";
+
+type Props = {
+  src?: string;
+  title?: string;
+  poster?: string;
+};
+
+export function VideoPlayer({ src = DEMO_SRC, title = DEMO_TITLE, poster = DEMO_POSTER }: Props) {
   return (
     <MediaPlayer
-      src="https://files.vidstack.io/sprite-fight/720p.mp4"
+      className="w-full"
+      src={src}
       viewType="video"
       streamType="on-demand"
       logLevel="warn"
       crossOrigin
       playsInline
-      title="Sprite Fight"
-      poster="https://files.vidstack.io/sprite-fight/poster.webp"
+      title={title}
+      poster={poster}
     >
       <MediaProvider>
         <Track
@@ -37,10 +49,7 @@ export function VideoPlayer() {
           default
         />
       </MediaProvider>
-      <DefaultVideoLayout
-        thumbnails="https://files.vidstack.io/sprite-fight/thumbnails.vtt"
-        icons={defaultLayoutIcons}
-      />
+      <DefaultVideoLayout thumbnails={DEMO_THUMBNAILS} icons={defaultLayoutIcons} />
     </MediaPlayer>
   );
 }
