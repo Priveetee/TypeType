@@ -1,12 +1,15 @@
 import { faker } from "@faker-js/faker";
 import type { VideoStream } from "../types/stream";
 
+const DEMO_PREVIEW_URL = "https://files.vidstack.io/sprite-fight/720p.mp4";
+
 function generateStream(date?: Date): VideoStream {
   const id = faker.string.uuid();
   return {
     id,
     title: faker.lorem.sentence({ min: 4, max: 10 }),
     thumbnail: `https://picsum.photos/seed/${id}/640/360`,
+    previewUrl: DEMO_PREVIEW_URL,
     channelName: faker.internet.username(),
     channelAvatar: `https://picsum.photos/seed/${faker.string.uuid()}/40/40`,
     views: faker.number.int({ min: 1000, max: 50000000 }),

@@ -1,4 +1,7 @@
+import { useRef, useState } from "react";
 import type { VideoStream } from "../types/stream";
+
+const PREVIEW_DELAY_MS = 3000;
 
 type Props = {
   stream: VideoStream;
@@ -28,14 +31,42 @@ function formatAge(date: Date): string {
 }
 
 export function VideoCard({ stream }: Props) {
+  const [previewing, setPreviewing] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function handleMouseEnter() {
+    if (!stream.previewUrl) return;
+    timerRef.current = setTimeout(() => setPreviewing(true), PREVIEW_DELAY_MS);
+  }
+
+  function handleMouseLeave() {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    setPreviewing(false);
+  }
+
   return (
-    <div className="flex flex-col gap-2 cursor-pointer group">
+    <a
+      href={`/watch?v=${stream.id}`}
+      className="flex flex-col gap-2 group"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       <div className="relative aspect-video rounded-lg overflow-hidden bg-zinc-800">
         <img
           src={stream.thumbnail}
           alt={stream.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
         />
+        {previewing && stream.previewUrl && (
+          <video
+            src={stream.previewUrl}
+            className="absolute inset-0 w-full h-full object-cover"
+            autoPlay
+            muted
+            loop
+            playsInline
+          />
+        )}
         <span className="absolute bottom-1.5 right-1.5 bg-black/80 text-white text-xs px-1 rounded">
           {formatDuration(stream.duration)}
         </span>
@@ -56,6 +87,6 @@ export function VideoCard({ stream }: Props) {
           </p>
         </div>
       </div>
-    </div>
+    </a>
   );
 }
