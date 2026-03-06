@@ -1,0 +1,18 @@
+{
+  "name": "typetype",
+  "private": true,
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev": "bun run --cwd apps/web dev",
+    "build": "bun run --cwd apps/web build",
+    "check": "biome check .",
+    "format": "biome format --write .",
+    "knip": "knip",
+    "sherif": "sherif"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "latest",
+    "knip": "latest",
+    "sherif": "latest"
+  }
+}
