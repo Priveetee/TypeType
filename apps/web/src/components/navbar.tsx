@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useUiStore } from "../stores/ui-store";
 import { SearchOverlay } from "./search-overlay";
 
@@ -48,6 +48,21 @@ function MenuIcon() {
 export function Navbar() {
   const [searchOpen, setSearchOpen] = useState(false);
   const toggleSidebar = useUiStore((s) => s.toggleSidebar);
+
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (
+        e.key === "/" &&
+        !(e.target instanceof HTMLInputElement) &&
+        !(e.target instanceof HTMLTextAreaElement)
+      ) {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, []);
 
   return (
     <>
