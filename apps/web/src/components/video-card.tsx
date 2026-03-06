@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import type { VideoStream } from "../types/stream";
 
@@ -45,8 +46,9 @@ export function VideoCard({ stream }: Props) {
   }
 
   return (
-    <a
-      href={`/watch?v=${stream.id}`}
+    <Link
+      to="/watch"
+      search={{ v: stream.id }}
       className="flex flex-col gap-2 group"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -87,6 +89,6 @@ export function VideoCard({ stream }: Props) {
           </p>
         </div>
       </div>
-    </a>
+    </Link>
   );
 }
