@@ -9,4 +9,6 @@ export type VideoStream = {
   views: number;
   duration: number;
   uploadedAt: Date;
+  likes?: number;
+  dislikes?: number;
 };

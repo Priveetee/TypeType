@@ -16,6 +16,8 @@ function generateStream(date?: Date): VideoStream {
     views: faker.number.int({ min: 1000, max: 50000000 }),
     duration: faker.number.int({ min: 60, max: 7200 }),
     uploadedAt: date ?? faker.date.recent({ days: 365 }),
+    likes: faker.number.int({ min: 100, max: 500000 }),
+    dislikes: faker.number.int({ min: 0, max: 50000 }),
   };
 }
 
