@@ -18,13 +18,17 @@ export function SearchOverlay({ onClose }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-start justify-center pt-24 px-4"
-      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      className="fixed inset-0 z-50 flex items-start justify-center pt-24 px-4"
     >
-      <div
-        className="w-full max-w-2xl"
-        onClick={(e) => e.stopPropagation()}
-      >
+      <button
+        type="button"
+        aria-label="Close search"
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-default"
+        onClick={onClose}
+      />
+      <div className="relative w-full max-w-2xl">
         <input
           ref={inputRef}
           type="search"

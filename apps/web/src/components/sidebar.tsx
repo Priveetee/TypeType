@@ -1,22 +1,27 @@
+import { Link } from "@tanstack/react-router";
 import { siBilibili, siNiconico, siYoutube } from "simple-icons";
 import { useUiStore } from "../stores/ui-store";
 
 type NavItem = {
   label: string;
+  to: string;
   icon: React.ReactNode;
 };
 
 const NAV_ITEMS: NavItem[] = [
   {
     label: "Home",
+    to: "/",
     icon: <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />,
   },
   {
     label: "Trending",
+    to: "/trending",
     icon: <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />,
   },
   {
     label: "Subscriptions",
+    to: "/subscriptions",
     icon: (
       <>
         <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
@@ -26,6 +31,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     label: "History",
+    to: "/history",
     icon: (
       <>
         <circle cx="12" cy="12" r="10" />
@@ -46,6 +52,10 @@ const SERVICES: Service[] = [
   { label: "NicoNico", path: siNiconico.path, color: "#aaaaaa" },
   { label: "BiliBili", path: siBilibili.path, color: "#00A1D6" },
 ];
+
+const BTN_BASE = "flex items-center h-10 rounded-lg transition-colors w-full";
+const BTN_ACTIVE = "text-zinc-100 bg-zinc-800";
+const BTN_INACTIVE = "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800";
 
 function NavIcon({ children, label }: { children: React.ReactNode; label: string }) {
   return (
@@ -96,16 +106,17 @@ export function Sidebar() {
     >
       <div className="flex flex-col gap-1 px-2">
         {NAV_ITEMS.map((item) => (
-          <button
+          <Link
             key={item.label}
-            type="button"
-            className={`flex items-center h-10 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors w-full ${
-              collapsed ? "justify-center px-0" : "gap-3 px-2 text-left"
-            }`}
+            to={item.to}
+            activeOptions={item.to === "/" ? { exact: true } : undefined}
+            className={`${BTN_BASE} ${collapsed ? "justify-center px-0" : "gap-3 px-2"}`}
+            activeProps={{ className: BTN_ACTIVE }}
+            inactiveProps={{ className: BTN_INACTIVE }}
           >
             <NavIcon label={item.label}>{item.icon}</NavIcon>
             {!collapsed && <span className="text-sm font-medium">{item.label}</span>}
-          </button>
+          </Link>
         ))}
       </div>
 

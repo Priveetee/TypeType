@@ -1,8 +1,5 @@
-import {
-  DefaultVideoLayout,
-  defaultLayoutIcons,
-} from "@vidstack/react/player/layouts/default";
 import { MediaPlayer, MediaProvider, Track } from "@vidstack/react";
+import { DefaultVideoLayout, defaultLayoutIcons } from "@vidstack/react/player/layouts/default";
 
 export function VideoPlayer() {
   return (
