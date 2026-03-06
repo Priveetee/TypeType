@@ -3,6 +3,7 @@ export type VideoStream = {
   title: string;
   thumbnail: string;
   previewUrl?: string;
+  description?: string;
   channelName: string;
   channelAvatar: string;
   views: number;

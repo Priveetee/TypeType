@@ -10,6 +10,7 @@ function generateStream(date?: Date): VideoStream {
     title: faker.lorem.sentence({ min: 4, max: 10 }),
     thumbnail: `https://picsum.photos/seed/${id}/640/360`,
     previewUrl: DEMO_PREVIEW_URL,
+    description: faker.lorem.paragraphs(3, "\n\n"),
     channelName: faker.internet.username(),
     channelAvatar: `https://picsum.photos/seed/${faker.string.uuid()}/40/40`,
     views: faker.number.int({ min: 1000, max: 50000000 }),
