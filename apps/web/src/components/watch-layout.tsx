@@ -2,6 +2,7 @@ import type { Comment } from "../types/comment";
 import type { VideoStream } from "../types/stream";
 import { RelatedVideos } from "./related-videos";
 import { VideoPlayer } from "./video-player";
+import { WatchActions } from "./watch-actions";
 import { WatchComments } from "./watch-comments";
 import { WatchDescription } from "./watch-description";
 import { WatchInfo } from "./watch-info";
@@ -20,6 +21,7 @@ export function WatchLayout({ stream, related, comments }: Props) {
           <VideoPlayer />
         </div>
         <WatchInfo stream={stream} />
+        <WatchActions stream={stream} />
         {stream.description && <WatchDescription description={stream.description} />}
         <WatchComments comments={comments} />
       </div>
