@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TrendingRouteImport } from './routes/trending'
 import { Route as SubscriptionsRouteImport } from './routes/subscriptions'
+import { Route as HistoryRouteImport } from './routes/history'
 import { Route as IndexRouteImport } from './routes/index'
 
 const TrendingRoute = TrendingRouteImport.update({
@@ -23,6 +24,11 @@ const SubscriptionsRoute = SubscriptionsRouteImport.update({
   path: '/subscriptions',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HistoryRoute = HistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -31,30 +37,34 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/history': typeof HistoryRoute
   '/subscriptions': typeof SubscriptionsRoute
   '/trending': typeof TrendingRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/history': typeof HistoryRoute
   '/subscriptions': typeof SubscriptionsRoute
   '/trending': typeof TrendingRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/history': typeof HistoryRoute
   '/subscriptions': typeof SubscriptionsRoute
   '/trending': typeof TrendingRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/subscriptions' | '/trending'
+  fullPaths: '/' | '/history' | '/subscriptions' | '/trending'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/subscriptions' | '/trending'
-  id: '__root__' | '/' | '/subscriptions' | '/trending'
+  to: '/' | '/history' | '/subscriptions' | '/trending'
+  id: '__root__' | '/' | '/history' | '/subscriptions' | '/trending'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  HistoryRoute: typeof HistoryRoute
   SubscriptionsRoute: typeof SubscriptionsRoute
   TrendingRoute: typeof TrendingRoute
 }
@@ -75,6 +85,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SubscriptionsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/history': {
+      id: '/history'
+      path: '/history'
+      fullPath: '/history'
+      preLoaderRoute: typeof HistoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -87,6 +104,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  HistoryRoute: HistoryRoute,
   SubscriptionsRoute: SubscriptionsRoute,
   TrendingRoute: TrendingRoute,
 }
