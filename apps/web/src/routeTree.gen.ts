@@ -12,8 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as WatchRouteImport } from './routes/watch'
 import { Route as TrendingRouteImport } from './routes/trending'
 import { Route as SubscriptionsRouteImport } from './routes/subscriptions'
+import { Route as PlaylistsRouteImport } from './routes/playlists'
 import { Route as HistoryRouteImport } from './routes/history'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PlaylistsIdRouteImport } from './routes/playlists_.$id'
 
 const WatchRoute = WatchRouteImport.update({
   id: '/watch',
@@ -30,6 +32,11 @@ const SubscriptionsRoute = SubscriptionsRouteImport.update({
   path: '/subscriptions',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlaylistsRoute = PlaylistsRouteImport.update({
+  id: '/playlists',
+  path: '/playlists',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HistoryRoute = HistoryRouteImport.update({
   id: '/history',
   path: '/history',
@@ -40,43 +47,78 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlaylistsIdRoute = PlaylistsIdRouteImport.update({
+  id: '/playlists_/$id',
+  path: '/playlists/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/history': typeof HistoryRoute
+  '/playlists': typeof PlaylistsRoute
   '/subscriptions': typeof SubscriptionsRoute
   '/trending': typeof TrendingRoute
   '/watch': typeof WatchRoute
+  '/playlists/$id': typeof PlaylistsIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/history': typeof HistoryRoute
+  '/playlists': typeof PlaylistsRoute
   '/subscriptions': typeof SubscriptionsRoute
   '/trending': typeof TrendingRoute
   '/watch': typeof WatchRoute
+  '/playlists/$id': typeof PlaylistsIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/history': typeof HistoryRoute
+  '/playlists': typeof PlaylistsRoute
   '/subscriptions': typeof SubscriptionsRoute
   '/trending': typeof TrendingRoute
   '/watch': typeof WatchRoute
+  '/playlists_/$id': typeof PlaylistsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/history' | '/subscriptions' | '/trending' | '/watch'
+  fullPaths:
+    | '/'
+    | '/history'
+    | '/playlists'
+    | '/subscriptions'
+    | '/trending'
+    | '/watch'
+    | '/playlists/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/history' | '/subscriptions' | '/trending' | '/watch'
-  id: '__root__' | '/' | '/history' | '/subscriptions' | '/trending' | '/watch'
+  to:
+    | '/'
+    | '/history'
+    | '/playlists'
+    | '/subscriptions'
+    | '/trending'
+    | '/watch'
+    | '/playlists/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/history'
+    | '/playlists'
+    | '/subscriptions'
+    | '/trending'
+    | '/watch'
+    | '/playlists_/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   HistoryRoute: typeof HistoryRoute
+  PlaylistsRoute: typeof PlaylistsRoute
   SubscriptionsRoute: typeof SubscriptionsRoute
   TrendingRoute: typeof TrendingRoute
   WatchRoute: typeof WatchRoute
+  PlaylistsIdRoute: typeof PlaylistsIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -102,6 +144,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SubscriptionsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/playlists': {
+      id: '/playlists'
+      path: '/playlists'
+      fullPath: '/playlists'
+      preLoaderRoute: typeof PlaylistsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/history': {
       id: '/history'
       path: '/history'
@@ -116,15 +165,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/playlists_/$id': {
+      id: '/playlists_/$id'
+      path: '/playlists/$id'
+      fullPath: '/playlists/$id'
+      preLoaderRoute: typeof PlaylistsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   HistoryRoute: HistoryRoute,
+  PlaylistsRoute: PlaylistsRoute,
   SubscriptionsRoute: SubscriptionsRoute,
   TrendingRoute: TrendingRoute,
   WatchRoute: WatchRoute,
+  PlaylistsIdRoute: PlaylistsIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

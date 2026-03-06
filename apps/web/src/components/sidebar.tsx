@@ -39,6 +39,18 @@ const NAV_ITEMS: NavItem[] = [
       </>
     ),
   },
+  {
+    label: "Playlists",
+    to: "/playlists",
+    icon: (
+      <>
+        <path d="M3 5h15" />
+        <path d="M3 9h15" />
+        <path d="M3 13h9" />
+        <path d="M15 13l4 3-4 3V13z" />
+      </>
+    ),
+  },
 ];
 
 type Service = {
