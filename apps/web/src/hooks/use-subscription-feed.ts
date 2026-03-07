@@ -1,8 +1,8 @@
 import { useQueries } from "@tanstack/react-query";
 import { fetchChannel } from "../lib/api";
 import { mapVideoItem } from "../lib/mappers";
-import { useSubscriptionsStore } from "../stores/subscriptions-store";
 import type { VideoStream } from "../types/stream";
+import { useSubscriptions } from "./use-subscriptions";
 
 type Result = {
   streams: VideoStream[];
@@ -10,7 +10,8 @@ type Result = {
 };
 
 export function useSubscriptionFeed(): Result {
-  const subscriptions = useSubscriptionsStore((s) => s.subscriptions);
+  const { query } = useSubscriptions();
+  const subscriptions = query.data ?? [];
 
   const queries = useQueries({
     queries: subscriptions.map((sub) => ({

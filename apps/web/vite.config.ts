@@ -18,6 +18,9 @@ export default defineConfig({
       "/proxy": {
         target: "http://localhost:8080",
       },
+      "/streams/manifest": {
+        target: "http://localhost:8080",
+      },
     },
   },
 });
