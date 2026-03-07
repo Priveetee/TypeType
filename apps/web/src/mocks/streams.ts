@@ -1,7 +1,6 @@
 import { faker } from "@faker-js/faker";
 import type { VideoStream } from "../types/stream";
-
-const DEMO_PREVIEW_URL = "https://files.vidstack.io/sprite-fight/720p.mp4";
+import { MOCK_QUALITY_STREAMS } from "./quality-streams";
 
 function generateStream(date?: Date): VideoStream {
   const id = faker.string.uuid();
@@ -9,7 +8,7 @@ function generateStream(date?: Date): VideoStream {
     id,
     title: faker.lorem.sentence({ min: 4, max: 10 }),
     thumbnail: `https://picsum.photos/seed/${id}/640/360`,
-    previewUrl: DEMO_PREVIEW_URL,
+    previewUrl: "https://files.vidstack.io/sprite-fight/720p.mp4",
     description: faker.lorem.paragraphs(3, "\n\n"),
     channelName: faker.internet.username(),
     channelAvatar: `https://picsum.photos/seed/${faker.string.uuid()}/40/40`,
@@ -18,6 +17,7 @@ function generateStream(date?: Date): VideoStream {
     uploadedAt: date ?? faker.date.recent({ days: 365 }),
     likes: faker.number.int({ min: 100, max: 500000 }),
     dislikes: faker.number.int({ min: 0, max: 50000 }),
+    qualityStreams: MOCK_QUALITY_STREAMS,
   };
 }
 

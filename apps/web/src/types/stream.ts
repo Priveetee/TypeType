@@ -1,3 +1,12 @@
+export type QualityStream = {
+  url: string;
+  format: "MPEG_4" | "WEBM" | "v3GPP";
+  resolution: string;
+  bitrate: number;
+  isVideoOnly: boolean;
+  codec?: string;
+};
+
 export type VideoStream = {
   id: string;
   title: string;
@@ -11,4 +20,7 @@ export type VideoStream = {
   uploadedAt: Date;
   likes?: number;
   dislikes?: number;
+  hlsUrl?: string;
+  dashMpdUrl?: string;
+  qualityStreams?: QualityStream[];
 };
