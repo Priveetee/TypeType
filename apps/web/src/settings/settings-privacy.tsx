@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { ConfirmModal } from "../components/confirm-modal";
 import { Toast } from "../components/toast";
-import { useHistoryStore } from "../stores/history-store";
-import { useSubscriptionsStore } from "../stores/subscriptions-store";
+import { useHistory } from "../hooks/use-history";
+import { useSubscriptions } from "../hooks/use-subscriptions";
 
 const SECTION_LABEL = "text-xs font-medium text-zinc-500 uppercase tracking-wider px-1";
 const CARD =
@@ -12,10 +12,10 @@ const ROW = "flex items-center justify-between px-4 py-4";
 type ActiveModal = "history" | "subscriptions" | null;
 
 export function SettingsPrivacy() {
-  const entries = useHistoryStore((s) => s.entries);
-  const clearEntries = useHistoryStore((s) => s.clearEntries);
-  const subscriptions = useSubscriptionsStore((s) => s.subscriptions);
-  const unsubscribeAll = useSubscriptionsStore((s) => s.unsubscribeAll);
+  const { query: historyQuery, clear: clearHistory } = useHistory();
+  const { query: subsQuery, remove: removeSubscription } = useSubscriptions();
+  const entries = historyQuery.data ?? [];
+  const subscriptions = subsQuery.data ?? [];
   const [modal, setModal] = useState<ActiveModal>(null);
   const [toast, setToast] = useState<string | null>(null);
 
@@ -25,13 +25,15 @@ export function SettingsPrivacy() {
     return () => clearTimeout(t);
   }, [toast]);
 
-  function handleConfirm() {
+  async function handleConfirm() {
     if (modal === "history") {
-      clearEntries();
+      clearHistory.mutate();
       setToast("Watch history cleared");
     }
     if (modal === "subscriptions") {
-      unsubscribeAll();
+      for (const sub of subsQuery.data ?? []) {
+        removeSubscription.mutate(sub.channelUrl);
+      }
       setToast("Unsubscribed from all channels");
     }
     setModal(null);

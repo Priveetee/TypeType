@@ -1,8 +1,8 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { siBilibili, siNiconico, siYoutube } from "simple-icons";
-import type { ServiceId } from "../stores/service-store";
-import { useServiceStore } from "../stores/service-store";
+import { useSettings } from "../hooks/use-settings";
 import { useUiStore } from "../stores/ui-store";
+import type { ServiceId } from "../types/user";
 import { ServiceIcon } from "./service-icon";
 
 type NavItem = {
@@ -106,12 +106,13 @@ function NavIcon({ children, label }: { children: React.ReactNode; label: string
 
 export function Sidebar() {
   const collapsed = useUiStore((s) => s.sidebarCollapsed);
-  const { service, setService } = useServiceStore();
+  const { settings, update } = useSettings();
+  const service = settings.defaultService;
   const navigate = useNavigate();
   const loc = useRouterState({ select: (s) => s.location });
 
   function handleServiceClick(id: ServiceId) {
-    setService(id);
+    update.mutate({ defaultService: id });
     if (loc.pathname !== "/search") return;
     const q = new URLSearchParams(loc.searchStr).get("q") ?? "";
     navigate({ to: "/search", search: { q, service: id } });

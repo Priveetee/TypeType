@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { Toast } from "../components/toast";
-import { useSubscriptionsStore } from "../stores/subscriptions-store";
+import { useSubscriptions } from "../hooks/use-subscriptions";
 
 const SECTION_LABEL = "text-xs font-medium text-zinc-500 uppercase tracking-wider px-1";
 const CARD = "bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden";
 const ROW = "flex items-center justify-between px-4 py-4";
 
 export function SettingsData() {
-  const subscriptions = useSubscriptionsStore((s) => s.subscriptions);
+  const { query } = useSubscriptions();
+  const subscriptions = query.data ?? [];
   const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => {

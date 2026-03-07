@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { usePlaylistStore } from "../stores/playlist-store";
+import { usePlaylists } from "../hooks/use-playlists";
 import type { VideoStream } from "../types/stream";
 import { PlaylistRow } from "./playlist-row";
 
@@ -14,8 +14,8 @@ type Props = {
 };
 
 export function PlaylistAddDropdown({ stream, anchorEl, onClose, onSaved }: Props) {
-  const { playlists, createPlaylist, addToPlaylist, removeFromPlaylist, isInPlaylist } =
-    usePlaylistStore();
+  const { query, create, addVideo, removeVideo, isInPlaylist } = usePlaylists();
+  const playlists = query.data ?? [];
   const [newName, setNewName] = useState("");
   const panelRef = useRef<HTMLDivElement>(null);
   const [panelStyle, setPanelStyle] = useState<React.CSSProperties>({ visibility: "hidden" });
@@ -70,10 +70,18 @@ export function PlaylistAddDropdown({ stream, anchorEl, onClose, onSaved }: Prop
     const playlist = playlists.find((p) => p.id === playlistId);
     if (!playlist) return;
     if (isInPlaylist(playlistId, stream.id)) {
-      removeFromPlaylist(playlistId, stream.id);
+      removeVideo.mutate({ playlistId, videoUrl: stream.id });
       onSaved(`Removed from ${playlist.name}`);
     } else {
-      addToPlaylist(playlistId, stream);
+      addVideo.mutate({
+        playlistId,
+        video: {
+          url: stream.id,
+          title: stream.title,
+          thumbnail: stream.thumbnail,
+          duration: stream.duration,
+        },
+      });
       onSaved(`Saved to ${playlist.name}`);
     }
   }
@@ -81,7 +89,7 @@ export function PlaylistAddDropdown({ stream, anchorEl, onClose, onSaved }: Prop
   function handleCreate() {
     const trimmed = newName.trim();
     if (!trimmed) return;
-    createPlaylist(trimmed);
+    create.mutate(trimmed);
     setNewName("");
     onSaved(`Playlist "${trimmed}" created`);
   }

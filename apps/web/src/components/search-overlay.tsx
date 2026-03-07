@@ -1,6 +1,6 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { useServiceStore } from "../stores/service-store";
+import { useSettings } from "../hooks/use-settings";
 
 type Props = {
   onClose: () => void;
@@ -10,7 +10,8 @@ export function SearchOverlay({ onClose }: Props) {
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
-  const service = useServiceStore((s) => s.service);
+  const { settings } = useSettings();
+  const service = settings.defaultService;
 
   useEffect(() => {
     inputRef.current?.focus();

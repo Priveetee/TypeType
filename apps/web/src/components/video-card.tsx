@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useRef, useState } from "react";
+import { formatDuration, formatViews } from "../lib/format";
 import type { VideoStream } from "../types/stream";
 
 const PREVIEW_DELAY_MS = 3000;
@@ -7,20 +8,6 @@ const PREVIEW_DELAY_MS = 3000;
 type Props = {
   stream: VideoStream;
 };
-
-function formatViews(views: number): string {
-  if (views >= 1_000_000) return `${(views / 1_000_000).toFixed(1)}M views`;
-  if (views >= 1_000) return `${(views / 1_000).toFixed(0)}K views`;
-  return `${views} views`;
-}
-
-function formatDuration(seconds: number): string {
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  const s = seconds % 60;
-  if (h > 0) return `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
-  return `${m}:${String(s).padStart(2, "0")}`;
-}
 
 export function VideoCard({ stream }: Props) {
   const [previewing, setPreviewing] = useState(false);

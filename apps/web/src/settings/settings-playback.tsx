@@ -1,12 +1,11 @@
-import { useUiStore } from "../stores/ui-store";
+import { useSettings } from "../hooks/use-settings";
 
 const SECTION_LABEL = "text-xs font-medium text-zinc-500 uppercase tracking-wider px-1";
 const CARD = "bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden";
 const ROW = "flex items-center justify-between px-4 py-4";
 
 export function SettingsPlayback() {
-  const autoplayEnabled = useUiStore((s) => s.autoplayEnabled);
-  const toggleAutoplay = useUiStore((s) => s.toggleAutoplay);
+  const { settings, update } = useSettings();
 
   return (
     <section className="flex flex-col gap-3">
@@ -20,15 +19,15 @@ export function SettingsPlayback() {
           <button
             type="button"
             role="switch"
-            aria-checked={autoplayEnabled}
-            onClick={toggleAutoplay}
+            aria-checked={settings.autoplay}
+            onClick={() => update.mutate({ autoplay: !settings.autoplay })}
             className={`relative w-10 h-5 rounded-full transition-colors duration-200 flex-shrink-0 ml-6 ${
-              autoplayEnabled ? "bg-zinc-100" : "bg-zinc-700"
+              settings.autoplay ? "bg-zinc-100" : "bg-zinc-700"
             }`}
           >
             <span
               className={`absolute left-0.5 top-0.5 w-4 h-4 rounded-full transition-all duration-200 ${
-                autoplayEnabled ? "translate-x-5 bg-zinc-900" : "translate-x-0 bg-zinc-300"
+                settings.autoplay ? "translate-x-5 bg-zinc-900" : "translate-x-0 bg-zinc-300"
               }`}
             />
           </button>

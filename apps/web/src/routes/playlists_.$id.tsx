@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { usePlaylistStore } from "../stores/playlist-store";
-import type { VideoStream } from "../types/stream";
+import { usePlaylists } from "../hooks/use-playlists";
+import type { PlaylistVideoItem } from "../types/user";
 
 function BackIcon() {
   return (
@@ -45,18 +45,18 @@ function XIcon() {
 }
 
 type VideoItemProps = {
-  stream: VideoStream;
+  video: PlaylistVideoItem;
   onRemove: () => void;
 };
 
-function PlaylistVideoItem({ stream, onRemove }: VideoItemProps) {
+function PlaylistVideoRow({ video, onRemove }: VideoItemProps) {
   return (
     <div className="flex flex-col gap-2 group relative">
-      <Link to="/watch" search={{ v: stream.id }} className="block">
+      <Link to="/watch" search={{ v: video.url }} className="block">
         <div className="relative aspect-video rounded-xl overflow-hidden bg-zinc-800">
           <img
-            src={stream.thumbnail}
-            alt={stream.title}
+            src={video.thumbnail}
+            alt={video.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
           />
           <button
@@ -72,11 +72,10 @@ function PlaylistVideoItem({ stream, onRemove }: VideoItemProps) {
           </button>
         </div>
       </Link>
-      <Link to="/watch" search={{ v: stream.id }}>
+      <Link to="/watch" search={{ v: video.url }}>
         <p className="text-sm font-medium text-zinc-100 line-clamp-2 leading-snug group-hover:text-white transition-colors">
-          {stream.title}
+          {video.title}
         </p>
-        <p className="text-xs text-zinc-500 mt-0.5 truncate">{stream.channelName}</p>
       </Link>
     </div>
   );
@@ -85,8 +84,8 @@ function PlaylistVideoItem({ stream, onRemove }: VideoItemProps) {
 function PlaylistDetailPage() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
-  const { playlists, deletePlaylist, removeFromPlaylist } = usePlaylistStore();
-  const playlist = playlists.find((p) => p.id === id);
+  const { query, remove, removeVideo } = usePlaylists();
+  const playlist = (query.data ?? []).find((p) => p.id === id);
 
   if (!playlist) {
     return (
@@ -103,11 +102,11 @@ function PlaylistDetailPage() {
   }
 
   function handleDelete() {
-    deletePlaylist(id);
+    remove.mutate(id);
     navigate({ to: "/playlists" });
   }
 
-  const count = playlist.streams.length;
+  const count = playlist.videos.length;
 
   return (
     <div className="flex flex-col gap-6 [animation:page-fade-in_0.2s_ease-out]">
@@ -144,11 +143,11 @@ function PlaylistDetailPage() {
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-          {playlist.streams.map((stream: VideoStream) => (
-            <PlaylistVideoItem
-              key={stream.id}
-              stream={stream}
-              onRemove={() => removeFromPlaylist(playlist.id, stream.id)}
+          {playlist.videos.map((video: PlaylistVideoItem) => (
+            <PlaylistVideoRow
+              key={video.id}
+              video={video}
+              onRemove={() => removeVideo.mutate({ playlistId: playlist.id, videoUrl: video.url })}
             />
           ))}
         </div>

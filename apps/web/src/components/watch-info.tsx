@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { useSubscriptionsStore } from "../stores/subscriptions-store";
+import { useSubscriptions } from "../hooks/use-subscriptions";
+import { formatDuration, formatViews } from "../lib/format";
 import type { VideoStream } from "../types/stream";
 import { Toast } from "./toast";
 
@@ -7,14 +8,8 @@ type Props = {
   stream: VideoStream;
 };
 
-function formatViews(views: number): string {
-  if (views >= 1_000_000) return `${(views / 1_000_000).toFixed(1)}M views`;
-  if (views >= 1_000) return `${(views / 1_000).toFixed(0)}K views`;
-  return `${views} views`;
-}
-
 export function WatchInfo({ stream }: Props) {
-  const { subscribe, unsubscribe, isSubscribed } = useSubscriptionsStore();
+  const { add, remove, isSubscribed } = useSubscriptions();
   const subscribed = stream.channelUrl ? isSubscribed(stream.channelUrl) : false;
   const [toastMsg, setToastMsg] = useState<string | null>(null);
 
@@ -27,10 +22,10 @@ export function WatchInfo({ stream }: Props) {
   function handleSubscribe() {
     if (!stream.channelUrl) return;
     if (subscribed) {
-      unsubscribe(stream.channelUrl);
+      remove.mutate(stream.channelUrl);
       setToastMsg(`Unsubscribed from ${stream.channelName}`);
     } else {
-      subscribe({
+      add.mutate({
         channelUrl: stream.channelUrl,
         name: stream.channelName,
         avatarUrl: stream.channelAvatar,
@@ -52,7 +47,7 @@ export function WatchInfo({ stream }: Props) {
           <div className="flex flex-col min-w-0">
             <p className="text-sm font-medium text-zinc-100 truncate">{stream.channelName}</p>
             <p className="text-xs text-zinc-500">
-              {formatViews(stream.views)} · {stream.uploadDate}
+              {formatViews(stream.views)} · {formatDuration(stream.duration)} · {stream.uploadDate}
             </p>
           </div>
         </div>

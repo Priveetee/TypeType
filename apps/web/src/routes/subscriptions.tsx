@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { VideoGrid } from "../components/video-grid";
 import { useSubscriptionFeed } from "../hooks/use-subscription-feed";
-import { useSubscriptionsStore } from "../stores/subscriptions-store";
+import { useSubscriptions } from "../hooks/use-subscriptions";
 
 function SubscriptionsPage() {
-  const subscriptions = useSubscriptionsStore((s) => s.subscriptions);
+  const { query } = useSubscriptions();
+  const subscriptions = query.data ?? [];
   const { streams, isLoading } = useSubscriptionFeed();
 
   if (subscriptions.length === 0) {

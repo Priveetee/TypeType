@@ -4,7 +4,7 @@ import { ConfirmModal } from "../components/confirm-modal";
 import { PlaylistCard } from "../components/playlist-card";
 import { PlaylistCreateModal } from "../components/playlist-create-modal";
 import { Toast } from "../components/toast";
-import { usePlaylistStore } from "../stores/playlist-store";
+import { usePlaylists } from "../hooks/use-playlists";
 
 function EmptyState() {
   return (
@@ -16,7 +16,8 @@ function EmptyState() {
 }
 
 function PlaylistsPage() {
-  const { playlists, createPlaylist, deletePlaylist } = usePlaylistStore();
+  const { query, create, remove } = usePlaylists();
+  const playlists = query.data ?? [];
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [confirmIds, setConfirmIds] = useState<string[] | null>(null);
@@ -46,7 +47,7 @@ function PlaylistsPage() {
   function handleConfirm() {
     if (!confirmIds) return;
     const count = confirmIds.length;
-    for (const id of confirmIds) deletePlaylist(id);
+    for (const id of confirmIds) remove.mutate(id);
     setConfirmIds(null);
     exitSelection();
     setToastMsg(count === 1 ? "Playlist deleted" : `${count} playlists deleted`);
@@ -124,7 +125,7 @@ function PlaylistsPage() {
       {creating && (
         <PlaylistCreateModal
           onConfirm={(name) => {
-            createPlaylist(name);
+            create.mutate(name);
             setCreating(false);
             setToastMsg(`"${name}" created`);
           }}

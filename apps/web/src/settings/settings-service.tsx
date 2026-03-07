@@ -1,7 +1,7 @@
 import { siBilibili, siNiconico, siYoutube } from "simple-icons";
 import { ServiceIcon } from "../components/service-icon";
-import type { ServiceId } from "../stores/service-store";
-import { useServiceStore } from "../stores/service-store";
+import { useSettings } from "../hooks/use-settings";
+import type { ServiceId } from "../types/user";
 
 type ServiceOption = {
   id: ServiceId;
@@ -33,7 +33,7 @@ function RadioDot({ selected }: { selected: boolean }) {
 }
 
 export function SettingsService() {
-  const { service, setService } = useServiceStore();
+  const { settings, update } = useSettings();
 
   return (
     <section className="flex flex-col gap-3">
@@ -43,14 +43,14 @@ export function SettingsService() {
           <button
             key={svc.id}
             type="button"
-            onClick={() => setService(svc.id)}
+            onClick={() => update.mutate({ defaultService: svc.id })}
             className={`flex items-center gap-3 px-4 py-3.5 w-full text-left transition-colors ${
-              service === svc.id ? "bg-zinc-800/60" : "hover:bg-zinc-800/30"
+              settings.defaultService === svc.id ? "bg-zinc-800/60" : "hover:bg-zinc-800/30"
             }`}
           >
             <ServiceIcon path={svc.path} color={svc.color} label={svc.label} />
             <span className="flex-1 text-sm text-zinc-100">{svc.label}</span>
-            <RadioDot selected={service === svc.id} />
+            <RadioDot selected={settings.defaultService === svc.id} />
           </button>
         ))}
       </div>

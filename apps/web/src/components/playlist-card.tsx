@@ -1,8 +1,8 @@
 import { Link } from "@tanstack/react-router";
-import type { Playlist } from "../types/playlist";
+import type { PlaylistItem } from "../types/playlist";
 
 type Props = {
-  playlist: Playlist;
+  playlist: PlaylistItem;
   selectionMode?: boolean;
   selected?: boolean;
   onToggleSelect?: () => void;
@@ -54,9 +54,9 @@ function EmptyIcon() {
   );
 }
 
-function ThumbnailContent({ playlist }: { playlist: Playlist }) {
-  const thumbnail = playlist.streams[0]?.thumbnail;
-  const count = playlist.streams.length;
+function ThumbnailContent({ playlist }: { playlist: PlaylistItem }) {
+  const thumbnail = playlist.videos[0]?.thumbnail;
+  const count = playlist.videos.length;
   const label = `${count} video${count !== 1 ? "s" : ""}`;
   return (
     <div className="relative aspect-video rounded-xl overflow-hidden bg-zinc-800">
@@ -85,7 +85,7 @@ export function PlaylistCard({
   onToggleSelect,
   onDeleteRequest,
 }: Props) {
-  const count = playlist.streams.length;
+  const count = playlist.videos.length;
   const label = `${count} video${count !== 1 ? "s" : ""}`;
 
   return (

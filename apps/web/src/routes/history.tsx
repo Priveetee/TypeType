@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import type { FilterState } from "../components/history-filter";
 import { HistoryFilter } from "../components/history-filter";
 import { VideoGrid } from "../components/video-grid";
-import type { SerializedFilter } from "../stores/history-store";
-import { useHistoryStore } from "../stores/history-store";
+import { useHistory } from "../hooks/use-history";
+import type { VideoStream } from "../types/stream";
+import type { HistoryItem } from "../types/user";
 
 const MS_PER_DAY = 86_400_000;
 
@@ -12,62 +13,55 @@ function startOfDay(date: Date): number {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
 }
 
-function toFilterState(f: SerializedFilter): FilterState | null {
-  if (f === null) return null;
-  if (f.kind === "preset") return f;
-  return { kind: "date", date: new Date(f.dateISO) };
-}
-
-function toSerialized(f: FilterState | null): SerializedFilter {
-  if (f === null) return null;
-  if (f.kind === "preset") return f;
-  return { kind: "date", dateISO: f.date.toISOString() };
+function toStream(item: HistoryItem): VideoStream {
+  return {
+    id: item.url,
+    title: item.title,
+    thumbnail: item.thumbnail,
+    channelName: item.channelName,
+    channelUrl: item.channelUrl,
+    channelAvatar: "",
+    views: 0,
+    duration: item.duration,
+    uploadDate: "",
+  };
 }
 
 function HistoryPage() {
-  const {
-    entries,
-    searchQuery,
-    filter: serializedFilter,
-    setSearchQuery,
-    setFilter,
-  } = useHistoryStore();
-
-  const filter = useMemo(() => toFilterState(serializedFilter), [serializedFilter]);
-
-  const handleFilterChange = (f: FilterState | null) => setFilter(toSerialized(f));
+  const { query } = useHistory();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filter, setFilter] = useState<FilterState | null>(null);
 
   const filtered = useMemo(() => {
+    const entries = query.data ?? [];
     const q = searchQuery.toLowerCase();
     const now = Date.now();
 
     return entries
-      .filter((entry) => {
-        const { stream } = entry;
-        const watchedAt = new Date(entry.watchedAt);
+      .filter((item) => {
         if (
           q &&
-          !stream.title.toLowerCase().includes(q) &&
-          !stream.channelName.toLowerCase().includes(q)
+          !item.title.toLowerCase().includes(q) &&
+          !item.channelName.toLowerCase().includes(q)
         ) {
           return false;
         }
         if (filter === null) return true;
+        const watchedAt = item.watchedAt;
         if (filter.kind === "preset") {
-          const days = (now - watchedAt.getTime()) / MS_PER_DAY;
+          const days = (now - watchedAt) / MS_PER_DAY;
           if (filter.value === "today") return days < 1;
           if (filter.value === "week") return days < 7;
           if (filter.value === "month") return days < 30;
         }
         if (filter.kind === "date") {
           const dayStart = startOfDay(filter.date);
-          const t = watchedAt.getTime();
-          return t >= dayStart && t < dayStart + MS_PER_DAY;
+          return watchedAt >= dayStart && watchedAt < dayStart + MS_PER_DAY;
         }
         return true;
       })
-      .map((entry) => entry.stream);
-  }, [entries, searchQuery, filter]);
+      .map(toStream);
+  }, [query.data, searchQuery, filter]);
 
   return (
     <div className="flex gap-8 items-start">
@@ -78,7 +72,7 @@ function HistoryPage() {
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         filter={filter}
-        onFilterChange={handleFilterChange}
+        onFilterChange={setFilter}
         resultCount={filtered.length}
       />
     </div>

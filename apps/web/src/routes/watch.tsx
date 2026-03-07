@@ -2,17 +2,27 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { PageSpinner } from "../components/page-spinner";
 import { WatchLayout } from "../components/watch-layout";
+import { useHistory } from "../hooks/use-history";
 import { useStream } from "../hooks/use-stream";
-import { useHistoryStore } from "../stores/history-store";
 
 function WatchPage() {
   const { v } = Route.useSearch();
   const { data: stream, isLoading, isError } = useStream(v);
-  const addEntry = useHistoryStore((s) => s.addEntry);
+  const { add } = useHistory();
+  const { mutate: addToHistory } = add;
 
   useEffect(() => {
-    if (stream) addEntry(stream);
-  }, [stream, addEntry]);
+    if (!stream) return;
+    addToHistory({
+      url: stream.id,
+      title: stream.title,
+      thumbnail: stream.thumbnail,
+      channelName: stream.channelName,
+      channelUrl: stream.channelUrl ?? "",
+      duration: stream.duration,
+      progress: 0,
+    });
+  }, [stream, addToHistory]);
 
   if (isLoading) return <PageSpinner />;
 
