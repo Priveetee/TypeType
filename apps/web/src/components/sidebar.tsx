@@ -113,7 +113,7 @@ export function Sidebar() {
   return (
     <aside
       className={`fixed top-14 left-0 bottom-0 z-40 bg-zinc-950 flex flex-col py-4 transition-all duration-200 ${
-        collapsed ? "w-14" : "w-60"
+        collapsed ? "w-14" : "w-48"
       }`}
     >
       <div className="flex flex-col gap-1 px-2">

@@ -11,7 +11,7 @@ function RootLayout() {
       <Navbar />
       <Sidebar />
       <main
-        className={`pt-14 px-4 py-6 transition-all duration-200 ${collapsed ? "ml-14" : "ml-60"}`}
+        className={`pt-14 px-4 py-6 transition-all duration-200 ${collapsed ? "ml-14" : "ml-48"}`}
       >
         <Outlet />
       </main>
