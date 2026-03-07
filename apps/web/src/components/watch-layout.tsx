@@ -1,4 +1,6 @@
-import type { DASHSrc } from "@vidstack/react";
+import type { MediaSrc } from "@vidstack/react";
+import { buildDashManifest } from "../lib/dash-manifest";
+import { proxyUrl } from "../lib/proxy";
 import type { VideoStream } from "../types/stream";
 import { RelatedVideos } from "./related-videos";
 import { VideoPlayer } from "./video-player";
@@ -7,9 +9,18 @@ import { WatchComments } from "./watch-comments";
 import { WatchDescription } from "./watch-description";
 import { WatchInfo } from "./watch-info";
 
-function manifestSrc(videoUrl: string): DASHSrc {
+const BASE = import.meta.env.VITE_API_URL;
+
+function manifestSrc(stream: VideoStream): MediaSrc {
+  if (stream.livestream && stream.hlsUrl) {
+    return { src: proxyUrl(stream.hlsUrl), type: "application/x-mpegurl" };
+  }
+  if (stream.videoOnlyStreams?.length && stream.audioStreams?.length) {
+    const src = buildDashManifest(stream.videoOnlyStreams, stream.audioStreams, stream.duration);
+    if (src) return { src, type: "application/dash+xml" };
+  }
   return {
-    src: `/streams/manifest?url=${encodeURIComponent(videoUrl)}`,
+    src: `${BASE}/streams/manifest?url=${encodeURIComponent(stream.id)}`,
     type: "application/dash+xml",
   };
 }
@@ -24,9 +35,10 @@ export function WatchLayout({ stream }: Props) {
       <div className="flex-[2] min-w-0 max-w-[133.333vh] flex flex-col gap-4">
         <div className="rounded-lg overflow-hidden">
           <VideoPlayer
-            src={manifestSrc(stream.id)}
+            src={manifestSrc(stream)}
             title={stream.title}
             poster={stream.thumbnail}
+            streamType={stream.livestream ? "live" : "on-demand"}
           />
         </div>
         <WatchInfo stream={stream} />

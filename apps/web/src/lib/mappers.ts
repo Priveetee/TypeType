@@ -45,5 +45,9 @@ export function mapStreamResponse(response: StreamResponse, url: string): VideoS
     likes: response.likeCount,
     dislikes: response.dislikeCount === -1 ? undefined : response.dislikeCount,
     related: response.relatedStreams.map(mapVideoItem),
+    livestream: response.livestream,
+    hlsUrl: response.hlsUrl || undefined,
+    videoOnlyStreams: response.videoOnlyStreams,
+    audioStreams: response.audioStreams,
   };
 }

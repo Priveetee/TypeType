@@ -8,6 +8,7 @@ type Props = {
   src: MediaSrc;
   title?: string;
   poster?: string;
+  streamType?: "on-demand" | "live";
 };
 
 function onProviderChange(provider: MediaProviderAdapter | null) {
@@ -18,13 +19,13 @@ function onProviderChange(provider: MediaProviderAdapter | null) {
   });
 }
 
-export function VideoPlayer({ src, title, poster }: Props) {
+export function VideoPlayer({ src, title, poster, streamType = "on-demand" }: Props) {
   return (
     <MediaPlayer
       className="w-full dark"
       src={src}
       viewType="video"
-      streamType="on-demand"
+      streamType={streamType}
       logLevel="warn"
       crossOrigin
       playsInline

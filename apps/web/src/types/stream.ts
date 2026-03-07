@@ -1,3 +1,5 @@
+import type { AudioStreamItem, VideoStreamItem } from "./api";
+
 export type VideoStream = {
   id: string;
   title: string;
@@ -12,5 +14,9 @@ export type VideoStream = {
   uploadDate: string;
   likes?: number;
   dislikes?: number;
+  livestream?: boolean;
+  hlsUrl?: string;
   related?: VideoStream[];
+  videoOnlyStreams?: VideoStreamItem[];
+  audioStreams?: AudioStreamItem[];
 };
