@@ -38,7 +38,7 @@ export function VideoPlayer({
 
   return (
     <MediaPlayer
-      className="w-full"
+      className="w-full dark"
       src={activeSrc}
       viewType="video"
       streamType="on-demand"
