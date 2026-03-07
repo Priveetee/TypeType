@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import type { VideoStream } from "../types/stream";
 import { PlaylistAddDropdown } from "./playlist-add-dropdown";
+import { Toast } from "./toast";
 
 type Props = {
   stream: VideoStream;
@@ -113,20 +114,7 @@ export function WatchActions({ stream }: Props) {
         <ShareIcon />
         Share
       </button>
-      {copied && (
-        <div className="fixed bottom-6 left-0 right-0 flex justify-center z-50 pointer-events-none">
-          <div className="bg-zinc-800 border border-zinc-700 text-zinc-100 text-xs px-4 py-2 rounded-full shadow-lg [animation:toast-fade-in_0.2s_ease-out]">
-            Link copied to clipboard
-          </div>
-        </div>
-      )}
-      {savedLabel && (
-        <div className="fixed bottom-6 left-0 right-0 flex justify-center z-50 pointer-events-none">
-          <div className="bg-zinc-800 border border-zinc-700 text-zinc-100 text-xs px-4 py-2 rounded-full shadow-lg [animation:toast-fade-in_0.2s_ease-out]">
-            {savedLabel}
-          </div>
-        </div>
-      )}
+      <Toast message={copied ? "Link copied to clipboard" : savedLabel} />
       <button
         ref={saveAnchorRef}
         type="button"

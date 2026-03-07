@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { VideoStream } from "../types/stream";
+import { Toast } from "./toast";
 
 type Props = {
   stream: VideoStream;
@@ -21,6 +22,21 @@ function formatDate(date: Date): string {
 
 export function WatchInfo({ stream }: Props) {
   const [subscribed, setSubscribed] = useState(false);
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!toastMsg) return;
+    const t = setTimeout(() => setToastMsg(null), 2000);
+    return () => clearTimeout(t);
+  }, [toastMsg]);
+
+  function handleSubscribe() {
+    const next = !subscribed;
+    setSubscribed(next);
+    setToastMsg(
+      next ? `Subscribed to ${stream.channelName}` : `Unsubscribed from ${stream.channelName}`,
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -41,7 +57,7 @@ export function WatchInfo({ stream }: Props) {
         </div>
         <button
           type="button"
-          onClick={() => setSubscribed((s) => !s)}
+          onClick={handleSubscribe}
           aria-pressed={subscribed}
           className={`flex-shrink-0 px-4 py-1.5 text-sm font-medium rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 focus-visible:ring-zinc-400 ${
             subscribed
@@ -53,6 +69,7 @@ export function WatchInfo({ stream }: Props) {
         </button>
       </div>
       <div className="h-px bg-zinc-800" />
+      <Toast message={toastMsg} />
     </div>
   );
 }
