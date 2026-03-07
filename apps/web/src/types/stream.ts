@@ -1,12 +1,3 @@
-export type QualityStream = {
-  url: string;
-  format: string;
-  resolution: string;
-  bitrate: number | null;
-  isVideoOnly: boolean;
-  codec: string;
-};
-
 export type VideoStream = {
   id: string;
   title: string;
@@ -21,8 +12,5 @@ export type VideoStream = {
   uploadDate: string;
   likes?: number;
   dislikes?: number;
-  hlsUrl?: string;
-  dashMpdUrl?: string;
-  qualityStreams?: QualityStream[];
   related?: VideoStream[];
 };

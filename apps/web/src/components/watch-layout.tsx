@@ -1,4 +1,4 @@
-import { proxyUrl } from "../lib/proxy";
+import type { DASHSrc } from "@vidstack/react";
 import type { VideoStream } from "../types/stream";
 import { RelatedVideos } from "./related-videos";
 import { VideoPlayer } from "./video-player";
@@ -7,12 +7,11 @@ import { WatchComments } from "./watch-comments";
 import { WatchDescription } from "./watch-description";
 import { WatchInfo } from "./watch-info";
 
-type MediaSrc = { src: string; type: string };
-
-function resolveExternalSrc(stream: VideoStream): MediaSrc | undefined {
-  if (stream.hlsUrl) return { src: proxyUrl(stream.hlsUrl), type: "application/x-mpegurl" };
-  if (stream.dashMpdUrl) return { src: proxyUrl(stream.dashMpdUrl), type: "application/dash+xml" };
-  return undefined;
+function manifestSrc(videoUrl: string): DASHSrc {
+  return {
+    src: `/streams/manifest?url=${encodeURIComponent(videoUrl)}`,
+    type: "application/dash+xml",
+  };
 }
 
 type Props = {
@@ -20,17 +19,14 @@ type Props = {
 };
 
 export function WatchLayout({ stream }: Props) {
-  const externalSrc = stream.qualityStreams ? undefined : resolveExternalSrc(stream);
-
   return (
     <div className="flex flex-col gap-6 lg:flex-row lg:items-start [animation:page-fade-in_0.2s_ease-out]">
       <div className="flex-[2] min-w-0 max-w-[133.333vh] flex flex-col gap-4">
         <div className="rounded-lg overflow-hidden">
           <VideoPlayer
-            src={externalSrc}
+            src={manifestSrc(stream.id)}
             title={stream.title}
             poster={stream.thumbnail}
-            qualityStreams={stream.qualityStreams}
           />
         </div>
         <WatchInfo stream={stream} />

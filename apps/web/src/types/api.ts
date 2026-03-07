@@ -5,6 +5,15 @@ export type VideoStreamItem = {
   bitrate: number | null;
   codec: string;
   isVideoOnly: boolean;
+  itag: number;
+  width: number;
+  height: number;
+  fps: number;
+  contentLength: number;
+  initStart: number;
+  initEnd: number;
+  indexStart: number;
+  indexEnd: number;
 };
 
 export type AudioStreamItem = {
@@ -13,6 +22,12 @@ export type AudioStreamItem = {
   bitrate: number | null;
   codec: string;
   quality: string | null;
+  itag: number;
+  contentLength: number;
+  initStart: number;
+  initEnd: number;
+  indexStart: number;
+  indexEnd: number;
 };
 
 export type SponsorBlockSegmentItem = {
@@ -40,6 +55,7 @@ export type StreamResponse = {
   title: string;
   uploaderName: string;
   uploaderUrl: string;
+  uploaderAvatarUrl: string;
   thumbnailUrl: string;
   description: string;
   duration: number;
