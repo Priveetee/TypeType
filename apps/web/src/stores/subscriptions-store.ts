@@ -11,6 +11,7 @@ type SubscriptionsStore = {
   subscriptions: Subscription[];
   subscribe: (sub: Subscription) => void;
   unsubscribe: (channelUrl: string) => void;
+  unsubscribeAll: () => void;
   isSubscribed: (channelUrl: string) => boolean;
 };
 
@@ -28,6 +29,7 @@ export const useSubscriptionsStore = create<SubscriptionsStore>()(
         set((state) => ({
           subscriptions: state.subscriptions.filter((s) => s.channelUrl !== channelUrl),
         })),
+      unsubscribeAll: () => set({ subscriptions: [] }),
       isSubscribed: (channelUrl) => get().subscriptions.some((s) => s.channelUrl === channelUrl),
     }),
     { name: "typed-subscriptions" },

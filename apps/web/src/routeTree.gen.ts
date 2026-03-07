@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as WatchRouteImport } from './routes/watch'
 import { Route as TrendingRouteImport } from './routes/trending'
 import { Route as SubscriptionsRouteImport } from './routes/subscriptions'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as PlaylistsRouteImport } from './routes/playlists'
 import { Route as HistoryRouteImport } from './routes/history'
@@ -31,6 +32,11 @@ const TrendingRoute = TrendingRouteImport.update({
 const SubscriptionsRoute = SubscriptionsRouteImport.update({
   id: '/subscriptions',
   path: '/subscriptions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SearchRoute = SearchRouteImport.update({
@@ -64,6 +70,7 @@ export interface FileRoutesByFullPath {
   '/history': typeof HistoryRoute
   '/playlists': typeof PlaylistsRoute
   '/search': typeof SearchRoute
+  '/settings': typeof SettingsRoute
   '/subscriptions': typeof SubscriptionsRoute
   '/trending': typeof TrendingRoute
   '/watch': typeof WatchRoute
@@ -74,6 +81,7 @@ export interface FileRoutesByTo {
   '/history': typeof HistoryRoute
   '/playlists': typeof PlaylistsRoute
   '/search': typeof SearchRoute
+  '/settings': typeof SettingsRoute
   '/subscriptions': typeof SubscriptionsRoute
   '/trending': typeof TrendingRoute
   '/watch': typeof WatchRoute
@@ -85,6 +93,7 @@ export interface FileRoutesById {
   '/history': typeof HistoryRoute
   '/playlists': typeof PlaylistsRoute
   '/search': typeof SearchRoute
+  '/settings': typeof SettingsRoute
   '/subscriptions': typeof SubscriptionsRoute
   '/trending': typeof TrendingRoute
   '/watch': typeof WatchRoute
@@ -97,6 +106,7 @@ export interface FileRouteTypes {
     | '/history'
     | '/playlists'
     | '/search'
+    | '/settings'
     | '/subscriptions'
     | '/trending'
     | '/watch'
@@ -107,6 +117,7 @@ export interface FileRouteTypes {
     | '/history'
     | '/playlists'
     | '/search'
+    | '/settings'
     | '/subscriptions'
     | '/trending'
     | '/watch'
@@ -117,6 +128,7 @@ export interface FileRouteTypes {
     | '/history'
     | '/playlists'
     | '/search'
+    | '/settings'
     | '/subscriptions'
     | '/trending'
     | '/watch'
@@ -128,6 +140,7 @@ export interface RootRouteChildren {
   HistoryRoute: typeof HistoryRoute
   PlaylistsRoute: typeof PlaylistsRoute
   SearchRoute: typeof SearchRoute
+  SettingsRoute: typeof SettingsRoute
   SubscriptionsRoute: typeof SubscriptionsRoute
   TrendingRoute: typeof TrendingRoute
   WatchRoute: typeof WatchRoute
@@ -155,6 +168,13 @@ declare module '@tanstack/react-router' {
       path: '/subscriptions'
       fullPath: '/subscriptions'
       preLoaderRoute: typeof SubscriptionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/search': {
@@ -200,6 +220,7 @@ const rootRouteChildren: RootRouteChildren = {
   HistoryRoute: HistoryRoute,
   PlaylistsRoute: PlaylistsRoute,
   SearchRoute: SearchRoute,
+  SettingsRoute: SettingsRoute,
   SubscriptionsRoute: SubscriptionsRoute,
   TrendingRoute: TrendingRoute,
   WatchRoute: WatchRoute,
