@@ -2,7 +2,7 @@
 
 ## Overview
 
-Typed is a privacy-respecting video platform. It is composed of two independent programs that communicate over HTTP: a Kotlin extraction server and a TypeScript frontend. This separation is both technical and legal — the extraction server is GPL v3, the frontend is MIT.
+TypeType is a privacy-respecting video platform. It is composed of two independent programs that communicate over HTTP: a Kotlin extraction server and a TypeScript frontend. This separation is both technical and legal — the extraction server is GPL v3, the frontend is MIT.
 
 ## Layers
 
@@ -88,12 +88,12 @@ React component (render)
 
 The project is split into two separate repositories with distinct licenses and toolchains.
 
-### typed (this repository)
+### TypeType (this repository)
 
 The frontend — a Bun monorepo with workspaces.
 
 ```
-typed/
+TypeType/
 ├── apps/
 │   └── web/          (the React application)
 └── packages/
@@ -106,12 +106,12 @@ typed/
 - License: MIT
 - No Kotlin or Java code enters this repository
 
-### typed-server (separate repository)
+### TypeType-Server (separate repository)
 
 The Kotlin wrapper — a Gradle project.
 
 ```
-typed-server/
+TypeType-Server/
 ├── src/
 │   └── main/kotlin/  (Ktor server, PipePipeExtractor integration)
 └── build.gradle.kts
@@ -126,9 +126,67 @@ typed-server/
 
 The REST API is the only point of contact between the two repositories. No code, no types, no logic crosses this boundary. Types consumed by the frontend are defined in `packages/types` and derived from API contracts — not from Kotlin classes.
 
+## API Contract
+
+The Ktor server exposes three endpoints. All responses are JSON.
+
+### `GET /streams?url={fullVideoUrl}`
+
+Full YouTube URL required (not a bare video ID).
+
+```
+StreamResponse
+  id              string
+  title           string
+  uploaderName    string
+  uploaderUrl     string
+  thumbnailUrl    string
+  description     string
+  duration        number
+  viewCount       number
+  likeCount       number
+  uploadDate      string        ("3 days ago" — not ISO 8601)
+  hlsUrl          string        (empty string if unavailable)
+  dashMpdUrl      string        (empty string if unavailable)
+  videoStreams     VideoStreamItem[]   (muxed — video + audio)
+  audioStreams     AudioStreamItem[]   (audio only)
+  videoOnlyStreams VideoStreamItem[]   (video only — VP9/AV1, no audio)
+
+VideoStreamItem
+  url             string
+  format          string        ("MPEG_4" | "WEBM" | "v3GPP")
+  resolution      string        ("1080p", "720p", …)
+  bitrate         number
+  isVideoOnly     boolean
+
+AudioStreamItem
+  url             string
+  format          string
+  bitrate         number
+  audioTrackName  string | null
+```
+
+### `GET /search?q={query}&service={service}`
+
+### `GET /trending?service={service}`
+
+Both return `VideoItem[]`:
+
+```
+VideoItem
+  id              string
+  title           string
+  url             string
+  thumbnailUrl    string
+  uploaderName    string
+  duration        number
+  viewCount       number
+  uploadDate      string
+```
+
 ## Reference Material
 
-These projects are maps of the territory — they inform UX and API decisions but share no code with Typed.
+These projects are maps of the territory — they inform UX and API decisions but share no code with TypeType.
 
 - `TeamPiped/Piped` — Vue frontend, UX reference, API patterns
 - `FreeTubeApp/FreeTube` — video player patterns
