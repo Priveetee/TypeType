@@ -3,11 +3,9 @@ import { useMemo } from "react";
 import type { FilterState } from "../components/history-filter";
 import { HistoryFilter } from "../components/history-filter";
 import { VideoGrid } from "../components/video-grid";
-import { generateHistoryStreams } from "../mocks/streams";
 import type { SerializedFilter } from "../stores/history-store";
 import { useHistoryStore } from "../stores/history-store";
 
-const MOCK_STREAMS = generateHistoryStreams(24);
 const MS_PER_DAY = 86_400_000;
 
 function startOfDay(date: Date): number {
@@ -27,7 +25,13 @@ function toSerialized(f: FilterState | null): SerializedFilter {
 }
 
 function HistoryPage() {
-  const { searchQuery, filter: serializedFilter, setSearchQuery, setFilter } = useHistoryStore();
+  const {
+    entries,
+    searchQuery,
+    filter: serializedFilter,
+    setSearchQuery,
+    setFilter,
+  } = useHistoryStore();
 
   const filter = useMemo(() => toFilterState(serializedFilter), [serializedFilter]);
 
@@ -37,25 +41,33 @@ function HistoryPage() {
     const q = searchQuery.toLowerCase();
     const now = Date.now();
 
-    return MOCK_STREAMS.filter((s) => {
-      if (q && !s.title.toLowerCase().includes(q) && !s.channelName.toLowerCase().includes(q)) {
-        return false;
-      }
-      if (filter === null) return true;
-      if (filter.kind === "preset") {
-        const days = (now - s.uploadedAt.getTime()) / MS_PER_DAY;
-        if (filter.value === "today") return days < 1;
-        if (filter.value === "week") return days < 7;
-        if (filter.value === "month") return days < 30;
-      }
-      if (filter.kind === "date") {
-        const dayStart = startOfDay(filter.date);
-        const t = s.uploadedAt.getTime();
-        return t >= dayStart && t < dayStart + MS_PER_DAY;
-      }
-      return true;
-    });
-  }, [searchQuery, filter]);
+    return entries
+      .filter((entry) => {
+        const { stream } = entry;
+        const watchedAt = new Date(entry.watchedAt);
+        if (
+          q &&
+          !stream.title.toLowerCase().includes(q) &&
+          !stream.channelName.toLowerCase().includes(q)
+        ) {
+          return false;
+        }
+        if (filter === null) return true;
+        if (filter.kind === "preset") {
+          const days = (now - watchedAt.getTime()) / MS_PER_DAY;
+          if (filter.value === "today") return days < 1;
+          if (filter.value === "week") return days < 7;
+          if (filter.value === "month") return days < 30;
+        }
+        if (filter.kind === "date") {
+          const dayStart = startOfDay(filter.date);
+          const t = watchedAt.getTime();
+          return t >= dayStart && t < dayStart + MS_PER_DAY;
+        }
+        return true;
+      })
+      .map((entry) => entry.stream);
+  }, [entries, searchQuery, filter]);
 
   return (
     <div className="flex gap-8 items-start">

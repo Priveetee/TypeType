@@ -1,11 +1,30 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { PageSpinner } from "../components/page-spinner";
 import { WatchLayout } from "../components/watch-layout";
-import { generateStreams } from "../mocks/streams";
-
-const MOCK_STREAM = generateStreams(1)[0];
+import { useStream } from "../hooks/use-stream";
+import { useHistoryStore } from "../stores/history-store";
 
 function WatchPage() {
-  return <WatchLayout stream={MOCK_STREAM} />;
+  const { v } = Route.useSearch();
+  const { data: stream, isLoading, isError } = useStream(v);
+  const addEntry = useHistoryStore((s) => s.addEntry);
+
+  useEffect(() => {
+    if (stream) addEntry(stream);
+  }, [stream, addEntry]);
+
+  if (isLoading) return <PageSpinner />;
+
+  if (isError || !stream) {
+    return (
+      <div className="flex items-center justify-center pt-32">
+        <p className="text-zinc-400 text-sm">Failed to load stream.</p>
+      </div>
+    );
+  }
+
+  return <WatchLayout stream={stream} />;
 }
 
 export const Route = createFileRoute("/watch")({
