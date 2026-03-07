@@ -1,0 +1,80 @@
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+
+type Props = {
+  onConfirm: (name: string) => void;
+  onCancel: () => void;
+};
+
+export function PlaylistCreateModal({ onConfirm, onCancel }: Props) {
+  const [name, setName] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    inputRef.current?.focus();
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") onCancel();
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = prev;
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [onCancel]);
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    onConfirm(trimmed);
+  }
+
+  return createPortal(
+    <>
+      <div
+        role="none"
+        className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+        onClick={onCancel}
+      />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="create-playlist-title"
+        className="fixed z-50 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-80 bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl p-5 flex flex-col gap-4"
+      >
+        <p id="create-playlist-title" className="text-sm font-semibold text-zinc-100">
+          New playlist
+        </p>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+          <input
+            ref={inputRef}
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Playlist name..."
+            className="bg-zinc-800 text-zinc-100 placeholder-zinc-500 rounded-lg px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-zinc-600 w-full"
+          />
+          <div className="flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={onCancel}
+              className="px-3.5 py-1.5 text-sm text-zinc-300 hover:text-zinc-100 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={!name.trim()}
+              className="px-3.5 py-1.5 text-sm text-zinc-900 bg-zinc-100 hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed rounded-lg transition-colors"
+            >
+              Create
+            </button>
+          </div>
+        </form>
+      </div>
+    </>,
+    document.body,
+  );
+}
