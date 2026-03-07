@@ -3,9 +3,10 @@ import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
+import { PageSpinner } from "./components/page-spinner";
 import { routeTree } from "./routeTree.gen";
 
-const router = createRouter({ routeTree });
+const router = createRouter({ routeTree, defaultPendingComponent: PageSpinner });
 const queryClient = new QueryClient();
 
 declare module "@tanstack/react-router" {

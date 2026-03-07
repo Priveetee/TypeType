@@ -1,10 +1,19 @@
 import { createRootRoute, Outlet } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { Navbar } from "../components/navbar";
 import { Sidebar } from "../components/sidebar";
 import { useUiStore } from "../stores/ui-store";
 
 function RootLayout() {
   const collapsed = useUiStore((s) => s.sidebarCollapsed);
+
+  useEffect(() => {
+    const loader = document.getElementById("app-loader");
+    if (!loader) return;
+    loader.style.opacity = "0";
+    const timer = setTimeout(() => loader.remove(), 300);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
