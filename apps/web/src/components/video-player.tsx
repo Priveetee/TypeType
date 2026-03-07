@@ -4,9 +4,7 @@ import { useState } from "react";
 import type { QualityStream } from "../types/stream";
 import { QualitySelector } from "./quality-selector";
 
-const DEMO_SRC = "https://files.vidstack.io/sprite-fight/720p.mp4";
-const DEMO_POSTER = "https://files.vidstack.io/sprite-fight/poster.webp";
-const DEMO_TITLE = "Sprite Fight";
+type MediaSrc = { src: string; type: string };
 
 function bestStream(streams: QualityStream[]): QualityStream | undefined {
   return streams
@@ -15,28 +13,31 @@ function bestStream(streams: QualityStream[]): QualityStream | undefined {
 }
 
 type Props = {
-  src?: string;
+  src?: MediaSrc;
   title?: string;
   poster?: string;
   qualityStreams?: QualityStream[];
 };
 
-export function VideoPlayer({
-  src = DEMO_SRC,
-  title = DEMO_TITLE,
-  poster = DEMO_POSTER,
-  qualityStreams,
-}: Props) {
+export function VideoPlayer({ src, title, poster, qualityStreams }: Props) {
   const [selected, setSelected] = useState<QualityStream | undefined>(() =>
     qualityStreams ? bestStream(qualityStreams) : undefined,
   );
 
-  const activeSrc = selected?.url ?? src;
+  const activeSrc: MediaSrc | undefined = selected ? { src: selected.url, type: "video/mp4" } : src;
 
   const qualitySlot =
     qualityStreams && qualityStreams.length > 0 && selected ? (
       <QualitySelector streams={qualityStreams} selected={selected} onSelect={setSelected} />
     ) : undefined;
+
+  if (!activeSrc) {
+    return (
+      <div className="w-full aspect-video bg-zinc-900 flex items-center justify-center rounded-lg">
+        <p className="text-zinc-500 text-sm">Stream unavailable</p>
+      </div>
+    );
+  }
 
   return (
     <MediaPlayer
