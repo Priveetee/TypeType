@@ -45,7 +45,7 @@ export function WatchInfo({ stream }: Props) {
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0">
           <img
-            src={stream.channelAvatar}
+            src={stream.channelAvatar || undefined}
             alt={stream.channelName}
             className="w-9 h-9 rounded-full flex-shrink-0"
           />

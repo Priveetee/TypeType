@@ -14,7 +14,7 @@ export function WatchComment({ comment }: Props) {
   return (
     <div className="flex gap-3">
       <img
-        src={comment.authorAvatarUrl}
+        src={comment.authorAvatarUrl || undefined}
         alt={comment.author}
         className="w-8 h-8 rounded-full flex-shrink-0 mt-0.5"
       />
