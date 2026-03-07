@@ -1,9 +1,11 @@
 export type Comment = {
   id: string;
-  author: string;
-  avatar: string;
   text: string;
-  likes: number;
-  postedAt: Date;
-  replies: Comment[];
+  author: string;
+  authorUrl: string;
+  authorAvatarUrl: string;
+  likeCount: number;
+  publishedTime: string;
+  isHeartedByUploader: boolean;
+  isPinned: boolean;
 };

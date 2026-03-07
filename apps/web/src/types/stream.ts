@@ -2,9 +2,9 @@ export type QualityStream = {
   url: string;
   format: "MPEG_4" | "WEBM" | "v3GPP";
   resolution: string;
-  bitrate: number;
+  bitrate: number | null;
   isVideoOnly: boolean;
-  codec?: string;
+  codec: string;
 };
 
 export type VideoStream = {
@@ -14,13 +14,15 @@ export type VideoStream = {
   previewUrl?: string;
   description?: string;
   channelName: string;
+  channelUrl?: string;
   channelAvatar: string;
   views: number;
   duration: number;
-  uploadedAt: Date;
+  uploadDate: string;
   likes?: number;
   dislikes?: number;
   hlsUrl?: string;
   dashMpdUrl?: string;
   qualityStreams?: QualityStream[];
+  related?: VideoStream[];
 };
