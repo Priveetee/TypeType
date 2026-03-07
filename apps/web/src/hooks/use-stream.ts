@@ -6,6 +6,6 @@ export function useStream(url: string) {
   return useQuery({
     queryKey: ["stream", url],
     queryFn: () => fetchStream(url).then((r) => mapStreamResponse(r, url)),
-    enabled: url.length > 0,
+    enabled: url.startsWith("http"),
   });
 }
