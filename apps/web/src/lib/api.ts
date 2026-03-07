@@ -8,10 +8,20 @@ import type {
 
 const BASE = import.meta.env.VITE_API_URL;
 
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
+
 async function request<T>(url: string): Promise<T> {
   const res = await fetch(url);
   const body = await res.json();
-  if (!res.ok) throw new Error(body.error);
+  if (!res.ok) throw new ApiError(body.error, res.status);
   return body;
 }
 
