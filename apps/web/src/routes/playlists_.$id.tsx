@@ -76,7 +76,7 @@ function PlaylistVideoItem({ stream, onRemove }: VideoItemProps) {
         <p className="text-sm font-medium text-zinc-100 line-clamp-2 leading-snug group-hover:text-white transition-colors">
           {stream.title}
         </p>
-        <p className="text-xs text-zinc-500 mt-0.5 truncate">{stream.uploader}</p>
+        <p className="text-xs text-zinc-500 mt-0.5 truncate">{stream.channelName}</p>
       </Link>
     </div>
   );
