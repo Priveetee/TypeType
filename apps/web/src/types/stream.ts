@@ -1,6 +1,6 @@
 export type QualityStream = {
   url: string;
-  format: "MPEG_4" | "WEBM" | "v3GPP";
+  format: string;
   resolution: string;
   bitrate: number | null;
   isVideoOnly: boolean;
