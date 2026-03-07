@@ -9,7 +9,9 @@ const DEMO_POSTER = "https://files.vidstack.io/sprite-fight/poster.webp";
 const DEMO_TITLE = "Sprite Fight";
 
 function bestStream(streams: QualityStream[]): QualityStream | undefined {
-  return streams.filter((s) => !s.isVideoOnly).sort((a, b) => b.bitrate - a.bitrate)[0];
+  return streams
+    .filter((s) => !s.isVideoOnly)
+    .sort((a, b) => (b.bitrate ?? 0) - (a.bitrate ?? 0))[0];
 }
 
 type Props = {

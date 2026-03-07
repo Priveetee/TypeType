@@ -22,15 +22,6 @@ function formatDuration(seconds: number): string {
   return `${m}:${String(s).padStart(2, "0")}`;
 }
 
-function formatAge(date: Date): string {
-  const days = Math.floor((Date.now() - date.getTime()) / 86_400_000);
-  if (days < 1) return "today";
-  if (days < 7) return `${days}d ago`;
-  if (days < 30) return `${Math.floor(days / 7)}w ago`;
-  if (days < 365) return `${Math.floor(days / 30)}mo ago`;
-  return `${Math.floor(days / 365)}y ago`;
-}
-
 export function VideoCard({ stream }: Props) {
   const [previewing, setPreviewing] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -85,7 +76,7 @@ export function VideoCard({ stream }: Props) {
           </p>
           <p className="text-xs text-zinc-400">{stream.channelName}</p>
           <p className="text-xs text-zinc-500">
-            {formatViews(stream.views)} · {formatAge(stream.uploadedAt)}
+            {formatViews(stream.views)} · {stream.uploadDate}
           </p>
         </div>
       </div>

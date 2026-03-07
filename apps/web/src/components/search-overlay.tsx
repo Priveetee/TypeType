@@ -1,11 +1,14 @@
-import { useEffect, useRef } from "react";
+import { useNavigate } from "@tanstack/react-router";
+import { useEffect, useRef, useState } from "react";
 
 type Props = {
   onClose: () => void;
 };
 
 export function SearchOverlay({ onClose }: Props) {
+  const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -15,6 +18,13 @@ export function SearchOverlay({ onClose }: Props) {
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
   }, [onClose]);
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!query.trim()) return;
+    navigate({ to: "/search", search: { q: query.trim(), service: 0 } });
+    onClose();
+  }
 
   return (
     <div
@@ -28,14 +38,16 @@ export function SearchOverlay({ onClose }: Props) {
         className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-default"
         onClick={onClose}
       />
-      <div className="relative w-full max-w-2xl">
+      <form onSubmit={handleSubmit} className="relative w-full max-w-2xl">
         <input
           ref={inputRef}
           type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
           placeholder="Search videos, channels..."
           className="w-full h-12 bg-zinc-900 border border-zinc-700 rounded-lg px-4 text-base text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-400"
         />
-      </div>
+      </form>
     </div>
   );
 }

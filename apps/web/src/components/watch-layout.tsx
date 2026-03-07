@@ -25,10 +25,10 @@ export function WatchLayout({ stream }: Props) {
         <WatchInfo stream={stream} />
         <WatchActions stream={stream} />
         {stream.description && <WatchDescription description={stream.description} />}
-        <WatchComments videoId={stream.id} />
+        <WatchComments videoUrl={stream.id} />
       </div>
       <div className="w-full lg:flex-1 lg:min-w-64">
-        <RelatedVideos videoId={stream.id} />
+        <RelatedVideos streams={stream.related ?? []} />
       </div>
     </div>
   );

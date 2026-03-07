@@ -7,12 +7,12 @@ import { WatchCommentSkeleton } from "./watch-comment-skeleton";
 const SKELETON_KEYS = Array.from({ length: 5 }, (_, i) => `cs-${i}`);
 
 type Props = {
-  videoId: string;
+  videoUrl: string;
 };
 
-export function WatchComments({ videoId }: Props) {
+export function WatchComments({ videoUrl }: Props) {
   const { data, isFetchingNextPage, hasNextPage, fetchNextPage, isLoading } =
-    useInfiniteComments(videoId);
+    useInfiniteComments(videoUrl);
 
   const loadMore = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) fetchNextPage();

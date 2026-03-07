@@ -17,7 +17,7 @@ function isFormatLabel(v: string): v is FormatLabel {
 }
 
 function codecFamily(stream: QualityStream): FormatLabel | null {
-  const c = stream.codec ?? "";
+  const c = stream.codec;
   if (c.startsWith("av01")) return "AV1";
   if (c.startsWith("vp09")) return "VP9";
   if (c.startsWith("avc1")) return "H.264";
@@ -25,11 +25,13 @@ function codecFamily(stream: QualityStream): FormatLabel | null {
 }
 
 function streamKey(s: QualityStream): string {
-  return `${s.resolution}|${s.format}|${s.codec ?? ""}`;
+  return `${s.resolution}|${s.format}|${s.codec}`;
 }
 
 function bestInFormat(streams: QualityStream[], format: FormatLabel): QualityStream | undefined {
-  return streams.filter((s) => codecFamily(s) === format).sort((a, b) => b.bitrate - a.bitrate)[0];
+  return streams
+    .filter((s) => codecFamily(s) === format)
+    .sort((a, b) => (b.bitrate ?? 0) - (a.bitrate ?? 0))[0];
 }
 
 function deduplicateByResolution(streams: QualityStream[]): QualityStream[] {
@@ -60,7 +62,9 @@ export function QualitySelector({ streams, selected, onSelect }: Props) {
   );
 
   const formatStreams = deduplicateByResolution(
-    streams.filter((s) => codecFamily(s) === selectedFormat).sort((a, b) => b.bitrate - a.bitrate),
+    streams
+      .filter((s) => codecFamily(s) === selectedFormat)
+      .sort((a, b) => (b.bitrate ?? 0) - (a.bitrate ?? 0)),
   );
   const activeInFormat = formatStreams.find((s) => streamKey(s) === streamKey(selected));
 

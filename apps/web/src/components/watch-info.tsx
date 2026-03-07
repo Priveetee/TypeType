@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSubscriptionsStore } from "../stores/subscriptions-store";
 import type { VideoStream } from "../types/stream";
 import { Toast } from "./toast";
 
@@ -12,16 +13,9 @@ function formatViews(views: number): string {
   return `${views} views`;
 }
 
-function formatDate(date: Date): string {
-  return date.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-}
-
 export function WatchInfo({ stream }: Props) {
-  const [subscribed, setSubscribed] = useState(false);
+  const { subscribe, unsubscribe, isSubscribed } = useSubscriptionsStore();
+  const subscribed = stream.channelUrl ? isSubscribed(stream.channelUrl) : false;
   const [toastMsg, setToastMsg] = useState<string | null>(null);
 
   useEffect(() => {
@@ -31,11 +25,18 @@ export function WatchInfo({ stream }: Props) {
   }, [toastMsg]);
 
   function handleSubscribe() {
-    const next = !subscribed;
-    setSubscribed(next);
-    setToastMsg(
-      next ? `Subscribed to ${stream.channelName}` : `Unsubscribed from ${stream.channelName}`,
-    );
+    if (!stream.channelUrl) return;
+    if (subscribed) {
+      unsubscribe(stream.channelUrl);
+      setToastMsg(`Unsubscribed from ${stream.channelName}`);
+    } else {
+      subscribe({
+        channelUrl: stream.channelUrl,
+        name: stream.channelName,
+        avatarUrl: stream.channelAvatar,
+      });
+      setToastMsg(`Subscribed to ${stream.channelName}`);
+    }
   }
 
   return (
@@ -51,22 +52,24 @@ export function WatchInfo({ stream }: Props) {
           <div className="flex flex-col min-w-0">
             <p className="text-sm font-medium text-zinc-100 truncate">{stream.channelName}</p>
             <p className="text-xs text-zinc-500">
-              {formatViews(stream.views)} · {formatDate(stream.uploadedAt)}
+              {formatViews(stream.views)} · {stream.uploadDate}
             </p>
           </div>
         </div>
-        <button
-          type="button"
-          onClick={handleSubscribe}
-          aria-pressed={subscribed}
-          className={`flex-shrink-0 px-4 py-1.5 text-sm font-medium rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 focus-visible:ring-zinc-400 ${
-            subscribed
-              ? "ring-1 ring-zinc-600 bg-zinc-800 text-zinc-100 hover:bg-zinc-700"
-              : "bg-zinc-100 text-zinc-900 hover:bg-white"
-          }`}
-        >
-          {subscribed ? "Subscribed" : "Subscribe"}
-        </button>
+        {stream.channelUrl && (
+          <button
+            type="button"
+            onClick={handleSubscribe}
+            aria-pressed={subscribed}
+            className={`flex-shrink-0 px-4 py-1.5 text-sm font-medium rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 focus-visible:ring-zinc-400 ${
+              subscribed
+                ? "ring-1 ring-zinc-600 bg-zinc-800 text-zinc-100 hover:bg-zinc-700"
+                : "bg-zinc-100 text-zinc-900 hover:bg-white"
+            }`}
+          >
+            {subscribed ? "Subscribed" : "Subscribe"}
+          </button>
+        )}
       </div>
       <div className="h-px bg-zinc-800" />
       <Toast message={toastMsg} />
