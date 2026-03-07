@@ -1,11 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo } from "react";
-import { VideoGrid } from "../components/video-grid";
-import { generateStreams } from "../mocks/streams";
+import { InfiniteVideoGrid } from "../components/infinite-video-grid";
 
 function SubscriptionsPage() {
-  const streams = useMemo(() => generateStreams(12), []);
-  return <VideoGrid streams={streams} />;
+  return <InfiniteVideoGrid queryKey="subscriptions" />;
 }
 
 export const Route = createFileRoute("/subscriptions")({
