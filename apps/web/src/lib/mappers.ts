@@ -1,17 +1,18 @@
 import type { CommentItem, StreamResponse, VideoItem } from "../types/api";
 import type { Comment } from "../types/comment";
 import type { QualityStream, VideoStream } from "../types/stream";
+import { proxyUrl } from "./proxy";
 
 function mapVideoStreamItem(item: {
   url: string;
-  format: "MPEG_4" | "WEBM" | "v3GPP";
+  format: string;
   resolution: string;
   bitrate: number | null;
   codec: string;
   isVideoOnly: boolean;
 }): QualityStream {
   return {
-    url: item.url,
+    url: proxyUrl(item.url),
     format: item.format,
     resolution: item.resolution,
     bitrate: item.bitrate,
