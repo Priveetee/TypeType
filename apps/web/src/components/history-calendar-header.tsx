@@ -113,7 +113,7 @@ export function CalendarHeader({
             {year}
           </button>
           {dropdown === "year" && (
-            <div className="absolute z-10 top-full left-1/2 -translate-x-1/2 mt-1 w-20 max-h-36 overflow-y-auto bg-zinc-950 border border-zinc-800 rounded-lg p-1 shadow-xl [scrollbar-width:thin] [scrollbar-color:var(--color-zinc-700)_transparent]">
+            <div className="absolute z-10 top-full left-1/2 -translate-x-1/2 mt-1 w-20 max-h-36 overflow-y-auto bg-zinc-950 border border-zinc-800 rounded-lg p-1 shadow-xl">
               {YEARS.map((y) => (
                 <button
                   key={y}

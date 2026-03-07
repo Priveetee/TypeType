@@ -35,16 +35,16 @@
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--color-zinc-600) transparent;
+  scrollbar-color: var(--color-zinc-600) var(--color-zinc-950);
 }
 
 *::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 *::-webkit-scrollbar-track {
-  background: transparent;
+  background: var(--color-zinc-950);
 }
 
 *::-webkit-scrollbar-thumb {
