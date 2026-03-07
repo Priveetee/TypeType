@@ -1,5 +1,6 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
+import { useServiceStore } from "../stores/service-store";
 
 type Props = {
   onClose: () => void;
@@ -9,6 +10,7 @@ export function SearchOverlay({ onClose }: Props) {
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
+  const service = useServiceStore((s) => s.service);
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -22,7 +24,7 @@ export function SearchOverlay({ onClose }: Props) {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!query.trim()) return;
-    navigate({ to: "/search", search: { q: query.trim(), service: 0 } });
+    navigate({ to: "/search", search: { q: query.trim(), service } });
     onClose();
   }
 

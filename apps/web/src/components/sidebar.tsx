@@ -1,6 +1,9 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { siBilibili, siNiconico, siYoutube } from "simple-icons";
+import type { ServiceId } from "../stores/service-store";
+import { useServiceStore } from "../stores/service-store";
 import { useUiStore } from "../stores/ui-store";
+import { ServiceIcon } from "./service-icon";
 
 type NavItem = {
   label: string;
@@ -51,18 +54,29 @@ const NAV_ITEMS: NavItem[] = [
       </>
     ),
   },
+  {
+    label: "Settings",
+    to: "/settings",
+    icon: (
+      <>
+        <circle cx="12" cy="12" r="3" />
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+      </>
+    ),
+  },
 ];
 
 type Service = {
+  id: ServiceId;
   label: string;
   path: string;
   color: string;
 };
 
 const SERVICES: Service[] = [
-  { label: "YouTube", path: siYoutube.path, color: "#FF0000" },
-  { label: "NicoNico", path: siNiconico.path, color: "#aaaaaa" },
-  { label: "BiliBili", path: siBilibili.path, color: "#00A1D6" },
+  { id: 0, label: "YouTube", path: siYoutube.path, color: "#FF0000" },
+  { id: 6, label: "NicoNico", path: siNiconico.path, color: "#aaaaaa" },
+  { id: 5, label: "BiliBili", path: siBilibili.path, color: "#00A1D6" },
 ];
 
 const BTN_BASE = "flex items-center h-10 rounded-lg transition-colors w-full";
@@ -90,25 +104,18 @@ function NavIcon({ children, label }: { children: React.ReactNode; label: string
   );
 }
 
-function ServiceIcon({ path, color, label }: { path: string; color: string; label: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill={color}
-      className="flex-shrink-0"
-      role="img"
-      aria-label={label}
-    >
-      <path d={path} />
-    </svg>
-  );
-}
-
 export function Sidebar() {
   const collapsed = useUiStore((s) => s.sidebarCollapsed);
+  const { service, setService } = useServiceStore();
+  const navigate = useNavigate();
+  const loc = useRouterState({ select: (s) => s.location });
+
+  function handleServiceClick(id: ServiceId) {
+    setService(id);
+    if (loc.pathname !== "/search") return;
+    const q = new URLSearchParams(loc.searchStr).get("q") ?? "";
+    navigate({ to: "/search", search: { q, service: id } });
+  }
 
   return (
     <aside
@@ -136,16 +143,17 @@ export function Sidebar() {
         {!collapsed && (
           <p className="text-xs text-zinc-600 px-2 mb-1 uppercase tracking-wider">Services</p>
         )}
-        {SERVICES.map((service) => (
+        {SERVICES.map((svc) => (
           <button
-            key={service.label}
+            key={svc.label}
             type="button"
-            className={`flex items-center h-10 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors w-full ${
-              collapsed ? "justify-center px-0" : "gap-3 px-2 text-left"
+            onClick={() => handleServiceClick(svc.id)}
+            className={`${BTN_BASE} ${collapsed ? "justify-center px-0" : "gap-3 px-2 text-left"} ${
+              service === svc.id ? BTN_ACTIVE : BTN_INACTIVE
             }`}
           >
-            <ServiceIcon path={service.path} color={service.color} label={service.label} />
-            {!collapsed && <span className="text-sm">{service.label}</span>}
+            <ServiceIcon path={svc.path} color={svc.color} label={svc.label} />
+            {!collapsed && <span className="text-sm">{svc.label}</span>}
           </button>
         ))}
       </div>
