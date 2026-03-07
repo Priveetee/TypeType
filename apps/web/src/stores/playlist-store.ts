@@ -3,6 +3,10 @@ import { persist } from "zustand/middleware";
 import type { Playlist } from "../types/playlist";
 import type { VideoStream } from "../types/stream";
 
+function generateId(): string {
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
 type PlaylistStore = {
   playlists: Playlist[];
   createPlaylist: (name: string) => void;
@@ -20,7 +24,7 @@ export const usePlaylistStore = create<PlaylistStore>()(
         set((state) => ({
           playlists: [
             ...state.playlists,
-            { id: crypto.randomUUID(), name, streams: [], createdAt: new Date() },
+            { id: generateId(), name, streams: [], createdAt: new Date() },
           ],
         })),
       deletePlaylist: (id) =>
