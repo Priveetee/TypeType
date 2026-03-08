@@ -28,6 +28,9 @@ function videoRepresentation(stream: ValidVideoStream, id: number): string {
     ` bandwidth="${stream.bitrate ?? 0}"` +
     ` width="${stream.width}" height="${stream.height}" frameRate="${stream.fps}">` +
     `<BaseURL>${proxyUrl(stream.url)}</BaseURL>` +
+    `<SegmentBase indexRange="${stream.indexStart}-${stream.indexEnd}">` +
+    `<Initialization range="${stream.initStart}-${stream.initEnd}"/>` +
+    `</SegmentBase>` +
     `</Representation>`
   );
 }
@@ -41,6 +44,9 @@ function audioRepresentation(stream: ValidAudioStream, id: number): string {
     ` schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011"` +
     ` value="2"/>` +
     `<BaseURL>${proxyUrl(stream.url)}</BaseURL>` +
+    `<SegmentBase indexRange="${stream.indexStart}-${stream.indexEnd}">` +
+    `<Initialization range="${stream.initStart}-${stream.initEnd}"/>` +
+    `</SegmentBase>` +
     `</Representation>`
   );
 }
@@ -75,8 +81,8 @@ export function buildDashManifest(
 
   if (videos.length === 0 || audios.length === 0) return null;
 
-  const videoGroups = groupBy(videos, (s) => s.mimeType || "video/mp4");
-  const audioGroups = groupBy(audios, (s) => s.mimeType || "audio/mp4");
+  const videoGroups = groupBy(videos, (s) => (s.mimeType || "video/mp4").split(";")[0].trim());
+  const audioGroups = groupBy(audios, (s) => (s.mimeType || "audio/mp4").split(";")[0].trim());
 
   const sets: string[] = [];
   let vi = 0;
