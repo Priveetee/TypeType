@@ -11,11 +11,23 @@ type Props = {
   streamType?: "on-demand" | "live";
 };
 
+type Dashjsv4Compat = {
+  setQualityFor: (type: dashjs.MediaType, index: number, forceReplace?: boolean) => void;
+};
+
+function shimDashjsQualityApi(player: dashjs.MediaPlayerClass): void {
+  const compat = player as unknown as Dashjsv4Compat;
+  compat.setQualityFor = (type, index, forceReplace = false) => {
+    player.setRepresentationForTypeByIndex(type, index, forceReplace);
+  };
+}
+
 function onProviderChange(provider: MediaProviderAdapter | null) {
   if (!isDASHProvider(provider)) return;
   provider.library = dashjs.MediaPlayer;
   provider.onInstance((player) => {
     player.updateSettings({ streaming: { cmcd: { enabled: false } } });
+    shimDashjsQualityApi(player);
   });
 }
 
