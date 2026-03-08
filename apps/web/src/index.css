@@ -55,3 +55,7 @@
 *::-webkit-scrollbar-thumb:hover {
   background: var(--color-zinc-500);
 }
+
+.vds-playback-menu .vds-menu-section:has(.vds-quality-slider) {
+  display: none;
+}

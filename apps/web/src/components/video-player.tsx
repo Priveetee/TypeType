@@ -3,6 +3,7 @@ import { isDASHProvider, MediaPlayer, MediaProvider } from "@vidstack/react";
 import { DefaultVideoLayout, defaultLayoutIcons } from "@vidstack/react/player/layouts/default";
 import * as dashjs from "dashjs";
 import { FormatSelector } from "./format-selector";
+import { QualitySelector } from "./quality-selector";
 
 type Props = {
   src: MediaSrc;
@@ -48,7 +49,14 @@ export function VideoPlayer({ src, title, poster, streamType = "on-demand" }: Pr
       <MediaProvider />
       <DefaultVideoLayout
         icons={defaultLayoutIcons}
-        slots={{ playbackMenuItemsEnd: <FormatSelector /> }}
+        slots={{
+          settingsMenuItemsStart: (
+            <>
+              <QualitySelector />
+              <FormatSelector />
+            </>
+          ),
+        }}
       />
     </MediaPlayer>
   );
