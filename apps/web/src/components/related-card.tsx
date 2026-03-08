@@ -60,9 +60,11 @@ export function RelatedCard({ stream }: Props) {
             playsInline
           />
         )}
-        <span className="absolute bottom-1 right-1 bg-black/80 text-white text-[10px] px-1 rounded">
-          {formatDuration(stream.duration)}
-        </span>
+        {stream.duration > 0 && (
+          <span className="absolute bottom-1 right-1 bg-black/80 text-white text-[10px] px-1 rounded">
+            {formatDuration(stream.duration)}
+          </span>
+        )}
       </div>
       <div className="flex flex-col gap-0.5 min-w-0 flex-1">
         <p className="text-xs font-medium text-zinc-100 line-clamp-2 leading-snug group-hover:text-white">

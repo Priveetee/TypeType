@@ -47,9 +47,11 @@ export function VideoCard({ stream }: Props) {
             playsInline
           />
         )}
-        <span className="absolute bottom-1.5 right-1.5 bg-black/80 text-white text-xs px-1 rounded">
-          {formatDuration(stream.duration)}
-        </span>
+        {stream.duration > 0 && (
+          <span className="absolute bottom-1.5 right-1.5 bg-black/80 text-white text-xs px-1 rounded">
+            {formatDuration(stream.duration)}
+          </span>
+        )}
       </div>
       <div className="flex gap-2">
         <img
