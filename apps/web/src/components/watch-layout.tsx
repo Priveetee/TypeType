@@ -1,3 +1,4 @@
+import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSaveProgress } from "../hooks/use-progress";
 import { useSettings } from "../hooks/use-settings";
@@ -19,6 +20,7 @@ type Props = {
 };
 
 export function WatchLayout({ stream, startTime }: Props) {
+  const navigate = useNavigate();
   const save = useSaveProgress(stream.id);
   const { settings, update, query: settingsQuery } = useSettings();
   const settingsReady =
@@ -93,6 +95,13 @@ export function WatchLayout({ stream, startTime }: Props) {
     positionRef.current = positionMs;
   }, []);
 
+  const handleEnded = useCallback(() => {
+    if (!settingsReady || !settings.autoplay) return;
+    const next = stream.related?.[0];
+    if (!next) return;
+    navigate({ to: "/watch", search: { v: next.id } });
+  }, [settingsReady, settings.autoplay, stream.related, navigate]);
+
   useEffect(() => {
     if (isLive) return;
     const onVisibilityChange = () => {
@@ -130,6 +139,7 @@ export function WatchLayout({ stream, startTime }: Props) {
             onPause={handleSave}
             onSeeked={handleSave}
             onError={handleError}
+            onEnded={handleEnded}
             onSeekReady={(seek) => {
               seekRef.current = seek;
             }}

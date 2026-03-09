@@ -31,6 +31,7 @@ type Props = {
   onSeeked?: () => void;
   onError?: () => void;
   onSeekReady?: (seek: (seconds: number) => void) => void;
+  onEnded?: () => void;
 };
 
 type Dashjsv4Compat = {
@@ -80,6 +81,7 @@ export function VideoPlayer({
   onSeeked,
   onError,
   onSeekReady,
+  onEnded,
 }: Props) {
   return (
     <MediaPlayer
@@ -101,6 +103,7 @@ export function VideoPlayer({
         onSeeked?.();
       }}
       onError={() => onError?.()}
+      onEnded={() => onEnded?.()}
     >
       <MediaProvider>
         {subtitles?.map((s) => (
