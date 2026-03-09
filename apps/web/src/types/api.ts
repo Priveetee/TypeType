@@ -119,6 +119,8 @@ export type CommentItem = {
   publishedTime: string;
   isHeartedByUploader: boolean;
   isPinned: boolean;
+  replyCount: number;
+  repliesPage: string | null;
 };
 
 export type CommentsPageResponse = {

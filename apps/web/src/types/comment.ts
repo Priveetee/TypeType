@@ -8,4 +8,6 @@ export type Comment = {
   publishedTime: string;
   isHeartedByUploader: boolean;
   isPinned: boolean;
+  replyCount: number;
+  repliesPage: string | null;
 };
