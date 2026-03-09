@@ -1,28 +1,19 @@
 import { Link } from "@tanstack/react-router";
+import { formatDuration, formatViews } from "../lib/format";
 import type { VideoStream } from "../types/stream";
 
 type Props = {
   stream: VideoStream;
 };
 
-function formatViews(views: number): string {
-  if (views >= 1_000_000) return `${(views / 1_000_000).toFixed(1)}M views`;
-  if (views >= 1_000) return `${(views / 1_000).toFixed(0)}K views`;
-  return `${views} views`;
-}
-
-function formatDuration(seconds: number): string {
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  const s = seconds % 60;
-  if (h > 0) return `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
-  return `${m}:${String(s).padStart(2, "0")}`;
-}
-
 export function RelatedCard({ stream }: Props) {
   return (
-    <Link to="/watch" search={{ v: stream.id }} className="flex gap-2 group">
-      <div className="relative w-40 aspect-video rounded-md overflow-hidden bg-zinc-800 flex-shrink-0">
+    <div className="flex gap-2 group">
+      <Link
+        to="/watch"
+        search={{ v: stream.id }}
+        className="relative w-40 aspect-video rounded-md overflow-hidden bg-zinc-800 flex-shrink-0"
+      >
         <img
           src={stream.thumbnail}
           alt={stream.title}
@@ -33,14 +24,46 @@ export function RelatedCard({ stream }: Props) {
             {formatDuration(stream.duration)}
           </span>
         )}
-      </div>
+      </Link>
       <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-        <p className="text-xs font-medium text-zinc-100 line-clamp-2 leading-snug group-hover:text-white">
+        <Link
+          to="/watch"
+          search={{ v: stream.id }}
+          className="text-xs font-medium text-zinc-100 line-clamp-2 leading-snug hover:text-white"
+        >
           {stream.title}
-        </p>
-        <p className="text-xs text-zinc-400">{stream.channelName}</p>
+        </Link>
+        {stream.channelUrl ? (
+          <Link
+            to="/channel"
+            search={{ url: stream.channelUrl }}
+            className="flex items-center gap-1.5 mt-0.5 w-fit group/channel"
+          >
+            {stream.channelAvatar && (
+              <img
+                src={stream.channelAvatar}
+                alt={stream.channelName}
+                className="w-4 h-4 rounded-full flex-shrink-0"
+              />
+            )}
+            <span className="text-xs text-zinc-400 group-hover/channel:text-zinc-200 truncate">
+              {stream.channelName}
+            </span>
+          </Link>
+        ) : (
+          <div className="flex items-center gap-1.5 mt-0.5">
+            {stream.channelAvatar && (
+              <img
+                src={stream.channelAvatar}
+                alt={stream.channelName}
+                className="w-4 h-4 rounded-full flex-shrink-0"
+              />
+            )}
+            <span className="text-xs text-zinc-400 truncate">{stream.channelName}</span>
+          </div>
+        )}
         <p className="text-xs text-zinc-500">{formatViews(stream.views)}</p>
       </div>
-    </Link>
+    </div>
   );
 }
