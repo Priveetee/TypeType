@@ -13,6 +13,7 @@ import { useEffect, useRef } from "react";
 import type { SponsorBlockSegmentItem, SubtitleItem } from "../types/api";
 import { FormatSelector } from "./format-selector";
 import { QualitySelector } from "./quality-selector";
+import { SponsorBlockBar } from "./sponsorblock-bar";
 import { VolumeRestorer } from "./volume-restorer";
 
 type Props = {
@@ -157,6 +158,7 @@ export function VideoPlayer({
         onVolumeChange={onVolumeChange}
       />
       {sponsorBlockSegments && <SponsorBlockSkipper segments={sponsorBlockSegments} />}
+      {sponsorBlockSegments && <SponsorBlockBar segments={sponsorBlockSegments} />}
     </MediaPlayer>
   );
 }
