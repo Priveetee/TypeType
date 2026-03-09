@@ -137,7 +137,12 @@ export function WatchActions({ stream }: Props) {
             const cu = stream.channelUrl;
             if (!cu) return;
             if (channelBlocked) removeChannel.mutate(cu);
-            else addChannel.mutate(cu);
+            else
+              addChannel.mutate({
+                url: cu,
+                name: stream.channelName,
+                thumbnailUrl: stream.channelAvatar,
+              });
           }}
           aria-pressed={channelBlocked}
           className={`${BTN} ${channelBlocked ? BTN_ON : BTN_IDLE}`}

@@ -11,6 +11,12 @@ import {
 const CHANNELS_KEY = ["blocked-channels"];
 const VIDEOS_KEY = ["blocked-videos"];
 
+type BlockChannelArgs = {
+  url: string;
+  name?: string;
+  thumbnailUrl?: string;
+};
+
 export function useBlocked() {
   const qc = useQueryClient();
 
@@ -18,7 +24,8 @@ export function useBlocked() {
   const videos = useQuery({ queryKey: VIDEOS_KEY, queryFn: fetchBlockedVideos });
 
   const addChannel = useMutation({
-    mutationFn: (url: string) => blockChannel(url),
+    mutationFn: ({ url, name, thumbnailUrl }: BlockChannelArgs) =>
+      blockChannel(url, name, thumbnailUrl),
     onSuccess: () => qc.invalidateQueries({ queryKey: CHANNELS_KEY }),
   });
 

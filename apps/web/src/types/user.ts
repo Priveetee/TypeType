@@ -63,5 +63,7 @@ export type SearchHistoryItem = {
 
 export type BlockedItem = {
   url: string;
+  name?: string;
+  thumbnailUrl?: string;
   blockedAt: number;
 };

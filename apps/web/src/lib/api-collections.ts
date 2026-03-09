@@ -55,11 +55,15 @@ export function fetchBlockedChannels(): Promise<BlockedItem[]> {
   return authedJson(`${BASE}/blocked/channels`);
 }
 
-export async function blockChannel(url: string): Promise<void> {
+export async function blockChannel(
+  url: string,
+  name?: string,
+  thumbnailUrl?: string,
+): Promise<void> {
   await authed(`${BASE}/blocked/channels`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ url }),
+    body: JSON.stringify({ url, name, thumbnailUrl }),
   });
 }
 
