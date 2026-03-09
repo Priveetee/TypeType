@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { formatLikes } from "../lib/format";
 import type { Comment } from "../types/comment";
 import { RichText } from "./rich-text";
@@ -11,6 +11,15 @@ type Props = {
 
 export function WatchComment({ comment, videoUrl }: Props) {
   const [showReplies, setShowReplies] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const [overflows, setOverflows] = useState(false);
+  const textRef = useRef<HTMLParagraphElement>(null);
+
+  useLayoutEffect(() => {
+    const el = textRef.current;
+    if (!el) return;
+    setOverflows(el.scrollHeight > el.clientHeight);
+  }, []);
 
   const repliesLabel =
     comment.replyCount > 0 ? `${formatLikes(comment.replyCount)} replies` : "Show replies";
@@ -41,9 +50,21 @@ export function WatchComment({ comment, videoUrl }: Props) {
             <span className="text-xs text-zinc-500">{comment.publishedTime}</span>
           )}
         </div>
-        <p className="text-sm text-zinc-200 leading-relaxed whitespace-pre-wrap">
+        <p
+          ref={textRef}
+          className={`text-sm text-zinc-200 leading-relaxed whitespace-pre-wrap${expanded ? "" : " line-clamp-5"}`}
+        >
           <RichText text={comment.text} />
         </p>
+        {(overflows || expanded) && (
+          <button
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            className="text-xs text-zinc-400 hover:text-zinc-200 text-left w-fit"
+          >
+            {expanded ? "Show less" : "Show more"}
+          </button>
+        )}
         {comment.likeCount >= 0 && (
           <span className="text-xs text-zinc-500">{likeDisplay} likes</span>
         )}
