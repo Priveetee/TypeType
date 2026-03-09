@@ -9,6 +9,17 @@ type Result = {
   isLoading: boolean;
 };
 
+function interleave(channels: VideoStream[][]): VideoStream[] {
+  const result: VideoStream[] = [];
+  const maxLen = Math.max(0, ...channels.map((c) => c.length));
+  for (let i = 0; i < maxLen; i++) {
+    for (const channel of channels) {
+      if (i < channel.length) result.push(channel[i]);
+    }
+  }
+  return result;
+}
+
 export function useSubscriptionFeed(): Result {
   const { query } = useSubscriptions();
   const subscriptions = query.data ?? [];
@@ -27,7 +38,8 @@ export function useSubscriptionFeed(): Result {
   });
 
   const isLoading = queries.some((q) => q.isLoading);
-  const streams = queries.flatMap((q) => q.data ?? []);
+  const channels = queries.map((q) => q.data ?? []);
+  const streams = interleave(channels);
 
   return { streams, isLoading };
 }
