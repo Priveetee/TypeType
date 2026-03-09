@@ -6,6 +6,8 @@ import type { VideoStream } from "../types/stream";
 type SearchPage = {
   streams: VideoStream[];
   nextpage: string | null;
+  searchSuggestion: string | null;
+  isCorrectedSearch: boolean;
 };
 
 export function useSearch(q: string, service: number) {
@@ -16,7 +18,9 @@ export function useSearch(q: string, service: number) {
       return {
         streams: response.items.map(mapVideoItem),
         nextpage: response.nextpage,
-      };
+        searchSuggestion: response.searchSuggestion,
+        isCorrectedSearch: response.isCorrectedSearch,
+      } satisfies SearchPage;
     },
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (last: SearchPage) => last.nextpage ?? undefined,

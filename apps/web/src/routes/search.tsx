@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback } from "react";
 import { ScrollSentinel } from "../components/scroll-sentinel";
 import { VideoCard } from "../components/video-card";
@@ -10,6 +10,7 @@ const SKELETON_KEYS = Array.from({ length: 12 }, (_, i) => `skeleton-${i}`);
 
 function SearchPage() {
   const { q, service } = Route.useSearch();
+  const navigate = useNavigate();
   const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } = useSearch(q, service);
   const { filter } = useBlockedFilter();
 
@@ -17,7 +18,15 @@ function SearchPage() {
     if (hasNextPage && !isFetchingNextPage) fetchNextPage();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
+  const firstPage = data?.pages[0];
+  const suggestion = firstPage?.searchSuggestion ?? null;
+  const isCorrected = firstPage?.isCorrectedSearch ?? false;
   const streams = filter(data?.pages.flatMap((p) => p.streams) ?? []);
+
+  function handleSuggestion() {
+    if (!suggestion) return;
+    navigate({ to: "/search", search: { q: suggestion, service } });
+  }
 
   if (isLoading) {
     return (
@@ -31,6 +40,31 @@ function SearchPage() {
 
   return (
     <div>
+      {isCorrected && suggestion && (
+        <p className="text-sm text-zinc-400 mb-4">
+          Showing results for <span className="text-zinc-100 font-medium">{suggestion}</span>.{" "}
+          <button
+            type="button"
+            onClick={handleSuggestion}
+            className="text-blue-400 hover:text-blue-300 underline"
+          >
+            Search instead for &ldquo;{q}&rdquo;
+          </button>
+        </p>
+      )}
+      {!isCorrected && suggestion && (
+        <p className="text-sm text-zinc-400 mb-4">
+          Did you mean{" "}
+          <button
+            type="button"
+            onClick={handleSuggestion}
+            className="text-blue-400 hover:text-blue-300 underline"
+          >
+            {suggestion}
+          </button>
+          ?
+        </p>
+      )}
       {streams.length === 0 ? (
         <p className="text-zinc-400 text-sm">No results for &ldquo;{q}&rdquo;</p>
       ) : (
