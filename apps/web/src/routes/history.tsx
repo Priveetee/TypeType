@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { ConfirmModal } from "../components/confirm-modal";
 import type { FilterState } from "../components/history-filter";
 import { HistoryFilter } from "../components/history-filter";
 import { useHistory } from "../hooks/use-history";
@@ -82,6 +83,7 @@ function HistoryPage() {
   const { query, remove } = useHistory();
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState<FilterState | null>(null);
+  const [pendingRemoveId, setPendingRemoveId] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
     const entries = query.data ?? [];
@@ -124,7 +126,7 @@ function HistoryPage() {
       <div className="flex-1 min-w-0">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8">
           {filtered.map((item: HistoryItem) => (
-            <HistoryCard key={item.id} item={item} onRemove={() => remove.mutate(item.id)} />
+            <HistoryCard key={item.id} item={item} onRemove={() => setPendingRemoveId(item.id)} />
           ))}
         </div>
       </div>
@@ -135,6 +137,18 @@ function HistoryPage() {
         onFilterChange={setFilter}
         resultCount={filtered.length}
       />
+      {pendingRemoveId !== null && (
+        <ConfirmModal
+          title="Remove from history?"
+          description="This video will be removed from your watch history."
+          confirmLabel="Remove"
+          onConfirm={() => {
+            remove.mutate(pendingRemoveId);
+            setPendingRemoveId(null);
+          }}
+          onCancel={() => setPendingRemoveId(null)}
+        />
+      )}
     </div>
   );
 }
