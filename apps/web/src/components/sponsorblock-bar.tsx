@@ -47,6 +47,7 @@ type Props = { segments: SponsorBlockSegmentItem[] };
 
 export function SponsorBlockBar({ segments }: Props) {
   const duration = useMediaState("duration");
+  const controlsVisible = useMediaState("controlsVisible");
   const anchorRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
 
@@ -86,6 +87,7 @@ export function SponsorBlockBar({ segments }: Props) {
           height: `${TRACK_HEIGHT}px`,
           pointerEvents: "none",
           zIndex: 40,
+          visibility: controlsVisible ? "visible" : "hidden",
         }}
       >
         {segments.map((seg) => (
