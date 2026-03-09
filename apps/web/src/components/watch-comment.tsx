@@ -15,6 +15,8 @@ export function WatchComment({ comment, videoUrl }: Props) {
   const repliesLabel =
     comment.replyCount > 0 ? `${formatLikes(comment.replyCount)} replies` : "Show replies";
 
+  const likeDisplay = comment.textualLikeCount || formatLikes(comment.likeCount);
+
   return (
     <div className="flex gap-3">
       <img
@@ -25,6 +27,11 @@ export function WatchComment({ comment, videoUrl }: Props) {
       <div className="flex flex-col gap-1 flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-xs font-medium text-zinc-300">{comment.author}</span>
+          {comment.uploaderVerified && (
+            <span className="text-xs text-zinc-500 border border-zinc-700 rounded px-1">
+              verified
+            </span>
+          )}
           {comment.isPinned && (
             <span className="text-xs text-zinc-500 border border-zinc-700 rounded px-1">
               pinned
@@ -38,7 +45,7 @@ export function WatchComment({ comment, videoUrl }: Props) {
           <RichText text={comment.text} />
         </p>
         {comment.likeCount >= 0 && (
-          <span className="text-xs text-zinc-500">{formatLikes(comment.likeCount)} likes</span>
+          <span className="text-xs text-zinc-500">{likeDisplay} likes</span>
         )}
         {comment.repliesPage !== null && (
           <button

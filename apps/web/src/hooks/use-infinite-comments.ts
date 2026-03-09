@@ -6,6 +6,7 @@ import type { Comment } from "../types/comment";
 type CommentPage = {
   comments: Comment[];
   nextpage: string | null;
+  commentsDisabled: boolean;
 };
 
 export function useInfiniteComments(videoUrl: string) {
@@ -16,6 +17,7 @@ export function useInfiniteComments(videoUrl: string) {
       return {
         comments: res.comments.map(mapCommentItem),
         nextpage: res.nextpage,
+        commentsDisabled: res.commentsDisabled,
       } satisfies CommentPage;
     },
     initialPageParam: undefined as string | undefined,
