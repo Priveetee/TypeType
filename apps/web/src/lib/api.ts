@@ -48,6 +48,14 @@ export function fetchComments(url: string, nextpage?: string): Promise<CommentsP
   return request(`${BASE}/comments?${params}`);
 }
 
+export function fetchCommentReplies(
+  url: string,
+  repliesPage: string,
+): Promise<CommentsPageResponse> {
+  const params = new URLSearchParams({ url, repliesPage });
+  return request(`${BASE}/comments/replies?${params}`);
+}
+
 export function fetchChannel(url: string, nextpage?: string): Promise<ChannelResponse> {
   const params = new URLSearchParams({ url });
   if (nextpage) params.set("nextpage", nextpage);
