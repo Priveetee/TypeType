@@ -4,13 +4,20 @@ import type { WatchLaterItem } from "../types/user";
 
 const KEY = ["watch-later"];
 
+type AddPayload = {
+  url: string;
+  title: string;
+  thumbnail: string;
+  duration: number;
+};
+
 export function useWatchLater() {
   const qc = useQueryClient();
-
-  const query = useQuery({ queryKey: KEY, queryFn: fetchWatchLater });
+  const query = useQuery<WatchLaterItem[]>({ queryKey: KEY, queryFn: fetchWatchLater });
+  const videos = query.data ?? [];
 
   const add = useMutation({
-    mutationFn: (item: Omit<WatchLaterItem, "addedAt">) => addWatchLater(item),
+    mutationFn: (video: AddPayload) => addWatchLater(video),
     onSuccess: () => qc.invalidateQueries({ queryKey: KEY }),
   });
 
@@ -19,5 +26,5 @@ export function useWatchLater() {
     onSuccess: () => qc.invalidateQueries({ queryKey: KEY }),
   });
 
-  return { query, add, remove };
+  return { videos, add, remove };
 }
