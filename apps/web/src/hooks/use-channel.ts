@@ -46,7 +46,10 @@ export function useChannel(channelUrl: string) {
 
   const pages = query.data?.pages ?? [];
   const meta = pages.find((p) => p.meta !== null)?.meta ?? null;
-  const videos = pages.flatMap((p) => p.videos);
+  const avatarUrl = meta?.avatarUrl ?? "";
+  const videos = pages.flatMap((p) =>
+    p.videos.map((v) => (v.channelAvatar || !avatarUrl ? v : { ...v, channelAvatar: avatarUrl })),
+  );
 
   return { ...query, meta, videos };
 }
