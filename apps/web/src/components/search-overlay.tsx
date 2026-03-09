@@ -24,7 +24,7 @@ export function SearchOverlay({ onClose }: Props) {
   const navigate = useNavigate();
   const { settings } = useSettings();
   const service = settings.defaultService;
-  const { query: historyQuery, add } = useSearchHistory();
+  const { query: historyQuery, add, clear } = useSearchHistory();
   const history = historyQuery.data ?? [];
   const debouncedQuery = useDebounced(query, 300);
 
@@ -95,8 +95,17 @@ export function SearchOverlay({ onClose }: Props) {
           <ul className="mt-1 bg-zinc-900 border border-zinc-700 rounded-lg overflow-hidden">
             {showHistory && (
               <>
-                <li className="px-4 py-2 text-xs text-zinc-500 uppercase tracking-wider">
-                  Recent searches
+                <li className="px-4 py-2 flex items-center justify-between">
+                  <span className="text-xs text-zinc-500 uppercase tracking-wider">
+                    Recent searches
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => clear.mutate()}
+                    className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors"
+                  >
+                    Clear
+                  </button>
                 </li>
                 {history.slice(0, 8).map((item) => (
                   <li key={item.id}>
