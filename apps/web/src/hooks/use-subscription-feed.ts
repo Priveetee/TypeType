@@ -15,10 +15,13 @@ export function useSubscriptionFeed(): Result {
 
   const queries = useQueries({
     queries: subscriptions.map((sub) => ({
-      queryKey: ["channel", sub.channelUrl],
+      queryKey: ["channel-feed", sub.channelUrl],
       queryFn: async () => {
         const res = await fetchChannel(sub.channelUrl);
-        return res.videos.map(mapVideoItem);
+        return res.videos.map((video) => {
+          const mapped = mapVideoItem(video);
+          return mapped.channelAvatar ? mapped : { ...mapped, channelAvatar: res.avatarUrl };
+        });
       },
     })),
   });
