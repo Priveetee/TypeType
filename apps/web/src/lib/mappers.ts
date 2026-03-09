@@ -38,6 +38,9 @@ export function mapStreamResponse(response: StreamResponse, url: string): VideoS
     channelName: response.uploaderName,
     channelUrl: response.uploaderUrl || undefined,
     channelAvatar: response.uploaderAvatarUrl,
+    uploaderVerified: response.uploaderVerified,
+    uploaderSubscriberCount:
+      response.uploaderSubscriberCount >= 0 ? response.uploaderSubscriberCount : undefined,
     views: response.viewCount,
     duration: response.duration,
     uploadDate: response.uploadDate,
