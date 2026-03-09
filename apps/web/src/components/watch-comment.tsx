@@ -1,4 +1,5 @@
 import type { Comment } from "../types/comment";
+import { RichText } from "./rich-text";
 
 type Props = {
   comment: Comment;
@@ -30,7 +31,9 @@ export function WatchComment({ comment }: Props) {
             <span className="text-xs text-zinc-500">{comment.publishedTime}</span>
           )}
         </div>
-        <p className="text-sm text-zinc-200 leading-relaxed">{comment.text}</p>
+        <p className="text-sm text-zinc-200 leading-relaxed whitespace-pre-wrap">
+          <RichText text={comment.text} />
+        </p>
         {comment.likeCount >= 0 && (
           <span className="text-xs text-zinc-500">{formatLikes(comment.likeCount)} likes</span>
         )}
