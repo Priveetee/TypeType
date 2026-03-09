@@ -44,8 +44,10 @@ function HomePage() {
     <div className="flex flex-col gap-8">
       <ContinueWatching />
       <section className="flex flex-col gap-3">
-        <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider px-1">{title}</p>
-        {hasSubs ? <FeedSection /> : <TrendingSection />}
+        {!query.isLoading && (
+          <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider px-1">{title}</p>
+        )}
+        {query.isLoading ? <SkeletonGrid /> : hasSubs ? <FeedSection /> : <TrendingSection />}
       </section>
     </div>
   );
