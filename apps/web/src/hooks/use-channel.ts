@@ -40,7 +40,7 @@ export function useChannel(channelUrl: string) {
       };
     },
     initialPageParam: undefined as string | undefined,
-    getNextPageParam: (last: ChannelPage) => last.nextpage ?? undefined,
+    getNextPageParam: (last: ChannelPage | undefined) => last?.nextpage ?? undefined,
     enabled: channelUrl.length > 0,
   });
 
