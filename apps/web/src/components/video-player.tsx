@@ -1,5 +1,5 @@
 import type { MediaProviderAdapter, MediaSrc } from "@vidstack/react";
-import { isDASHProvider, MediaPlayer, MediaProvider, Track } from "@vidstack/react";
+import { isDASHProvider, MediaPlayer, MediaProvider, Track, useMediaState } from "@vidstack/react";
 import { DefaultVideoLayout, defaultLayoutIcons } from "@vidstack/react/player/layouts/default";
 import * as dashjs from "dashjs";
 import type { SponsorBlockSegmentItem, SubtitleItem } from "../types/api";
@@ -40,6 +40,12 @@ function shimDashjsQualityApi(player: dashjs.MediaPlayerClass): void {
   compat.setQualityFor = (type, index, forceReplace = false) => {
     player.setRepresentationForTypeByIndex(type, index, forceReplace);
   };
+}
+
+function ChaptersTrack({ src }: { src: string }) {
+  const duration = useMediaState("duration");
+  if (!Number.isFinite(duration) || duration <= 0) return null;
+  return <Track kind="chapters" src={src} default />;
 }
 
 function onProviderChange(provider: MediaProviderAdapter | null) {
@@ -104,7 +110,7 @@ export function VideoPlayer({
             lang={s.languageTag}
           />
         ))}
-        {chaptersVtt && <Track kind="chapters" src={chaptersVtt} default />}
+        {chaptersVtt && <ChaptersTrack src={chaptersVtt} />}
       </MediaProvider>
       <DefaultVideoLayout
         icons={defaultLayoutIcons}
