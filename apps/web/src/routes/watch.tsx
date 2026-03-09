@@ -39,8 +39,10 @@ function WatchPage() {
   }
 
   const savedPosition = progressFetch.data?.position ?? 0;
+  const serverPositionMs = (stream.startPosition ?? 0) * 1000;
+  const resumeMs = savedPosition > 0 ? savedPosition : serverPositionMs;
   const durationMs = stream.duration * 1000;
-  const startTime = savedPosition >= 5000 && savedPosition < durationMs * 0.95 ? savedPosition : 0;
+  const startTime = resumeMs >= 5000 && resumeMs < durationMs * 0.95 ? resumeMs : 0;
 
   return <WatchLayout stream={stream} startTime={startTime} />;
 }
