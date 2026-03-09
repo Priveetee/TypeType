@@ -3,6 +3,7 @@ import { useCallback } from "react";
 import { ScrollSentinel } from "../components/scroll-sentinel";
 import { VideoCard } from "../components/video-card";
 import { VideoCardSkeleton } from "../components/video-card-skeleton";
+import { useBlockedFilter } from "../hooks/use-blocked-filter";
 import { useSearch } from "../hooks/use-search";
 
 const SKELETON_KEYS = Array.from({ length: 12 }, (_, i) => `skeleton-${i}`);
@@ -10,12 +11,13 @@ const SKELETON_KEYS = Array.from({ length: 12 }, (_, i) => `skeleton-${i}`);
 function SearchPage() {
   const { q, service } = Route.useSearch();
   const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } = useSearch(q, service);
+  const { filter } = useBlockedFilter();
 
   const loadMore = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) fetchNextPage();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  const streams = data?.pages.flatMap((p) => p.streams) ?? [];
+  const streams = filter(data?.pages.flatMap((p) => p.streams) ?? []);
 
   if (isLoading) {
     return (

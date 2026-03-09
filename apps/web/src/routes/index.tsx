@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { VideoCardSkeleton } from "../components/video-card-skeleton";
 import { VideoGrid } from "../components/video-grid";
+import { useBlockedFilter } from "../hooks/use-blocked-filter";
 import { useSettings } from "../hooks/use-settings";
 import { useTrending } from "../hooks/use-trending";
 
@@ -9,6 +10,7 @@ const SKELETON_KEYS = Array.from({ length: 12 }, (_, i) => `skeleton-${i}`);
 function HomePage() {
   const { settings } = useSettings();
   const { data: streams, isLoading } = useTrending(settings.defaultService);
+  const { filter } = useBlockedFilter();
 
   if (isLoading) {
     return (
@@ -20,7 +22,7 @@ function HomePage() {
     );
   }
 
-  return <VideoGrid streams={streams ?? []} />;
+  return <VideoGrid streams={filter(streams ?? [])} />;
 }
 
 export const Route = createFileRoute("/")({ component: HomePage });

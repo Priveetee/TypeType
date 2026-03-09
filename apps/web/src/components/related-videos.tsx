@@ -1,3 +1,4 @@
+import { useBlockedFilter } from "../hooks/use-blocked-filter";
 import type { VideoStream } from "../types/stream";
 import { AutoplayToggle } from "./autoplay-toggle";
 import { RelatedCard } from "./related-card";
@@ -11,12 +12,14 @@ type Props = {
 };
 
 export function RelatedVideos({ streams, isLoading = false }: Props) {
+  const { filter } = useBlockedFilter();
+  const visible = filter(streams);
   return (
     <div className="flex flex-col gap-3">
       <AutoplayToggle />
       {isLoading
         ? SKELETON_KEYS.map((k) => <RelatedCardSkeleton key={k} />)
-        : streams.map((stream) => <RelatedCard key={stream.id} stream={stream} />)}
+        : visible.map((stream) => <RelatedCard key={stream.id} stream={stream} />)}
     </div>
   );
 }

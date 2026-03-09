@@ -3,6 +3,7 @@ import { useCallback } from "react";
 import { PageSpinner } from "../components/page-spinner";
 import { ScrollSentinel } from "../components/scroll-sentinel";
 import { VideoCard } from "../components/video-card";
+import { useBlockedFilter } from "../hooks/use-blocked-filter";
 import { useChannel } from "../hooks/use-channel";
 import { useSubscriptions } from "../hooks/use-subscriptions";
 import { formatViews } from "../lib/format";
@@ -12,6 +13,7 @@ function ChannelPage() {
   const { meta, videos, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } =
     useChannel(url);
   const { add, remove, isSubscribed } = useSubscriptions();
+  const { filter } = useBlockedFilter();
 
   const loadMore = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) fetchNextPage();
@@ -63,7 +65,7 @@ function ChannelPage() {
         </div>
       )}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8">
-        {videos.map((v) => (
+        {filter(videos).map((v) => (
           <VideoCard key={v.id} stream={v} />
         ))}
       </div>
