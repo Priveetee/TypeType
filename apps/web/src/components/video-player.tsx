@@ -3,6 +3,7 @@ import { isDASHProvider, MediaPlayer, MediaProvider, Track, useMediaState } from
 import { DefaultVideoLayout, defaultLayoutIcons } from "@vidstack/react/player/layouts/default";
 import * as dashjs from "dashjs";
 import type { SponsorBlockSegmentItem, SubtitleItem } from "../types/api";
+import { AudioTrackSelector } from "./audio-track-selector";
 import { FormatSelector } from "./format-selector";
 import { PlayerSeeker, SeekBridge, SponsorBlockSkipper } from "./player-internals";
 import { QualitySelector } from "./quality-selector";
@@ -23,6 +24,7 @@ type Props = {
   initialMuted?: boolean;
   settingsReady?: boolean;
   autoplay?: boolean;
+  originalAudioLocale?: string | null;
   onVolumeChange?: (volume: number, muted: boolean) => void;
   onTimeUpdate?: (positionMs: number) => void;
   onPause?: () => void;
@@ -71,6 +73,7 @@ export function VideoPlayer({
   initialMuted = false,
   settingsReady = false,
   autoplay = false,
+  originalAudioLocale,
   onVolumeChange,
   onTimeUpdate,
   onPause,
@@ -118,6 +121,7 @@ export function VideoPlayer({
         slots={{
           settingsMenuItemsStart: (
             <>
+              <AudioTrackSelector originalLocale={originalAudioLocale} />
               <QualitySelector />
               <FormatSelector />
             </>

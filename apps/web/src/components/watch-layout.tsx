@@ -27,6 +27,10 @@ export function WatchLayout({ stream, startTime }: Props) {
   const nativeEnabled = !isLive && Boolean(stream.videoOnlyStreams?.length);
   const [nativeFailed, setNativeFailed] = useState(false);
 
+  const originalLocale =
+    stream.audioStreams?.find((a) => a.audioTrackName?.toLowerCase().includes("original"))
+      ?.audioLocale ?? null;
+
   const manifestSrc = resolveManifestSrc(stream, isLive, nativeFailed);
 
   const handleError = useCallback(() => {
@@ -120,6 +124,7 @@ export function WatchLayout({ stream, startTime }: Props) {
             initialMuted={settings.muted}
             settingsReady={settingsReady}
             autoplay={settingsReady && settings.autoplay}
+            originalAudioLocale={originalLocale}
             onVolumeChange={handleVolumeChange}
             onTimeUpdate={handleTimeUpdate}
             onPause={handleSave}
