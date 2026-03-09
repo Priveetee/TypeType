@@ -16,7 +16,10 @@ export function useSettings() {
   });
 
   const update = useMutation({
-    mutationFn: (patch: Partial<SettingsItem>) => updateSettings(patch),
+    mutationFn: (patch: Partial<SettingsItem>) => {
+      const current = qc.getQueryData<SettingsItem>(KEY) ?? DEFAULTS;
+      return updateSettings({ ...current, ...patch });
+    },
     onSuccess: () => qc.invalidateQueries({ queryKey: KEY }),
   });
 
