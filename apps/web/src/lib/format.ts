@@ -1,4 +1,5 @@
 export function formatViews(views: number): string {
+  if (views < 0) return "";
   if (views >= 1_000_000) return `${(views / 1_000_000).toFixed(1)}M views`;
   if (views >= 1_000) return `${(views / 1_000).toFixed(0)}K views`;
   return `${views} views`;
