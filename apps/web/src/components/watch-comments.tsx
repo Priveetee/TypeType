@@ -25,8 +25,8 @@ export function WatchComments({ videoUrl }: Props) {
     <div className="flex flex-col gap-6">
       <h2 className="text-base font-semibold text-zinc-100">Comments</h2>
       <div className="flex flex-col gap-6">
-        {comments.map((comment, i) => (
-          <WatchComment key={comment.id || i} comment={comment} />
+        {comments.map((comment) => (
+          <WatchComment key={comment.id} comment={comment} videoUrl={videoUrl} />
         ))}
         {showSkeletons && SKELETON_KEYS.map((k) => <WatchCommentSkeleton key={k} />)}
       </div>

@@ -1,17 +1,20 @@
+import { useState } from "react";
+import { formatLikes } from "../lib/format";
 import type { Comment } from "../types/comment";
 import { RichText } from "./rich-text";
+import { WatchCommentReplies } from "./watch-comment-replies";
 
 type Props = {
   comment: Comment;
+  videoUrl: string;
 };
 
-function formatLikes(n: number): string {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
-  return String(n);
-}
+export function WatchComment({ comment, videoUrl }: Props) {
+  const [showReplies, setShowReplies] = useState(false);
 
-export function WatchComment({ comment }: Props) {
+  const repliesLabel =
+    comment.replyCount > 0 ? `${formatLikes(comment.replyCount)} replies` : "Show replies";
+
   return (
     <div className="flex gap-3">
       <img
@@ -36,6 +39,18 @@ export function WatchComment({ comment }: Props) {
         </p>
         {comment.likeCount >= 0 && (
           <span className="text-xs text-zinc-500">{formatLikes(comment.likeCount)} likes</span>
+        )}
+        {comment.repliesPage !== null && (
+          <button
+            type="button"
+            onClick={() => setShowReplies((v) => !v)}
+            className="text-xs text-blue-400 hover:text-blue-300 text-left w-fit mt-1"
+          >
+            {showReplies ? "Hide replies" : repliesLabel}
+          </button>
+        )}
+        {showReplies && comment.repliesPage !== null && (
+          <WatchCommentReplies videoUrl={videoUrl} repliesPage={comment.repliesPage} />
         )}
       </div>
     </div>
