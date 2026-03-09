@@ -13,10 +13,9 @@ const ROW = "flex items-center justify-between px-4 py-4";
 type ActiveModal = "history" | "subscriptions" | "search-history" | null;
 
 export function SettingsPrivacy() {
-  const { query: historyQuery, clear: clearHistory } = useHistory();
+  const { total: historyTotal, clear: clearHistory } = useHistory();
   const { query: subsQuery, remove: removeSubscription } = useSubscriptions();
   const { query: searchHistoryQuery, clear: clearSearchHistory } = useSearchHistory();
-  const entries = historyQuery.data ?? [];
   const subscriptions = subsQuery.data ?? [];
   const searchEntries = searchHistoryQuery.data ?? [];
   const [modal, setModal] = useState<ActiveModal>(null);
@@ -46,7 +45,7 @@ export function SettingsPrivacy() {
     setModal(null);
   }
 
-  const historyLabel = entries.length === 1 ? "1 entry" : `${entries.length} entries`;
+  const historyLabel = historyTotal === 1 ? "1 entry" : `${historyTotal} entries`;
   const subsLabel = subscriptions.length === 1 ? "1 channel" : `${subscriptions.length} channels`;
   const searchLabel = searchEntries.length === 1 ? "1 entry" : `${searchEntries.length} entries`;
 
@@ -70,7 +69,7 @@ export function SettingsPrivacy() {
           </div>
           <button
             type="button"
-            disabled={entries.length === 0}
+            disabled={historyTotal === 0}
             onClick={() => setModal("history")}
             className="text-xs text-red-400 hover:text-red-300 disabled:text-zinc-600 disabled:cursor-not-allowed transition-colors ml-6 flex-shrink-0"
           >

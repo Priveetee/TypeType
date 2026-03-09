@@ -8,13 +8,13 @@ function isInProgress(progress: number, duration: number): boolean {
 }
 
 export function ContinueWatching() {
-  const { query } = useHistory();
-  const items = (query.data ?? [])
+  const { items } = useHistory();
+  const displayed = items
     .filter((h) => isInProgress(h.progress, h.duration))
     .sort((a, b) => b.watchedAt - a.watchedAt)
     .slice(0, MAX_ITEMS);
 
-  if (items.length === 0) return null;
+  if (displayed.length === 0) return null;
 
   return (
     <section className="flex flex-col gap-3">
@@ -22,7 +22,7 @@ export function ContinueWatching() {
         Continue watching
       </p>
       <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-none">
-        {items.map((item) => (
+        {displayed.map((item) => (
           <ContinueCard key={item.id} item={item} />
         ))}
       </div>

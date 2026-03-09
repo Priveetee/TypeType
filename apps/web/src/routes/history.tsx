@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ConfirmModal } from "../components/confirm-modal";
 import type { FilterState } from "../components/history-filter";
 import { HistoryFilter } from "../components/history-filter";
+import { ScrollSentinel } from "../components/scroll-sentinel";
 import { useHistory } from "../hooks/use-history";
 import { formatDuration } from "../lib/format";
 import type { HistoryItem } from "../types/user";
@@ -11,6 +12,15 @@ const MS_PER_DAY = 86_400_000;
 
 function startOfDay(date: Date): number {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+}
+
+function useDebounce(value: string, ms: number): string {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const id = setTimeout(() => setDebounced(value), ms);
+    return () => clearTimeout(id);
+  }, [value, ms]);
+  return debounced;
 }
 
 function XIcon() {
@@ -34,10 +44,7 @@ function XIcon() {
   );
 }
 
-type HistoryCardProps = {
-  item: HistoryItem;
-  onRemove: () => void;
-};
+type HistoryCardProps = { item: HistoryItem; onRemove: () => void };
 
 function HistoryCard({ item, onRemove }: HistoryCardProps) {
   return (
@@ -79,47 +86,35 @@ function HistoryCard({ item, onRemove }: HistoryCardProps) {
   );
 }
 
+function applyDateFilter(items: HistoryItem[], filter: FilterState | null): HistoryItem[] {
+  if (filter === null) return items;
+  const now = Date.now();
+  return items.filter((item) => {
+    if (filter.kind === "preset") {
+      const days = (now - item.watchedAt) / MS_PER_DAY;
+      if (filter.value === "today") return days < 1;
+      if (filter.value === "week") return days < 7;
+      if (filter.value === "month") return days < 30;
+    }
+    if (filter.kind === "date") {
+      const dayStart = startOfDay(filter.date);
+      return item.watchedAt >= dayStart && item.watchedAt < dayStart + MS_PER_DAY;
+    }
+    return true;
+  });
+}
+
 function HistoryPage() {
-  const { query, remove } = useHistory();
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState<FilterState | null>(null);
   const [pendingRemoveId, setPendingRemoveId] = useState<string | null>(null);
-
-  const filtered = useMemo(() => {
-    const entries = query.data ?? [];
-    const seen = new Map<string, HistoryItem>();
-    for (const item of entries) {
-      const existing = seen.get(item.url);
-      if (!existing || item.watchedAt > existing.watchedAt) {
-        seen.set(item.url, item);
-      }
-    }
-    const deduped = Array.from(seen.values());
-    const q = searchQuery.toLowerCase();
-    const now = Date.now();
-    return deduped.filter((item) => {
-      if (
-        q &&
-        !item.title.toLowerCase().includes(q) &&
-        !item.channelName.toLowerCase().includes(q)
-      ) {
-        return false;
-      }
-      if (filter === null) return true;
-      const watchedAt = item.watchedAt;
-      if (filter.kind === "preset") {
-        const days = (now - watchedAt) / MS_PER_DAY;
-        if (filter.value === "today") return days < 1;
-        if (filter.value === "week") return days < 7;
-        if (filter.value === "month") return days < 30;
-      }
-      if (filter.kind === "date") {
-        const dayStart = startOfDay(filter.date);
-        return watchedAt >= dayStart && watchedAt < dayStart + MS_PER_DAY;
-      }
-      return true;
-    });
-  }, [query.data, searchQuery, filter]);
+  const debouncedQuery = useDebounce(searchQuery, 300);
+  const { query, items, total, remove } = useHistory(debouncedQuery);
+  const filtered = applyDateFilter(items, filter);
+  const prevQueryRef = useRef(debouncedQuery);
+  useEffect(() => {
+    prevQueryRef.current = debouncedQuery;
+  }, [debouncedQuery]);
 
   return (
     <div className="flex gap-8 items-start">
@@ -129,13 +124,19 @@ function HistoryPage() {
             <HistoryCard key={item.id} item={item} onRemove={() => setPendingRemoveId(item.id)} />
           ))}
         </div>
+        <ScrollSentinel
+          onIntersect={() => {
+            if (query.hasNextPage && !query.isFetchingNextPage) query.fetchNextPage();
+          }}
+          enabled={!!query.hasNextPage && !query.isFetchingNextPage}
+        />
       </div>
       <HistoryFilter
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         filter={filter}
         onFilterChange={setFilter}
-        resultCount={filtered.length}
+        resultCount={filter !== null ? filtered.length : total}
       />
       {pendingRemoveId !== null && (
         <ConfirmModal

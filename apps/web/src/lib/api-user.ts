@@ -19,8 +19,28 @@ async function authedJson<T>(url: string, init?: RequestInit): Promise<T> {
   return body as T;
 }
 
-export function fetchHistory(): Promise<HistoryItem[]> {
-  return authedJson(`${BASE}/history`);
+type HistoryParams = {
+  q?: string;
+  limit?: number;
+  offset?: number;
+};
+
+export type HistoryPage = {
+  items: HistoryItem[];
+  total: number;
+};
+
+export async function fetchHistory(params: HistoryParams = {}): Promise<HistoryPage> {
+  const search = new URLSearchParams();
+  if (params.q) search.set("q", params.q);
+  if (params.limit !== undefined) search.set("limit", String(params.limit));
+  if (params.offset !== undefined) search.set("offset", String(params.offset));
+  const qs = search.toString();
+  const res = await authed(`${BASE}/history${qs ? `?${qs}` : ""}`);
+  const body = await res.json();
+  if (!res.ok) throw new ApiError((body as { error: string }).error, res.status);
+  const total = Number(res.headers.get("X-Total-Count") ?? 0);
+  return { items: body as HistoryItem[], total };
 }
 
 export async function addHistory(item: Omit<HistoryItem, "id" | "watchedAt">): Promise<void> {
