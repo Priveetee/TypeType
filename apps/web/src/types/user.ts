@@ -51,6 +51,8 @@ export type SettingsItem = {
   defaultService: ServiceId;
   defaultQuality: string;
   autoplay: boolean;
+  volume: number;
+  muted: boolean;
 };
 
 export type SearchHistoryItem = {

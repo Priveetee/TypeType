@@ -59,8 +59,8 @@ export function fetchSettings(): Promise<SettingsItem> {
   return authedJson(`${BASE}/settings`);
 }
 
-export async function updateSettings(settings: SettingsItem): Promise<void> {
-  await authed(`${BASE}/settings`, {
+export function updateSettings(settings: SettingsItem): Promise<SettingsItem> {
+  return authedJson(`${BASE}/settings`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(settings),
