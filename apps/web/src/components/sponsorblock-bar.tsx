@@ -1,4 +1,5 @@
 import { useMediaState } from "@vidstack/react";
+import { useEffect, useRef } from "react";
 import type { SponsorBlockSegmentItem } from "../types/api";
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -12,6 +13,9 @@ const CATEGORY_COLORS: Record<string, string> = {
   filler: "#7300ff",
   music_offtopic: "#ff9900",
 };
+
+const TRACK_HEIGHT = 5;
+const THUMB_MARGIN = 7.5;
 
 type SegmentBarProps = {
   segment: SponsorBlockSegmentItem;
@@ -43,24 +47,51 @@ type Props = { segments: SponsorBlockSegmentItem[] };
 
 export function SponsorBlockBar({ segments }: Props) {
   const duration = useMediaState("duration");
+  const anchorRef = useRef<HTMLDivElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const anchor = anchorRef.current;
+    const overlay = overlayRef.current;
+    if (!anchor || !overlay || !duration) return;
+
+    const player = anchor.closest<HTMLElement>("[data-media-player]");
+    const slider = player?.querySelector<HTMLElement>(".vds-time-slider");
+    if (!player || !slider) return;
+
+    const update = () => {
+      const pRect = player.getBoundingClientRect();
+      const sRect = slider.getBoundingClientRect();
+      const trackCenterY = sRect.top - pRect.top + sRect.height / 2;
+      overlay.style.top = `${trackCenterY - TRACK_HEIGHT / 2}px`;
+      overlay.style.left = `${sRect.left - pRect.left + THUMB_MARGIN}px`;
+      overlay.style.width = `${sRect.width - THUMB_MARGIN * 2}px`;
+    };
+
+    const ro = new ResizeObserver(update);
+    ro.observe(player);
+    update();
+    return () => ro.disconnect();
+  }, [duration]);
 
   if (!duration || segments.length === 0) return null;
 
   return (
-    <div
-      style={{
-        position: "absolute",
-        bottom: "2.9rem",
-        left: "1rem",
-        right: "1rem",
-        height: "3px",
-        pointerEvents: "none",
-        zIndex: 40,
-      }}
-    >
-      {segments.map((seg) => (
-        <SegmentBar key={`${seg.category}-${seg.startTime}`} segment={seg} duration={duration} />
-      ))}
-    </div>
+    <>
+      <div ref={anchorRef} style={{ display: "none" }} />
+      <div
+        ref={overlayRef}
+        style={{
+          position: "absolute",
+          height: `${TRACK_HEIGHT}px`,
+          pointerEvents: "none",
+          zIndex: 40,
+        }}
+      >
+        {segments.map((seg) => (
+          <SegmentBar key={`${seg.category}-${seg.startTime}`} segment={seg} duration={duration} />
+        ))}
+      </div>
+    </>
   );
 }
