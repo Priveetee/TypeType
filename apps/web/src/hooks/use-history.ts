@@ -10,7 +10,14 @@ export function useHistory() {
   const query = useQuery({ queryKey: KEY, queryFn: fetchHistory });
 
   const add = useMutation({
-    mutationFn: (item: Omit<HistoryItem, "id" | "watchedAt">) => addHistory(item),
+    mutationFn: async (item: Omit<HistoryItem, "id" | "watchedAt">) => {
+      const existing = qc.getQueryData<HistoryItem[]>(KEY) ?? [];
+      const duplicate = existing.find((h) => h.url === item.url);
+      if (duplicate) {
+        await removeHistory(duplicate.id);
+      }
+      await addHistory(item);
+    },
     onSuccess: () => qc.invalidateQueries({ queryKey: KEY }),
   });
 

@@ -85,9 +85,17 @@ function HistoryPage() {
 
   const filtered = useMemo(() => {
     const entries = query.data ?? [];
+    const seen = new Map<string, HistoryItem>();
+    for (const item of entries) {
+      const existing = seen.get(item.url);
+      if (!existing || item.watchedAt > existing.watchedAt) {
+        seen.set(item.url, item);
+      }
+    }
+    const deduped = Array.from(seen.values());
     const q = searchQuery.toLowerCase();
     const now = Date.now();
-    return entries.filter((item) => {
+    return deduped.filter((item) => {
       if (
         q &&
         !item.title.toLowerCase().includes(q) &&
