@@ -42,9 +42,9 @@ export type ProgressItem = {
   updatedAt: number;
 };
 
-export type LikeItem = {
+export type FavoriteItem = {
   videoUrl: string;
-  likedAt: number;
+  favoritedAt: number;
 };
 
 export type SettingsItem = {

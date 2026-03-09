@@ -1,4 +1,4 @@
-import type { BlockedItem, LikeItem, ProgressItem, WatchLaterItem } from "../types/user";
+import type { BlockedItem, FavoriteItem, ProgressItem, WatchLaterItem } from "../types/user";
 import { ApiError } from "./api";
 import { getToken } from "./token";
 
@@ -19,8 +19,12 @@ async function authedJson<T>(url: string, init?: RequestInit): Promise<T> {
   return body as T;
 }
 
-export function fetchProgress(videoUrl: string): Promise<ProgressItem> {
-  return authedJson(`${BASE}/progress/${encodeURIComponent(videoUrl)}`);
+export async function fetchProgress(videoUrl: string): Promise<ProgressItem> {
+  const res = await authed(`${BASE}/progress/${encodeURIComponent(videoUrl)}`);
+  if (res.status === 404) return { videoUrl, position: 0, updatedAt: 0 };
+  const body = await res.json();
+  if (!res.ok) throw new ApiError((body as { error: string }).error, res.status);
+  return body as ProgressItem;
 }
 
 export async function updateProgress(videoUrl: string, position: number): Promise<void> {
@@ -58,16 +62,16 @@ export async function removeWatchLater(videoUrl: string): Promise<void> {
   await authed(`${BASE}/watch-later/${encodeURIComponent(videoUrl)}`, { method: "DELETE" });
 }
 
-export function fetchLikes(): Promise<LikeItem[]> {
-  return authedJson(`${BASE}/likes`);
+export function fetchFavorites(): Promise<FavoriteItem[]> {
+  return authedJson(`${BASE}/favorites`);
 }
 
-export async function addLike(videoUrl: string): Promise<void> {
-  await authed(`${BASE}/likes/${encodeURIComponent(videoUrl)}`, { method: "POST" });
+export async function addFavorite(videoUrl: string): Promise<void> {
+  await authed(`${BASE}/favorites/${encodeURIComponent(videoUrl)}`, { method: "POST" });
 }
 
-export async function removeLike(videoUrl: string): Promise<void> {
-  await authed(`${BASE}/likes/${encodeURIComponent(videoUrl)}`, { method: "DELETE" });
+export async function removeFavorite(videoUrl: string): Promise<void> {
+  await authed(`${BASE}/favorites/${encodeURIComponent(videoUrl)}`, { method: "DELETE" });
 }
 
 export function fetchBlockedChannels(): Promise<BlockedItem[]> {

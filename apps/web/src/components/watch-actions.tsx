@@ -1,9 +1,11 @@
 import { useRef, useState } from "react";
+import { useBlocked } from "../hooks/use-blocked";
+import { useFavorites } from "../hooks/use-favorites";
 import { useWatchLater } from "../hooks/use-watch-later";
 import type { VideoStream } from "../types/stream";
 import { PlaylistAddDropdown } from "./playlist-add-dropdown";
 import { Toast } from "./toast";
-import { ClockIcon, ListPlusIcon, ShareIcon } from "./watch-icons";
+import { BanIcon, ClockIcon, ListPlusIcon, ShareIcon, StarIcon } from "./watch-icons";
 
 type Props = {
   stream: VideoStream;
@@ -19,8 +21,21 @@ export function WatchActions({ stream }: Props) {
   const [toastLabel, setToastLabel] = useState<string | null>(null);
   const saveAnchorRef = useRef<HTMLButtonElement>(null);
   const { add: addWatchLater, remove: removeWatchLater, videos: wlVideos } = useWatchLater();
+  const { add: addFavorite, remove: removeFavorite, isFavorited } = useFavorites();
+  const {
+    videos: blockedVideos,
+    channels: blockedChannels,
+    addVideo,
+    removeVideo,
+    addChannel,
+    removeChannel,
+  } = useBlocked();
 
   const inWatchLater = wlVideos.some((w) => w.url === stream.id);
+  const favorited = isFavorited(stream.id);
+  const videoBlocked = (blockedVideos.data ?? []).some((b) => b.url === stream.id);
+  const channelBlocked =
+    !!stream.channelUrl && (blockedChannels.data ?? []).some((b) => b.url === stream.channelUrl);
 
   async function handleShare() {
     const url = window.location.href;
@@ -68,6 +83,17 @@ export function WatchActions({ stream }: Props) {
       </button>
       <button
         type="button"
+        onClick={() =>
+          favorited ? removeFavorite.mutate(stream.id) : addFavorite.mutate(stream.id)
+        }
+        aria-pressed={favorited}
+        className={`${BTN} ${favorited ? BTN_ON : BTN_IDLE}`}
+      >
+        <StarIcon filled={favorited} />
+        {favorited ? "Favorited" : "Favorite"}
+      </button>
+      <button
+        type="button"
         onClick={handleWatchLater}
         aria-pressed={inWatchLater}
         className={`${BTN} ${inWatchLater ? BTN_ON : BTN_IDLE}`}
@@ -85,6 +111,31 @@ export function WatchActions({ stream }: Props) {
         <ListPlusIcon />
         Save
       </button>
+      <button
+        type="button"
+        onClick={() => (videoBlocked ? removeVideo.mutate(stream.id) : addVideo.mutate(stream.id))}
+        aria-pressed={videoBlocked}
+        className={`${BTN} ${videoBlocked ? BTN_ON : BTN_IDLE}`}
+      >
+        <BanIcon />
+        {videoBlocked ? "Unblock video" : "Block video"}
+      </button>
+      {stream.channelUrl && (
+        <button
+          type="button"
+          onClick={() => {
+            const cu = stream.channelUrl;
+            if (!cu) return;
+            if (channelBlocked) removeChannel.mutate(cu);
+            else addChannel.mutate(cu);
+          }}
+          aria-pressed={channelBlocked}
+          className={`${BTN} ${channelBlocked ? BTN_ON : BTN_IDLE}`}
+        >
+          <BanIcon />
+          {channelBlocked ? "Unblock channel" : "Block channel"}
+        </button>
+      )}
       {playlistOpen && (
         <PlaylistAddDropdown
           stream={stream}
