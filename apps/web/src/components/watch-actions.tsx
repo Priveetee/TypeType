@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { useBlocked } from "../hooks/use-blocked";
-import { useFavorites } from "../hooks/use-favorites";
+import { useFavoritesPlaylist } from "../hooks/use-favorites-playlist";
 import { useWatchLaterPlaylist } from "../hooks/use-watch-later-playlist";
 import type { VideoStream } from "../types/stream";
 import { PlaylistAddDropdown } from "./playlist-add-dropdown";
@@ -26,11 +26,16 @@ export function WatchActions({ stream }: Props) {
     isInWatchLater,
     isPending: wlPending,
   } = useWatchLaterPlaylist();
-  const { add: addFavorite, remove: removeFavorite, isFavorited } = useFavorites();
+  const {
+    add: addFavorite,
+    remove: removeFavorite,
+    isInFavorites,
+    isPending: favPending,
+  } = useFavoritesPlaylist();
   const { channels: blockedChannels, addChannel, removeChannel } = useBlocked();
 
   const inWatchLater = isInWatchLater(stream.id);
-  const favorited = isFavorited(stream.id);
+  const favorited = isInFavorites(stream.id);
   const channelBlocked =
     !!stream.channelUrl && (blockedChannels.data ?? []).some((b) => b.url === stream.channelUrl);
 
@@ -59,6 +64,21 @@ export function WatchActions({ stream }: Props) {
     setTimeout(() => setToastLabel(null), 2000);
   }
 
+  async function handleFavorite() {
+    if (favorited) {
+      await removeFavorite(stream.id);
+      handleSaved("Removed from Favorites");
+    } else {
+      await addFavorite({
+        url: stream.id,
+        title: stream.title,
+        thumbnail: stream.thumbnail,
+        duration: stream.duration,
+      });
+      handleSaved("Saved to Favorites");
+    }
+  }
+
   async function handleWatchLater() {
     if (inWatchLater) {
       await removeWatchLater(stream.id);
@@ -82,14 +102,13 @@ export function WatchActions({ stream }: Props) {
       </button>
       <button
         type="button"
-        onClick={() =>
-          favorited ? removeFavorite.mutate(stream.id) : addFavorite.mutate(stream.id)
-        }
+        onClick={handleFavorite}
+        disabled={favPending}
         aria-pressed={favorited}
-        className={`${BTN} ${favorited ? BTN_ON : BTN_IDLE}`}
+        className={`${BTN} ${favorited ? BTN_ON : BTN_IDLE} disabled:opacity-50 disabled:cursor-not-allowed`}
       >
         <StarIcon filled={favorited} />
-        {favorited ? "Favorited" : "Favorite"}
+        {favPending ? "Saving..." : favorited ? "Favorited" : "Favorite"}
       </button>
       <button
         type="button"
