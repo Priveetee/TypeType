@@ -20,6 +20,7 @@ export function QualitySelector() {
   );
 
   if (filteredOptions.length <= 1) return null;
+  if (filteredOptions.every((o) => (o.quality?.height ?? 0) === 0)) return null;
 
   const current = filteredOptions.find((o) => o.selected)?.label ?? filteredOptions[0]?.label;
 
