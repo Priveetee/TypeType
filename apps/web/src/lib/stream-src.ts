@@ -46,6 +46,15 @@ export function resolveManifestSrc(
     };
   }
 
+  const isMultiLanguage = stream.audioStreams?.some((a) => a.audioTrackId !== null) ?? false;
+
+  if (!isLive && stream.videoOnlyStreams?.length && isMultiLanguage) {
+    return {
+      src: `${BASE}/streams/manifest?url=${encodeURIComponent(stream.id)}`,
+      type: "application/dash+xml",
+    };
+  }
+
   if (!isLive && stream.videoOnlyStreams?.length && !nativeFailed) {
     return {
       src: `${BASE}/streams/native-manifest?url=${encodeURIComponent(stream.id)}`,
