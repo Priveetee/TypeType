@@ -1,6 +1,7 @@
 import type { MediaSrc } from "@vidstack/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSaveProgress } from "../hooks/use-progress";
+import { useSettings } from "../hooks/use-settings";
 import { buildDashManifest } from "../lib/dash-manifest";
 import { proxyUrl } from "../lib/proxy";
 import { buildThumbnailVtt } from "../lib/thumbnail-vtt";
@@ -32,6 +33,9 @@ type Props = {
 
 export function WatchLayout({ stream, startTime }: Props) {
   const save = useSaveProgress(stream.id);
+  const { settings, update, query: settingsQuery } = useSettings();
+  const settingsReady =
+    (settingsQuery.isSuccess && !settingsQuery.isPlaceholderData) || settingsQuery.isError;
   const isLive = stream.livestream;
   const nativeEnabled = !isLive && Boolean(stream.videoOnlyStreams?.length);
   const [nativeFailed, setNativeFailed] = useState(false);
@@ -56,6 +60,16 @@ export function WatchLayout({ stream, startTime }: Props) {
   const thumbnailVtt = useRef<string | null>(null);
   const saveMutateRef = useRef(save.mutate);
   saveMutateRef.current = save.mutate;
+
+  const updateMutateRef = useRef(update.mutate);
+  updateMutateRef.current = update.mutate;
+  const volumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const handleVolumeChange = useCallback((volume: number, muted: boolean) => {
+    if (volumeTimerRef.current) clearTimeout(volumeTimerRef.current);
+    volumeTimerRef.current = setTimeout(() => {
+      updateMutateRef.current({ volume, muted });
+    }, 1000);
+  }, []);
 
   const saveIfEligibleRef = useRef<() => void>(() => {});
   saveIfEligibleRef.current = () => {
@@ -113,6 +127,10 @@ export function WatchLayout({ stream, startTime }: Props) {
             subtitles={stream.subtitles}
             sponsorBlockSegments={stream.sponsorBlockSegments}
             thumbnailVtt={thumbnailVtt.current ?? undefined}
+            initialVolume={settings.volume}
+            initialMuted={settings.muted}
+            settingsReady={settingsReady}
+            onVolumeChange={handleVolumeChange}
             onTimeUpdate={handleTimeUpdate}
             onPause={handleSave}
             onSeeked={handleSave}

@@ -13,33 +13,7 @@ import { useEffect, useRef } from "react";
 import type { SponsorBlockSegmentItem, SubtitleItem } from "../types/api";
 import { FormatSelector } from "./format-selector";
 import { QualitySelector } from "./quality-selector";
-
-const VOLUME_KEY = "player-volume";
-const MUTED_KEY = "player-muted";
-
-function VolumeRestorer() {
-  const remote = useMediaRemote();
-  const volume = useMediaState("volume");
-  const muted = useMediaState("muted");
-  const restoredRef = useRef(false);
-
-  useEffect(() => {
-    if (restoredRef.current) return;
-    restoredRef.current = true;
-    const saved = localStorage.getItem(VOLUME_KEY);
-    const savedMuted = localStorage.getItem(MUTED_KEY);
-    if (saved !== null) remote.changeVolume(parseFloat(saved));
-    if (savedMuted === "true") remote.mute();
-  }, [remote]);
-
-  useEffect(() => {
-    if (!restoredRef.current) return;
-    localStorage.setItem(VOLUME_KEY, String(volume));
-    localStorage.setItem(MUTED_KEY, String(muted));
-  }, [volume, muted]);
-
-  return null;
-}
+import { VolumeRestorer } from "./volume-restorer";
 
 type Props = {
   src: MediaSrc;
@@ -50,6 +24,10 @@ type Props = {
   subtitles?: SubtitleItem[];
   sponsorBlockSegments?: SponsorBlockSegmentItem[];
   thumbnailVtt?: string;
+  initialVolume?: number;
+  initialMuted?: boolean;
+  settingsReady?: boolean;
+  onVolumeChange?: (volume: number, muted: boolean) => void;
   onTimeUpdate?: (positionMs: number) => void;
   onPause?: () => void;
   onSeeked?: () => void;
@@ -115,6 +93,10 @@ export function VideoPlayer({
   subtitles,
   sponsorBlockSegments,
   thumbnailVtt,
+  initialVolume = 1,
+  initialMuted = false,
+  settingsReady = false,
+  onVolumeChange,
   onTimeUpdate,
   onPause,
   onSeeked,
@@ -129,6 +111,7 @@ export function VideoPlayer({
       logLevel="warn"
       crossOrigin
       playsInline
+      storage={null}
       title={title}
       poster={poster}
       onProviderChange={onProviderChange}
@@ -164,7 +147,12 @@ export function VideoPlayer({
         }}
       />
       <PlayerSeeker startTime={startTime} />
-      <VolumeRestorer />
+      <VolumeRestorer
+        initialVolume={initialVolume}
+        initialMuted={initialMuted}
+        settingsReady={settingsReady}
+        onVolumeChange={onVolumeChange}
+      />
       {sponsorBlockSegments && <SponsorBlockSkipper segments={sponsorBlockSegments} />}
     </MediaPlayer>
   );
