@@ -1,5 +1,4 @@
 import { useMediaState } from "@vidstack/react";
-import { useEffect, useRef } from "react";
 import type { SponsorBlockSegmentItem } from "../types/api";
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -14,41 +13,54 @@ const CATEGORY_COLORS: Record<string, string> = {
   music_offtopic: "#ff9900",
 };
 
+type SegmentBarProps = {
+  segment: SponsorBlockSegmentItem;
+  duration: number;
+};
+
+function SegmentBar({ segment, duration }: SegmentBarProps) {
+  const color = CATEGORY_COLORS[segment.category];
+  if (!color) return null;
+  const left = (segment.startTime / 1000 / duration) * 100;
+  const width = ((segment.endTime - segment.startTime) / 1000 / duration) * 100;
+  return (
+    <div
+      style={{
+        position: "absolute",
+        left: `${left}%`,
+        width: `${width}%`,
+        top: 0,
+        bottom: 0,
+        backgroundColor: color,
+        opacity: 0.8,
+        pointerEvents: "none",
+      }}
+    />
+  );
+}
+
 type Props = { segments: SponsorBlockSegmentItem[] };
 
 export function SponsorBlockBar({ segments }: Props) {
   const duration = useMediaState("duration");
-  const ref = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!duration || segments.length === 0) return;
+  if (!duration || segments.length === 0) return null;
 
-    const player = ref.current?.closest("[data-media-player]");
-    const track = player?.querySelector(
-      ".vds-time-slider .vds-slider-track:not(.vds-slider-track-fill):not(.vds-slider-progress)",
-    );
-    if (!(track instanceof HTMLElement)) return;
-
-    const sorted = [...segments].sort((a, b) => a.startTime - b.startTime);
-    const stops: string[] = ["to right"];
-    for (const seg of sorted) {
-      const color = CATEGORY_COLORS[seg.category];
-      if (!color) continue;
-      const start = (seg.startTime / 1000 / duration) * 100;
-      const end = (seg.endTime / 1000 / duration) * 100;
-      stops.push(`transparent ${start}%`);
-      stops.push(`${color} ${start}%`);
-      stops.push(`${color} ${end}%`);
-      stops.push(`transparent ${end}%`);
-    }
-
-    if (stops.length <= 1) return;
-    track.style.background = `linear-gradient(${stops.join(",")})`;
-
-    return () => {
-      track.style.background = "";
-    };
-  }, [segments, duration]);
-
-  return <div ref={ref} style={{ display: "none" }} />;
+  return (
+    <div
+      style={{
+        position: "absolute",
+        bottom: "2.9rem",
+        left: "1rem",
+        right: "1rem",
+        height: "3px",
+        pointerEvents: "none",
+        zIndex: 40,
+      }}
+    >
+      {segments.map((seg) => (
+        <SegmentBar key={`${seg.category}-${seg.startTime}`} segment={seg} duration={duration} />
+      ))}
+    </div>
+  );
 }
