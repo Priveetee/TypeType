@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useSubscriptions } from "../hooks/use-subscriptions";
 import { formatDuration, formatViews } from "../lib/format";
@@ -39,17 +40,43 @@ export function WatchInfo({ stream }: Props) {
       <h1 className="text-base font-semibold text-zinc-100 leading-snug">{stream.title}</h1>
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0">
-          <img
-            src={stream.channelAvatar || undefined}
-            alt={stream.channelName}
-            className="w-9 h-9 rounded-full flex-shrink-0"
-          />
-          <div className="flex flex-col min-w-0">
-            <p className="text-sm font-medium text-zinc-100 truncate">{stream.channelName}</p>
-            <p className="text-xs text-zinc-500">
-              {formatViews(stream.views)} · {formatDuration(stream.duration)} · {stream.uploadDate}
-            </p>
-          </div>
+          {stream.channelUrl ? (
+            <Link
+              to="/channel"
+              search={{ url: stream.channelUrl }}
+              className="flex items-center gap-3 min-w-0 group"
+            >
+              <img
+                src={stream.channelAvatar || undefined}
+                alt={stream.channelName}
+                className="w-9 h-9 rounded-full flex-shrink-0"
+              />
+              <div className="flex flex-col min-w-0">
+                <p className="text-sm font-medium text-zinc-100 truncate group-hover:underline">
+                  {stream.channelName}
+                </p>
+                <p className="text-xs text-zinc-500">
+                  {formatViews(stream.views)} · {formatDuration(stream.duration)} ·{" "}
+                  {stream.uploadDate}
+                </p>
+              </div>
+            </Link>
+          ) : (
+            <>
+              <img
+                src={stream.channelAvatar || undefined}
+                alt={stream.channelName}
+                className="w-9 h-9 rounded-full flex-shrink-0"
+              />
+              <div className="flex flex-col min-w-0">
+                <p className="text-sm font-medium text-zinc-100 truncate">{stream.channelName}</p>
+                <p className="text-xs text-zinc-500">
+                  {formatViews(stream.views)} · {formatDuration(stream.duration)} ·{" "}
+                  {stream.uploadDate}
+                </p>
+              </div>
+            </>
+          )}
         </div>
         {stream.channelUrl && (
           <button
