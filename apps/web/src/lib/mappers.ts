@@ -41,13 +41,20 @@ export function mapStreamResponse(response: StreamResponse, url: string): VideoS
     views: response.viewCount,
     duration: response.duration,
     uploadDate: response.uploadDate,
+    uploaded: response.uploaded <= 0 ? undefined : response.uploaded,
     description: response.description || undefined,
     likes: response.likeCount,
     dislikes: response.dislikeCount === -1 ? undefined : response.dislikeCount,
+    tags: response.tags.length > 0 ? response.tags : undefined,
+    category: response.category || undefined,
     related: response.relatedStreams.map(mapVideoItem),
     livestream: response.livestream,
     hlsUrl: response.hlsUrl || undefined,
     videoOnlyStreams: response.videoOnlyStreams,
     audioStreams: response.audioStreams,
+    subtitles: response.subtitles.length > 0 ? response.subtitles : undefined,
+    previewFrames: response.previewFrames.length > 0 ? response.previewFrames : undefined,
+    sponsorBlockSegments:
+      response.sponsorBlockSegments.length > 0 ? response.sponsorBlockSegments : undefined,
   };
 }

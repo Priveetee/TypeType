@@ -1,4 +1,10 @@
-import type { AudioStreamItem, VideoStreamItem } from "./api";
+import type {
+  AudioStreamItem,
+  PreviewFrameItem,
+  SponsorBlockSegmentItem,
+  SubtitleItem,
+  VideoStreamItem,
+} from "./api";
 
 export type VideoStream = {
   id: string;
@@ -12,11 +18,17 @@ export type VideoStream = {
   views: number;
   duration: number;
   uploadDate: string;
+  uploaded?: number;
   likes?: number;
   dislikes?: number;
   livestream?: boolean;
   hlsUrl?: string;
+  tags?: string[];
+  category?: string;
   related?: VideoStream[];
   videoOnlyStreams?: VideoStreamItem[];
   audioStreams?: AudioStreamItem[];
+  subtitles?: SubtitleItem[];
+  previewFrames?: PreviewFrameItem[];
+  sponsorBlockSegments?: SponsorBlockSegmentItem[];
 };
