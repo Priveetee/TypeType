@@ -19,7 +19,10 @@ export function WatchComments({ videoUrl }: Props) {
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const commentsDisabled = data?.pages[0]?.commentsDisabled ?? false;
-  const comments = data?.pages.flatMap((p) => p.comments) ?? [];
+  const allComments = data?.pages.flatMap((p) => p.comments) ?? [];
+  const comments = allComments.filter(
+    (c) => (c.text as string | null) && (c.author as string | null),
+  );
   const showSkeletons = isLoading || isFetchingNextPage;
 
   return (
@@ -29,8 +32,8 @@ export function WatchComments({ videoUrl }: Props) {
         <p className="text-sm text-zinc-500">Comments are disabled for this video.</p>
       ) : (
         <div className="flex flex-col gap-6">
-          {comments.map((comment) => (
-            <WatchComment key={comment.id} comment={comment} videoUrl={videoUrl} />
+          {comments.map((comment, i) => (
+            <WatchComment key={comment.id || `c-${i}`} comment={comment} videoUrl={videoUrl} />
           ))}
           {showSkeletons && SKELETON_KEYS.map((k) => <WatchCommentSkeleton key={k} />)}
         </div>

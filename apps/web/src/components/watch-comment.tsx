@@ -28,11 +28,15 @@ export function WatchComment({ comment, videoUrl }: Props) {
 
   return (
     <div className="flex gap-3">
-      <img
-        src={comment.authorAvatarUrl || undefined}
-        alt={comment.author}
-        className="w-8 h-8 rounded-full flex-shrink-0 mt-0.5"
-      />
+      {comment.authorAvatarUrl ? (
+        <img
+          src={comment.authorAvatarUrl}
+          alt={comment.author}
+          className="w-8 h-8 rounded-full flex-shrink-0 mt-0.5 bg-zinc-700"
+        />
+      ) : (
+        <div className="w-8 h-8 rounded-full flex-shrink-0 mt-0.5 bg-zinc-700" />
+      )}
       <div className="flex flex-col gap-1 flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-xs font-medium text-zinc-300">{comment.author}</span>
