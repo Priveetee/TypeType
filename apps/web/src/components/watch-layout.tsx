@@ -1,10 +1,9 @@
-import type { MediaSrc } from "@vidstack/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSaveProgress } from "../hooks/use-progress";
 import { useSettings } from "../hooks/use-settings";
 import { buildChaptersVtt } from "../lib/chapters-vtt";
-import { buildDashManifest } from "../lib/dash-manifest";
 import { proxyUrl } from "../lib/proxy";
+import { resolveManifestSrc } from "../lib/stream-src";
 import { buildThumbnailVtt } from "../lib/thumbnail-vtt";
 import type { VideoStream } from "../types/stream";
 import { RelatedVideos } from "./related-videos";
@@ -13,19 +12,6 @@ import { WatchActions } from "./watch-actions";
 import { WatchComments } from "./watch-comments";
 import { WatchDescription } from "./watch-description";
 import { WatchInfo } from "./watch-info";
-
-const BASE = import.meta.env.VITE_API_URL;
-
-function fallbackSrc(stream: VideoStream): MediaSrc {
-  if (stream.videoOnlyStreams?.length && stream.audioStreams?.length) {
-    const built = buildDashManifest(stream.videoOnlyStreams, stream.audioStreams, stream.duration);
-    if (built) return { src: built, type: "application/dash+xml" };
-  }
-  return {
-    src: `${BASE}/streams/manifest?url=${encodeURIComponent(stream.id)}`,
-    type: "application/dash+xml",
-  };
-}
 
 type Props = {
   stream: VideoStream;
@@ -41,17 +27,7 @@ export function WatchLayout({ stream, startTime }: Props) {
   const nativeEnabled = !isLive && Boolean(stream.videoOnlyStreams?.length);
   const [nativeFailed, setNativeFailed] = useState(false);
 
-  let manifestSrc: MediaSrc;
-  if (isLive && stream.hlsUrl) {
-    manifestSrc = { src: proxyUrl(stream.hlsUrl), type: "application/x-mpegurl" };
-  } else if (nativeEnabled && !nativeFailed) {
-    manifestSrc = {
-      src: `${BASE}/streams/native-manifest?url=${encodeURIComponent(stream.id)}`,
-      type: "application/dash+xml",
-    };
-  } else {
-    manifestSrc = fallbackSrc(stream);
-  }
+  const manifestSrc = resolveManifestSrc(stream, isLive, nativeFailed);
 
   const handleError = useCallback(() => {
     if (nativeEnabled && !nativeFailed) setNativeFailed(true);
