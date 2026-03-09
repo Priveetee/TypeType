@@ -1,6 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { formatDuration, formatViews } from "../lib/format";
 import type { VideoStream } from "../types/stream";
+import { ChannelAvatar } from "./channel-avatar";
+import { VerifiedBadgeIcon } from "./watch-icons";
 
 type Props = {
   stream: VideoStream;
@@ -39,27 +41,27 @@ export function RelatedCard({ stream }: Props) {
             search={{ url: stream.channelUrl }}
             className="flex items-center gap-1.5 mt-0.5 w-fit group/channel"
           >
-            {stream.channelAvatar && (
-              <img
-                src={stream.channelAvatar}
-                alt={stream.channelName}
-                className="w-4 h-4 rounded-full flex-shrink-0"
-              />
-            )}
-            <span className="text-xs text-zinc-400 group-hover/channel:text-zinc-200 truncate">
+            <ChannelAvatar
+              src={stream.channelAvatar}
+              name={stream.channelName}
+              className="w-4 h-4"
+            />
+            <span className="text-xs text-zinc-400 group-hover/channel:text-zinc-200 truncate flex items-center gap-1">
               {stream.channelName}
+              {stream.uploaderVerified && <VerifiedBadgeIcon />}
             </span>
           </Link>
         ) : (
           <div className="flex items-center gap-1.5 mt-0.5">
-            {stream.channelAvatar && (
-              <img
-                src={stream.channelAvatar}
-                alt={stream.channelName}
-                className="w-4 h-4 rounded-full flex-shrink-0"
-              />
-            )}
-            <span className="text-xs text-zinc-400 truncate">{stream.channelName}</span>
+            <ChannelAvatar
+              src={stream.channelAvatar}
+              name={stream.channelName}
+              className="w-4 h-4"
+            />
+            <span className="text-xs text-zinc-400 truncate flex items-center gap-1">
+              {stream.channelName}
+              {stream.uploaderVerified && <VerifiedBadgeIcon />}
+            </span>
           </div>
         )}
         <p className="text-xs text-zinc-500">{formatViews(stream.views)}</p>

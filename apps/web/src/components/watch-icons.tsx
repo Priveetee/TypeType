@@ -99,3 +99,24 @@ export function StarIcon({ filled }: { filled?: boolean }) {
     </SvgIcon>
   );
 }
+
+export function VerifiedBadgeIcon() {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      className="w-3 h-3 text-zinc-400 flex-shrink-0"
+      fill="currentColor"
+      aria-label="Verified"
+    >
+      <path d="M8 1L9.8 3.2L12.5 2.5L12.5 5.3L15 6.5L13.5 9L15 11.5L12.5 12.7L12.5 15.5L9.8 14.8L8 17L6.2 14.8L3.5 15.5L3.5 12.7L1 11.5L2.5 9L1 6.5L3.5 5.3L3.5 2.5L6.2 3.2Z" />
+      <polyline
+        points="5,9 7,11 11,7"
+        stroke="white"
+        strokeWidth="1.5"
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}

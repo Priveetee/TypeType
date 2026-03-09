@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback } from "react";
+import { ChannelAvatar } from "../components/channel-avatar";
 import { PageSpinner } from "../components/page-spinner";
 import { ScrollSentinel } from "../components/scroll-sentinel";
 import { VideoCard } from "../components/video-card";
+import { VerifiedBadgeIcon } from "../components/watch-icons";
 import { useBlockedFilter } from "../hooks/use-blocked-filter";
 import { useChannel } from "../hooks/use-channel";
 import { useSubscriptions } from "../hooks/use-subscriptions";
@@ -41,9 +43,12 @@ function ChannelPage() {
           )}
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <img src={meta.avatarUrl} alt={meta.name} className="w-14 h-14 rounded-full" />
+              <ChannelAvatar src={meta.avatarUrl} name={meta.name} className="w-14 h-14" />
               <div className="flex flex-col">
-                <h1 className="text-lg font-semibold text-zinc-100">{meta.name}</h1>
+                <h1 className="text-lg font-semibold text-zinc-100 flex items-center gap-1.5">
+                  {meta.name}
+                  {meta.isVerified && <VerifiedBadgeIcon />}
+                </h1>
                 <p className="text-sm text-zinc-500">
                   {formatViews(meta.subscriberCount)} subscribers
                 </p>

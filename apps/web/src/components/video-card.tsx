@@ -1,17 +1,12 @@
 import { Link } from "@tanstack/react-router";
 import { formatDuration, formatViews } from "../lib/format";
 import type { VideoStream } from "../types/stream";
+import { ChannelAvatar } from "./channel-avatar";
+import { VerifiedBadgeIcon } from "./watch-icons";
 
 type Props = {
   stream: VideoStream;
 };
-
-function ChannelAvatar({ src, name }: { src: string; name: string }) {
-  if (!src) {
-    return <div className="w-8 h-8 rounded-full flex-shrink-0 mt-0.5 bg-zinc-700" title={name} />;
-  }
-  return <img src={src} alt={name} className="w-8 h-8 rounded-full flex-shrink-0 mt-0.5" />;
-}
 
 export function VideoCard({ stream }: Props) {
   return (
@@ -33,10 +28,14 @@ export function VideoCard({ stream }: Props) {
       <div className="flex gap-2">
         {stream.channelUrl ? (
           <Link to="/channel" search={{ url: stream.channelUrl }} className="flex-shrink-0 mt-0.5">
-            <ChannelAvatar src={stream.channelAvatar} name={stream.channelName} />
+            <ChannelAvatar
+              src={stream.channelAvatar}
+              name={stream.channelName}
+              className="w-8 h-8"
+            />
           </Link>
         ) : (
-          <ChannelAvatar src={stream.channelAvatar} name={stream.channelName} />
+          <ChannelAvatar src={stream.channelAvatar} name={stream.channelName} className="w-8 h-8" />
         )}
         <div className="flex flex-col gap-0.5 min-w-0">
           <Link
@@ -50,12 +49,16 @@ export function VideoCard({ stream }: Props) {
             <Link
               to="/channel"
               search={{ url: stream.channelUrl }}
-              className="text-xs text-zinc-400 hover:text-zinc-200 transition-colors w-fit"
+              className="text-xs text-zinc-400 hover:text-zinc-200 transition-colors w-fit flex items-center gap-1"
             >
               {stream.channelName}
+              {stream.uploaderVerified && <VerifiedBadgeIcon />}
             </Link>
           ) : (
-            <p className="text-xs text-zinc-400">{stream.channelName}</p>
+            <p className="text-xs text-zinc-400 flex items-center gap-1">
+              {stream.channelName}
+              {stream.uploaderVerified && <VerifiedBadgeIcon />}
+            </p>
           )}
           <p className="text-xs text-zinc-500">
             {formatViews(stream.views)} · {stream.uploadDate}
