@@ -5,6 +5,7 @@ type Props = {
   initialVolume: number;
   initialMuted: boolean;
   settingsReady: boolean;
+  autoplay: boolean;
   onVolumeChange?: (volume: number, muted: boolean) => void;
 };
 
@@ -12,6 +13,7 @@ export function VolumeRestorer({
   initialVolume,
   initialMuted,
   settingsReady,
+  autoplay,
   onVolumeChange,
 }: Props) {
   const remote = useMediaRemote();
@@ -25,7 +27,8 @@ export function VolumeRestorer({
     restoredRef.current = true;
     remote.changeVolume(initialVolume);
     if (initialMuted) remote.mute();
-  }, [settingsReady, canPlay, remote, initialVolume, initialMuted]);
+    if (autoplay) remote.play();
+  }, [settingsReady, canPlay, remote, initialVolume, initialMuted, autoplay]);
 
   useEffect(() => {
     if (!restoredRef.current) return;

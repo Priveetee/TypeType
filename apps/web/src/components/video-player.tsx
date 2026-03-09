@@ -91,7 +91,6 @@ export function VideoPlayer({
       crossOrigin
       playsInline
       storage={null}
-      autoPlay={autoplay}
       title={title}
       poster={poster}
       onProviderChange={onProviderChange}
@@ -133,6 +132,7 @@ export function VideoPlayer({
         initialVolume={initialVolume}
         initialMuted={initialMuted}
         settingsReady={settingsReady}
+        autoplay={autoplay}
         onVolumeChange={onVolumeChange}
       />
       {sponsorBlockSegments && <SponsorBlockSkipper segments={sponsorBlockSegments} />}
