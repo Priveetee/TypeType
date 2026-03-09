@@ -1,4 +1,4 @@
-import type { PlaylistItem } from "../types/user";
+import type { PlaylistItem, PlaylistVideoItem } from "../types/user";
 import { ApiError } from "./api";
 import { getToken } from "./token";
 
@@ -53,8 +53,8 @@ export async function deletePlaylist(id: string): Promise<void> {
 export async function addVideoToPlaylist(
   playlistId: string,
   video: { url: string; title: string; thumbnail: string; duration: number },
-): Promise<void> {
-  await authed(`${BASE}/playlists/${encodeURIComponent(playlistId)}/videos`, {
+): Promise<PlaylistVideoItem> {
+  return authedJson(`${BASE}/playlists/${encodeURIComponent(playlistId)}/videos`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(video),
