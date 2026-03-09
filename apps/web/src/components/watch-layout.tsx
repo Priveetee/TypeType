@@ -2,6 +2,7 @@ import type { MediaSrc } from "@vidstack/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSaveProgress } from "../hooks/use-progress";
 import { useSettings } from "../hooks/use-settings";
+import { buildChaptersVtt } from "../lib/chapters-vtt";
 import { buildDashManifest } from "../lib/dash-manifest";
 import { proxyUrl } from "../lib/proxy";
 import { buildThumbnailVtt } from "../lib/thumbnail-vtt";
@@ -9,6 +10,7 @@ import type { VideoStream } from "../types/stream";
 import { RelatedVideos } from "./related-videos";
 import { VideoPlayer } from "./video-player";
 import { WatchActions } from "./watch-actions";
+import { WatchChapters } from "./watch-chapters";
 import { WatchComments } from "./watch-comments";
 import { WatchDescription } from "./watch-description";
 import { WatchInfo } from "./watch-info";
@@ -36,7 +38,7 @@ export function WatchLayout({ stream, startTime }: Props) {
   const { settings, update, query: settingsQuery } = useSettings();
   const settingsReady =
     (settingsQuery.isSuccess && !settingsQuery.isPlaceholderData) || settingsQuery.isError;
-  const isLive = stream.livestream;
+  const isLive = stream.streamType === "live_stream" || stream.streamType === "audio_live_stream";
   const nativeEnabled = !isLive && Boolean(stream.videoOnlyStreams?.length);
   const [nativeFailed, setNativeFailed] = useState(false);
 
@@ -57,7 +59,9 @@ export function WatchLayout({ stream, startTime }: Props) {
   }, [nativeEnabled, nativeFailed]);
 
   const positionRef = useRef(0);
+  const seekRef = useRef<((seconds: number) => void) | null>(null);
   const thumbnailVtt = useRef<string | null>(null);
+  const chaptersVtt = useRef<string | null>(null);
   const saveMutateRef = useRef(save.mutate);
   saveMutateRef.current = save.mutate;
 
@@ -97,12 +101,21 @@ export function WatchLayout({ stream, startTime }: Props) {
     };
   }, [stream.previewFrames]);
 
+  useEffect(() => {
+    chaptersVtt.current = stream.streamSegments
+      ? buildChaptersVtt(stream.streamSegments, stream.duration)
+      : null;
+    return () => {
+      if (chaptersVtt.current) URL.revokeObjectURL(chaptersVtt.current);
+    };
+  }, [stream.streamSegments, stream.duration]);
+
   const handleTimeUpdate = useCallback((positionMs: number) => {
     positionRef.current = positionMs;
   }, []);
 
   useEffect(() => {
-    if (stream.livestream) return;
+    if (isLive) return;
     const onVisibilityChange = () => {
       if (document.visibilityState === "hidden") saveIfEligibleRef.current();
     };
@@ -112,7 +125,7 @@ export function WatchLayout({ stream, startTime }: Props) {
       clearInterval(interval);
       document.removeEventListener("visibilitychange", onVisibilityChange);
     };
-  }, [stream.livestream]);
+  }, [isLive]);
 
   return (
     <div className="flex flex-col gap-6 lg:flex-row lg:items-start [animation:page-fade-in_0.2s_ease-out]">
@@ -122,11 +135,12 @@ export function WatchLayout({ stream, startTime }: Props) {
             src={manifestSrc}
             title={stream.title}
             poster={stream.thumbnail}
-            streamType={stream.livestream ? "live" : "on-demand"}
+            streamType={isLive ? "live" : "on-demand"}
             startTime={startTime}
             subtitles={stream.subtitles}
             sponsorBlockSegments={stream.sponsorBlockSegments}
             thumbnailVtt={thumbnailVtt.current ?? undefined}
+            chaptersVtt={chaptersVtt.current ?? undefined}
             initialVolume={settings.volume}
             initialMuted={settings.muted}
             settingsReady={settingsReady}
@@ -136,11 +150,20 @@ export function WatchLayout({ stream, startTime }: Props) {
             onPause={handleSave}
             onSeeked={handleSave}
             onError={handleError}
+            onSeekReady={(seek) => {
+              seekRef.current = seek;
+            }}
           />
         </div>
         <WatchInfo stream={stream} />
         <WatchActions stream={stream} />
         {stream.description && <WatchDescription description={stream.description} />}
+        {stream.streamSegments && (
+          <WatchChapters
+            segments={stream.streamSegments}
+            onSeek={(seconds) => seekRef.current?.(seconds)}
+          />
+        )}
         <WatchComments videoUrl={stream.id} />
       </div>
       <div className="w-full lg:flex-1 lg:min-w-64">

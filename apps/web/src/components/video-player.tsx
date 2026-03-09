@@ -1,17 +1,10 @@
 import type { MediaProviderAdapter, MediaSrc } from "@vidstack/react";
-import {
-  isDASHProvider,
-  MediaPlayer,
-  MediaProvider,
-  Track,
-  useMediaRemote,
-  useMediaState,
-} from "@vidstack/react";
+import { isDASHProvider, MediaPlayer, MediaProvider, Track } from "@vidstack/react";
 import { DefaultVideoLayout, defaultLayoutIcons } from "@vidstack/react/player/layouts/default";
 import * as dashjs from "dashjs";
-import { useEffect, useRef } from "react";
 import type { SponsorBlockSegmentItem, SubtitleItem } from "../types/api";
 import { FormatSelector } from "./format-selector";
+import { PlayerSeeker, SeekBridge, SponsorBlockSkipper } from "./player-internals";
 import { QualitySelector } from "./quality-selector";
 import { SponsorBlockBar } from "./sponsorblock-bar";
 import { VolumeRestorer } from "./volume-restorer";
@@ -25,6 +18,7 @@ type Props = {
   subtitles?: SubtitleItem[];
   sponsorBlockSegments?: SponsorBlockSegmentItem[];
   thumbnailVtt?: string;
+  chaptersVtt?: string;
   initialVolume?: number;
   initialMuted?: boolean;
   settingsReady?: boolean;
@@ -34,6 +28,7 @@ type Props = {
   onPause?: () => void;
   onSeeked?: () => void;
   onError?: () => void;
+  onSeekReady?: (seek: (seconds: number) => void) => void;
 };
 
 type Dashjsv4Compat = {
@@ -56,36 +51,6 @@ function onProviderChange(provider: MediaProviderAdapter | null) {
   });
 }
 
-function PlayerSeeker({ startTime }: { startTime: number }) {
-  const remote = useMediaRemote();
-  const canPlay = useMediaState("canPlay");
-  const seeked = useRef(false);
-  useEffect(() => {
-    if (canPlay && !seeked.current && startTime > 0) {
-      seeked.current = true;
-      remote.seek(startTime / 1000);
-    }
-  }, [canPlay, startTime, remote]);
-  return null;
-}
-
-function SponsorBlockSkipper({ segments }: { segments: SponsorBlockSegmentItem[] }) {
-  const remote = useMediaRemote();
-  const currentTime = useMediaState("currentTime");
-  useEffect(() => {
-    for (const seg of segments) {
-      if (seg.action !== "skip") continue;
-      const startSec = seg.startTime / 1000;
-      const endSec = seg.endTime / 1000;
-      if (currentTime >= startSec && currentTime < endSec) {
-        remote.seek(endSec);
-        break;
-      }
-    }
-  }, [currentTime, segments, remote]);
-  return null;
-}
-
 export function VideoPlayer({
   src,
   title,
@@ -95,6 +60,7 @@ export function VideoPlayer({
   subtitles,
   sponsorBlockSegments,
   thumbnailVtt,
+  chaptersVtt,
   initialVolume = 1,
   initialMuted = false,
   settingsReady = false,
@@ -104,6 +70,7 @@ export function VideoPlayer({
   onPause,
   onSeeked,
   onError,
+  onSeekReady,
 }: Props) {
   return (
     <MediaPlayer
@@ -137,6 +104,7 @@ export function VideoPlayer({
             lang={s.languageTag}
           />
         ))}
+        {chaptersVtt && <Track kind="chapters" src={chaptersVtt} default />}
       </MediaProvider>
       <DefaultVideoLayout
         icons={defaultLayoutIcons}
@@ -159,6 +127,7 @@ export function VideoPlayer({
       />
       {sponsorBlockSegments && <SponsorBlockSkipper segments={sponsorBlockSegments} />}
       {sponsorBlockSegments && <SponsorBlockBar segments={sponsorBlockSegments} />}
+      {onSeekReady && <SeekBridge onSeekReady={onSeekReady} />}
     </MediaPlayer>
   );
 }
