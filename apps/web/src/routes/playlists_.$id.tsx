@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { ConfirmModal } from "../components/confirm-modal";
 import { PlaylistRenameModal } from "../components/playlist-rename-modal";
 import { PlaylistVideoRow } from "../components/playlist-video-row";
 import { usePlaylist, usePlaylists } from "../hooks/use-playlists";
@@ -53,6 +54,7 @@ function PlaylistDetailPage() {
   const { remove, removeVideo, rename } = usePlaylists();
   const { data: playlist, isPending } = usePlaylist(id);
   const [renaming, setRenaming] = useState(false);
+  const [pendingRemove, setPendingRemove] = useState<PlaylistVideoItem | null>(null);
 
   if (isPending) {
     return (
@@ -132,10 +134,22 @@ function PlaylistDetailPage() {
             <PlaylistVideoRow
               key={video.id}
               video={video}
-              onRemove={() => removeVideo.mutate({ playlistId: playlist.id, videoUrl: video.url })}
+              onRemove={() => setPendingRemove(video)}
             />
           ))}
         </div>
+      )}
+      {pendingRemove && (
+        <ConfirmModal
+          title="Remove video"
+          description={`Remove "${pendingRemove.title}" from this playlist?`}
+          confirmLabel="Remove"
+          onConfirm={() => {
+            removeVideo.mutate({ playlistId: playlist.id, videoUrl: pendingRemove.url });
+            setPendingRemove(null);
+          }}
+          onCancel={() => setPendingRemove(null)}
+        />
       )}
       {renaming && (
         <PlaylistRenameModal
