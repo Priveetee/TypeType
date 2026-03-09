@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ConfirmModal } from "../components/confirm-modal";
 import { Toast } from "../components/toast";
 import { useHistory } from "../hooks/use-history";
+import { useSearchHistory } from "../hooks/use-search-history";
 import { useSubscriptions } from "../hooks/use-subscriptions";
 
 const SECTION_LABEL = "text-xs font-medium text-zinc-500 uppercase tracking-wider px-1";
@@ -9,13 +10,15 @@ const CARD =
   "bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden divide-y divide-zinc-800";
 const ROW = "flex items-center justify-between px-4 py-4";
 
-type ActiveModal = "history" | "subscriptions" | null;
+type ActiveModal = "history" | "subscriptions" | "search-history" | null;
 
 export function SettingsPrivacy() {
   const { query: historyQuery, clear: clearHistory } = useHistory();
   const { query: subsQuery, remove: removeSubscription } = useSubscriptions();
+  const { query: searchHistoryQuery, clear: clearSearchHistory } = useSearchHistory();
   const entries = historyQuery.data ?? [];
   const subscriptions = subsQuery.data ?? [];
+  const searchEntries = searchHistoryQuery.data ?? [];
   const [modal, setModal] = useState<ActiveModal>(null);
   const [toast, setToast] = useState<string | null>(null);
 
@@ -36,11 +39,25 @@ export function SettingsPrivacy() {
       }
       setToast("Unsubscribed from all channels");
     }
+    if (modal === "search-history") {
+      clearSearchHistory.mutate();
+      setToast("Search history cleared");
+    }
     setModal(null);
   }
 
   const historyLabel = entries.length === 1 ? "1 entry" : `${entries.length} entries`;
   const subsLabel = subscriptions.length === 1 ? "1 channel" : `${subscriptions.length} channels`;
+  const searchLabel = searchEntries.length === 1 ? "1 entry" : `${searchEntries.length} entries`;
+
+  const modalTitle =
+    modal === "history"
+      ? `Clear ${historyLabel}?`
+      : modal === "subscriptions"
+        ? `Unsubscribe from ${subsLabel}?`
+        : `Clear ${searchLabel}?`;
+  const confirmLabel =
+    modal === "history" ? "Clear" : modal === "subscriptions" ? "Unsubscribe all" : "Clear";
 
   return (
     <section className="flex flex-col gap-3">
@@ -55,6 +72,20 @@ export function SettingsPrivacy() {
             type="button"
             disabled={entries.length === 0}
             onClick={() => setModal("history")}
+            className="text-xs text-red-400 hover:text-red-300 disabled:text-zinc-600 disabled:cursor-not-allowed transition-colors ml-6 flex-shrink-0"
+          >
+            Clear
+          </button>
+        </div>
+        <div className={ROW}>
+          <div className="flex flex-col gap-1">
+            <span className="text-sm text-zinc-100">Search history</span>
+            <span className="text-xs text-zinc-500">{searchLabel}</span>
+          </div>
+          <button
+            type="button"
+            disabled={searchEntries.length === 0}
+            onClick={() => setModal("search-history")}
             className="text-xs text-red-400 hover:text-red-300 disabled:text-zinc-600 disabled:cursor-not-allowed transition-colors ml-6 flex-shrink-0"
           >
             Clear
@@ -77,9 +108,9 @@ export function SettingsPrivacy() {
       </div>
       {modal !== null && (
         <ConfirmModal
-          title={modal === "history" ? `Clear ${historyLabel}?` : `Unsubscribe from ${subsLabel}?`}
+          title={modalTitle}
           description="This action cannot be undone."
-          confirmLabel={modal === "history" ? "Clear" : "Unsubscribe all"}
+          confirmLabel={confirmLabel}
           onConfirm={handleConfirm}
           onCancel={() => setModal(null)}
         />
