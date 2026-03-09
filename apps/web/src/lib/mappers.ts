@@ -1,15 +1,24 @@
 import type { CommentItem, StreamResponse, VideoItem } from "../types/api";
 import type { Comment } from "../types/comment";
 import type { VideoStream } from "../types/stream";
+import { proxyImage } from "./proxy";
+
+function normalizeDescription(raw: string): string {
+  return raw
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<a[^>]*>([\s\S]*?)<\/a>/gi, "$1")
+    .replace(/<[^>]+>/g, "")
+    .trim();
+}
 
 export function mapVideoItem(item: VideoItem): VideoStream {
   return {
     id: item.id,
     title: item.title,
-    thumbnail: item.thumbnailUrl,
+    thumbnail: proxyImage(item.thumbnailUrl),
     channelName: item.uploaderName,
     channelUrl: item.uploaderUrl || undefined,
-    channelAvatar: item.uploaderAvatarUrl,
+    channelAvatar: proxyImage(item.uploaderAvatarUrl),
     uploaderVerified: item.uploaderVerified,
     views: item.viewCount,
     duration: item.duration,
@@ -26,7 +35,7 @@ export function mapCommentItem(item: CommentItem): Comment {
     text: item.text,
     author: item.author,
     authorUrl: item.authorUrl,
-    authorAvatarUrl: item.authorAvatarUrl,
+    authorAvatarUrl: proxyImage(item.authorAvatarUrl),
     likeCount: item.likeCount,
     textualLikeCount: item.textualLikeCount,
     publishedTime: item.publishedTime,
@@ -39,13 +48,16 @@ export function mapCommentItem(item: CommentItem): Comment {
 }
 
 export function mapStreamResponse(response: StreamResponse, url: string): VideoStream {
+  const rawDescription = response.description || undefined;
+  const description = rawDescription ? normalizeDescription(rawDescription) : undefined;
+
   return {
     id: url,
     title: response.title,
-    thumbnail: response.thumbnailUrl,
+    thumbnail: proxyImage(response.thumbnailUrl),
     channelName: response.uploaderName,
     channelUrl: response.uploaderUrl || undefined,
-    channelAvatar: response.uploaderAvatarUrl,
+    channelAvatar: proxyImage(response.uploaderAvatarUrl),
     uploaderVerified: response.uploaderVerified,
     uploaderSubscriberCount:
       response.uploaderSubscriberCount >= 0 ? response.uploaderSubscriberCount : undefined,
@@ -53,7 +65,7 @@ export function mapStreamResponse(response: StreamResponse, url: string): VideoS
     duration: response.duration,
     uploadDate: response.uploadDate,
     uploaded: response.uploaded <= 0 ? undefined : response.uploaded,
-    description: response.description || undefined,
+    description,
     likes: response.likeCount,
     dislikes: response.dislikeCount === -1 ? undefined : response.dislikeCount,
     tags: response.tags.length > 0 ? response.tags : undefined,

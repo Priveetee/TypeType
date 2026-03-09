@@ -1,6 +1,7 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { fetchChannel } from "../lib/api";
 import { mapVideoItem } from "../lib/mappers";
+import { proxyImage } from "../lib/proxy";
 import type { VideoStream } from "../types/stream";
 
 export type ChannelMeta = {
@@ -29,8 +30,8 @@ export function useChannel(channelUrl: string) {
           ? {
               name: res.name,
               description: res.description,
-              avatarUrl: res.avatarUrl,
-              bannerUrl: res.bannerUrl,
+              avatarUrl: proxyImage(res.avatarUrl),
+              bannerUrl: proxyImage(res.bannerUrl),
               subscriberCount: res.subscriberCount,
               isVerified: res.isVerified,
             }
