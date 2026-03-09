@@ -3,12 +3,16 @@ import {
   addVideoToPlaylist,
   createPlaylist,
   deletePlaylist,
+  fetchPlaylist,
   fetchPlaylists,
   removeVideoFromPlaylist,
+  updatePlaylist,
 } from "../lib/api-playlists";
 import type { PlaylistVideoItem } from "../types/user";
 
 const KEY = ["playlists"];
+
+type RenamePayload = { id: string; name: string; description?: string };
 
 type AddVideoPayload = {
   playlistId: string;
@@ -35,6 +39,12 @@ export function usePlaylists() {
     onSuccess: () => qc.invalidateQueries({ queryKey: KEY }),
   });
 
+  const rename = useMutation({
+    mutationFn: ({ id, name, description }: RenamePayload) =>
+      updatePlaylist(id, { name, description }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: KEY }),
+  });
+
   const addVideo = useMutation({
     mutationFn: ({ playlistId, video }: AddVideoPayload) => addVideoToPlaylist(playlistId, video),
     onSuccess: () => qc.invalidateQueries({ queryKey: KEY }),
@@ -51,5 +61,12 @@ export function usePlaylists() {
     return pl?.videos.some((v) => v.url === videoUrl) ?? false;
   }
 
-  return { query, create, remove, addVideo, removeVideo, isInPlaylist };
+  return { query, create, remove, rename, addVideo, removeVideo, isInPlaylist };
+}
+
+export function usePlaylist(id: string) {
+  return useQuery({
+    queryKey: [...KEY, id],
+    queryFn: () => fetchPlaylist(id),
+  });
 }

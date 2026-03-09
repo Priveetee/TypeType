@@ -1,0 +1,57 @@
+import { Link } from "@tanstack/react-router";
+import type { PlaylistVideoItem } from "../types/user";
+
+function XIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={12}
+      height={12}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      role="img"
+      aria-label="Remove"
+    >
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  );
+}
+
+type Props = { video: PlaylistVideoItem; onRemove: () => void };
+
+export function PlaylistVideoRow({ video, onRemove }: Props) {
+  return (
+    <div className="flex flex-col gap-2 group relative">
+      <Link to="/watch" search={{ v: video.url }} className="block">
+        <div className="relative aspect-video rounded-xl overflow-hidden bg-zinc-800">
+          <img
+            src={video.thumbnail}
+            alt={video.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+          />
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              onRemove();
+            }}
+            aria-label="Remove from playlist"
+            className="absolute top-1.5 right-1.5 bg-black/70 hover:bg-black/90 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+          >
+            <XIcon />
+          </button>
+        </div>
+      </Link>
+      <Link to="/watch" search={{ v: video.url }}>
+        <p className="text-sm font-medium text-zinc-100 line-clamp-2 leading-snug group-hover:text-white transition-colors">
+          {video.title}
+        </p>
+      </Link>
+    </div>
+  );
+}

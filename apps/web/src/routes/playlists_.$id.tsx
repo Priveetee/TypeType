@@ -1,5 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { usePlaylists } from "../hooks/use-playlists";
+import { useState } from "react";
+import { PlaylistRenameModal } from "../components/playlist-rename-modal";
+import { PlaylistVideoRow } from "../components/playlist-video-row";
+import { usePlaylist, usePlaylists } from "../hooks/use-playlists";
 import type { PlaylistVideoItem } from "../types/user";
 
 function BackIcon() {
@@ -23,69 +26,41 @@ function BackIcon() {
   );
 }
 
-function XIcon() {
+function PencilIcon() {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width={12}
-      height={12}
+      width={13}
+      height={13}
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth={2.5}
+      strokeWidth={2}
       strokeLinecap="round"
       strokeLinejoin="round"
       role="img"
-      aria-label="Remove"
+      aria-label="Rename"
     >
-      <line x1="18" y1="6" x2="6" y2="18" />
-      <line x1="6" y1="6" x2="18" y2="18" />
+      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
     </svg>
-  );
-}
-
-type VideoItemProps = {
-  video: PlaylistVideoItem;
-  onRemove: () => void;
-};
-
-function PlaylistVideoRow({ video, onRemove }: VideoItemProps) {
-  return (
-    <div className="flex flex-col gap-2 group relative">
-      <Link to="/watch" search={{ v: video.url }} className="block">
-        <div className="relative aspect-video rounded-xl overflow-hidden bg-zinc-800">
-          <img
-            src={video.thumbnail}
-            alt={video.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-          />
-          <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              onRemove();
-            }}
-            aria-label="Remove from playlist"
-            className="absolute top-1.5 right-1.5 bg-black/70 hover:bg-black/90 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-          >
-            <XIcon />
-          </button>
-        </div>
-      </Link>
-      <Link to="/watch" search={{ v: video.url }}>
-        <p className="text-sm font-medium text-zinc-100 line-clamp-2 leading-snug group-hover:text-white transition-colors">
-          {video.title}
-        </p>
-      </Link>
-    </div>
   );
 }
 
 function PlaylistDetailPage() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
-  const { query, remove, removeVideo } = usePlaylists();
-  const playlist = (query.data ?? []).find((p) => p.id === id);
+  const { remove, removeVideo, rename } = usePlaylists();
+  const { data: playlist, isPending } = usePlaylist(id);
+  const [renaming, setRenaming] = useState(false);
+
+  if (isPending) {
+    return (
+      <div className="flex items-center justify-center py-32">
+        <p className="text-zinc-500 text-sm">Loading...</p>
+      </div>
+    );
+  }
 
   if (!playlist) {
     return (
@@ -120,7 +95,17 @@ function PlaylistDetailPage() {
             <BackIcon />
           </Link>
           <div>
-            <h1 className="text-lg font-semibold text-zinc-100">{playlist.name}</h1>
+            <div className="flex items-center gap-1.5">
+              <h1 className="text-lg font-semibold text-zinc-100">{playlist.name}</h1>
+              <button
+                type="button"
+                onClick={() => setRenaming(true)}
+                className="text-zinc-600 hover:text-zinc-300 transition-colors"
+                aria-label="Rename playlist"
+              >
+                <PencilIcon />
+              </button>
+            </div>
             <p className="text-xs text-zinc-500">
               {count} video{count !== 1 ? "s" : ""}
             </p>
@@ -151,6 +136,16 @@ function PlaylistDetailPage() {
             />
           ))}
         </div>
+      )}
+      {renaming && (
+        <PlaylistRenameModal
+          currentName={playlist.name}
+          onConfirm={(name) => {
+            rename.mutate({ id, name });
+            setRenaming(false);
+          }}
+          onCancel={() => setRenaming(false)}
+        />
       )}
     </div>
   );
