@@ -1,6 +1,9 @@
 import type { MediaSrc } from "@vidstack/react";
+import { useCallback, useEffect, useRef } from "react";
+import { useSaveProgress } from "../hooks/use-progress";
 import { buildDashManifest } from "../lib/dash-manifest";
 import { proxyUrl } from "../lib/proxy";
+import { buildThumbnailVtt } from "../lib/thumbnail-vtt";
 import type { VideoStream } from "../types/stream";
 import { RelatedVideos } from "./related-videos";
 import { VideoPlayer } from "./video-player";
@@ -27,9 +30,47 @@ function manifestSrc(stream: VideoStream): MediaSrc {
 
 type Props = {
   stream: VideoStream;
+  startTime: number;
 };
 
-export function WatchLayout({ stream }: Props) {
+export function WatchLayout({ stream, startTime }: Props) {
+  const save = useSaveProgress(stream.id);
+  const positionRef = useRef(0);
+  const thumbnailVtt = useRef<string | null>(null);
+  const saveMutateRef = useRef(save.mutate);
+  saveMutateRef.current = save.mutate;
+
+  useEffect(() => {
+    if (!stream.previewFrames) {
+      thumbnailVtt.current = null;
+      return;
+    }
+    const proxied = stream.previewFrames.map((frame) => ({
+      ...frame,
+      urls: frame.urls.map(proxyUrl),
+    }));
+    thumbnailVtt.current = buildThumbnailVtt(proxied);
+    return () => {
+      if (thumbnailVtt.current) URL.revokeObjectURL(thumbnailVtt.current);
+    };
+  }, [stream.previewFrames]);
+
+  const handleTimeUpdate = useCallback((positionMs: number) => {
+    positionRef.current = positionMs;
+  }, []);
+
+  useEffect(() => {
+    if (stream.livestream) return;
+    const interval = setInterval(() => {
+      const pos = positionRef.current;
+      if (pos < 5000) return;
+      const durationMs = stream.duration * 1000;
+      if (pos >= durationMs * 0.95) return;
+      saveMutateRef.current(pos);
+    }, 10_000);
+    return () => clearInterval(interval);
+  }, [stream.duration, stream.livestream]);
+
   return (
     <div className="flex flex-col gap-6 lg:flex-row lg:items-start [animation:page-fade-in_0.2s_ease-out]">
       <div className="flex-[2] min-w-0 max-w-[133.333vh] flex flex-col gap-4">
@@ -39,6 +80,11 @@ export function WatchLayout({ stream }: Props) {
             title={stream.title}
             poster={stream.thumbnail}
             streamType={stream.livestream ? "live" : "on-demand"}
+            startTime={startTime}
+            subtitles={stream.subtitles}
+            sponsorBlockSegments={stream.sponsorBlockSegments}
+            thumbnailVtt={thumbnailVtt.current ?? undefined}
+            onTimeUpdate={handleTimeUpdate}
           />
         </div>
         <WatchInfo stream={stream} />

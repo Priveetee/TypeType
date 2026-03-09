@@ -19,32 +19,43 @@ async function authedJson<T>(url: string, init?: RequestInit): Promise<T> {
   return body as T;
 }
 
-export function fetchWatchLater(): Promise<WatchLaterItem[]> {
-  return authedJson(`${BASE}/watch-later`);
-}
-
-export async function addWatchLater(item: Omit<WatchLaterItem, "addedAt">): Promise<void> {
-  await authed(`${BASE}/watch-later`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(item),
-  });
-}
-
-export async function removeWatchLater(videoUrl: string): Promise<void> {
-  await authed(`${BASE}/watch-later/${encodeURIComponent(videoUrl)}`, { method: "DELETE" });
-}
-
 export function fetchProgress(videoUrl: string): Promise<ProgressItem> {
   return authedJson(`${BASE}/progress/${encodeURIComponent(videoUrl)}`);
 }
 
 export async function updateProgress(videoUrl: string, position: number): Promise<void> {
-  await authed(`${BASE}/progress/${encodeURIComponent(videoUrl)}`, {
+  const res = await authed(`${BASE}/progress/${encodeURIComponent(videoUrl)}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ position }),
+    body: JSON.stringify({ position: Math.round(position) }),
   });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ error: "update failed" }));
+    throw new ApiError((body as { error: string }).error, res.status);
+  }
+}
+
+export function fetchWatchLater(): Promise<WatchLaterItem[]> {
+  return authedJson(`${BASE}/watch-later`);
+}
+
+type AddWatchLaterPayload = {
+  url: string;
+  title: string;
+  thumbnail: string;
+  duration: number;
+};
+
+export async function addWatchLater(video: AddWatchLaterPayload): Promise<void> {
+  await authed(`${BASE}/watch-later`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(video),
+  });
+}
+
+export async function removeWatchLater(videoUrl: string): Promise<void> {
+  await authed(`${BASE}/watch-later/${encodeURIComponent(videoUrl)}`, { method: "DELETE" });
 }
 
 export function fetchLikes(): Promise<LikeItem[]> {

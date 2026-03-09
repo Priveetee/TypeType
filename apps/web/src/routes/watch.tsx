@@ -1,19 +1,23 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { PageSpinner } from "../components/page-spinner";
 import { WatchLayout } from "../components/watch-layout";
 import { useHistory } from "../hooks/use-history";
+import { useProgress } from "../hooks/use-progress";
 import { useStream } from "../hooks/use-stream";
 
 function WatchPage() {
   const { v } = Route.useSearch();
   const { data: stream, isLoading, isError } = useStream(v);
   const { add } = useHistory();
-  const { mutate: addToHistory } = add;
+  const progressFetch = useProgress(v);
+
+  const addToHistoryRef = useRef(add.mutate);
+  addToHistoryRef.current = add.mutate;
 
   useEffect(() => {
     if (!stream) return;
-    addToHistory({
+    addToHistoryRef.current({
       url: stream.id,
       title: stream.title,
       thumbnail: stream.thumbnail,
@@ -22,9 +26,9 @@ function WatchPage() {
       duration: stream.duration,
       progress: 0,
     });
-  }, [stream, addToHistory]);
+  }, [stream]);
 
-  if (isLoading) return <PageSpinner />;
+  if (isLoading || progressFetch.isPending) return <PageSpinner />;
 
   if (isError || !stream) {
     return (
@@ -34,7 +38,11 @@ function WatchPage() {
     );
   }
 
-  return <WatchLayout stream={stream} />;
+  const savedPosition = progressFetch.data?.position ?? 0;
+  const durationMs = stream.duration * 1000;
+  const startTime = savedPosition >= 5000 && savedPosition < durationMs * 0.95 ? savedPosition : 0;
+
+  return <WatchLayout stream={stream} startTime={startTime} />;
 }
 
 export const Route = createFileRoute("/watch")({
