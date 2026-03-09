@@ -1,4 +1,5 @@
 import type {
+  BulletCommentsPageResponse,
   ChannelResponse,
   CommentsPageResponse,
   SearchPageResponse,
@@ -65,4 +66,8 @@ export function fetchChannel(url: string, nextpage?: string): Promise<ChannelRes
 export function fetchSuggestions(query: string, service: number): Promise<string[]> {
   const params = new URLSearchParams({ query, service: String(service) });
   return request(`${BASE}/suggestions?${params}`);
+}
+
+export function fetchBulletComments(url: string): Promise<BulletCommentsPageResponse> {
+  return request(`${BASE}/bullet-comments?url=${encodeURIComponent(url)}`);
 }

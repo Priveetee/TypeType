@@ -150,6 +150,20 @@ export type CommentsPageResponse = {
   commentsDisabled: boolean;
 };
 
+export type BulletCommentItem = {
+  text: string;
+  argbColor: number;
+  position: "REGULAR" | "TOP" | "BOTTOM" | "SUPERCHAT";
+  relativeFontSize: number;
+  durationMs: number;
+  isLive: boolean;
+};
+
+export type BulletCommentsPageResponse = {
+  comments: BulletCommentItem[];
+  nextpage: string | null;
+};
+
 export type ChannelResponse = {
   name: string;
   description: string;
