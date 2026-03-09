@@ -130,6 +130,7 @@ export function WatchLayout({ stream, startTime }: Props) {
             initialVolume={settings.volume}
             initialMuted={settings.muted}
             settingsReady={settingsReady}
+            autoplay={settingsReady && settings.autoplay}
             onVolumeChange={handleVolumeChange}
             onTimeUpdate={handleTimeUpdate}
             onPause={handleSave}

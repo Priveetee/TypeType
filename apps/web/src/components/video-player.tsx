@@ -27,6 +27,7 @@ type Props = {
   initialVolume?: number;
   initialMuted?: boolean;
   settingsReady?: boolean;
+  autoplay?: boolean;
   onVolumeChange?: (volume: number, muted: boolean) => void;
   onTimeUpdate?: (positionMs: number) => void;
   onPause?: () => void;
@@ -96,6 +97,7 @@ export function VideoPlayer({
   initialVolume = 1,
   initialMuted = false,
   settingsReady = false,
+  autoplay = false,
   onVolumeChange,
   onTimeUpdate,
   onPause,
@@ -112,6 +114,7 @@ export function VideoPlayer({
       crossOrigin
       playsInline
       storage={null}
+      autoPlay={autoplay}
       title={title}
       poster={poster}
       onProviderChange={onProviderChange}
