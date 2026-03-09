@@ -122,6 +122,7 @@ export function WatchActions({ stream }: Props) {
       </button>
       <Toast message={copied ? "Link copied to clipboard" : toastLabel} />
       <button
+        ref={saveAnchorRef}
         type="button"
         onClick={() => setPlaylistOpen((o) => !o)}
         className={`${BTN} ${playlistOpen ? BTN_ON : BTN_IDLE}`}
