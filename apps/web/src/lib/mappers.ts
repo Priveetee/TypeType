@@ -10,9 +10,13 @@ export function mapVideoItem(item: VideoItem): VideoStream {
     channelName: item.uploaderName,
     channelUrl: item.uploaderUrl || undefined,
     channelAvatar: item.uploaderAvatarUrl,
+    uploaderVerified: item.uploaderVerified,
     views: item.viewCount,
     duration: item.duration,
     uploadDate: item.uploadDate,
+    streamType: item.streamType || undefined,
+    isShortFormContent: item.isShortFormContent,
+    shortDescription: item.shortDescription ?? undefined,
   };
 }
 
@@ -24,9 +28,11 @@ export function mapCommentItem(item: CommentItem): Comment {
     authorUrl: item.authorUrl,
     authorAvatarUrl: item.authorAvatarUrl,
     likeCount: item.likeCount,
+    textualLikeCount: item.textualLikeCount,
     publishedTime: item.publishedTime,
     isHeartedByUploader: item.isHeartedByUploader,
     isPinned: item.isPinned,
+    uploaderVerified: item.uploaderVerified,
     replyCount: item.replyCount,
     repliesPage: item.repliesPage ?? null,
   };
@@ -53,7 +59,11 @@ export function mapStreamResponse(response: StreamResponse, url: string): VideoS
     tags: response.tags.length > 0 ? response.tags : undefined,
     category: response.category || undefined,
     related: response.relatedStreams.map(mapVideoItem),
-    livestream: response.livestream,
+    streamType: response.streamType || undefined,
+    isShortFormContent: response.isShortFormContent,
+    requiresMembership: response.requiresMembership,
+    startPosition: response.startPosition > 0 ? response.startPosition : undefined,
+    streamSegments: response.streamSegments.length > 0 ? response.streamSegments : undefined,
     hlsUrl: response.hlsUrl || undefined,
     videoOnlyStreams: response.videoOnlyStreams,
     audioStreams: response.audioStreams,

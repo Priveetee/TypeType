@@ -5,9 +5,11 @@ export type Comment = {
   authorUrl: string;
   authorAvatarUrl: string;
   likeCount: number;
+  textualLikeCount: string;
   publishedTime: string;
   isHeartedByUploader: boolean;
   isPinned: boolean;
+  uploaderVerified: boolean;
   replyCount: number;
   repliesPage: string | null;
 };

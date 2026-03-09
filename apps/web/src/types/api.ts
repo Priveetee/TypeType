@@ -26,6 +26,7 @@ export type AudioStreamItem = {
   quality: string | null;
   audioTrackId: string | null;
   audioTrackName: string | null;
+  audioLocale: string | null;
   itag: number;
   contentLength: number;
   initStart: number;
@@ -59,6 +60,14 @@ export type PreviewFrameItem = {
   framesPerPageY: number;
 };
 
+export type StreamSegmentItem = {
+  title: string;
+  startTimeSeconds: number;
+  channelName: string | null;
+  url: string | null;
+  previewUrl: string | null;
+};
+
 export type VideoItem = {
   id: string;
   title: string;
@@ -67,9 +76,13 @@ export type VideoItem = {
   uploaderName: string;
   uploaderUrl: string;
   uploaderAvatarUrl: string;
+  uploaderVerified: boolean;
   duration: number;
   viewCount: number;
   uploadDate: string;
+  streamType: string;
+  isShortFormContent: boolean;
+  shortDescription: string | null;
 };
 
 export type StreamResponse = {
@@ -92,7 +105,11 @@ export type StreamResponse = {
   license: string;
   visibility: string;
   tags: string[];
-  livestream: boolean;
+  streamType: string;
+  isShortFormContent: boolean;
+  requiresMembership: boolean;
+  startPosition: number;
+  streamSegments: StreamSegmentItem[];
   hlsUrl: string;
   dashMpdUrl: string;
   videoStreams: VideoStreamItem[];
@@ -107,6 +124,8 @@ export type StreamResponse = {
 export type SearchPageResponse = {
   items: VideoItem[];
   nextpage: string | null;
+  searchSuggestion: string | null;
+  isCorrectedSearch: boolean;
 };
 
 export type CommentItem = {
@@ -116,9 +135,11 @@ export type CommentItem = {
   authorUrl: string;
   authorAvatarUrl: string;
   likeCount: number;
+  textualLikeCount: string;
   publishedTime: string;
   isHeartedByUploader: boolean;
   isPinned: boolean;
+  uploaderVerified: boolean;
   replyCount: number;
   repliesPage: string | null;
 };
@@ -126,6 +147,7 @@ export type CommentItem = {
 export type CommentsPageResponse = {
   comments: CommentItem[];
   nextpage: string | null;
+  commentsDisabled: boolean;
 };
 
 export type ChannelResponse = {
