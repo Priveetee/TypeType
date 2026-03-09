@@ -28,7 +28,7 @@ export function mapCommentItem(item: CommentItem): Comment {
     isHeartedByUploader: item.isHeartedByUploader,
     isPinned: item.isPinned,
     replyCount: item.replyCount,
-    repliesPage: item.repliesPage,
+    repliesPage: item.repliesPage ?? null,
   };
 }
 
