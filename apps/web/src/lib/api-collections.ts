@@ -1,4 +1,4 @@
-import type { BlockedItem, FavoriteItem, ProgressItem, WatchLaterItem } from "../types/user";
+import type { BlockedItem, FavoriteItem, ProgressItem } from "../types/user";
 import { ApiError } from "./api";
 import { getToken } from "./token";
 
@@ -37,29 +37,6 @@ export async function updateProgress(videoUrl: string, position: number): Promis
     const body = await res.json().catch(() => ({ error: "update failed" }));
     throw new ApiError((body as { error: string }).error, res.status);
   }
-}
-
-export function fetchWatchLater(): Promise<WatchLaterItem[]> {
-  return authedJson(`${BASE}/watch-later`);
-}
-
-type AddWatchLaterPayload = {
-  url: string;
-  title: string;
-  thumbnail: string;
-  duration: number;
-};
-
-export async function addWatchLater(video: AddWatchLaterPayload): Promise<void> {
-  await authed(`${BASE}/watch-later`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(video),
-  });
-}
-
-export async function removeWatchLater(videoUrl: string): Promise<void> {
-  await authed(`${BASE}/watch-later/${encodeURIComponent(videoUrl)}`, { method: "DELETE" });
 }
 
 export function fetchFavorites(): Promise<FavoriteItem[]> {

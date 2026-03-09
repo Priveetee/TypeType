@@ -36,17 +36,6 @@ export const NAV_ITEMS: NavItem[] = [
     ),
   },
   {
-    label: "Watch Later",
-    to: "/watch-later",
-    icon: (
-      <>
-        <circle cx="12" cy="12" r="10" />
-        <polyline points="12 6 12 12 16 14" />
-        <line x1="2" y1="2" x2="22" y2="22" />
-      </>
-    ),
-  },
-  {
     label: "Playlists",
     to: "/playlists",
     icon: (

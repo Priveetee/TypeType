@@ -8,7 +8,7 @@ import {
   removeVideoFromPlaylist,
   updatePlaylist,
 } from "../lib/api-playlists";
-import type { PlaylistVideoItem } from "../types/user";
+import type { PlaylistItem, PlaylistVideoItem } from "../types/user";
 
 const KEY = ["playlists"];
 
@@ -47,12 +47,40 @@ export function usePlaylists() {
 
   const addVideo = useMutation({
     mutationFn: ({ playlistId, video }: AddVideoPayload) => addVideoToPlaylist(playlistId, video),
+    onMutate: async ({ playlistId, video }) => {
+      await qc.cancelQueries({ queryKey: KEY });
+      const snapshot = qc.getQueryData<PlaylistItem[]>(KEY);
+      qc.setQueryData<PlaylistItem[]>(KEY, (old) =>
+        (old ?? []).map((p) =>
+          p.id === playlistId
+            ? { ...p, videos: [...p.videos, { id: "", position: p.videos.length, ...video }] }
+            : p,
+        ),
+      );
+      return { snapshot };
+    },
+    onError: (_e, _v, ctx) => {
+      if (ctx?.snapshot !== undefined) qc.setQueryData(KEY, ctx.snapshot);
+    },
     onSuccess: () => qc.invalidateQueries({ queryKey: KEY }),
   });
 
   const removeVideo = useMutation({
     mutationFn: ({ playlistId, videoUrl }: RemoveVideoPayload) =>
       removeVideoFromPlaylist(playlistId, videoUrl),
+    onMutate: async ({ playlistId, videoUrl }) => {
+      await qc.cancelQueries({ queryKey: KEY });
+      const snapshot = qc.getQueryData<PlaylistItem[]>(KEY);
+      qc.setQueryData<PlaylistItem[]>(KEY, (old) =>
+        (old ?? []).map((p) =>
+          p.id === playlistId ? { ...p, videos: p.videos.filter((v) => v.url !== videoUrl) } : p,
+        ),
+      );
+      return { snapshot };
+    },
+    onError: (_e, _v, ctx) => {
+      if (ctx?.snapshot !== undefined) qc.setQueryData(KEY, ctx.snapshot);
+    },
     onSuccess: () => qc.invalidateQueries({ queryKey: KEY }),
   });
 

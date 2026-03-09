@@ -9,7 +9,6 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as WatchLaterRouteImport } from './routes/watch-later'
 import { Route as WatchRouteImport } from './routes/watch'
 import { Route as TrendingRouteImport } from './routes/trending'
 import { Route as SubscriptionsRouteImport } from './routes/subscriptions'
@@ -21,11 +20,6 @@ import { Route as ChannelRouteImport } from './routes/channel'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PlaylistsIdRouteImport } from './routes/playlists_.$id'
 
-const WatchLaterRoute = WatchLaterRouteImport.update({
-  id: '/watch-later',
-  path: '/watch-later',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const WatchRoute = WatchRouteImport.update({
   id: '/watch',
   path: '/watch',
@@ -87,7 +81,6 @@ export interface FileRoutesByFullPath {
   '/subscriptions': typeof SubscriptionsRoute
   '/trending': typeof TrendingRoute
   '/watch': typeof WatchRoute
-  '/watch-later': typeof WatchLaterRoute
   '/playlists/$id': typeof PlaylistsIdRoute
 }
 export interface FileRoutesByTo {
@@ -100,7 +93,6 @@ export interface FileRoutesByTo {
   '/subscriptions': typeof SubscriptionsRoute
   '/trending': typeof TrendingRoute
   '/watch': typeof WatchRoute
-  '/watch-later': typeof WatchLaterRoute
   '/playlists/$id': typeof PlaylistsIdRoute
 }
 export interface FileRoutesById {
@@ -114,7 +106,6 @@ export interface FileRoutesById {
   '/subscriptions': typeof SubscriptionsRoute
   '/trending': typeof TrendingRoute
   '/watch': typeof WatchRoute
-  '/watch-later': typeof WatchLaterRoute
   '/playlists_/$id': typeof PlaylistsIdRoute
 }
 export interface FileRouteTypes {
@@ -129,7 +120,6 @@ export interface FileRouteTypes {
     | '/subscriptions'
     | '/trending'
     | '/watch'
-    | '/watch-later'
     | '/playlists/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -142,7 +132,6 @@ export interface FileRouteTypes {
     | '/subscriptions'
     | '/trending'
     | '/watch'
-    | '/watch-later'
     | '/playlists/$id'
   id:
     | '__root__'
@@ -155,7 +144,6 @@ export interface FileRouteTypes {
     | '/subscriptions'
     | '/trending'
     | '/watch'
-    | '/watch-later'
     | '/playlists_/$id'
   fileRoutesById: FileRoutesById
 }
@@ -169,19 +157,11 @@ export interface RootRouteChildren {
   SubscriptionsRoute: typeof SubscriptionsRoute
   TrendingRoute: typeof TrendingRoute
   WatchRoute: typeof WatchRoute
-  WatchLaterRoute: typeof WatchLaterRoute
   PlaylistsIdRoute: typeof PlaylistsIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/watch-later': {
-      id: '/watch-later'
-      path: '/watch-later'
-      fullPath: '/watch-later'
-      preLoaderRoute: typeof WatchLaterRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/watch': {
       id: '/watch'
       path: '/watch'
@@ -265,7 +245,6 @@ const rootRouteChildren: RootRouteChildren = {
   SubscriptionsRoute: SubscriptionsRoute,
   TrendingRoute: TrendingRoute,
   WatchRoute: WatchRoute,
-  WatchLaterRoute: WatchLaterRoute,
   PlaylistsIdRoute: PlaylistsIdRoute,
 }
 export const routeTree = rootRouteImport

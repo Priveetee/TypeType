@@ -61,14 +61,6 @@ export type SearchHistoryItem = {
   searchedAt: number;
 };
 
-export type WatchLaterItem = {
-  url: string;
-  title: string;
-  thumbnail: string;
-  duration: number;
-  addedAt: number;
-};
-
 export type BlockedItem = {
   url: string;
   blockedAt: number;

@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { useBlocked } from "../hooks/use-blocked";
 import { useFavorites } from "../hooks/use-favorites";
-import { useWatchLater } from "../hooks/use-watch-later";
+import { useWatchLaterPlaylist } from "../hooks/use-watch-later-playlist";
 import type { VideoStream } from "../types/stream";
 import { PlaylistAddDropdown } from "./playlist-add-dropdown";
 import { Toast } from "./toast";
@@ -20,20 +20,17 @@ export function WatchActions({ stream }: Props) {
   const [playlistOpen, setPlaylistOpen] = useState(false);
   const [toastLabel, setToastLabel] = useState<string | null>(null);
   const saveAnchorRef = useRef<HTMLButtonElement>(null);
-  const { add: addWatchLater, remove: removeWatchLater, videos: wlVideos } = useWatchLater();
-  const { add: addFavorite, remove: removeFavorite, isFavorited } = useFavorites();
   const {
-    videos: blockedVideos,
-    channels: blockedChannels,
-    addVideo,
-    removeVideo,
-    addChannel,
-    removeChannel,
-  } = useBlocked();
+    add: addWatchLater,
+    remove: removeWatchLater,
+    isInWatchLater,
+    isPending: wlPending,
+  } = useWatchLaterPlaylist();
+  const { add: addFavorite, remove: removeFavorite, isFavorited } = useFavorites();
+  const { channels: blockedChannels, addChannel, removeChannel } = useBlocked();
 
-  const inWatchLater = wlVideos.some((w) => w.url === stream.id);
+  const inWatchLater = isInWatchLater(stream.id);
   const favorited = isFavorited(stream.id);
-  const videoBlocked = (blockedVideos.data ?? []).some((b) => b.url === stream.id);
   const channelBlocked =
     !!stream.channelUrl && (blockedChannels.data ?? []).some((b) => b.url === stream.channelUrl);
 
@@ -62,16 +59,18 @@ export function WatchActions({ stream }: Props) {
     setTimeout(() => setToastLabel(null), 2000);
   }
 
-  function handleWatchLater() {
+  async function handleWatchLater() {
     if (inWatchLater) {
-      removeWatchLater.mutate(stream.id);
+      await removeWatchLater(stream.id);
+      handleSaved("Removed from Watch Later");
     } else {
-      addWatchLater.mutate({
+      await addWatchLater({
         url: stream.id,
         title: stream.title,
         thumbnail: stream.thumbnail,
         duration: stream.duration,
       });
+      handleSaved("Saved to Watch Later");
     }
   }
 
@@ -95,30 +94,21 @@ export function WatchActions({ stream }: Props) {
       <button
         type="button"
         onClick={handleWatchLater}
+        disabled={wlPending}
         aria-pressed={inWatchLater}
-        className={`${BTN} ${inWatchLater ? BTN_ON : BTN_IDLE}`}
+        className={`${BTN} ${inWatchLater ? BTN_ON : BTN_IDLE} disabled:opacity-50 disabled:cursor-not-allowed`}
       >
         <ClockIcon />
-        {inWatchLater ? "Saved" : "Watch Later"}
+        {wlPending ? "Saving..." : inWatchLater ? "Saved" : "Watch Later"}
       </button>
       <Toast message={copied ? "Link copied to clipboard" : toastLabel} />
       <button
-        ref={saveAnchorRef}
         type="button"
         onClick={() => setPlaylistOpen((o) => !o)}
         className={`${BTN} ${playlistOpen ? BTN_ON : BTN_IDLE}`}
       >
         <ListPlusIcon />
         Save
-      </button>
-      <button
-        type="button"
-        onClick={() => (videoBlocked ? removeVideo.mutate(stream.id) : addVideo.mutate(stream.id))}
-        aria-pressed={videoBlocked}
-        className={`${BTN} ${videoBlocked ? BTN_ON : BTN_IDLE}`}
-      >
-        <BanIcon />
-        {videoBlocked ? "Unblock video" : "Block video"}
       </button>
       {stream.channelUrl && (
         <button
