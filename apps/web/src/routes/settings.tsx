@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { SettingsBlocked } from "../settings/settings-blocked";
 import { SettingsData } from "../settings/settings-data";
 import { SettingsPlayback } from "../settings/settings-playback";
 import { SettingsPrivacy } from "../settings/settings-privacy";
@@ -12,6 +13,7 @@ function SettingsPage() {
       <SettingsService />
       <SettingsPrivacy />
       <SettingsData />
+      <SettingsBlocked />
     </div>
   );
 }
