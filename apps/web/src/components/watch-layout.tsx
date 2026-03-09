@@ -1,5 +1,5 @@
 import type { MediaSrc } from "@vidstack/react";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useSaveProgress } from "../hooks/use-progress";
 import { buildDashManifest } from "../lib/dash-manifest";
 import { proxyUrl } from "../lib/proxy";
@@ -14,13 +14,10 @@ import { WatchInfo } from "./watch-info";
 
 const BASE = import.meta.env.VITE_API_URL;
 
-function manifestSrc(stream: VideoStream): MediaSrc {
-  if (stream.livestream && stream.hlsUrl) {
-    return { src: proxyUrl(stream.hlsUrl), type: "application/x-mpegurl" };
-  }
+function fallbackSrc(stream: VideoStream): MediaSrc {
   if (stream.videoOnlyStreams?.length && stream.audioStreams?.length) {
-    const src = buildDashManifest(stream.videoOnlyStreams, stream.audioStreams, stream.duration);
-    if (src) return { src, type: "application/dash+xml" };
+    const built = buildDashManifest(stream.videoOnlyStreams, stream.audioStreams, stream.duration);
+    if (built) return { src: built, type: "application/dash+xml" };
   }
   return {
     src: `${BASE}/streams/manifest?url=${encodeURIComponent(stream.id)}`,
@@ -35,10 +32,41 @@ type Props = {
 
 export function WatchLayout({ stream, startTime }: Props) {
   const save = useSaveProgress(stream.id);
+  const isLive = stream.livestream;
+  const nativeEnabled = !isLive && Boolean(stream.videoOnlyStreams?.length);
+  const [nativeFailed, setNativeFailed] = useState(false);
+
+  let manifestSrc: MediaSrc;
+  if (isLive && stream.hlsUrl) {
+    manifestSrc = { src: proxyUrl(stream.hlsUrl), type: "application/x-mpegurl" };
+  } else if (nativeEnabled && !nativeFailed) {
+    manifestSrc = {
+      src: `${BASE}/streams/native-manifest?url=${encodeURIComponent(stream.id)}`,
+      type: "application/dash+xml",
+    };
+  } else {
+    manifestSrc = fallbackSrc(stream);
+  }
+
+  const handleError = useCallback(() => {
+    if (nativeEnabled && !nativeFailed) setNativeFailed(true);
+  }, [nativeEnabled, nativeFailed]);
+
   const positionRef = useRef(0);
   const thumbnailVtt = useRef<string | null>(null);
   const saveMutateRef = useRef(save.mutate);
   saveMutateRef.current = save.mutate;
+
+  const saveIfEligibleRef = useRef<() => void>(() => {});
+  saveIfEligibleRef.current = () => {
+    const pos = positionRef.current;
+    if (pos < 5000) return;
+    const durationMs = stream.duration * 1000;
+    if (pos >= durationMs * 0.95) return;
+    saveMutateRef.current(pos);
+  };
+
+  const handleSave = useCallback(() => saveIfEligibleRef.current(), []);
 
   useEffect(() => {
     if (!stream.previewFrames) {
@@ -61,22 +89,23 @@ export function WatchLayout({ stream, startTime }: Props) {
 
   useEffect(() => {
     if (stream.livestream) return;
-    const interval = setInterval(() => {
-      const pos = positionRef.current;
-      if (pos < 5000) return;
-      const durationMs = stream.duration * 1000;
-      if (pos >= durationMs * 0.95) return;
-      saveMutateRef.current(pos);
-    }, 10_000);
-    return () => clearInterval(interval);
-  }, [stream.duration, stream.livestream]);
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "hidden") saveIfEligibleRef.current();
+    };
+    const interval = setInterval(() => saveIfEligibleRef.current(), 10_000);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
+  }, [stream.livestream]);
 
   return (
     <div className="flex flex-col gap-6 lg:flex-row lg:items-start [animation:page-fade-in_0.2s_ease-out]">
       <div className="flex-[2] min-w-0 max-w-[133.333vh] flex flex-col gap-4">
         <div className="rounded-lg overflow-hidden">
           <VideoPlayer
-            src={manifestSrc(stream)}
+            src={manifestSrc}
             title={stream.title}
             poster={stream.thumbnail}
             streamType={stream.livestream ? "live" : "on-demand"}
@@ -85,6 +114,9 @@ export function WatchLayout({ stream, startTime }: Props) {
             sponsorBlockSegments={stream.sponsorBlockSegments}
             thumbnailVtt={thumbnailVtt.current ?? undefined}
             onTimeUpdate={handleTimeUpdate}
+            onPause={handleSave}
+            onSeeked={handleSave}
+            onError={handleError}
           />
         </div>
         <WatchInfo stream={stream} />

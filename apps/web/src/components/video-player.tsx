@@ -14,6 +14,33 @@ import type { SponsorBlockSegmentItem, SubtitleItem } from "../types/api";
 import { FormatSelector } from "./format-selector";
 import { QualitySelector } from "./quality-selector";
 
+const VOLUME_KEY = "player-volume";
+const MUTED_KEY = "player-muted";
+
+function VolumeRestorer() {
+  const remote = useMediaRemote();
+  const volume = useMediaState("volume");
+  const muted = useMediaState("muted");
+  const restoredRef = useRef(false);
+
+  useEffect(() => {
+    if (restoredRef.current) return;
+    restoredRef.current = true;
+    const saved = localStorage.getItem(VOLUME_KEY);
+    const savedMuted = localStorage.getItem(MUTED_KEY);
+    if (saved !== null) remote.changeVolume(parseFloat(saved));
+    if (savedMuted === "true") remote.mute();
+  }, [remote]);
+
+  useEffect(() => {
+    if (!restoredRef.current) return;
+    localStorage.setItem(VOLUME_KEY, String(volume));
+    localStorage.setItem(MUTED_KEY, String(muted));
+  }, [volume, muted]);
+
+  return null;
+}
+
 type Props = {
   src: MediaSrc;
   title?: string;
@@ -24,6 +51,9 @@ type Props = {
   sponsorBlockSegments?: SponsorBlockSegmentItem[];
   thumbnailVtt?: string;
   onTimeUpdate?: (positionMs: number) => void;
+  onPause?: () => void;
+  onSeeked?: () => void;
+  onError?: () => void;
 };
 
 type Dashjsv4Compat = {
@@ -86,6 +116,9 @@ export function VideoPlayer({
   sponsorBlockSegments,
   thumbnailVtt,
   onTimeUpdate,
+  onPause,
+  onSeeked,
+  onError,
 }: Props) {
   return (
     <MediaPlayer
@@ -100,6 +133,12 @@ export function VideoPlayer({
       poster={poster}
       onProviderChange={onProviderChange}
       onTimeUpdate={({ currentTime }) => onTimeUpdate?.(currentTime * 1000)}
+      onPause={() => onPause?.()}
+      onSeeked={(currentTime) => {
+        onTimeUpdate?.(currentTime * 1000);
+        onSeeked?.();
+      }}
+      onError={() => onError?.()}
     >
       <MediaProvider>
         {subtitles?.map((s) => (
@@ -125,6 +164,7 @@ export function VideoPlayer({
         }}
       />
       <PlayerSeeker startTime={startTime} />
+      <VolumeRestorer />
       {sponsorBlockSegments && <SponsorBlockSkipper segments={sponsorBlockSegments} />}
     </MediaPlayer>
   );
