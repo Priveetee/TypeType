@@ -71,6 +71,14 @@ export function fetchSearchHistory(): Promise<SearchHistoryItem[]> {
   return authedJson(`${BASE}/search-history`);
 }
 
+export async function addSearchHistory(term: string): Promise<SearchHistoryItem> {
+  return authedJson(`${BASE}/search-history`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ term }),
+  });
+}
+
 export async function clearSearchHistory(): Promise<void> {
   await authed(`${BASE}/search-history`, { method: "DELETE" });
 }

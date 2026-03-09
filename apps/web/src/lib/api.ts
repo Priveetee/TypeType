@@ -53,3 +53,8 @@ export function fetchChannel(url: string, nextpage?: string): Promise<ChannelRes
   if (nextpage) params.set("nextpage", nextpage);
   return request(`${BASE}/channel?${params}`);
 }
+
+export function fetchSuggestions(query: string, service: number): Promise<string[]> {
+  const params = new URLSearchParams({ query, service: String(service) });
+  return request(`${BASE}/suggestions?${params}`);
+}
