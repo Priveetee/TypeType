@@ -1,7 +1,9 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { fetchSubscriptionFeed } from "../lib/api-user";
 import { mapVideoItem } from "../lib/mappers";
+import { proxyImage } from "../lib/proxy";
 import type { VideoStream } from "../types/stream";
+import { useSubscriptions } from "./use-subscriptions";
 
 type Result = {
   streams: VideoStream[];
@@ -12,6 +14,11 @@ type Result = {
 };
 
 export function useSubscriptionFeed(): Result {
+  const { query: subsQuery } = useSubscriptions();
+  const avatarMap = new Map(
+    (subsQuery.data ?? []).map((s) => [s.channelUrl, proxyImage(s.avatarUrl)]),
+  );
+
   const query = useInfiniteQuery({
     queryKey: ["subscription-feed"],
     queryFn: ({ pageParam }) => fetchSubscriptionFeed(pageParam as number),
@@ -20,7 +27,16 @@ export function useSubscriptionFeed(): Result {
     staleTime: 5 * 60 * 1000,
   });
 
-  const streams = (query.data?.pages ?? []).flatMap((page) => page.videos).map(mapVideoItem);
+  const streams = (query.data?.pages ?? [])
+    .flatMap((page) => page.videos)
+    .map((video) => {
+      const mapped = mapVideoItem(video);
+      if (!mapped.channelAvatar && mapped.channelUrl) {
+        const avatar = avatarMap.get(mapped.channelUrl);
+        if (avatar) return { ...mapped, channelAvatar: avatar };
+      }
+      return mapped;
+    });
 
   return {
     streams,
