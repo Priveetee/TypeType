@@ -110,15 +110,20 @@ function PlaylistsPage() {
         <EmptyState />
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-          {playlists.map((playlist) => (
-            <PlaylistCard
+          {playlists.map((playlist, index) => (
+            <div
               key={playlist.id}
-              playlist={playlist}
-              selectionMode={selectionMode}
-              selected={selectedIds.has(playlist.id)}
-              onToggleSelect={() => toggleSelect(playlist.id)}
-              onDeleteRequest={() => setConfirmIds([playlist.id])}
-            />
+              className="animate-card-pop-in"
+              style={{ animationDelay: `${Math.min(index * 45, 270)}ms` }}
+            >
+              <PlaylistCard
+                playlist={playlist}
+                selectionMode={selectionMode}
+                selected={selectedIds.has(playlist.id)}
+                onToggleSelect={() => toggleSelect(playlist.id)}
+                onDeleteRequest={() => setConfirmIds([playlist.id])}
+              />
+            </div>
           ))}
         </div>
       )}

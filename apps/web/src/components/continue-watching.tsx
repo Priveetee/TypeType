@@ -22,8 +22,14 @@ export function ContinueWatching() {
         Continue watching
       </p>
       <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-none">
-        {displayed.map((item) => (
-          <ContinueCard key={item.id} item={item} />
+        {displayed.map((item, index) => (
+          <div
+            key={item.id}
+            className="animate-card-pop-in"
+            style={{ animationDelay: `${Math.min(index * 45, 270)}ms` }}
+          >
+            <ContinueCard item={item} />
+          </div>
         ))}
       </div>
     </section>

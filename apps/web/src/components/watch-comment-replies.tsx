@@ -24,8 +24,14 @@ export function WatchCommentReplies({ videoUrl, repliesPage }: Props) {
 
   return (
     <div className="border-l border-zinc-800 pl-11 flex flex-col gap-4 mt-3">
-      {replies.map((reply) => (
-        <WatchReply key={reply.id} reply={reply} />
+      {replies.map((reply, i) => (
+        <div
+          key={reply.id}
+          className="animate-card-pop-in"
+          style={{ animationDelay: `${Math.min(i * 25, 150)}ms` }}
+        >
+          <WatchReply reply={reply} />
+        </div>
       ))}
       {(isLoading || isFetchingNextPage) &&
         SKELETON_KEYS.map((k) => <WatchCommentSkeleton key={k} />)}

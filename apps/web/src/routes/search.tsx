@@ -69,8 +69,14 @@ function SearchPage() {
         <p className="text-zinc-400 text-sm">No results for &ldquo;{q}&rdquo;</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8">
-          {streams.map((stream) => (
-            <VideoCard key={stream.id} stream={stream} />
+          {streams.map((stream, index) => (
+            <div
+              key={stream.id}
+              className="animate-card-pop-in"
+              style={{ animationDelay: `${Math.min(index * 45, 270)}ms` }}
+            >
+              <VideoCard stream={stream} />
+            </div>
           ))}
           {isFetchingNextPage && SKELETON_KEYS.map((k) => <VideoCardSkeleton key={k} />)}
         </div>

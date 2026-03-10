@@ -19,7 +19,15 @@ export function RelatedVideos({ streams, isLoading = false }: Props) {
       <AutoplayToggle />
       {isLoading
         ? SKELETON_KEYS.map((k) => <RelatedCardSkeleton key={k} />)
-        : visible.map((stream) => <RelatedCard key={stream.id} stream={stream} />)}
+        : visible.map((stream, index) => (
+            <div
+              key={stream.id}
+              className="animate-card-pop-in"
+              style={{ animationDelay: `${Math.min(index * 35, 210)}ms` }}
+            >
+              <RelatedCard stream={stream} />
+            </div>
+          ))}
     </div>
   );
 }

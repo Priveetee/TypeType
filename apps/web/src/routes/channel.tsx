@@ -70,8 +70,14 @@ function ChannelPage() {
         </div>
       )}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8">
-        {filter(videos).map((v) => (
-          <VideoCard key={v.id} stream={v} />
+        {filter(videos).map((v, index) => (
+          <div
+            key={v.id}
+            className="animate-card-pop-in"
+            style={{ animationDelay: `${Math.min(index * 45, 270)}ms` }}
+          >
+            <VideoCard stream={v} />
+          </div>
         ))}
       </div>
       <ScrollSentinel onIntersect={loadMore} enabled={!!hasNextPage && !isFetchingNextPage} />

@@ -130,12 +130,14 @@ function PlaylistDetailPage() {
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-          {playlist.videos.map((video: PlaylistVideoItem) => (
-            <PlaylistVideoRow
+          {playlist.videos.map((video: PlaylistVideoItem, index: number) => (
+            <div
               key={video.id}
-              video={video}
-              onRemove={() => setPendingRemove(video)}
-            />
+              className="animate-card-pop-in"
+              style={{ animationDelay: `${Math.min(index * 45, 270)}ms` }}
+            >
+              <PlaylistVideoRow video={video} onRemove={() => setPendingRemove(video)} />
+            </div>
           ))}
         </div>
       )}

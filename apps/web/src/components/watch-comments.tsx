@@ -33,7 +33,13 @@ export function WatchComments({ videoUrl }: Props) {
       ) : (
         <div className="flex flex-col gap-6">
           {comments.map((comment, i) => (
-            <WatchComment key={comment.id || `c-${i}`} comment={comment} videoUrl={videoUrl} />
+            <div
+              key={comment.id || `c-${i}`}
+              className="animate-card-pop-in"
+              style={{ animationDelay: `${Math.min(i * 35, 210)}ms` }}
+            >
+              <WatchComment comment={comment} videoUrl={videoUrl} />
+            </div>
           ))}
           {showSkeletons && SKELETON_KEYS.map((k) => <WatchCommentSkeleton key={k} />)}
         </div>
