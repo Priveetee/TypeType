@@ -5,6 +5,13 @@ export function formatViews(views: number): string {
   return `${views} views`;
 }
 
+export function formatSubscribers(n: number | undefined): string {
+  if (n == null || n < 0) return "";
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M subscribers`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(0)}K subscribers`;
+  return `${n} subscribers`;
+}
+
 export function formatDuration(seconds: number): string {
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);

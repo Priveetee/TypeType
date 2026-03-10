@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useSubscriptions } from "../hooks/use-subscriptions";
-import { formatDuration, formatViews } from "../lib/format";
+import { formatSubscribers, formatViews } from "../lib/format";
 import type { VideoStream } from "../types/stream";
 import { ChannelAvatar } from "./channel-avatar";
 import { Toast } from "./toast";
@@ -37,9 +37,27 @@ export function WatchInfo({ stream }: Props) {
     }
   }
 
+  const channelMeta = (
+    <div className="flex flex-col min-w-0">
+      <p className="text-sm font-medium text-zinc-100 truncate flex items-center gap-1">
+        {stream.channelName}
+        {stream.uploaderVerified && <VerifiedBadgeIcon />}
+      </p>
+      <p className="text-xs text-zinc-500">
+        {formatSubscribers(stream.uploaderSubscriberCount)}
+        {stream.uploadDate && ` · ${stream.uploadDate}`}
+      </p>
+    </div>
+  );
+
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-base font-semibold text-zinc-100 leading-snug">{stream.title}</h1>
+      <div className="flex items-start justify-between gap-4">
+        <h1 className="text-base font-semibold text-zinc-100 leading-snug">{stream.title}</h1>
+        <span className="text-sm text-zinc-400 flex-shrink-0 mt-0.5">
+          {formatViews(stream.views)}
+        </span>
+      </div>
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0">
           {stream.channelUrl ? (
@@ -59,29 +77,20 @@ export function WatchInfo({ stream }: Props) {
                   {stream.uploaderVerified && <VerifiedBadgeIcon />}
                 </p>
                 <p className="text-xs text-zinc-500">
-                  {formatViews(stream.views)} · {formatDuration(stream.duration)} ·{" "}
-                  {stream.uploadDate}
+                  {formatSubscribers(stream.uploaderSubscriberCount)}
+                  {stream.uploadDate && ` · ${stream.uploadDate}`}
                 </p>
               </div>
             </Link>
           ) : (
-            <>
+            <div className="flex items-center gap-3 min-w-0">
               <ChannelAvatar
                 src={stream.channelAvatar}
                 name={stream.channelName}
                 className="w-9 h-9"
               />
-              <div className="flex flex-col min-w-0">
-                <p className="text-sm font-medium text-zinc-100 truncate flex items-center gap-1">
-                  {stream.channelName}
-                  {stream.uploaderVerified && <VerifiedBadgeIcon />}
-                </p>
-                <p className="text-xs text-zinc-500">
-                  {formatViews(stream.views)} · {formatDuration(stream.duration)} ·{" "}
-                  {stream.uploadDate}
-                </p>
-              </div>
-            </>
+              {channelMeta}
+            </div>
           )}
         </div>
         {stream.channelUrl && (
