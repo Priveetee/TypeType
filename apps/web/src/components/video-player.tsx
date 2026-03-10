@@ -25,6 +25,7 @@ type Props = {
   settingsReady?: boolean;
   autoplay?: boolean;
   originalAudioLocale?: string | null;
+  overlay?: React.ReactNode;
   onVolumeChange?: (volume: number, muted: boolean) => void;
   onTimeUpdate?: (positionMs: number) => void;
   onPause?: () => void;
@@ -75,6 +76,7 @@ export function VideoPlayer({
   settingsReady = false,
   autoplay = false,
   originalAudioLocale,
+  overlay,
   onVolumeChange,
   onTimeUpdate,
   onPause,
@@ -117,6 +119,7 @@ export function VideoPlayer({
         ))}
         {chaptersVtt && <ChaptersTrack src={chaptersVtt} />}
       </MediaProvider>
+      {overlay}
       <DefaultVideoLayout
         icons={defaultLayoutIcons}
         thumbnails={thumbnailVtt}

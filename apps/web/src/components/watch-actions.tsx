@@ -1,8 +1,11 @@
 import { useRef, useState } from "react";
 import { useBlocked } from "../hooks/use-blocked";
 import { useFavoritesPlaylist } from "../hooks/use-favorites-playlist";
+import { useShareUrl } from "../hooks/use-share-url";
 import { useWatchLaterPlaylist } from "../hooks/use-watch-later-playlist";
+import { detectProvider } from "../lib/provider";
 import type { VideoStream } from "../types/stream";
+import { DanmakuControls } from "./danmaku-controls";
 import { PlaylistAddDropdown } from "./playlist-add-dropdown";
 import { Toast } from "./toast";
 import { BanIcon, ClockIcon, ListPlusIcon, ShareIcon, StarIcon } from "./watch-icons";
@@ -16,7 +19,7 @@ const BTN_IDLE = "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800";
 const BTN_ON = "text-zinc-100 bg-zinc-800";
 
 export function WatchActions({ stream }: Props) {
-  const [copied, setCopied] = useState(false);
+  const { copied, share } = useShareUrl();
   const [playlistOpen, setPlaylistOpen] = useState(false);
   const [toastLabel, setToastLabel] = useState<string | null>(null);
   const saveAnchorRef = useRef<HTMLButtonElement>(null);
@@ -38,26 +41,7 @@ export function WatchActions({ stream }: Props) {
   const favorited = isInFavorites(stream.id);
   const channelBlocked =
     !!stream.channelUrl && (blockedChannels.data ?? []).some((b) => b.url === stream.channelUrl);
-
-  async function handleShare() {
-    const url = window.location.href;
-    try {
-      if (navigator.clipboard) {
-        await navigator.clipboard.writeText(url);
-      } else {
-        const el = document.createElement("textarea");
-        el.value = url;
-        el.style.cssText = "position:fixed;opacity:0;pointer-events:none";
-        document.body.appendChild(el);
-        el.focus();
-        el.select();
-        document.execCommand("copy");
-        document.body.removeChild(el);
-      }
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {}
-  }
+  const isNicoNico = detectProvider(stream.id) === "nicovideo";
 
   function handleSaved(label: string) {
     setToastLabel(label);
@@ -96,7 +80,11 @@ export function WatchActions({ stream }: Props) {
 
   return (
     <div className="flex items-center gap-1 flex-wrap">
-      <button type="button" onClick={handleShare} className={`${BTN} ${BTN_IDLE}`}>
+      <button
+        type="button"
+        onClick={() => share(window.location.href)}
+        className={`${BTN} ${BTN_IDLE}`}
+      >
         <ShareIcon />
         Share
       </button>
@@ -151,6 +139,7 @@ export function WatchActions({ stream }: Props) {
           {channelBlocked ? "Unblock channel" : "Block channel"}
         </button>
       )}
+      {isNicoNico && <DanmakuControls />}
       {playlistOpen && (
         <PlaylistAddDropdown
           stream={stream}
