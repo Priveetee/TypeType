@@ -1,4 +1,5 @@
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { addHistory, clearHistory, fetchHistory, removeHistory } from "../lib/api-user";
 import type { HistoryItem } from "../types/user";
 
@@ -6,13 +7,23 @@ const PAGE_SIZE = 40;
 
 const historyKey = (q: string) => ["history", q];
 
+function useDebounced(value: string, ms: number): string {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const id = setTimeout(() => setDebounced(value), ms);
+    return () => clearTimeout(id);
+  }, [value, ms]);
+  return debounced;
+}
+
 export function useHistory(searchQuery = "") {
   const qc = useQueryClient();
+  const debouncedQuery = useDebounced(searchQuery, 300);
 
   const query = useInfiniteQuery({
-    queryKey: historyKey(searchQuery),
+    queryKey: historyKey(debouncedQuery),
     queryFn: ({ pageParam = 0 }) =>
-      fetchHistory({ q: searchQuery || undefined, limit: PAGE_SIZE, offset: pageParam }),
+      fetchHistory({ q: debouncedQuery || undefined, limit: PAGE_SIZE, offset: pageParam }),
     getNextPageParam: (lastPage, pages) => {
       const fetched = pages.reduce((sum, p) => sum + p.items.length, 0);
       return fetched < lastPage.total ? fetched : undefined;
@@ -27,17 +38,26 @@ export function useHistory(searchQuery = "") {
       if (existing) await removeHistory(existing.id);
       await addHistory(item);
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["history"] }),
+    onSuccess: () =>
+      qc
+        .invalidateQueries({ queryKey: ["history"] })
+        .then(() => qc.invalidateQueries({ queryKey: ["history-all"] })),
   });
 
   const remove = useMutation({
     mutationFn: (id: string) => removeHistory(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["history"] }),
+    onSuccess: () =>
+      qc
+        .invalidateQueries({ queryKey: ["history"] })
+        .then(() => qc.invalidateQueries({ queryKey: ["history-all"] })),
   });
 
   const clear = useMutation({
     mutationFn: clearHistory,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["history"] }),
+    onSuccess: () =>
+      qc
+        .invalidateQueries({ queryKey: ["history"] })
+        .then(() => qc.invalidateQueries({ queryKey: ["history-all"] })),
   });
 
   const total = query.data?.pages[0]?.total ?? 0;

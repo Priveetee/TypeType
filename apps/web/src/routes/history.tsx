@@ -1,26 +1,44 @@
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { ConfirmModal } from "../components/confirm-modal";
 import type { FilterState } from "../components/history-filter";
 import { HistoryFilter } from "../components/history-filter";
 import { ScrollSentinel } from "../components/scroll-sentinel";
 import { useHistory } from "../hooks/use-history";
+import { fetchHistory } from "../lib/api-user";
 import { formatDuration } from "../lib/format";
 import type { HistoryItem } from "../types/user";
-
-const MS_PER_DAY = 86_400_000;
 
 function startOfDay(date: Date): number {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
 }
 
-function useDebounce(value: string, ms: number): string {
-  const [debounced, setDebounced] = useState(value);
-  useEffect(() => {
-    const id = setTimeout(() => setDebounced(value), ms);
-    return () => clearTimeout(id);
-  }, [value, ms]);
-  return debounced;
+function startOfWeek(date: Date): number {
+  const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  d.setDate(d.getDate() - d.getDay());
+  return d.getTime();
+}
+
+function startOfMonth(date: Date): number {
+  return new Date(date.getFullYear(), date.getMonth(), 1).getTime();
+}
+
+function applyDateFilter(items: HistoryItem[], filter: FilterState | null): HistoryItem[] {
+  if (filter === null) return items;
+  const now = new Date();
+  return items.filter((item) => {
+    if (filter.kind === "preset") {
+      if (filter.value === "today") return item.watchedAt >= startOfDay(now);
+      if (filter.value === "week") return item.watchedAt >= startOfWeek(now);
+      if (filter.value === "month") return item.watchedAt >= startOfMonth(now);
+    }
+    if (filter.kind === "date") {
+      const dayStart = startOfDay(filter.date);
+      return item.watchedAt >= dayStart && item.watchedAt < dayStart + 86_400_000;
+    }
+    return true;
+  });
 }
 
 function XIcon() {
@@ -44,11 +62,15 @@ function XIcon() {
   );
 }
 
-type HistoryCardProps = { item: HistoryItem; onRemove: () => void };
+type HistoryCardProps = { item: HistoryItem; onRemove: () => void; index: number };
 
-function HistoryCard({ item, onRemove }: HistoryCardProps) {
+function HistoryCard({ item, onRemove, index }: HistoryCardProps) {
+  const delay = Math.min(index * 45, 270);
   return (
-    <div className="flex flex-col gap-2 group relative">
+    <div
+      className="flex flex-col gap-2 group relative animate-card-pop-in"
+      style={{ animationDelay: `${delay}ms` }}
+    >
       <Link to="/watch" search={{ v: item.url }} className="block">
         <div className="relative aspect-video rounded-lg overflow-hidden bg-zinc-800">
           <img
@@ -86,49 +108,40 @@ function HistoryCard({ item, onRemove }: HistoryCardProps) {
   );
 }
 
-function applyDateFilter(items: HistoryItem[], filter: FilterState | null): HistoryItem[] {
-  if (filter === null) return items;
-  const now = Date.now();
-  return items.filter((item) => {
-    if (filter.kind === "preset") {
-      const days = (now - item.watchedAt) / MS_PER_DAY;
-      if (filter.value === "today") return days < 1;
-      if (filter.value === "week") return days < 7;
-      if (filter.value === "month") return days < 30;
-    }
-    if (filter.kind === "date") {
-      const dayStart = startOfDay(filter.date);
-      return item.watchedAt >= dayStart && item.watchedAt < dayStart + MS_PER_DAY;
-    }
-    return true;
-  });
-}
-
 function HistoryPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState<FilterState | null>(null);
   const [pendingRemoveId, setPendingRemoveId] = useState<string | null>(null);
-  const debouncedQuery = useDebounce(searchQuery, 300);
-  const { query, items, total, remove } = useHistory(debouncedQuery);
-  const filtered = applyDateFilter(items, filter);
-  const prevQueryRef = useRef(debouncedQuery);
-  useEffect(() => {
-    prevQueryRef.current = debouncedQuery;
-  }, [debouncedQuery]);
+  const { query, items, total, remove } = useHistory(searchQuery);
+
+  const allItemsQuery = useQuery({
+    queryKey: ["history-all"],
+    queryFn: () => fetchHistory({ limit: 10_000 }),
+    enabled: filter !== null,
+    staleTime: 30_000,
+  });
+
+  const sourceItems = filter !== null ? (allItemsQuery.data?.items ?? []) : items;
+  const filtered = applyDateFilter(sourceItems, filter);
 
   return (
     <div className="flex gap-8 items-start">
       <div className="flex-1 min-w-0">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8">
-          {filtered.map((item: HistoryItem) => (
-            <HistoryCard key={item.id} item={item} onRemove={() => setPendingRemoveId(item.id)} />
+          {filtered.map((item: HistoryItem, index: number) => (
+            <HistoryCard
+              key={item.id}
+              item={item}
+              index={index}
+              onRemove={() => setPendingRemoveId(item.id)}
+            />
           ))}
         </div>
         <ScrollSentinel
           onIntersect={() => {
             if (query.hasNextPage && !query.isFetchingNextPage) query.fetchNextPage();
           }}
-          enabled={!!query.hasNextPage && !query.isFetchingNextPage}
+          enabled={!!query.hasNextPage && !query.isFetchingNextPage && filter === null}
         />
       </div>
       <HistoryFilter
