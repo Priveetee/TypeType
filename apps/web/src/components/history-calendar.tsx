@@ -25,7 +25,7 @@ export function HistoryCalendar({ selected, onSelect }: Props) {
 
   const initialMonth = selected
     ? new Date(selected.getFullYear(), selected.getMonth(), 1)
-    : new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    : new Date(today.getFullYear(), today.getMonth(), 1);
 
   const [viewMonth, setViewMonth] = useState(initialMonth);
 
