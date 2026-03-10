@@ -62,16 +62,16 @@ export function WatchLayout({ stream, startTime }: Props) {
     }, 1000);
   }, []);
 
-  const saveIfEligibleRef = useRef<() => void>(() => {});
-  saveIfEligibleRef.current = () => {
+  const saveRef = useRef<(seeked: boolean) => void>(() => {});
+  saveRef.current = (seeked: boolean) => {
     const pos = positionRef.current;
-    if (pos < 5000) return;
     const durationMs = stream.duration * 1000;
     if (pos >= durationMs * 0.95) return;
-    saveMutateRef.current(pos);
+    if (!seeked && pos < 5000) return;
+    saveMutateRef.current(seeked && pos < 5000 ? 0 : pos);
   };
-
-  const handleSave = useCallback(() => saveIfEligibleRef.current(), []);
+  const handleSave = useCallback(() => saveRef.current(false), []);
+  const handleSeekSave = useCallback(() => saveRef.current(true), []);
 
   useEffect(() => {
     if (!stream.previewFrames) {
@@ -111,9 +111,9 @@ export function WatchLayout({ stream, startTime }: Props) {
   useEffect(() => {
     if (isLive) return;
     const onVisibilityChange = () => {
-      if (document.visibilityState === "hidden") saveIfEligibleRef.current();
+      if (document.visibilityState === "hidden") saveRef.current(false);
     };
-    const interval = setInterval(() => saveIfEligibleRef.current(), 10_000);
+    const interval = setInterval(() => saveRef.current(false), 10_000);
     document.addEventListener("visibilitychange", onVisibilityChange);
     return () => {
       clearInterval(interval);
@@ -148,7 +148,7 @@ export function WatchLayout({ stream, startTime }: Props) {
             onVolumeChange={handleVolumeChange}
             onTimeUpdate={handleTimeUpdate}
             onPause={handleSave}
-            onSeeked={handleSave}
+            onSeeked={handleSeekSave}
             onError={handleError}
             onEnded={handleEnded}
             onSeekReady={(seek) => {
