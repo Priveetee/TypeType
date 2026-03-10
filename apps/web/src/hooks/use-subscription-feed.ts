@@ -1,45 +1,32 @@
-import { useQueries } from "@tanstack/react-query";
-import { fetchChannel } from "../lib/api";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { fetchSubscriptionFeed } from "../lib/api-user";
 import { mapVideoItem } from "../lib/mappers";
 import type { VideoStream } from "../types/stream";
-import { useSubscriptions } from "./use-subscriptions";
 
 type Result = {
   streams: VideoStream[];
   isLoading: boolean;
+  isFetchingNextPage: boolean;
+  hasNextPage: boolean;
+  fetchNextPage: () => void;
 };
 
-function interleave(channels: VideoStream[][]): VideoStream[] {
-  const result: VideoStream[] = [];
-  const maxLen = Math.max(0, ...channels.map((c) => c.length));
-  for (let i = 0; i < maxLen; i++) {
-    for (const channel of channels) {
-      if (i < channel.length) result.push(channel[i]);
-    }
-  }
-  return result;
-}
-
 export function useSubscriptionFeed(): Result {
-  const { query } = useSubscriptions();
-  const subscriptions = query.data ?? [];
-
-  const queries = useQueries({
-    queries: subscriptions.map((sub) => ({
-      queryKey: ["channel-feed", sub.channelUrl],
-      queryFn: async () => {
-        const res = await fetchChannel(sub.channelUrl);
-        return res.videos.map((video) => {
-          const mapped = mapVideoItem(video);
-          return mapped.channelAvatar ? mapped : { ...mapped, channelAvatar: res.avatarUrl };
-        });
-      },
-    })),
+  const query = useInfiniteQuery({
+    queryKey: ["subscription-feed"],
+    queryFn: ({ pageParam }) => fetchSubscriptionFeed(pageParam as number),
+    initialPageParam: 0,
+    getNextPageParam: (last, pages) => (last.nextpage !== null ? pages.length : undefined),
+    staleTime: 5 * 60 * 1000,
   });
 
-  const isLoading = queries.some((q) => q.isLoading);
-  const channels = queries.map((q) => q.data ?? []);
-  const streams = interleave(channels);
+  const streams = (query.data?.pages ?? []).flatMap((page) => page.videos).map(mapVideoItem);
 
-  return { streams, isLoading };
+  return {
+    streams,
+    isLoading: query.isLoading,
+    isFetchingNextPage: query.isFetchingNextPage,
+    hasNextPage: query.hasNextPage,
+    fetchNextPage: query.fetchNextPage,
+  };
 }

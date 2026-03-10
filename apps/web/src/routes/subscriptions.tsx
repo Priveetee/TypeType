@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { ScrollSentinel } from "../components/scroll-sentinel";
 import { VideoCardSkeleton } from "../components/video-card-skeleton";
 import { VideoGrid } from "../components/video-grid";
 import { useBlockedFilter } from "../hooks/use-blocked-filter";
@@ -11,7 +12,8 @@ const SKELETON_KEYS = Array.from({ length: SKELETON_COUNT }, (_, i) => `subs-sk-
 function SubscriptionsPage() {
   const { query } = useSubscriptions();
   const subscriptions = query.data ?? [];
-  const { streams, isLoading } = useSubscriptionFeed();
+  const { streams, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } =
+    useSubscriptionFeed();
   const { filter } = useBlockedFilter();
 
   if (subscriptions.length === 0) {
@@ -24,7 +26,7 @@ function SubscriptionsPage() {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8">
         {SKELETON_KEYS.map((key) => (
           <VideoCardSkeleton key={key} />
         ))}
@@ -32,7 +34,12 @@ function SubscriptionsPage() {
     );
   }
 
-  return <VideoGrid streams={filter(streams)} />;
+  return (
+    <>
+      <VideoGrid streams={filter(streams)} />
+      <ScrollSentinel onIntersect={fetchNextPage} enabled={hasNextPage && !isFetchingNextPage} />
+    </>
+  );
 }
 
 export const Route = createFileRoute("/subscriptions")({

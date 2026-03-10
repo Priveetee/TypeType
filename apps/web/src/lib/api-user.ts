@@ -1,3 +1,4 @@
+import type { VideoItem } from "../types/api";
 import type { HistoryItem, SearchHistoryItem, SettingsItem, SubscriptionItem } from "../types/user";
 import { ApiError } from "./api";
 import { getToken } from "./token";
@@ -101,4 +102,14 @@ export async function addSearchHistory(term: string): Promise<SearchHistoryItem>
 
 export async function clearSearchHistory(): Promise<void> {
   await authed(`${BASE}/search-history`, { method: "DELETE" });
+}
+
+export type SubscriptionFeedPage = {
+  videos: VideoItem[];
+  nextpage: string | null;
+};
+
+export async function fetchSubscriptionFeed(page: number): Promise<SubscriptionFeedPage> {
+  const search = new URLSearchParams({ page: String(page), limit: "30" });
+  return authedJson(`${BASE}/subscriptions/feed?${search.toString()}`);
 }
