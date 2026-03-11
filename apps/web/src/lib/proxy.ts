@@ -23,3 +23,9 @@ export function proxyImage(url: string): string {
   if (!url || !isBiliBiliCdn(url)) return url;
   return proxyUrl(url);
 }
+
+export function toProxiedVttUrl(url: string): string {
+  const parsed = new URL(url);
+  parsed.searchParams.set("fmt", "vtt");
+  return proxyUrl(parsed.toString());
+}
