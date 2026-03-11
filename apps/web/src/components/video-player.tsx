@@ -138,6 +138,7 @@ export function VideoPlayer({
       <DefaultVideoLayout
         icons={defaultLayoutIcons}
         thumbnails={thumbnailVtt}
+        translations={{ Captions: "Subtitles" }}
         slots={{
           settingsMenuItemsStart: (
             <>
