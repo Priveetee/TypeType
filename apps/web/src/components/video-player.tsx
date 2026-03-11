@@ -94,8 +94,12 @@ export function VideoPlayer({
 }: Props) {
   const [subtitleSize, setSubtitleSize] = useState<FontSize>("normal");
   const hasSubtitles = (subtitles?.length ?? 0) > 0;
-  const subtitleStyle: Record<`--${string}`, number> = {
+  const subtitleStyle: Record<`--${string}`, string | number> = {
     "--media-user-font-size": fontSizeToMultiplier(subtitleSize),
+    "--media-user-font-family":
+      "system-ui, -apple-system, 'Segoe UI', 'Noto Sans', 'Noto Sans CJK JP'," +
+      " 'Noto Sans Arabic', 'Hiragino Sans', 'Yu Gothic', 'Microsoft YaHei'," +
+      " 'WenQuanYi Micro Hei', sans-serif",
   };
 
   return (
