@@ -25,6 +25,7 @@ function WatchPage() {
       thumbnail: stream.thumbnail,
       channelName: stream.channelName,
       channelUrl: stream.channelUrl ?? "",
+      channelAvatar: stream.channelAvatar,
       duration: stream.duration,
       progress: 0,
     });

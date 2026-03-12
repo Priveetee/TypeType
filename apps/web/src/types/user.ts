@@ -7,6 +7,7 @@ export type HistoryItem = {
   thumbnail: string;
   channelName: string;
   channelUrl: string;
+  channelAvatar?: string;
   duration: number;
   progress: number;
   watchedAt: number;
