@@ -17,3 +17,7 @@ export function getToken(): Promise<string> {
   }
   return cached;
 }
+
+export function invalidateToken(): void {
+  cached = null;
+}

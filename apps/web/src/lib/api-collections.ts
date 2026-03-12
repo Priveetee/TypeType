@@ -1,23 +1,8 @@
 import type { BlockedItem, ProgressItem } from "../types/user";
 import { ApiError } from "./api";
-import { getToken } from "./token";
+import { authed, authedJson } from "./authed";
 
 const BASE = import.meta.env.VITE_API_URL;
-
-async function authed(url: string, init?: RequestInit): Promise<Response> {
-  const token = await getToken();
-  return fetch(url, {
-    ...init,
-    headers: { "X-Instance-Token": token, ...(init?.headers ?? {}) },
-  });
-}
-
-async function authedJson<T>(url: string, init?: RequestInit): Promise<T> {
-  const res = await authed(url, init);
-  const body = await res.json();
-  if (!res.ok) throw new ApiError((body as { error: string }).error, res.status);
-  return body as T;
-}
 
 export async function fetchProgress(videoUrl: string): Promise<ProgressItem> {
   const res = await authed(`${BASE}/progress/${encodeURIComponent(videoUrl)}`);
