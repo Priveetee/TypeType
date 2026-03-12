@@ -1,1 +1,1 @@
-export type { PlaylistItem, PlaylistVideoItem } from "./user";
+export type { PlaylistItem } from "./user";

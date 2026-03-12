@@ -16,8 +16,6 @@ const MONTH_NAMES = [
   "December",
 ];
 
-export { MONTH_NAMES };
-
 const CURRENT_YEAR = new Date().getFullYear();
 const YEARS = Array.from({ length: CURRENT_YEAR - 1999 }, (_, i) => CURRENT_YEAR - i);
 

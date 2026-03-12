@@ -1,5 +1,5 @@
 export const REGULAR_DISPLAY_MS = 6000;
-export const STATIC_DISPLAY_MS = 3000;
+const STATIC_DISPLAY_MS = 3000;
 export const N_LANES = 8;
 export const LANE_HEIGHT_PX = 36;
 export const CHAR_WIDTH_PX = 14;

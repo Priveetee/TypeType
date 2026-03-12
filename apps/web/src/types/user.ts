@@ -43,11 +43,6 @@ export type ProgressItem = {
   updatedAt: number;
 };
 
-export type FavoriteItem = {
-  videoUrl: string;
-  favoritedAt: number;
-};
-
 export type SettingsItem = {
   defaultService: ServiceId;
   defaultQuality: string;

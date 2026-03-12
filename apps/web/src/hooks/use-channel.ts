@@ -4,7 +4,7 @@ import { mapVideoItem } from "../lib/mappers";
 import { proxyImage } from "../lib/proxy";
 import type { VideoStream } from "../types/stream";
 
-export type ChannelMeta = {
+type ChannelMeta = {
   name: string;
   description: string;
   avatarUrl: string;
@@ -13,7 +13,7 @@ export type ChannelMeta = {
   isVerified: boolean;
 };
 
-export type ChannelPage = {
+type ChannelPage = {
   meta: ChannelMeta | null;
   videos: VideoStream[];
   nextpage: string | null;

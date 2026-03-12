@@ -1,4 +1,4 @@
-export type Language = {
+type Language = {
   code: string;
   label: string;
   flag?: string;

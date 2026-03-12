@@ -26,7 +26,7 @@ type HistoryParams = {
   offset?: number;
 };
 
-export type HistoryPage = {
+type HistoryPage = {
   items: HistoryItem[];
   total: number;
 };
@@ -104,7 +104,7 @@ export async function clearSearchHistory(): Promise<void> {
   await authed(`${BASE}/search-history`, { method: "DELETE" });
 }
 
-export type SubscriptionFeedPage = {
+type SubscriptionFeedPage = {
   videos: VideoItem[];
   nextpage: string | null;
 };

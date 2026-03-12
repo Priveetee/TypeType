@@ -1,4 +1,4 @@
-import type { BlockedItem, FavoriteItem, ProgressItem } from "../types/user";
+import type { BlockedItem, ProgressItem } from "../types/user";
 import { ApiError } from "./api";
 import { getToken } from "./token";
 
@@ -37,18 +37,6 @@ export async function updateProgress(videoUrl: string, position: number): Promis
     const body = await res.json().catch(() => ({ error: "update failed" }));
     throw new ApiError((body as { error: string }).error, res.status);
   }
-}
-
-export function fetchFavorites(): Promise<FavoriteItem[]> {
-  return authedJson(`${BASE}/favorites`);
-}
-
-export async function addFavorite(videoUrl: string): Promise<void> {
-  await authed(`${BASE}/favorites/${encodeURIComponent(videoUrl)}`, { method: "POST" });
-}
-
-export async function removeFavorite(videoUrl: string): Promise<void> {
-  await authed(`${BASE}/favorites/${encodeURIComponent(videoUrl)}`, { method: "DELETE" });
 }
 
 export function fetchBlockedChannels(): Promise<BlockedItem[]> {

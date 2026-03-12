@@ -1,4 +1,4 @@
-export type NavItem = {
+type NavItem = {
   label: string;
   to: string;
   icon: React.ReactNode;

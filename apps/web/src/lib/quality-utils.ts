@@ -1,6 +1,6 @@
 import type { VideoQualityOption } from "@vidstack/react";
 
-export type CodecFamily = "H.264" | "VP9";
+type CodecFamily = "H.264" | "VP9";
 
 export function codecFamily(codec: string | null): CodecFamily | null {
   if (!codec) return null;
