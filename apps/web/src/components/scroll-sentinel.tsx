@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 
 type Props = {
   onIntersect: () => void;
@@ -7,8 +7,8 @@ type Props = {
 
 export function ScrollSentinel({ onIntersect, enabled }: Props) {
   const ref = useRef<HTMLDivElement>(null);
-
-  const stableOnIntersect = useCallback(onIntersect, [onIntersect]);
+  const onIntersectRef = useRef(onIntersect);
+  onIntersectRef.current = onIntersect;
 
   useEffect(() => {
     const el = ref.current;
@@ -16,14 +16,14 @@ export function ScrollSentinel({ onIntersect, enabled }: Props) {
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) stableOnIntersect();
+        if (entry.isIntersecting) onIntersectRef.current();
       },
       { rootMargin: "300px" },
     );
 
     observer.observe(el);
     return () => observer.disconnect();
-  }, [stableOnIntersect, enabled]);
+  }, [enabled]);
 
   return <div ref={ref} />;
 }
