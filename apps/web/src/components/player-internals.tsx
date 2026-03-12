@@ -1,4 +1,9 @@
-import { useMediaRemote, useMediaState } from "@vidstack/react";
+import {
+  useAudioOptions,
+  useMediaRemote,
+  useMediaState,
+  useVideoQualityOptions,
+} from "@vidstack/react";
 import { useEffect, useRef } from "react";
 import type { SponsorBlockSegmentItem } from "../types/api";
 
@@ -43,5 +48,60 @@ export function SponsorBlockSkipper({ segments }: { segments: SponsorBlockSegmen
       }
     }
   }, [currentTime, segments, remote]);
+  return null;
+}
+
+type PlayerDefaultsProps = {
+  defaultQuality?: string;
+  defaultAudioLanguage?: string;
+  subtitlesEnabled?: boolean;
+  defaultSubtitleLanguage?: string;
+};
+
+export function PlayerDefaults({
+  defaultQuality,
+  defaultAudioLanguage,
+  subtitlesEnabled,
+  defaultSubtitleLanguage,
+}: PlayerDefaultsProps) {
+  const canPlay = useMediaState("canPlay");
+  const qualityOptions = useVideoQualityOptions({ sort: "descending" });
+  const audioOptions = useAudioOptions();
+  const textTracks = useMediaState("textTracks");
+  const qualityApplied = useRef(false);
+  const audioApplied = useRef(false);
+  const subtitleApplied = useRef(false);
+
+  useEffect(() => {
+    if (!canPlay || qualityApplied.current || !defaultQuality) return;
+    const match = qualityOptions.find((o) => o.label === defaultQuality);
+    if (match) {
+      match.select();
+      qualityApplied.current = true;
+    }
+  }, [canPlay, qualityOptions, defaultQuality]);
+
+  useEffect(() => {
+    if (!canPlay || audioApplied.current || !defaultAudioLanguage) return;
+    const match = audioOptions.find((o) => o.track.language === defaultAudioLanguage);
+    if (match) {
+      match.select();
+      audioApplied.current = true;
+    }
+  }, [canPlay, audioOptions, defaultAudioLanguage]);
+
+  useEffect(() => {
+    if (!canPlay || subtitleApplied.current || !subtitlesEnabled) return;
+    const count = textTracks.length;
+    for (let i = 0; i < count; i++) {
+      const track = textTracks[i];
+      if (track.kind !== "subtitles" && track.kind !== "captions") continue;
+      if (defaultSubtitleLanguage && track.language !== defaultSubtitleLanguage) continue;
+      track.setMode("showing");
+      subtitleApplied.current = true;
+      break;
+    }
+  }, [canPlay, textTracks, subtitlesEnabled, defaultSubtitleLanguage]);
+
   return null;
 }

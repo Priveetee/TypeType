@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useBulletComments } from "../hooks/use-bullet-comments";
 import { useSaveProgress } from "../hooks/use-progress";
 import { useSettings } from "../hooks/use-settings";
+import { useVolumeSync } from "../hooks/use-volume-sync";
 import { buildChaptersVtt } from "../lib/chapters-vtt";
 import { detectProvider } from "../lib/provider";
 import { proxyUrl } from "../lib/proxy";
@@ -11,6 +12,7 @@ import { buildThumbnailVtt } from "../lib/thumbnail-vtt";
 import { useDanmakuStore } from "../stores/danmaku-store";
 import type { VideoStream } from "../types/stream";
 import { DanmakuOverlay } from "./danmaku-overlay";
+import { PlayerDefaults } from "./player-internals";
 import { RelatedVideos } from "./related-videos";
 import { VideoPlayer } from "./video-player";
 import { WatchActions } from "./watch-actions";
@@ -51,16 +53,7 @@ export function WatchLayout({ stream, startTime }: Props) {
   const chaptersVtt = useRef<string | null>(null);
   const saveMutateRef = useRef(save.mutate);
   saveMutateRef.current = save.mutate;
-
-  const updateMutateRef = useRef(update.mutate);
-  updateMutateRef.current = update.mutate;
-  const volumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const handleVolumeChange = useCallback((volume: number, muted: boolean) => {
-    if (volumeTimerRef.current) clearTimeout(volumeTimerRef.current);
-    volumeTimerRef.current = setTimeout(() => {
-      updateMutateRef.current({ volume, muted });
-    }, 1000);
-  }, []);
+  const handleVolumeChange = useVolumeSync(update.mutate);
 
   const saveRef = useRef<(seeked: boolean) => void>(() => {});
   saveRef.current = (seeked: boolean) => {
@@ -141,9 +134,17 @@ export function WatchLayout({ stream, startTime }: Props) {
             autoplay={settingsReady && settings.autoplay}
             originalAudioLocale={originalLocale}
             overlay={
-              isNicoNico && bulletCommentsOn && bulletComments ? (
-                <DanmakuOverlay comments={bulletComments} positionRef={positionRef} />
-              ) : undefined
+              <>
+                {isNicoNico && bulletCommentsOn && bulletComments && (
+                  <DanmakuOverlay comments={bulletComments} positionRef={positionRef} />
+                )}
+                <PlayerDefaults
+                  defaultQuality={settings.defaultQuality}
+                  defaultAudioLanguage={settings.defaultAudioLanguage || undefined}
+                  subtitlesEnabled={settings.subtitlesEnabled}
+                  defaultSubtitleLanguage={settings.defaultSubtitleLanguage || undefined}
+                />
+              </>
             }
             onVolumeChange={handleVolumeChange}
             onTimeUpdate={handleTimeUpdate}
