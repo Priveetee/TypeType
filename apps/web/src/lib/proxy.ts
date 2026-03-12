@@ -20,8 +20,10 @@ function isBiliBiliCdn(url: string): boolean {
 }
 
 export function proxyImage(url: string): string {
-  if (!url || !isBiliBiliCdn(url)) return url;
-  return proxyUrl(url);
+  if (!url) return url;
+  const normalized = url.startsWith("httpss://") ? `https://${url.slice(9)}` : url;
+  if (!isBiliBiliCdn(normalized)) return normalized;
+  return proxyUrl(normalized);
 }
 
 export function toProxiedVttUrl(url: string): string {
