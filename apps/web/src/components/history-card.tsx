@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { formatDuration } from "../lib/format";
+import { proxyImage } from "../lib/proxy";
 import type { HistoryItem } from "../types/user";
 import { ChannelAvatar } from "./channel-avatar";
 
@@ -36,7 +37,7 @@ export function HistoryCard({ item, onRemove, index }: HistoryCardProps) {
       <Link to="/watch" search={{ v: item.url }} className="block">
         <div className="relative aspect-video rounded-lg overflow-hidden bg-zinc-800">
           <img
-            src={item.thumbnail}
+            src={proxyImage(item.thumbnail)}
             alt={item.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
           />
@@ -62,14 +63,14 @@ export function HistoryCard({ item, onRemove, index }: HistoryCardProps) {
         {item.channelUrl ? (
           <Link to="/channel" search={{ url: item.channelUrl }} className="flex-shrink-0 mt-0.5">
             <ChannelAvatar
-              src={item.channelAvatar ?? ""}
+              src={proxyImage(item.channelAvatar ?? "")}
               name={item.channelName}
               className="w-7 h-7"
             />
           </Link>
         ) : (
           <ChannelAvatar
-            src={item.channelAvatar ?? ""}
+            src={proxyImage(item.channelAvatar ?? "")}
             name={item.channelName}
             className="w-7 h-7"
           />
