@@ -1,17 +1,18 @@
 import { useNavigate } from "@tanstack/react-router";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useBulletComments } from "../hooks/use-bullet-comments";
+import { usePlayerError } from "../hooks/use-player-error";
 import { useSaveProgress } from "../hooks/use-progress";
 import { useSettings } from "../hooks/use-settings";
 import { useVolumeSync } from "../hooks/use-volume-sync";
 import { buildChaptersVtt } from "../lib/chapters-vtt";
 import { detectProvider } from "../lib/provider";
 import { proxyUrl } from "../lib/proxy";
-import { resolveManifestSrc } from "../lib/stream-src";
 import { buildThumbnailVtt } from "../lib/thumbnail-vtt";
 import { useDanmakuStore } from "../stores/danmaku-store";
 import type { VideoStream } from "../types/stream";
 import { DanmakuOverlay } from "./danmaku-overlay";
+import { PlayerError } from "./player-error";
 import { PlayerDefaults } from "./player-internals";
 import { RelatedVideos } from "./related-videos";
 import { VideoPlayer } from "./video-player";
@@ -32,20 +33,13 @@ export function WatchLayout({ stream, startTime }: Props) {
   const settingsReady =
     (settingsQuery.isSuccess && !settingsQuery.isPlaceholderData) || settingsQuery.isError;
   const isLive = stream.streamType === "live_stream" || stream.streamType === "audio_live_stream";
-  const nativeEnabled = !isLive && Boolean(stream.videoOnlyStreams?.length);
-  const [nativeFailed, setNativeFailed] = useState(false);
+  const { manifestSrc, playerFailed, handleError } = usePlayerError(stream, isLive);
   const { on: bulletCommentsOn } = useDanmakuStore();
   const isNicoNico = detectProvider(stream.id) === "nicovideo";
   const { data: bulletComments } = useBulletComments(stream.id, isNicoNico);
   const originalLocale =
     stream.audioStreams?.find((a) => a.audioTrackName?.toLowerCase().includes("original"))
       ?.audioLocale ?? null;
-
-  const manifestSrc = resolveManifestSrc(stream, isLive, nativeFailed);
-
-  const handleError = useCallback(() => {
-    if (nativeEnabled && !nativeFailed) setNativeFailed(true);
-  }, [nativeEnabled, nativeFailed]);
 
   const positionRef = useRef(0);
   const seekRef = useRef<((seconds: number) => void) | null>(null);
@@ -156,6 +150,7 @@ export function WatchLayout({ stream, startTime }: Props) {
               seekRef.current = seek;
             }}
           />
+          {playerFailed && <PlayerError />}
         </div>
         <WatchInfo stream={stream} />
         <WatchActions stream={stream} />
