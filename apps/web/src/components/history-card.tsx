@@ -1,0 +1,98 @@
+import { Link } from "@tanstack/react-router";
+import { formatDuration } from "../lib/format";
+import type { HistoryItem } from "../types/user";
+import { ChannelAvatar } from "./channel-avatar";
+
+function XIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={12}
+      height={12}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      role="img"
+      aria-label="Remove"
+    >
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  );
+}
+
+type HistoryCardProps = { item: HistoryItem; onRemove: () => void; index: number };
+
+export function HistoryCard({ item, onRemove, index }: HistoryCardProps) {
+  const delay = Math.min(index * 45, 270);
+  return (
+    <div
+      className="flex flex-col gap-2 group relative animate-card-pop-in"
+      style={{ animationDelay: `${delay}ms` }}
+    >
+      <Link to="/watch" search={{ v: item.url }} className="block">
+        <div className="relative aspect-video rounded-lg overflow-hidden bg-zinc-800">
+          <img
+            src={item.thumbnail}
+            alt={item.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+          />
+          {item.duration > 0 && (
+            <span className="absolute bottom-1.5 right-1.5 bg-black/80 text-white text-xs px-1 rounded">
+              {formatDuration(item.duration)}
+            </span>
+          )}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              onRemove();
+            }}
+            aria-label="Remove from history"
+            className="absolute top-1.5 right-1.5 bg-black/70 hover:bg-black/90 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+          >
+            <XIcon />
+          </button>
+        </div>
+      </Link>
+      <div className="flex gap-2">
+        {item.channelUrl ? (
+          <Link to="/channel" search={{ url: item.channelUrl }} className="flex-shrink-0 mt-0.5">
+            <ChannelAvatar
+              src={item.channelAvatar ?? ""}
+              name={item.channelName}
+              className="w-7 h-7"
+            />
+          </Link>
+        ) : (
+          <ChannelAvatar
+            src={item.channelAvatar ?? ""}
+            name={item.channelName}
+            className="w-7 h-7"
+          />
+        )}
+        <div className="flex flex-col gap-0.5 min-w-0">
+          <Link to="/watch" search={{ v: item.url }}>
+            <p className="text-sm font-medium text-zinc-100 line-clamp-2 leading-snug">
+              {item.title}
+            </p>
+          </Link>
+          {item.channelUrl ? (
+            <Link
+              to="/channel"
+              search={{ url: item.channelUrl }}
+              className="text-xs text-zinc-400 hover:text-zinc-200 transition-colors w-fit"
+            >
+              {item.channelName}
+            </Link>
+          ) : (
+            <p className="text-xs text-zinc-400">{item.channelName}</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
