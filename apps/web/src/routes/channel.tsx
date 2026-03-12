@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useCallback } from "react";
 import { ChannelAvatar } from "../components/channel-avatar";
 import { PageSpinner } from "../components/page-spinner";
 import { ScrollSentinel } from "../components/scroll-sentinel";
@@ -16,10 +15,6 @@ function ChannelPage() {
     useChannel(url);
   const { add, remove, isSubscribed } = useSubscriptions();
   const { filter } = useBlockedFilter();
-
-  const loadMore = useCallback(() => {
-    if (hasNextPage && !isFetchingNextPage) fetchNextPage();
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const subscribed = isSubscribed(url);
 
@@ -80,7 +75,7 @@ function ChannelPage() {
           </div>
         ))}
       </div>
-      <ScrollSentinel onIntersect={loadMore} enabled={!!hasNextPage && !isFetchingNextPage} />
+      <ScrollSentinel onIntersect={fetchNextPage} enabled={hasNextPage && !isFetchingNextPage} />
     </div>
   );
 }
