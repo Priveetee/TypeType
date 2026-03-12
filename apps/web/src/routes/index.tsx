@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ContinueWatching } from "../components/continue-watching";
+import { ScrollSentinel } from "../components/scroll-sentinel";
 import { VideoCardSkeleton } from "../components/video-card-skeleton";
 import { VideoGrid } from "../components/video-grid";
 import { useBlockedFilter } from "../hooks/use-blocked-filter";
@@ -21,10 +22,16 @@ function SkeletonGrid() {
 }
 
 function FeedSection() {
-  const { streams, isLoading } = useSubscriptionFeed();
+  const { streams, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } =
+    useSubscriptionFeed();
   const { filter } = useBlockedFilter();
   if (isLoading) return <SkeletonGrid />;
-  return <VideoGrid streams={filter(streams)} />;
+  return (
+    <>
+      <VideoGrid streams={filter(streams)} />
+      <ScrollSentinel onIntersect={fetchNextPage} enabled={hasNextPage && !isFetchingNextPage} />
+    </>
+  );
 }
 
 function TrendingSection() {
