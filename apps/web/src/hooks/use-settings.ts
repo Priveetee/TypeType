@@ -10,6 +10,9 @@ const DEFAULTS: SettingsItem = {
   autoplay: true,
   volume: 1,
   muted: false,
+  subtitlesEnabled: false,
+  defaultSubtitleLanguage: "",
+  defaultAudioLanguage: "",
 };
 
 export function useSettings() {

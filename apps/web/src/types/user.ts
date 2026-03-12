@@ -53,6 +53,9 @@ export type SettingsItem = {
   autoplay: boolean;
   volume: number;
   muted: boolean;
+  subtitlesEnabled: boolean;
+  defaultSubtitleLanguage: string;
+  defaultAudioLanguage: string;
 };
 
 export type SearchHistoryItem = {
