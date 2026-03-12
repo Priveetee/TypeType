@@ -7,12 +7,15 @@ type UsePlayerErrorReturn = {
   manifestSrc: MediaSrc;
   playerFailed: boolean;
   handleError: () => void;
+  reset: () => void;
+  retryKey: number;
 };
 
 export function usePlayerError(stream: VideoStream, isLive: boolean): UsePlayerErrorReturn {
   const nativeEnabled = !isLive && Boolean(stream.videoOnlyStreams?.length);
   const [nativeFailed, setNativeFailed] = useState(false);
   const [playerFailed, setPlayerFailed] = useState(false);
+  const [retryKey, setRetryKey] = useState(0);
 
   const manifestSrc = resolveManifestSrc(stream, isLive, nativeFailed);
 
@@ -21,5 +24,10 @@ export function usePlayerError(stream: VideoStream, isLive: boolean): UsePlayerE
     else setPlayerFailed(true);
   }, [nativeEnabled, nativeFailed]);
 
-  return { manifestSrc, playerFailed, handleError };
+  const reset = useCallback(() => {
+    setPlayerFailed(false);
+    setRetryKey((k) => k + 1);
+  }, []);
+
+  return { manifestSrc, playerFailed, handleError, reset, retryKey };
 }

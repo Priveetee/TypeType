@@ -1,6 +1,10 @@
 import { useRouter } from "@tanstack/react-router";
 
-export function PlayerError() {
+type Props = {
+  onRetry: () => void;
+};
+
+export function PlayerError({ onRetry }: Props) {
   const router = useRouter();
 
   return (
@@ -12,13 +16,22 @@ export function PlayerError() {
           This video could not be played. The stream may be unavailable or unsupported.
         </p>
       </div>
-      <button
-        type="button"
-        onClick={() => router.history.back()}
-        className="px-5 py-2 rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-sm font-medium transition-colors cursor-pointer"
-      >
-        Go back
-      </button>
+      <div className="flex gap-3">
+        <button
+          type="button"
+          onClick={onRetry}
+          className="px-5 py-2 rounded-full bg-zinc-100 hover:bg-white text-zinc-900 text-sm font-medium transition-colors cursor-pointer"
+        >
+          Retry
+        </button>
+        <button
+          type="button"
+          onClick={() => router.history.back()}
+          className="px-5 py-2 rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-sm font-medium transition-colors cursor-pointer"
+        >
+          Go back
+        </button>
+      </div>
     </div>
   );
 }

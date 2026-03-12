@@ -33,7 +33,10 @@ export function WatchLayout({ stream, startTime }: Props) {
   const settingsReady =
     (settingsQuery.isSuccess && !settingsQuery.isPlaceholderData) || settingsQuery.isError;
   const isLive = stream.streamType === "live_stream" || stream.streamType === "audio_live_stream";
-  const { manifestSrc, playerFailed, handleError } = usePlayerError(stream, isLive);
+  const { manifestSrc, playerFailed, handleError, reset, retryKey } = usePlayerError(
+    stream,
+    isLive,
+  );
   const { on: bulletCommentsOn } = useDanmakuStore();
   const isNicoNico = detectProvider(stream.id) === "nicovideo";
   const { data: bulletComments } = useBulletComments(stream.id, isNicoNico);
@@ -113,6 +116,7 @@ export function WatchLayout({ stream, startTime }: Props) {
       <div className="flex-[2] min-w-0 max-w-[133.333vh] flex flex-col gap-4">
         <div className="rounded-lg overflow-hidden">
           <VideoPlayer
+            key={retryKey}
             src={manifestSrc}
             title={stream.title}
             poster={stream.thumbnail}
@@ -150,7 +154,7 @@ export function WatchLayout({ stream, startTime }: Props) {
               seekRef.current = seek;
             }}
           />
-          {playerFailed && <PlayerError />}
+          {playerFailed && <PlayerError onRetry={reset} />}
         </div>
         <WatchInfo stream={stream} />
         <WatchActions stream={stream} />
