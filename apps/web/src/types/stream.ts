@@ -11,6 +11,8 @@ export type VideoStream = {
   id: string;
   title: string;
   thumbnail: string;
+  rawThumbnail: string;
+  rawChannelAvatar: string;
   description?: string;
   channelName: string;
   channelUrl?: string;

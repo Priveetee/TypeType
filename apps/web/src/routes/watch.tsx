@@ -22,10 +22,10 @@ function WatchPage() {
     addToHistoryRef.current({
       url: stream.id,
       title: stream.title,
-      thumbnail: stream.thumbnail,
+      thumbnail: stream.rawThumbnail,
       channelName: stream.channelName,
       channelUrl: stream.channelUrl ?? "",
-      channelAvatar: stream.channelAvatar,
+      channelAvatar: stream.rawChannelAvatar,
       duration: stream.duration,
       progress: 0,
     });
