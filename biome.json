@@ -38,5 +38,17 @@
         "organizeImports": "on"
       }
     }
-  }
+  },
+  "overrides": [
+    {
+      "includes": ["apps/web/src/components/flag-icon.tsx"],
+      "linter": {
+        "rules": {
+          "performance": {
+            "noDynamicNamespaceImportAccess": "off"
+          }
+        }
+      }
+    }
+  ]
 }

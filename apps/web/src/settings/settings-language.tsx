@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { FlagIcon } from "../components/flag-icon";
 import { useSettings } from "../hooks/use-settings";
 import { LANGUAGES } from "../lib/languages";
 
@@ -63,6 +64,9 @@ function LanguageDropdown({ value, onChange, disabled = false }: DropdownProps) 
         onClick={() => setOpen((v) => !v)}
         className={`flex items-center gap-2 bg-zinc-800 border border-zinc-700 text-xs rounded-lg px-3 py-1.5 transition-colors ${disabled ? "text-zinc-600 cursor-not-allowed" : "text-zinc-100 hover:bg-zinc-700"}`}
       >
+        {selected?.flag && (
+          <FlagIcon code={selected.flag} className="w-4 h-3 rounded-sm flex-shrink-0" />
+        )}
         {label}
         {CHEVRON}
       </button>
@@ -95,8 +99,9 @@ function LanguageDropdown({ value, onChange, disabled = false }: DropdownProps) 
                   onChange(l.code);
                   setOpen(false);
                 }}
-                className={`block w-full text-left px-3 py-2 text-xs transition-colors ${l.code === value ? "text-zinc-100 bg-zinc-700" : "text-zinc-400 hover:bg-zinc-700 hover:text-zinc-100"}`}
+                className={`flex items-center gap-2 w-full text-left px-3 py-2 text-xs transition-colors ${l.code === value ? "text-zinc-100 bg-zinc-700" : "text-zinc-400 hover:bg-zinc-700 hover:text-zinc-100"}`}
               >
+                {l.flag && <FlagIcon code={l.flag} className="w-4 h-3 rounded-sm flex-shrink-0" />}
                 {l.label}
               </button>
             ))}
