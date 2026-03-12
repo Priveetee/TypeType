@@ -1,5 +1,6 @@
 export function formatViews(views: number): string {
   if (views < 0) return "";
+  if (views >= 1_000_000_000) return `${(views / 1_000_000_000).toFixed(1)}B views`;
   if (views >= 1_000_000) return `${(views / 1_000_000).toFixed(1)}M views`;
   if (views >= 1_000) return `${(views / 1_000).toFixed(0)}K views`;
   return `${views} views`;
@@ -7,6 +8,7 @@ export function formatViews(views: number): string {
 
 export function formatSubscribers(n: number | undefined): string {
   if (n == null || n < 0) return "";
+  if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(1)}B subscribers`;
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M subscribers`;
   if (n >= 1_000) return `${(n / 1_000).toFixed(0)}K subscribers`;
   return `${n} subscribers`;
@@ -21,6 +23,7 @@ export function formatDuration(seconds: number): string {
 }
 
 export function formatLikes(n: number): string {
+  if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(1)}B`;
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
   if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
   return String(n);
