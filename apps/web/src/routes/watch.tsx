@@ -34,19 +34,14 @@ function WatchPage() {
   if (isLoading || progressFetch.isPending) return <PageSpinner />;
 
   if (isError || !stream) {
-    const is4xx = error instanceof ApiError && error.status >= 400 && error.status < 500;
     const message =
       error instanceof ApiError && error.status === 400 ? error.message : "Failed to load stream.";
     return (
       <StreamError
         message={message}
-        onRetry={
-          is4xx
-            ? undefined
-            : () => {
-                void refetch();
-              }
-        }
+        onRetry={() => {
+          void refetch();
+        }}
       />
     );
   }
