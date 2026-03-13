@@ -1,11 +1,10 @@
 import type { MediaSrc } from "@vidstack/react";
 import type { VideoStream } from "../types/stream";
 import { buildDashManifest } from "./dash-manifest";
+import { API_BASE as BASE } from "./env";
 import { buildNicoMasterPlaylist } from "./nico-manifest";
 import { detectProvider } from "./provider";
 import { proxyUrl } from "./proxy";
-
-const BASE = import.meta.env.VITE_API_URL;
 
 function fallbackSrc(stream: VideoStream, maxHeight?: number): MediaSrc {
   if (stream.videoOnlyStreams?.length && stream.audioStreams?.length) {

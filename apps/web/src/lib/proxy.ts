@@ -1,4 +1,6 @@
-const RAW: string = import.meta.env.VITE_API_URL;
+import { API_BASE } from "./env";
+
+const RAW: string = API_BASE;
 
 function absoluteBase(): string {
   if (RAW.startsWith("http")) return RAW;

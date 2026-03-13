@@ -1,8 +1,7 @@
 import type { PlaylistItem, PlaylistVideoItem } from "../types/user";
 import { ApiError } from "./api";
+import { API_BASE as BASE } from "./env";
 import { getToken } from "./token";
-
-const BASE = import.meta.env.VITE_API_URL;
 
 async function authed(url: string, init?: RequestInit): Promise<Response> {
   const token = await getToken();

@@ -3,7 +3,7 @@ import type { HistoryItem, SearchHistoryItem, SettingsItem, SubscriptionItem } f
 import { ApiError } from "./api";
 import { authed, authedJson } from "./authed";
 
-const BASE = import.meta.env.VITE_API_URL;
+import { API_BASE as BASE } from "./env";
 
 type HistoryParams = {
   q?: string;

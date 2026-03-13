@@ -7,7 +7,7 @@ import type {
   VideoItem,
 } from "../types/api";
 
-const BASE = import.meta.env.VITE_API_URL;
+import { API_BASE as BASE } from "./env";
 
 export class ApiError extends Error {
   status: number;

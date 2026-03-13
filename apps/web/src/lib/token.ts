@@ -1,4 +1,4 @@
-const BASE = import.meta.env.VITE_API_URL;
+import { API_BASE as BASE } from "./env";
 
 let cached: Promise<string> | null = null;
 

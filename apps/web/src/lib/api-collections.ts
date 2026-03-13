@@ -2,7 +2,7 @@ import type { BlockedItem, ProgressItem } from "../types/user";
 import { ApiError } from "./api";
 import { authed, authedJson } from "./authed";
 
-const BASE = import.meta.env.VITE_API_URL;
+import { API_BASE as BASE } from "./env";
 
 export async function fetchProgress(videoUrl: string): Promise<ProgressItem> {
   const res = await authed(`${BASE}/progress/${encodeURIComponent(videoUrl)}`);
