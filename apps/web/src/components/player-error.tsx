@@ -1,4 +1,5 @@
 import { useRouter } from "@tanstack/react-router";
+import { useEffect } from "react";
 
 type Props = {
   onRetry: () => void;
@@ -6,6 +7,15 @@ type Props = {
 
 export function PlayerError({ onRetry }: Props) {
   const router = useRouter();
+
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+    };
+  }, []);
 
   return (
     <div className="fixed inset-0 bg-zinc-950 flex flex-col items-center justify-center gap-5 z-50">
