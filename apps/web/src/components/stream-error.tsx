@@ -1,4 +1,6 @@
 import { useRouter } from "@tanstack/react-router";
+import { parseGeoRestriction } from "../lib/geo-restriction";
+import { FlagIcon } from "./flag-icon";
 
 type Props = {
   message: string;
@@ -7,6 +9,7 @@ type Props = {
 
 export function StreamError({ message, onRetry }: Props) {
   const router = useRouter();
+  const countryCode = parseGeoRestriction(message);
 
   return (
     <div className="fixed inset-0 bg-zinc-950 flex flex-col items-center justify-center gap-5">
@@ -15,7 +18,10 @@ export function StreamError({ message, onRetry }: Props) {
         <p className="text-white text-base font-semibold tracking-tight">
           Couldn't load this video
         </p>
-        <p className="text-zinc-400 text-sm max-w-xs text-center">{message}</p>
+        <div className="flex items-center gap-2">
+          {countryCode && <FlagIcon code={countryCode} className="w-5 h-4 rounded-sm shrink-0" />}
+          <p className="text-zinc-400 text-sm max-w-xs text-center">{message}</p>
+        </div>
       </div>
       <div className="flex gap-3">
         {onRetry && (
