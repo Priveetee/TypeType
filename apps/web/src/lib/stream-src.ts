@@ -7,9 +7,14 @@ import { proxyUrl } from "./proxy";
 
 const BASE = import.meta.env.VITE_API_URL;
 
-function fallbackSrc(stream: VideoStream): MediaSrc {
+function fallbackSrc(stream: VideoStream, maxHeight?: number): MediaSrc {
   if (stream.videoOnlyStreams?.length && stream.audioStreams?.length) {
-    const built = buildDashManifest(stream.videoOnlyStreams, stream.audioStreams, stream.duration);
+    const built = buildDashManifest(
+      stream.videoOnlyStreams,
+      stream.audioStreams,
+      stream.duration,
+      maxHeight,
+    );
     if (built) return { src: built, type: "application/dash+xml" };
   }
   return {
@@ -22,6 +27,7 @@ export function resolveManifestSrc(
   stream: VideoStream,
   isLive: boolean,
   nativeFailed: boolean,
+  qualityFailed: boolean,
 ): MediaSrc {
   const provider = detectProvider(stream.id);
 
@@ -62,5 +68,5 @@ export function resolveManifestSrc(
     };
   }
 
-  return fallbackSrc(stream);
+  return fallbackSrc(stream, qualityFailed ? 720 : undefined);
 }

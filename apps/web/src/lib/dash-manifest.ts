@@ -73,10 +73,13 @@ export function buildDashManifest(
   videoOnlyStreams: VideoStreamItem[],
   audioStreams: AudioStreamItem[],
   duration: number,
+  maxHeight?: number,
 ): string | null {
   if (duration <= 0) return null;
 
-  const videos = videoOnlyStreams.filter(isValidVideo);
+  const videos = videoOnlyStreams
+    .filter(isValidVideo)
+    .filter((s) => maxHeight === undefined || s.height <= maxHeight);
   const audios = audioStreams.filter(isValidAudio);
 
   if (videos.length === 0 || audios.length === 0) return null;

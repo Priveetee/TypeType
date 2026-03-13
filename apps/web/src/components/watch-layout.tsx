@@ -33,7 +33,7 @@ export function WatchLayout({ stream, startTime }: Props) {
   const settingsReady =
     (settingsQuery.isSuccess && !settingsQuery.isPlaceholderData) || settingsQuery.isError;
   const isLive = stream.streamType === "live_stream" || stream.streamType === "audio_live_stream";
-  const { manifestSrc, playerFailed, handleError, reset, retryKey } = usePlayerError(
+  const { manifestSrc, playerFailed, qualityFailed, handleError, reset, retryKey } = usePlayerError(
     stream,
     isLive,
   );
@@ -138,7 +138,7 @@ export function WatchLayout({ stream, startTime }: Props) {
                 )}
                 <PlayerFocuser />
                 <PlayerDefaults
-                  defaultQuality={settings.defaultQuality}
+                  defaultQuality={qualityFailed ? undefined : settings.defaultQuality}
                   defaultAudioLanguage={settings.defaultAudioLanguage || undefined}
                   subtitlesEnabled={settings.subtitlesEnabled}
                   defaultSubtitleLanguage={settings.defaultSubtitleLanguage || undefined}
