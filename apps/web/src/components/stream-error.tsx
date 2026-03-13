@@ -2,9 +2,10 @@ import { useRouter } from "@tanstack/react-router";
 
 type Props = {
   message: string;
+  onRetry?: () => void;
 };
 
-export function StreamError({ message }: Props) {
+export function StreamError({ message, onRetry }: Props) {
   const router = useRouter();
 
   return (
@@ -16,13 +17,24 @@ export function StreamError({ message }: Props) {
         </p>
         <p className="text-zinc-400 text-sm max-w-xs text-center">{message}</p>
       </div>
-      <button
-        type="button"
-        onClick={() => router.history.back()}
-        className="px-5 py-2 rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-sm font-medium transition-colors cursor-pointer"
-      >
-        Go back
-      </button>
+      <div className="flex gap-3">
+        {onRetry && (
+          <button
+            type="button"
+            onClick={onRetry}
+            className="px-5 py-2 rounded-full bg-white hover:bg-zinc-200 text-zinc-900 text-sm font-medium transition-colors cursor-pointer"
+          >
+            Retry
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={() => router.history.back()}
+          className="px-5 py-2 rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-sm font-medium transition-colors cursor-pointer"
+        >
+          Go back
+        </button>
+      </div>
     </div>
   );
 }

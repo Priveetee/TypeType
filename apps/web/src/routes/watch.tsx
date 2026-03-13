@@ -10,7 +10,7 @@ import { ApiError } from "../lib/api";
 
 function WatchPage() {
   const { v } = Route.useSearch();
-  const { data: stream, isLoading, isError, error } = useStream(v);
+  const { data: stream, isLoading, isError, error, refetch } = useStream(v);
   const { add } = useHistory();
   const progressFetch = useProgress(v);
 
@@ -34,9 +34,21 @@ function WatchPage() {
   if (isLoading || progressFetch.isPending) return <PageSpinner />;
 
   if (isError || !stream) {
+    const is4xx = error instanceof ApiError && error.status >= 400 && error.status < 500;
     const message =
       error instanceof ApiError && error.status === 400 ? error.message : "Failed to load stream.";
-    return <StreamError message={message} />;
+    return (
+      <StreamError
+        message={message}
+        onRetry={
+          is4xx
+            ? undefined
+            : () => {
+                void refetch();
+              }
+        }
+      />
+    );
   }
 
   const savedPosition = progressFetch.data?.position ?? 0;
