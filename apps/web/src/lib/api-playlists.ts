@@ -61,8 +61,12 @@ export async function addVideoToPlaylist(
 }
 
 export async function removeVideoFromPlaylist(playlistId: string, videoUrl: string): Promise<void> {
-  await authed(
+  const res = await authed(
     `${BASE}/playlists/${encodeURIComponent(playlistId)}/videos/${encodeURIComponent(videoUrl)}`,
     { method: "DELETE" },
   );
+  if (!res.ok && res.status !== 404) {
+    const body = await res.json().catch(() => ({ error: "remove failed" }));
+    throw new ApiError((body as { error: string }).error, res.status);
+  }
 }
