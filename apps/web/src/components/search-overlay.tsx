@@ -20,6 +20,7 @@ function useDebounced(value: string, delay: number): string {
 export function SearchOverlay({ onClose }: Props) {
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const { settings } = useSettings();
@@ -29,7 +30,11 @@ export function SearchOverlay({ onClose }: Props) {
   const debouncedQuery = useDebounced(query, 300);
 
   useEffect(() => {
-    inputRef.current?.focus();
+    const frame = requestAnimationFrame(() => inputRef.current?.focus());
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
+  useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
@@ -53,7 +58,15 @@ export function SearchOverlay({ onClose }: Props) {
     };
   }, [debouncedQuery, service]);
 
-  function navigate_and_close(term: string) {
+  const showSuggestions = query.trim().length > 0 && suggestions.length > 0;
+  const showHistory = query.trim().length === 0 && history.length > 0;
+  const items = showHistory
+    ? history.slice(0, 8).map((h) => h.term)
+    : showSuggestions
+      ? suggestions.slice(0, 8)
+      : [];
+
+  function navigateAndClose(term: string) {
     add.mutate(term);
     navigate({ to: "/search", search: { q: term, service } });
     onClose();
@@ -61,12 +74,23 @@ export function SearchOverlay({ onClose }: Props) {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (selectedIndex >= 0 && items[selectedIndex]) {
+      navigateAndClose(items[selectedIndex]);
+      return;
+    }
     if (!query.trim()) return;
-    navigate_and_close(query.trim());
+    navigateAndClose(query.trim());
   }
 
-  const showSuggestions = query.trim().length > 0 && suggestions.length > 0;
-  const showHistory = query.trim().length === 0 && history.length > 0;
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setSelectedIndex((i) => Math.min(i + 1, items.length - 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setSelectedIndex((i) => Math.max(i - 1, -1));
+    }
+  }
 
   return (
     <div
@@ -76,6 +100,7 @@ export function SearchOverlay({ onClose }: Props) {
     >
       <button
         type="button"
+        tabIndex={-1}
         aria-label="Close search"
         className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-default"
         onClick={onClose}
@@ -86,52 +111,46 @@ export function SearchOverlay({ onClose }: Props) {
             ref={inputRef}
             type="search"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setSelectedIndex(-1);
+            }}
+            onKeyDown={handleKeyDown}
             placeholder="Search videos, channels..."
             className="w-full h-12 bg-zinc-900 border border-zinc-700 rounded-lg px-4 text-base text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-400"
           />
         </form>
-        {(showSuggestions || showHistory) && (
+        {items.length > 0 && (
           <ul className="mt-1 bg-zinc-900 border border-zinc-700 rounded-lg overflow-hidden">
             {showHistory && (
-              <>
-                <li className="px-4 py-2 flex items-center justify-between">
-                  <span className="text-xs text-zinc-500 uppercase tracking-wider">
-                    Recent searches
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => clear.mutate()}
-                    className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors"
-                  >
-                    Clear
-                  </button>
-                </li>
-                {history.slice(0, 8).map((item) => (
-                  <li key={item.id}>
-                    <button
-                      type="button"
-                      className="w-full text-left px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 transition-colors"
-                      onClick={() => navigate_and_close(item.term)}
-                    >
-                      {item.term}
-                    </button>
-                  </li>
-                ))}
-              </>
+              <li className="px-4 py-2 flex items-center justify-between">
+                <span className="text-xs text-zinc-500 uppercase tracking-wider">
+                  Recent searches
+                </span>
+                <button
+                  type="button"
+                  onClick={() => clear.mutate()}
+                  className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors"
+                >
+                  Clear
+                </button>
+              </li>
             )}
-            {showSuggestions &&
-              suggestions.slice(0, 8).map((s) => (
-                <li key={s}>
-                  <button
-                    type="button"
-                    className="w-full text-left px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 transition-colors"
-                    onClick={() => navigate_and_close(s)}
-                  >
-                    {s}
-                  </button>
-                </li>
-              ))}
+            {items.map((item, index) => (
+              <li key={item}>
+                <button
+                  type="button"
+                  className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
+                    index === selectedIndex
+                      ? "bg-zinc-700 text-zinc-100"
+                      : "text-zinc-300 hover:bg-zinc-800"
+                  }`}
+                  onClick={() => navigateAndClose(item)}
+                >
+                  {item}
+                </button>
+              </li>
+            ))}
           </ul>
         )}
       </div>
