@@ -15,11 +15,21 @@ The easiest way to run everything together is with the provided [docker-compose.
 
 ## Docker (recommended)
 
+Create a `.env` file at the repository root. At minimum:
+
+```
+ALLOWED_ORIGINS=http://localhost:80
+DATABASE_URL=jdbc:postgresql://postgres:5432/typetype
+DATABASE_USER=typetype
+DATABASE_PASSWORD=typetype
+DRAGONFLY_URL=redis://dragonfly:6379
+```
+
+Then start all services:
+
 ```sh
 docker compose up -d
 ```
-
-This starts all five services:
 
 | Service | Port | Description |
 |---|---|---|
@@ -29,7 +39,7 @@ This starts all five services:
 | PostgreSQL 17 | `5432` | User data persistence |
 | DragonflyDB | `6379` | Extraction result cache |
 
-The frontend is available at `http://localhost`.
+The frontend is available at `http://localhost:80`.
 
 ## Development
 
@@ -46,11 +56,11 @@ bun install
 
 ### Configure
 
-Copy the example environment file and set the backend URL:
-
 ```sh
 cp apps/web/.env.example apps/web/.env
 ```
+
+Set `VITE_API_URL` to the URL of your running TypeType-Server:
 
 ```
 VITE_API_URL=http://localhost:8080
