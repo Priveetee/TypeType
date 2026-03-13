@@ -4,7 +4,6 @@ import { buildDashManifest } from "./dash-manifest";
 import { API_BASE as BASE } from "./env";
 import { buildNicoMasterPlaylist } from "./nico-manifest";
 import { detectProvider } from "./provider";
-import { proxyUrl } from "./proxy";
 
 function fallbackSrc(stream: VideoStream, maxHeight?: number): MediaSrc {
   if (stream.videoOnlyStreams?.length && stream.audioStreams?.length) {
@@ -30,8 +29,11 @@ export function resolveManifestSrc(
 ): MediaSrc {
   const provider = detectProvider(stream.id);
 
-  if (isLive && stream.hlsUrl) {
-    return { src: proxyUrl(stream.hlsUrl), type: "application/x-mpegurl" };
+  if (stream.hlsUrl) {
+    return {
+      src: `${BASE}/streams/hls-manifest?url=${encodeURIComponent(stream.id)}`,
+      type: "application/x-mpegurl",
+    };
   }
 
   if (provider === "nicovideo" && stream.videoOnlyStreams?.length) {
