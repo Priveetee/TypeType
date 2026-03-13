@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useUiStore } from "../stores/ui-store";
 import { SearchOverlay } from "./search-overlay";
@@ -75,10 +76,10 @@ export function Navbar() {
         >
           <MenuIcon />
         </button>
-        <div className="flex items-center gap-2">
+        <Link to="/" className="flex items-center gap-2">
           <img src="/logo.svg" alt="TypeType" width={28} height={28} />
           <span className="text-zinc-100 text-sm font-semibold tracking-widest">TYPETYPE</span>
-        </div>
+        </Link>
         <div className="flex-1" />
         <button
           type="button"
