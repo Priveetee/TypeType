@@ -75,8 +75,9 @@ export function Navbar() {
         >
           <MenuIcon />
         </button>
-        <div className="w-28 h-8 bg-zinc-800 rounded flex items-center justify-center">
-          <span className="text-zinc-400 text-sm font-semibold tracking-widest">TYPETYPE</span>
+        <div className="flex items-center gap-2">
+          <img src="/logo.svg" alt="TypeType" width={28} height={28} />
+          <span className="text-zinc-100 text-sm font-semibold tracking-widest">TYPETYPE</span>
         </div>
         <div className="flex-1" />
         <button
