@@ -1,0 +1,52 @@
+services:
+  typetype:
+    image: ghcr.io/priveetee/typetype:latest
+    ports:
+      - "80:80"
+    depends_on:
+      - typetype-server
+    restart: unless-stopped
+
+  typetype-server:
+    image: ghcr.io/priveetee/typetype-server:latest
+    ports:
+      - "8080:8080"
+    env_file: .env
+    depends_on:
+      - postgres
+      - dragonfly
+      - typetype-token
+    restart: unless-stopped
+
+  typetype-token:
+    image: ghcr.io/priveetee/typetype-token:latest
+    ports:
+      - "8081:8081"
+    init: true
+    ipc: host
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: typetype
+      POSTGRES_USER: typetype
+      POSTGRES_PASSWORD: typetype
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  dragonfly:
+    image: docker.dragonflydb.io/dragonflydb/dragonfly:latest
+    ports:
+      - "6379:6379"
+    ulimits:
+      memlock: -1
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
