@@ -50,15 +50,25 @@ export function fetchSubscriptions(): Promise<SubscriptionItem[]> {
 }
 
 export async function subscribe(item: Omit<SubscriptionItem, "subscribedAt">): Promise<void> {
-  await authed(`${BASE}/subscriptions`, {
+  const res = await authed(`${BASE}/subscriptions`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(item),
   });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ error: "subscribe failed" }));
+    throw new ApiError((body as { error: string }).error, res.status);
+  }
 }
 
 export async function unsubscribe(channelUrl: string): Promise<void> {
-  await authed(`${BASE}/subscriptions/${encodeURIComponent(channelUrl)}`, { method: "DELETE" });
+  const res = await authed(`${BASE}/subscriptions/${encodeURIComponent(channelUrl)}`, {
+    method: "DELETE",
+  });
+  if (!res.ok && res.status !== 404) {
+    const body = await res.json().catch(() => ({ error: "unsubscribe failed" }));
+    throw new ApiError((body as { error: string }).error, res.status);
+  }
 }
 
 export function fetchSettings(): Promise<SettingsItem> {

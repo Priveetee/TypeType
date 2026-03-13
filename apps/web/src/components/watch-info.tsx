@@ -97,8 +97,9 @@ export function WatchInfo({ stream }: Props) {
           <button
             type="button"
             onClick={handleSubscribe}
+            disabled={add.isPending || remove.isPending}
             aria-pressed={subscribed}
-            className={`flex-shrink-0 px-4 py-1.5 text-sm font-medium rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 focus-visible:ring-zinc-400 ${
+            className={`flex-shrink-0 px-4 py-1.5 text-sm font-medium rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 focus-visible:ring-zinc-400 disabled:opacity-50 disabled:cursor-not-allowed ${
               subscribed
                 ? "ring-1 ring-zinc-600 bg-zinc-800 text-zinc-100 hover:bg-zinc-700"
                 : "bg-zinc-100 text-zinc-900 hover:bg-white"
