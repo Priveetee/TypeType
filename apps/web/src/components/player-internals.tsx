@@ -1,5 +1,6 @@
 import {
   useAudioOptions,
+  useMediaPlayer,
   useMediaRemote,
   useMediaState,
   useVideoQualityOptions,
@@ -18,6 +19,18 @@ export function SeekBridge({
   useEffect(() => {
     onSeekReadyRef.current((seconds: number) => remote.seek(seconds));
   }, [remote]);
+  return null;
+}
+
+export function PlayerFocuser() {
+  const player = useMediaPlayer();
+  const canPlay = useMediaState("canPlay");
+  const focused = useRef(false);
+  useEffect(() => {
+    if (!canPlay || focused.current || !player?.el) return;
+    focused.current = true;
+    player.el.focus({ preventScroll: true });
+  }, [canPlay, player]);
   return null;
 }
 

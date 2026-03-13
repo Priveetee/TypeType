@@ -13,7 +13,7 @@ import { useDanmakuStore } from "../stores/danmaku-store";
 import type { VideoStream } from "../types/stream";
 import { DanmakuOverlay } from "./danmaku-overlay";
 import { PlayerError } from "./player-error";
-import { PlayerDefaults } from "./player-internals";
+import { PlayerDefaults, PlayerFocuser } from "./player-internals";
 import { RelatedVideos } from "./related-videos";
 import { VideoPlayer } from "./video-player";
 import { WatchActions } from "./watch-actions";
@@ -136,6 +136,7 @@ export function WatchLayout({ stream, startTime }: Props) {
                 {isNicoNico && bulletCommentsOn && bulletComments && (
                   <DanmakuOverlay comments={bulletComments} positionRef={positionRef} />
                 )}
+                <PlayerFocuser />
                 <PlayerDefaults
                   defaultQuality={settings.defaultQuality}
                   defaultAudioLanguage={settings.defaultAudioLanguage || undefined}
