@@ -1,5 +1,6 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { siBilibili, siNiconico, siYoutube } from "simple-icons";
+import { useAuth } from "../hooks/use-auth";
 import { useSettings } from "../hooks/use-settings";
 import { useUiStore } from "../stores/ui-store";
 import type { ServiceId } from "../types/user";
@@ -46,6 +47,7 @@ function NavIcon({ children, label }: { children: React.ReactNode; label: string
 
 export function Sidebar() {
   const collapsed = useUiStore((s) => s.sidebarCollapsed);
+  const { isAdmin } = useAuth();
   const { settings, update } = useSettings();
   const service = settings.defaultService;
   const navigate = useNavigate();
@@ -65,7 +67,7 @@ export function Sidebar() {
       }`}
     >
       <div className="flex flex-col gap-1 px-2">
-        {NAV_ITEMS.map((item) => (
+        {NAV_ITEMS.filter((item) => !item.adminOnly || isAdmin).map((item) => (
           <Link
             key={item.label}
             to={item.to}
