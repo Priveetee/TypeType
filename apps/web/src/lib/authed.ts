@@ -1,20 +1,27 @@
+import { useAuthStore } from "../stores/auth-store";
 import { ApiError } from "./api";
-import { getToken, invalidateToken } from "./token";
+import { refreshSession } from "./auth-session";
+
+function withBearer(init: RequestInit | undefined, token: string): RequestInit {
+  const headers = new Headers(init?.headers);
+  headers.set("Authorization", `Bearer ${token}`);
+  return { ...init, headers };
+}
 
 export async function authed(url: string, init?: RequestInit): Promise<Response> {
-  const token = await getToken();
-  const res = await fetch(url, {
-    ...init,
-    headers: { "X-Instance-Token": token, ...(init?.headers ?? {}) },
-  });
+  const token = useAuthStore.getState().token;
+  if (!token) throw new ApiError("Authentication required", 401);
+  const res = await fetch(url, withBearer(init, token));
   if (res.status === 401) {
-    invalidateToken();
-    const retryToken = await getToken();
-    return fetch(url, {
-      ...init,
-      headers: { "X-Instance-Token": retryToken, ...(init?.headers ?? {}) },
-    });
+    try {
+      const retryToken = await refreshSession();
+      return fetch(url, withBearer(init, retryToken));
+    } catch {
+      useAuthStore.getState().setSignedOut();
+      throw new ApiError("Session expired", 401);
+    }
   }
+  if (res.status === 403) throw new ApiError("Insufficient role", 403);
   return res;
 }
 
