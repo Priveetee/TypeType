@@ -3,6 +3,7 @@ import { fetchSubscriptionFeed } from "../lib/api-user";
 import { mapVideoItem } from "../lib/mappers";
 import { proxyImage } from "../lib/proxy";
 import type { VideoStream } from "../types/stream";
+import { useAuth } from "./use-auth";
 import { useSubscriptions } from "./use-subscriptions";
 
 type Result = {
@@ -14,6 +15,7 @@ type Result = {
 };
 
 export function useSubscriptionFeed(): Result {
+  const { isAuthed } = useAuth();
   const { query: subsQuery } = useSubscriptions();
   const avatarMap = new Map(
     (subsQuery.data ?? []).map((s) => [s.channelUrl, proxyImage(s.avatarUrl)]),
@@ -25,6 +27,7 @@ export function useSubscriptionFeed(): Result {
     initialPageParam: 0,
     getNextPageParam: (last, pages) => (last.nextpage !== null ? pages.length : undefined),
     staleTime: 5 * 60 * 1000,
+    enabled: isAuthed,
   });
 
   const streams = (query.data?.pages ?? [])

@@ -32,11 +32,12 @@ export async function blockChannel(
   url: string,
   name?: string,
   thumbnailUrl?: string,
+  global = false,
 ): Promise<void> {
   await authed(`${BASE}/blocked/channels`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ url, name, thumbnailUrl }),
+    body: JSON.stringify({ url, name, thumbnailUrl, global }),
   });
 }
 
@@ -48,11 +49,11 @@ export function fetchBlockedVideos(): Promise<BlockedItem[]> {
   return authedJson(`${BASE}/blocked/videos`);
 }
 
-export async function blockVideo(url: string): Promise<void> {
+export async function blockVideo(url: string, global = false): Promise<void> {
   await authed(`${BASE}/blocked/videos`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ url }),
+    body: JSON.stringify({ url, global }),
   });
 }
 

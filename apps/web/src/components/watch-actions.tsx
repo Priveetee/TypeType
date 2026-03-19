@@ -1,19 +1,21 @@
 import { useRef, useState } from "react";
+import { useAuth } from "../hooks/use-auth";
 import { useBlocked } from "../hooks/use-blocked";
 import { useFavoritesPlaylist } from "../hooks/use-favorites-playlist";
 import { useShareUrl } from "../hooks/use-share-url";
 import { useWatchLaterPlaylist } from "../hooks/use-watch-later-playlist";
 import { detectProvider } from "../lib/provider";
+import { goto } from "../lib/route-redirect";
 import type { VideoStream } from "../types/stream";
 import { DanmakuControls } from "./danmaku-controls";
 import { PlaylistAddDropdown } from "./playlist-add-dropdown";
 import { Toast } from "./toast";
-import { BanIcon, ClockIcon, ListPlusIcon, ShareIcon, StarIcon } from "./watch-icons";
+import { WatchActionBlockControls } from "./watch-action-block-controls";
+import { ClockIcon, ListPlusIcon, ShareIcon, StarIcon } from "./watch-icons";
 
 type Props = {
   stream: VideoStream;
 };
-
 const BTN = "flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors";
 const BTN_IDLE = "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800";
 const BTN_ON = "text-zinc-100 bg-zinc-800";
@@ -22,7 +24,9 @@ export function WatchActions({ stream }: Props) {
   const { copied, share } = useShareUrl();
   const [playlistOpen, setPlaylistOpen] = useState(false);
   const [toastLabel, setToastLabel] = useState<string | null>(null);
+  const [globalBlock, setGlobalBlock] = useState(false);
   const saveAnchorRef = useRef<HTMLButtonElement>(null);
+  const { isAuthed, canGlobalBlock } = useAuth();
   const {
     add: addWatchLater,
     remove: removeWatchLater,
@@ -36,7 +40,6 @@ export function WatchActions({ stream }: Props) {
     isPending: favPending,
   } = useFavoritesPlaylist();
   const { channels: blockedChannels, addChannel, removeChannel } = useBlocked();
-
   const inWatchLater = isInWatchLater(stream.id);
   const favorited = isInFavorites(stream.id);
   const channelBlocked =
@@ -47,8 +50,11 @@ export function WatchActions({ stream }: Props) {
     setToastLabel(label);
     setTimeout(() => setToastLabel(null), 2000);
   }
-
   async function handleFavorite() {
+    if (!isAuthed) {
+      goto("/");
+      return;
+    }
     if (favorited) {
       await removeFavorite(stream.id);
       handleSaved("Removed from Favorites");
@@ -62,8 +68,11 @@ export function WatchActions({ stream }: Props) {
       handleSaved("Saved to Favorites");
     }
   }
-
   async function handleWatchLater() {
+    if (!isAuthed) {
+      goto("/");
+      return;
+    }
     if (inWatchLater) {
       await removeWatchLater(stream.id);
       handleSaved("Removed from Watch Later");
@@ -76,6 +85,24 @@ export function WatchActions({ stream }: Props) {
       });
       handleSaved("Saved to Watch Later");
     }
+  }
+  function toggleChannelBlock() {
+    const channelUrl = stream.channelUrl;
+    if (!channelUrl) return;
+    if (!isAuthed) {
+      goto("/");
+      return;
+    }
+    if (channelBlocked) {
+      removeChannel.mutate(channelUrl);
+      return;
+    }
+    addChannel.mutate({
+      url: channelUrl,
+      name: stream.channelName,
+      thumbnailUrl: stream.channelAvatar,
+      global: globalBlock,
+    });
   }
 
   return (
@@ -91,7 +118,7 @@ export function WatchActions({ stream }: Props) {
       <button
         type="button"
         onClick={handleFavorite}
-        disabled={favPending}
+        disabled={favPending || !isAuthed}
         aria-pressed={favorited}
         className={`${BTN} ${favorited ? BTN_ON : BTN_IDLE} disabled:opacity-50 disabled:cursor-not-allowed`}
       >
@@ -101,7 +128,7 @@ export function WatchActions({ stream }: Props) {
       <button
         type="button"
         onClick={handleWatchLater}
-        disabled={wlPending}
+        disabled={wlPending || !isAuthed}
         aria-pressed={inWatchLater}
         className={`${BTN} ${inWatchLater ? BTN_ON : BTN_IDLE} disabled:opacity-50 disabled:cursor-not-allowed`}
       >
@@ -113,31 +140,20 @@ export function WatchActions({ stream }: Props) {
         ref={saveAnchorRef}
         type="button"
         onClick={() => setPlaylistOpen((o) => !o)}
+        disabled={!isAuthed}
         className={`${BTN} ${playlistOpen ? BTN_ON : BTN_IDLE}`}
       >
         <ListPlusIcon />
         Save
       </button>
       {stream.channelUrl && (
-        <button
-          type="button"
-          onClick={() => {
-            const cu = stream.channelUrl;
-            if (!cu) return;
-            if (channelBlocked) removeChannel.mutate(cu);
-            else
-              addChannel.mutate({
-                url: cu,
-                name: stream.channelName,
-                thumbnailUrl: stream.channelAvatar,
-              });
-          }}
-          aria-pressed={channelBlocked}
-          className={`${BTN} ${channelBlocked ? BTN_ON : BTN_IDLE}`}
-        >
-          <BanIcon />
-          {channelBlocked ? "Unblock channel" : "Block channel"}
-        </button>
+        <WatchActionBlockControls
+          canGlobalBlock={canGlobalBlock}
+          channelBlocked={channelBlocked}
+          globalBlock={globalBlock}
+          onToggleGlobal={() => setGlobalBlock((v) => !v)}
+          onToggleChannel={toggleChannelBlock}
+        />
       )}
       {isNicoNico && <DanmakuControls />}
       {playlistOpen && (

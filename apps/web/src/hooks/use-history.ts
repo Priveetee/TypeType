@@ -2,6 +2,7 @@ import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-q
 import { useEffect, useState } from "react";
 import { addHistory, clearHistory, fetchHistory, removeHistory } from "../lib/api-user";
 import type { HistoryItem } from "../types/user";
+import { useAuth } from "./use-auth";
 
 const PAGE_SIZE = 40;
 
@@ -18,6 +19,7 @@ function useDebounced(value: string, ms: number): string {
 
 export function useHistory(searchQuery = "") {
   const qc = useQueryClient();
+  const { isAuthed } = useAuth();
   const debouncedQuery = useDebounced(searchQuery, 300);
 
   const query = useInfiniteQuery({
@@ -29,10 +31,12 @@ export function useHistory(searchQuery = "") {
       return fetched < lastPage.total ? fetched : undefined;
     },
     initialPageParam: 0,
+    enabled: isAuthed,
   });
 
   const add = useMutation({
     mutationFn: async (item: Omit<HistoryItem, "id" | "watchedAt">) => {
+      if (!isAuthed) return;
       const cached = qc.getQueryData<{ pages: { items: HistoryItem[] }[] }>(historyKey(""));
       const existing = cached?.pages.flatMap((p) => p.items).find((h) => h.url === item.url);
       if (existing) await removeHistory(existing.id);
@@ -45,7 +49,7 @@ export function useHistory(searchQuery = "") {
   });
 
   const remove = useMutation({
-    mutationFn: (id: string) => removeHistory(id),
+    mutationFn: (id: string) => (isAuthed ? removeHistory(id) : Promise.resolve()),
     onSuccess: () =>
       qc
         .invalidateQueries({ queryKey: ["history"] })
@@ -53,7 +57,7 @@ export function useHistory(searchQuery = "") {
   });
 
   const clear = useMutation({
-    mutationFn: clearHistory,
+    mutationFn: () => (isAuthed ? clearHistory() : Promise.resolve()),
     onSuccess: () =>
       qc
         .invalidateQueries({ queryKey: ["history"] })

@@ -1,7 +1,9 @@
 import type { VideoStream } from "../types/stream";
+import { useAuth } from "./use-auth";
 import { useBlocked } from "./use-blocked";
 
 export function useBlockedFilter() {
+  const { isAuthed } = useAuth();
   const { channels, videos } = useBlocked();
 
   const blockedChannelUrls = new Set((channels.data ?? []).map((item) => item.url));
@@ -14,6 +16,7 @@ export function useBlockedFilter() {
   }
 
   function filter(streams: VideoStream[]): VideoStream[] {
+    if (!isAuthed) return streams;
     return streams.filter((s) => !isBlocked(s));
   }
 

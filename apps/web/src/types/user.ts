@@ -65,4 +65,5 @@ export type BlockedItem = {
   name?: string;
   thumbnailUrl?: string;
   blockedAt: number;
+  global?: boolean;
 };

@@ -1,22 +1,7 @@
 import type { PlaylistItem, PlaylistVideoItem } from "../types/user";
 import { ApiError } from "./api";
+import { authed, authedJson } from "./authed";
 import { API_BASE as BASE } from "./env";
-import { getToken } from "./token";
-
-async function authed(url: string, init?: RequestInit): Promise<Response> {
-  const token = await getToken();
-  return fetch(url, {
-    ...init,
-    headers: { "X-Instance-Token": token, ...(init?.headers ?? {}) },
-  });
-}
-
-async function authedJson<T>(url: string, init?: RequestInit): Promise<T> {
-  const res = await authed(url, init);
-  const body = await res.json();
-  if (!res.ok) throw new ApiError((body as { error: string }).error, res.status);
-  return body as T;
-}
 
 export function fetchPlaylists(): Promise<PlaylistItem[]> {
   return authedJson(`${BASE}/playlists`);

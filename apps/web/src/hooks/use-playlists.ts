@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ApiError } from "../lib/api";
 import {
   addVideoToPlaylist,
   createPlaylist,
@@ -9,6 +10,7 @@ import {
   updatePlaylist,
 } from "../lib/api-playlists";
 import type { PlaylistItem, PlaylistVideoItem } from "../types/user";
+import { useAuth } from "./use-auth";
 
 const KEY = ["playlists"];
 
@@ -26,27 +28,34 @@ type RemoveVideoPayload = {
 
 export function usePlaylists() {
   const qc = useQueryClient();
+  const { isAuthed } = useAuth();
 
-  const query = useQuery({ queryKey: KEY, queryFn: fetchPlaylists });
+  const query = useQuery({ queryKey: KEY, queryFn: fetchPlaylists, enabled: isAuthed });
 
   const create = useMutation({
-    mutationFn: (name: string) => createPlaylist(name),
+    mutationFn: (name: string) =>
+      isAuthed
+        ? createPlaylist(name)
+        : Promise.reject(new ApiError("Authentication required", 401)),
     onSuccess: () => qc.invalidateQueries({ queryKey: KEY }),
   });
 
   const remove = useMutation({
-    mutationFn: (id: string) => deletePlaylist(id),
+    mutationFn: (id: string) => (isAuthed ? deletePlaylist(id) : Promise.resolve()),
     onSuccess: () => qc.invalidateQueries({ queryKey: KEY }),
   });
 
   const rename = useMutation({
     mutationFn: ({ id, name, description }: RenamePayload) =>
-      updatePlaylist(id, { name, description }),
+      isAuthed ? updatePlaylist(id, { name, description }) : Promise.resolve(),
     onSuccess: () => qc.invalidateQueries({ queryKey: KEY }),
   });
 
   const addVideo = useMutation({
-    mutationFn: ({ playlistId, video }: AddVideoPayload) => addVideoToPlaylist(playlistId, video),
+    mutationFn: ({ playlistId, video }: AddVideoPayload) =>
+      isAuthed
+        ? addVideoToPlaylist(playlistId, video)
+        : Promise.reject(new ApiError("Authentication required", 401)),
     onMutate: async ({ playlistId, video }) => {
       await qc.cancelQueries({ queryKey: KEY });
       const snapshot = qc.getQueryData<PlaylistItem[]>(KEY);
@@ -67,7 +76,7 @@ export function usePlaylists() {
 
   const removeVideo = useMutation({
     mutationFn: ({ playlistId, videoUrl }: RemoveVideoPayload) =>
-      removeVideoFromPlaylist(playlistId, videoUrl),
+      isAuthed ? removeVideoFromPlaylist(playlistId, videoUrl) : Promise.resolve(),
     onMutate: async ({ playlistId, videoUrl }) => {
       await qc.cancelQueries({ queryKey: KEY });
       const snapshot = qc.getQueryData<PlaylistItem[]>(KEY);
@@ -85,6 +94,7 @@ export function usePlaylists() {
   });
 
   function isInPlaylist(playlistId: string, videoUrl: string): boolean {
+    if (!isAuthed) return false;
     const pl = (query.data ?? []).find((p) => p.id === playlistId);
     return pl?.videos.some((v) => v.url === videoUrl) ?? false;
   }

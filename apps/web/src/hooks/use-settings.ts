@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchSettings, updateSettings } from "../lib/api-user";
 import type { SettingsItem } from "../types/user";
+import { useAuth } from "./use-auth";
 
 const KEY = ["settings"];
 
@@ -17,10 +18,12 @@ const DEFAULTS: SettingsItem = {
 
 export function useSettings() {
   const qc = useQueryClient();
+  const { isAuthed } = useAuth();
 
   const query = useQuery({
     queryKey: KEY,
     queryFn: () => fetchSettings(),
+    enabled: isAuthed,
     placeholderData: DEFAULTS,
   });
 
@@ -28,6 +31,7 @@ export function useSettings() {
     mutationFn: (patch: Partial<SettingsItem>) => {
       const current = qc.getQueryData<SettingsItem>(KEY) ?? DEFAULTS;
       const next = { ...current, ...patch };
+      if (!isAuthed) return Promise.resolve(next);
       return updateSettings(next);
     },
     onSuccess: (data) => {
