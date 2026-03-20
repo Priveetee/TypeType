@@ -25,7 +25,11 @@ export function useHistory(searchQuery = "") {
   const query = useInfiniteQuery({
     queryKey: historyKey(debouncedQuery),
     queryFn: ({ pageParam = 0 }) =>
-      fetchHistory({ q: debouncedQuery || undefined, limit: PAGE_SIZE, offset: pageParam }),
+      fetchHistory({
+        q: debouncedQuery || undefined,
+        limit: PAGE_SIZE,
+        offset: pageParam,
+      }),
     getNextPageParam: (lastPage, pages) => {
       const fetched = pages.reduce((sum, p) => sum + p.items.length, 0);
       return fetched < lastPage.total ? fetched : undefined;
