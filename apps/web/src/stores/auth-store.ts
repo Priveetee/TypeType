@@ -22,13 +22,26 @@ function toStatus(me: AuthMe): AuthStatus {
   return me.id.startsWith("guest:") ? "guest" : "authenticated";
 }
 
+function normalizeAuthMe(me: AuthMe | null): AuthMe | null {
+  if (!me) return null;
+  return {
+    id: me.id,
+    role: me.role,
+    publicUsername: me.publicUsername ?? null,
+    bio: me.bio ?? null,
+    avatarUrl: me.avatarUrl ?? null,
+    avatarType: me.avatarType ?? null,
+    avatarCode: me.avatarCode ?? null,
+  };
+}
+
 function readStoredAuth(): StoredAuth | null {
   const raw = localStorage.getItem(STORAGE_KEY);
   if (!raw) return null;
   try {
     const parsed = JSON.parse(raw) as StoredAuth;
     if (typeof parsed.token !== "string") return null;
-    return { token: parsed.token, me: parsed.me ?? null };
+    return { token: parsed.token, me: normalizeAuthMe(parsed.me ?? null) };
   } catch {
     return null;
   }
@@ -55,8 +68,10 @@ export const useAuthStore = create<AuthStore>((set) => ({
     set({ token, me: null, status: "loading" });
   },
   setSession: (token, me) => {
-    writeStoredAuth({ token, me });
-    set({ token, me, status: toStatus(me) });
+    const normalized = normalizeAuthMe(me);
+    if (!normalized) return;
+    writeStoredAuth({ token, me: normalized });
+    set({ token, me: normalized, status: toStatus(normalized) });
   },
   setSignedOut: () => {
     localStorage.removeItem(STORAGE_KEY);

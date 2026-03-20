@@ -2,7 +2,12 @@ export type AuthRole = "admin" | "moderator" | "user";
 
 export type AuthMe = {
   id: string;
-  role: AuthRole;
+  role: AuthRole | null;
+  publicUsername: string | null;
+  bio: string | null;
+  avatarUrl: string | null;
+  avatarType: "custom" | "emoji" | null;
+  avatarCode: string | null;
 };
 
 export type AuthStatus = "loading" | "authenticated" | "guest" | "signed_out";
@@ -16,6 +21,9 @@ export type AuthUser = {
   email: string;
   name: string;
   role: AuthRole;
+  avatarUrl: string | null;
+  avatarType: "custom" | "emoji" | null;
+  avatarCode: string | null;
   suspended: boolean;
   verified: boolean;
   createdAt: number | string;

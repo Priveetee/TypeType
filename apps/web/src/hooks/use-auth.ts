@@ -10,6 +10,11 @@ export function useAuth() {
   const role = me?.role ?? null;
   const isAuthed = token !== null;
   const isGuest = status === "guest";
+  const publicUsername = me?.publicUsername ?? null;
+  const bio = me?.bio ?? null;
+  const avatarUrl = me?.avatarUrl ?? null;
+  const avatarType = me?.avatarType ?? null;
+  const avatarCode = me?.avatarCode ?? null;
   const isAdmin = role === "admin";
   const isModerator = role === "moderator";
   const canGlobalBlock = useMemo(() => isAdmin || isModerator, [isAdmin, isModerator]);
@@ -18,6 +23,11 @@ export function useAuth() {
     token,
     me,
     role,
+    publicUsername,
+    bio,
+    avatarUrl,
+    avatarType,
+    avatarCode,
     status,
     isAuthed,
     isGuest,

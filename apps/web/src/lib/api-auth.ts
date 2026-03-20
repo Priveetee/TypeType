@@ -27,6 +27,18 @@ async function authedJson<T>(url: string, token: string): Promise<T> {
   return body as T;
 }
 
+function normalizeAuthMe(me: AuthMe): AuthMe {
+  return {
+    id: me.id,
+    role: me.role,
+    publicUsername: me.publicUsername ?? null,
+    bio: me.bio ?? null,
+    avatarUrl: me.avatarUrl ?? null,
+    avatarType: me.avatarType ?? null,
+    avatarCode: me.avatarCode ?? null,
+  };
+}
+
 export async function registerAuth(payload: RegisterPayload): Promise<AuthResponse> {
   const res = await fetch(`${BASE}/auth/register`, {
     method: "POST",
@@ -69,5 +81,5 @@ export async function resetPassword(payload: {
 }
 
 export function fetchMe(token: string): Promise<AuthMe> {
-  return authedJson<AuthMe>(`${BASE}/auth/me`, token);
+  return authedJson<AuthMe>(`${BASE}/auth/me`, token).then(normalizeAuthMe);
 }

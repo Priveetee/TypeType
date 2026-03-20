@@ -3,8 +3,19 @@ import { ApiError } from "./api";
 import { authed, authedJson } from "./authed";
 import { API_BASE as BASE } from "./env";
 
+function normalizeAdminUser(user: AuthUser): AuthUser {
+  return {
+    ...user,
+    avatarUrl: user.avatarUrl ?? null,
+    avatarType: user.avatarType ?? null,
+    avatarCode: user.avatarCode ?? null,
+  };
+}
+
 export function fetchAdminUsers(): Promise<AuthUser[]> {
-  return authedJson<AuthUser[]>(`${BASE}/admin/users`);
+  return authedJson<AuthUser[]>(`${BASE}/admin/users`).then((users) =>
+    users.map(normalizeAdminUser),
+  );
 }
 
 export async function updateUserRole(id: string, role: AuthRole): Promise<void> {
