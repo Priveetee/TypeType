@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { formatDuration } from "../lib/format";
 import { proxyImage } from "../lib/proxy";
 import type { HistoryItem } from "../types/user";
-import { ChannelAvatar } from "./channel-avatar";
+import { HistoryChannelAvatar } from "./history-channel-avatar";
 
 function XIcon() {
   return (
@@ -26,6 +26,16 @@ function XIcon() {
 }
 
 type HistoryCardProps = { item: HistoryItem; onRemove: () => void; index: number };
+
+function formatWatchedAt(timestamp: number): string {
+  return new Date(timestamp).toLocaleString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
 
 export function HistoryCard({ item, onRemove, index }: HistoryCardProps) {
   const delay = Math.min(index * 45, 270);
@@ -62,18 +72,10 @@ export function HistoryCard({ item, onRemove, index }: HistoryCardProps) {
       <div className="flex gap-2">
         {item.channelUrl ? (
           <Link to="/channel" search={{ url: item.channelUrl }} className="flex-shrink-0 mt-0.5">
-            <ChannelAvatar
-              src={proxyImage(item.channelAvatar ?? "")}
-              name={item.channelName}
-              className="w-7 h-7"
-            />
+            <HistoryChannelAvatar item={item} className="w-7 h-7" />
           </Link>
         ) : (
-          <ChannelAvatar
-            src={proxyImage(item.channelAvatar ?? "")}
-            name={item.channelName}
-            className="w-7 h-7"
-          />
+          <HistoryChannelAvatar item={item} className="w-7 h-7" />
         )}
         <div className="flex flex-col gap-0.5 min-w-0">
           <Link to="/watch" search={{ v: item.url }}>
@@ -92,6 +94,7 @@ export function HistoryCard({ item, onRemove, index }: HistoryCardProps) {
           ) : (
             <p className="text-xs text-zinc-400">{item.channelName}</p>
           )}
+          <p className="text-[11px] text-zinc-500">Watched {formatWatchedAt(item.watchedAt)}</p>
         </div>
       </div>
     </div>
