@@ -1,7 +1,7 @@
 import { useAuthStore } from "../stores/auth-store";
 import type { AuthMe } from "../types/auth";
 import { ApiError } from "./api";
-import { fetchMe, guestAuth, loginAuth, refreshAuth, registerAuth } from "./api-auth";
+import { fetchMe, loginAuth, refreshAuth, registerAuth } from "./api-auth";
 
 type Credentials = {
   email: string;
@@ -16,10 +16,6 @@ async function hydrateSession(token: string): Promise<AuthMe> {
   const me = await fetchMe(token);
   useAuthStore.getState().setSession(token, me);
   return me;
-}
-
-export function getAuthToken(): string | null {
-  return useAuthStore.getState().token;
 }
 
 export async function refreshSession(): Promise<string> {
@@ -57,10 +53,5 @@ export async function loginSession(payload: Credentials): Promise<void> {
 
 export async function registerSession(payload: RegisterPayload): Promise<void> {
   const response = await registerAuth(payload);
-  await hydrateSession(response.token);
-}
-
-export async function guestSession(): Promise<void> {
-  const response = await guestAuth();
   await hydrateSession(response.token);
 }

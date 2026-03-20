@@ -45,11 +45,6 @@ export async function loginAuth(payload: AuthPayload): Promise<AuthResponse> {
   return parseAuthResponse(res);
 }
 
-export async function guestAuth(): Promise<AuthResponse> {
-  const res = await fetch(`${BASE}/auth/guest`, { method: "POST" });
-  return parseAuthResponse(res);
-}
-
 export async function refreshAuth(token: string): Promise<AuthResponse> {
   const res = await fetch(`${BASE}/auth/refresh`, {
     method: "POST",
