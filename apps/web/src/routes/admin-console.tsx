@@ -40,6 +40,12 @@ function AdminConsolePage() {
   );
   const selectedUser = filtered.find((user) => user.id === selectedUserId) ?? null;
 
+  useEffect(() => {
+    if (selectedUserId !== null) return;
+    if (filtered.length === 0) return;
+    setSelectedUserId(filtered[0].id);
+  }, [selectedUserId, filtered]);
+
   if (!isAdmin) {
     goto("/");
     return null;
