@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useSettings } from "../hooks/use-settings";
 import { SettingsBlocked } from "../settings/settings-blocked";
-import { SettingsData } from "../settings/settings-data";
 import { SettingsLanguage } from "../settings/settings-language";
+import { SettingsPipePipeRestore } from "../settings/settings-pipepipe-restore";
 import { SettingsPlayback } from "../settings/settings-playback";
 import { SettingsPrivacy } from "../settings/settings-privacy";
 import { SettingsService } from "../settings/settings-service";
@@ -17,7 +17,7 @@ function SettingsPage() {
       {settings.defaultService === 0 && <SettingsLanguage />}
       <SettingsService />
       <SettingsPrivacy />
-      <SettingsData />
+      <SettingsPipePipeRestore />
       <SettingsBlocked />
     </div>
   );
