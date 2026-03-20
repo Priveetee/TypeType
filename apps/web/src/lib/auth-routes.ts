@@ -1,6 +1,12 @@
-export type RedirectTarget = "/" | "/history" | "/playlists" | "/settings" | "/subscriptions";
+export type RedirectTarget =
+  | "/"
+  | "/history"
+  | "/playlists"
+  | "/profile"
+  | "/settings"
+  | "/subscriptions";
 
-const PROTECTED_PREFIXES = ["/history", "/playlists", "/settings", "/subscriptions"];
+const PROTECTED_PREFIXES = ["/history", "/playlists", "/profile", "/settings", "/subscriptions"];
 const AUTH_PAGES = ["/login", "/register", "/reset-password"];
 
 export function requiresAuth(pathname: string): boolean {
@@ -25,6 +31,7 @@ export function isAuthPage(pathname: string): boolean {
 export function sanitizeRedirect(value: string | undefined): RedirectTarget {
   if (!value) return "/";
   if (value === "/history") return "/history";
+  if (value === "/profile") return "/profile";
   if (value === "/settings") return "/settings";
   if (value === "/subscriptions") return "/subscriptions";
   if (value === "/playlists" || value.startsWith("/playlists/")) return "/playlists";

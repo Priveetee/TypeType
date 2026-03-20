@@ -59,13 +59,26 @@ export const NAV_ITEMS: NavItem[] = [
     ),
   },
   {
+    label: "Profile",
+    to: "/profile",
+    icon: (
+      <>
+        <circle cx="12" cy="8" r="3" />
+        <path d="M5 21v-2a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v2" />
+      </>
+    ),
+  },
+  {
     label: "Admin",
     to: "/admin-console",
     adminOnly: true,
     icon: (
       <>
-        <circle cx="12" cy="8" r="3" />
-        <path d="M5 21v-2a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v2" />
+        <path d="M14.7 6.3l3 3" />
+        <path d="M11.8 9.2l4 4" />
+        <path d="M8.9 12.1l3.1 3.1" />
+        <path d="M6 15l3 3" />
+        <path d="M3 21l6-2 10-10a2.12 2.12 0 1 0-3-3L6 16l-3 5z" />
       </>
     ),
   },
