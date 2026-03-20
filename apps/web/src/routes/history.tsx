@@ -6,6 +6,7 @@ import { HistoryCard } from "../components/history-card";
 import type { FilterState } from "../components/history-filter";
 import { HistoryFilter } from "../components/history-filter";
 import { ScrollSentinel } from "../components/scroll-sentinel";
+import { useAuth } from "../hooks/use-auth";
 import { useHistory } from "../hooks/use-history";
 import { fetchHistory } from "../lib/api-user";
 import type { HistoryItem } from "../types/user";
@@ -16,7 +17,9 @@ function startOfDay(date: Date): number {
 
 function startOfWeek(date: Date): number {
   const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-  d.setDate(d.getDate() - d.getDay());
+  const day = d.getDay();
+  const offset = day === 0 ? 6 : day - 1;
+  d.setDate(d.getDate() - offset);
   return d.getTime();
 }
 
@@ -24,38 +27,44 @@ function startOfMonth(date: Date): number {
   return new Date(date.getFullYear(), date.getMonth(), 1).getTime();
 }
 
-function applyDateFilter(items: HistoryItem[], filter: FilterState | null): HistoryItem[] {
-  if (filter === null) return items;
+type DateRange = { from: number; to: number } | null;
+
+function rangeFromFilter(filter: FilterState | null): DateRange {
+  if (filter === null) return null;
   const now = new Date();
-  return items.filter((item) => {
-    if (filter.kind === "preset") {
-      if (filter.value === "today") return item.watchedAt >= startOfDay(now);
-      if (filter.value === "week") return item.watchedAt >= startOfWeek(now);
-      if (filter.value === "month") return item.watchedAt >= startOfMonth(now);
-    }
-    if (filter.kind === "date") {
-      const dayStart = startOfDay(filter.date);
-      return item.watchedAt >= dayStart && item.watchedAt < dayStart + 86_400_000;
-    }
-    return true;
-  });
+  if (filter.kind === "preset") {
+    if (filter.value === "today") return { from: startOfDay(now), to: Number.MAX_SAFE_INTEGER };
+    if (filter.value === "week") return { from: startOfWeek(now), to: Number.MAX_SAFE_INTEGER };
+    return { from: startOfMonth(now), to: Number.MAX_SAFE_INTEGER };
+  }
+  const from = startOfDay(filter.date);
+  return { from, to: from + 86_400_000 };
 }
 
 function HistoryPage() {
+  const { isAuthed } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState<FilterState | null>(null);
   const [pendingRemoveId, setPendingRemoveId] = useState<string | null>(null);
   const { query, items, total, remove } = useHistory(searchQuery);
+  const dateRange = rangeFromFilter(filter);
 
   const allItemsQuery = useQuery({
-    queryKey: ["history-all"],
-    queryFn: () => fetchHistory({ limit: 10_000 }),
-    enabled: filter !== null,
+    queryKey: ["history-filtered", searchQuery, dateRange?.from ?? null, dateRange?.to ?? null],
+    queryFn: () =>
+      fetchHistory({
+        q: searchQuery || undefined,
+        from: dateRange?.from,
+        to: dateRange?.to,
+        limit: 500,
+        offset: 0,
+      }),
+    enabled: filter !== null && isAuthed,
     staleTime: 30_000,
   });
 
-  const sourceItems = filter !== null ? (allItemsQuery.data?.items ?? []) : items;
-  const filtered = applyDateFilter(sourceItems, filter);
+  const filtered = filter !== null ? (allItemsQuery.data?.items ?? []) : items;
+  const filteredTotal = filter !== null ? (allItemsQuery.data?.total ?? 0) : total;
 
   return (
     <div className="flex gap-8 items-start">
@@ -82,7 +91,7 @@ function HistoryPage() {
         onSearchChange={setSearchQuery}
         filter={filter}
         onFilterChange={setFilter}
-        resultCount={filter !== null ? filtered.length : total}
+        resultCount={filteredTotal}
       />
       {pendingRemoveId !== null && (
         <ConfirmModal

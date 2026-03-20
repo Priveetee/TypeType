@@ -44,8 +44,7 @@ export function HistoryCalendar({ selected, onSelect }: Props) {
   };
 
   const handleMonthChange = (m: number) => {
-    const clamped = year === today.getFullYear() && m > today.getMonth() ? today.getMonth() : m;
-    setViewMonth(new Date(year, clamped, 1));
+    setViewMonth(new Date(year, m, 1));
   };
 
   const handleYearChange = (y: number) => {

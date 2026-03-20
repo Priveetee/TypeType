@@ -7,6 +7,8 @@ import { API_BASE as BASE } from "./env";
 
 type HistoryParams = {
   q?: string;
+  from?: number;
+  to?: number;
   limit?: number;
   offset?: number;
 };
@@ -19,6 +21,8 @@ type HistoryPage = {
 export async function fetchHistory(params: HistoryParams = {}): Promise<HistoryPage> {
   const search = new URLSearchParams();
   if (params.q) search.set("q", params.q);
+  if (params.from !== undefined) search.set("from", String(params.from));
+  if (params.to !== undefined) search.set("to", String(params.to));
   if (params.limit !== undefined) search.set("limit", String(params.limit));
   if (params.offset !== undefined) search.set("offset", String(params.offset));
   const qs = search.toString();

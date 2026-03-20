@@ -41,7 +41,7 @@ function SearchIcon() {
 }
 
 function formatDate(date: Date): string {
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
 export function HistoryFilter({
