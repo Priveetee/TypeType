@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { ProfileAvatar } from "../components/profile-avatar";
+import { ProfileAvatarSettings } from "../components/profile-avatar-settings";
 import { Toast } from "../components/toast";
 import { useAuth } from "../hooks/use-auth";
 import { useProfile } from "../hooks/use-profile";
@@ -107,6 +108,7 @@ function ProfilePage() {
           </button>
         </div>
       </section>
+      <ProfileAvatarSettings />
       <Toast message={toast} />
     </div>
   );
