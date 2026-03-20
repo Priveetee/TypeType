@@ -3,6 +3,7 @@
   "workspaces": {
     ".": {
       "ignore": [".venv-browserbase/**"],
+      // Required by @vidstack/react at build time. Do not remove.
       "ignoreDependencies": ["media-icons"]
     }
   }
