@@ -1,10 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { ProfileAvatar } from "../components/profile-avatar";
 import { ProfileAvatarSettings } from "../components/profile-avatar-settings";
 import { Toast } from "../components/toast";
 import { useAuth } from "../hooks/use-auth";
 import { useProfile } from "../hooks/use-profile";
+import { parseProfileServerError } from "../lib/profile-errors";
 import { normalizeField, validateBio, validatePublicUsername } from "../lib/profile-validation";
 
 function ProfilePage() {
@@ -12,6 +13,8 @@ function ProfilePage() {
   const { save } = useProfile();
   const [publicUsername, setPublicUsername] = useState("");
   const [bio, setBio] = useState("");
+  const [serverUsernameError, setServerUsernameError] = useState<string | null>(null);
+  const [serverBioError, setServerBioError] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => {
@@ -28,8 +31,8 @@ function ProfilePage() {
 
   const normalizedUsername = normalizeField(publicUsername);
   const normalizedBio = normalizeField(bio);
-  const usernameError = validatePublicUsername(normalizedUsername);
-  const bioError = validateBio(normalizedBio);
+  const usernameError = serverUsernameError ?? validatePublicUsername(normalizedUsername);
+  const bioError = serverBioError ?? validateBio(normalizedBio);
   const hasError = usernameError !== null || bioError !== null;
 
   const isDirty = useMemo(() => {
@@ -60,6 +63,7 @@ function ProfilePage() {
             id="publicUsername"
             value={publicUsername}
             onChange={(event) => setPublicUsername(event.target.value)}
+            onFocus={() => setServerUsernameError(null)}
             placeholder="john.doe"
             className="h-9 rounded-md border border-zinc-700 bg-zinc-950 px-3 text-sm text-zinc-100"
           />
@@ -76,6 +80,7 @@ function ProfilePage() {
             id="bio"
             value={bio}
             onChange={(event) => setBio(event.target.value)}
+            onFocus={() => setServerBioError(null)}
             placeholder="Tell people who you are"
             maxLength={280}
             rows={4}
@@ -94,11 +99,24 @@ function ProfilePage() {
             type="button"
             disabled={save.isPending || hasError || !isDirty}
             onClick={() => {
+              setServerUsernameError(null);
+              setServerBioError(null);
               save.mutate(
                 { publicUsername: normalizedUsername, bio: normalizedBio },
                 {
                   onSuccess: () => setToast("Profile updated"),
-                  onError: () => setToast("Unable to update profile"),
+                  onError: (error) => {
+                    const parsed = parseProfileServerError(error);
+                    if (parsed.field === "publicUsername") {
+                      setServerUsernameError(parsed.message);
+                      return;
+                    }
+                    if (parsed.field === "bio") {
+                      setServerBioError(parsed.message);
+                      return;
+                    }
+                    setToast(parsed.message);
+                  },
                 },
               );
             }}
@@ -108,6 +126,20 @@ function ProfilePage() {
           </button>
         </div>
       </section>
+      {me && !me.id.startsWith("guest:") && (
+        <section className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 flex items-center justify-between gap-3">
+          <div>
+            <p className="text-sm text-zinc-100">Password</p>
+            <p className="text-xs text-zinc-500">Reset your account password</p>
+          </div>
+          <Link
+            to="/reset-password"
+            className="h-9 rounded-md border border-zinc-700 bg-zinc-900 px-3 inline-flex items-center text-xs text-zinc-200 hover:border-zinc-500"
+          >
+            Reset password
+          </Link>
+        </section>
+      )}
       <ProfileAvatarSettings />
       <Toast message={toast} />
     </div>
