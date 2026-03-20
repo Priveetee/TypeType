@@ -36,24 +36,8 @@ function LoginPage() {
 
   return (
     <div className="min-h-[calc(100vh-56px)] flex items-center justify-center px-4">
-      <AuthCard
-        title="Sign in"
-        subtitle="On a new install, create the first account first. It becomes admin."
-      >
+      <AuthCard title="Sign in" subtitle="Use your account credentials to continue.">
         <AuthErrorBanner message={error} />
-        <div className="mb-3 rounded-lg border border-sky-800/60 bg-sky-950/30 px-3 py-2 text-xs text-sky-200">
-          New instance setup: first account creation is required before any sign in.
-        </div>
-        <Link
-          to="/register"
-          search={{ redirect }}
-          className="mb-4 h-10 w-full rounded-lg bg-zinc-100 text-zinc-900 text-sm font-semibold inline-flex items-center justify-center hover:bg-white"
-        >
-          Create first account
-        </Link>
-        <div className="mb-3 text-xs text-zinc-500">
-          Already created the first account? Sign in below.
-        </div>
         <form className="flex flex-col gap-3" onSubmit={submitLogin}>
           <input
             type="email"
@@ -81,7 +65,14 @@ function LoginPage() {
             {pending ? "Signing in..." : "Sign in"}
           </button>
         </form>
-        <div className="mt-4 text-xs text-zinc-500 flex items-center justify-end">
+        <div className="mt-4 text-xs text-zinc-500 flex items-center justify-between">
+          <Link
+            to="/register"
+            search={{ redirect }}
+            className="text-zinc-300 hover:text-zinc-100 underline underline-offset-2"
+          >
+            Create account
+          </Link>
           <Link
             to="/reset-password"
             className="text-zinc-300 hover:text-zinc-100 underline underline-offset-2"
