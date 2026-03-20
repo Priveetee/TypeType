@@ -2,7 +2,8 @@
   "$schema": "https://unpkg.com/knip@latest/schema-jsonc.json",
   "workspaces": {
     ".": {
-      "ignore": [".venv-browserbase/**"]
+      "ignore": [".venv-browserbase/**"],
+      "ignoreDependencies": ["media-icons"]
     }
   }
 }
