@@ -10,7 +10,12 @@ export function requiresAuth(pathname: string): boolean {
 }
 
 export function isAdminRoute(pathname: string): boolean {
-  return pathname === "/admin" || pathname.startsWith("/admin/");
+  return (
+    pathname === "/admin" ||
+    pathname.startsWith("/admin/") ||
+    pathname === "/admin-console" ||
+    pathname.startsWith("/admin-console/")
+  );
 }
 
 export function isAuthPage(pathname: string): boolean {

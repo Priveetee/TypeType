@@ -60,7 +60,7 @@ export const NAV_ITEMS: NavItem[] = [
   },
   {
     label: "Admin",
-    to: "/admin",
+    to: "/admin-console",
     adminOnly: true,
     icon: (
       <>

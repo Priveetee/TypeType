@@ -71,7 +71,7 @@ export function NavbarAccountControls({ status, isAuthed, isGuest, isAdmin, sign
           )}
           {isAdmin && (
             <Link
-              to="/admin"
+              to="/admin-console"
               className="h-8 px-3 inline-flex items-center text-xs rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-200"
             >
               Admin

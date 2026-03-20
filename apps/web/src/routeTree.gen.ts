@@ -20,7 +20,7 @@ import { Route as PlaylistsRouteImport } from './routes/playlists'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as HistoryRouteImport } from './routes/history'
 import { Route as ChannelRouteImport } from './routes/channel'
-import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AdminConsoleRouteImport } from './routes/admin-console'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PlaylistsIdRouteImport } from './routes/playlists_.$id'
 
@@ -79,9 +79,9 @@ const ChannelRoute = ChannelRouteImport.update({
   path: '/channel',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
+const AdminConsoleRoute = AdminConsoleRouteImport.update({
+  id: '/admin-console',
+  path: '/admin-console',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -97,7 +97,7 @@ const PlaylistsIdRoute = PlaylistsIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin-console': typeof AdminConsoleRoute
   '/channel': typeof ChannelRoute
   '/history': typeof HistoryRoute
   '/login': typeof LoginRoute
@@ -113,7 +113,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin-console': typeof AdminConsoleRoute
   '/channel': typeof ChannelRoute
   '/history': typeof HistoryRoute
   '/login': typeof LoginRoute
@@ -130,7 +130,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin-console': typeof AdminConsoleRoute
   '/channel': typeof ChannelRoute
   '/history': typeof HistoryRoute
   '/login': typeof LoginRoute
@@ -148,7 +148,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/admin'
+    | '/admin-console'
     | '/channel'
     | '/history'
     | '/login'
@@ -164,7 +164,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/admin'
+    | '/admin-console'
     | '/channel'
     | '/history'
     | '/login'
@@ -180,7 +180,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/admin'
+    | '/admin-console'
     | '/channel'
     | '/history'
     | '/login'
@@ -197,7 +197,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AdminRoute: typeof AdminRoute
+  AdminConsoleRoute: typeof AdminConsoleRoute
   ChannelRoute: typeof ChannelRoute
   HistoryRoute: typeof HistoryRoute
   LoginRoute: typeof LoginRoute
@@ -291,11 +291,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChannelRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
+    '/admin-console': {
+      id: '/admin-console'
+      path: '/admin-console'
+      fullPath: '/admin-console'
+      preLoaderRoute: typeof AdminConsoleRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -317,7 +317,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AdminRoute: AdminRoute,
+  AdminConsoleRoute: AdminConsoleRoute,
   ChannelRoute: ChannelRoute,
   HistoryRoute: HistoryRoute,
   LoginRoute: LoginRoute,
