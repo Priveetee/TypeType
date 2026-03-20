@@ -3,15 +3,19 @@ import { useEffect, useMemo, useState } from "react";
 import { AdminUserDetailPanel } from "../components/admin-user-detail-panel";
 import { AdminUserGrid } from "../components/admin-user-grid";
 import { AdminUserToolbar } from "../components/admin-user-toolbar";
+import { AdminUsersPagination } from "../components/admin-users-pagination";
 import { Toast } from "../components/toast";
 import { useAdminUsers } from "../hooks/use-admin-users";
 import { useAuth } from "../hooks/use-auth";
 import { type AdminFilter, matchesAdminFilter } from "../lib/admin-console";
 import { goto } from "../lib/route-redirect";
 
+const PAGE_SIZE = 50;
+
 function AdminConsolePage() {
   const { isAdmin } = useAuth();
-  const { query, role, suspend, resetToken } = useAdminUsers(isAdmin);
+  const [page, setPage] = useState(1);
+  const { query, role, suspend, resetToken } = useAdminUsers(isAdmin, page, PAGE_SIZE);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<AdminFilter>("all");
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
@@ -23,7 +27,12 @@ function AdminConsolePage() {
     return () => clearTimeout(timer);
   }, [toast]);
 
-  const users = query.data ?? [];
+  const users = query.data?.items ?? [];
+  const total = query.data?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const currentPage = query.data?.page ?? page;
+  const pageStart = total === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
+  const pageEnd = total === 0 ? 0 : Math.min(currentPage * PAGE_SIZE, total);
   const searchTerm = search.trim().toLowerCase();
   const busy = role.isPending || suspend.isPending || resetToken.isPending;
   const filtered = useMemo(
@@ -41,8 +50,12 @@ function AdminConsolePage() {
   const selectedUser = filtered.find((user) => user.id === selectedUserId) ?? null;
 
   useEffect(() => {
-    if (selectedUserId !== null) return;
-    if (filtered.length === 0) return;
+    if (filtered.length === 0) {
+      setSelectedUserId(null);
+      return;
+    }
+    const found = selectedUserId && filtered.some((user) => user.id === selectedUserId);
+    if (found) return;
     setSelectedUserId(filtered[0].id);
   }, [selectedUserId, filtered]);
 
@@ -56,8 +69,24 @@ function AdminConsolePage() {
       <AdminUserToolbar
         search={search}
         filter={filter}
-        onSearchChange={(value) => setSearch(value)}
-        onFilterChange={(value) => setFilter(value)}
+        onSearchChange={(value) => {
+          setSearch(value);
+          setPage(1);
+        }}
+        onFilterChange={(value) => {
+          setFilter(value);
+          setPage(1);
+        }}
+      />
+      <AdminUsersPagination
+        page={currentPage}
+        totalPages={totalPages}
+        total={total}
+        pageStart={pageStart}
+        pageEnd={pageEnd}
+        pending={query.isPending}
+        onPrev={() => setPage((value) => Math.max(1, value - 1))}
+        onNext={() => setPage((value) => Math.min(totalPages, value + 1))}
       />
 
       {query.isPending && (

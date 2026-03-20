@@ -9,13 +9,14 @@ import {
 import type { AuthRole } from "../types/auth";
 
 const KEY = ["admin-users"];
+const key = (page: number, limit: number) => [...KEY, page, limit];
 
-export function useAdminUsers(enabled: boolean) {
+export function useAdminUsers(enabled: boolean, page: number, limit: number) {
   const qc = useQueryClient();
 
   const query = useQuery({
-    queryKey: KEY,
-    queryFn: fetchAdminUsers,
+    queryKey: key(page, limit),
+    queryFn: () => fetchAdminUsers(page, limit),
     enabled,
   });
 

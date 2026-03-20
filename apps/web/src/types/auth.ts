@@ -21,6 +21,8 @@ export type AuthUser = {
   email: string;
   name: string;
   role: AuthRole;
+  publicUsername: string | null;
+  bio: string | null;
   avatarUrl: string | null;
   avatarType: "custom" | "emoji" | null;
   avatarCode: string | null;

@@ -3,19 +3,52 @@ import { ApiError } from "./api";
 import { authed, authedJson } from "./authed";
 import { API_BASE as BASE } from "./env";
 
+export type AdminUsersPage = {
+  items: AuthUser[];
+  page: number;
+  limit: number;
+  total: number;
+};
+
 function normalizeAdminUser(user: AuthUser): AuthUser {
   return {
     ...user,
+    publicUsername: user.publicUsername ?? null,
+    bio: user.bio ?? null,
     avatarUrl: user.avatarUrl ?? null,
     avatarType: user.avatarType ?? null,
     avatarCode: user.avatarCode ?? null,
   };
 }
 
-export function fetchAdminUsers(): Promise<AuthUser[]> {
-  return authedJson<AuthUser[]>(`${BASE}/admin/users`).then((users) =>
-    users.map(normalizeAdminUser),
+function isPaginatedResponse(value: unknown): value is AdminUsersPage {
+  if (!value || typeof value !== "object") return false;
+  const record = value as Partial<AdminUsersPage>;
+  return (
+    Array.isArray(record.items) &&
+    typeof record.page === "number" &&
+    typeof record.limit === "number" &&
+    typeof record.total === "number"
   );
+}
+
+function toNumberParam(value: number): string {
+  return String(Math.trunc(value));
+}
+
+export async function fetchAdminUsers(page: number, limit: number): Promise<AdminUsersPage> {
+  const search = new URLSearchParams({
+    page: toNumberParam(page),
+    limit: toNumberParam(limit),
+  });
+  const body = await authedJson<AdminUsersPage>(`${BASE}/admin/users?${search}`);
+  if (!isPaginatedResponse(body)) {
+    throw new ApiError("Invalid admin users payload", 500);
+  }
+  return {
+    ...body,
+    items: body.items.map(normalizeAdminUser),
+  };
 }
 
 export async function updateUserRole(id: string, role: AuthRole): Promise<void> {
