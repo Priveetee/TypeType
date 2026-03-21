@@ -27,6 +27,9 @@ export function ShortsPlayerShell() {
   const streamQuery = useStream(active?.id ?? "");
   const stream = streamQuery.data;
   const onVolumeChange = useVolumeSync(update.mutate);
+  const originalLocale =
+    stream?.audioStreams?.find((a) => a.audioTrackName?.toLowerCase().includes("original"))
+      ?.audioLocale ?? null;
 
   useEffect(() => {
     const nextIds = shorts.slice(index + 1, index + 4).map((item) => item.id);
@@ -67,7 +70,14 @@ export function ShortsPlayerShell() {
         <div
           className="shorts-shell relative min-h-0 flex-1 overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 [&_media-player]:h-full [&_media-player]:w-full"
           onWheel={(event) => {
-            onWheel(event.deltaY);
+            const target = event.target as HTMLElement;
+            const isMenuScrollable =
+              target.closest(
+                "[role='menu'], [role='menuitem'], [role='option'], .vds-menu-items",
+              ) !== null;
+            if (!isMenuScrollable) {
+              onWheel(event.deltaY);
+            }
           }}
           onTouchStart={(event) => {
             onTouchStart(event.touches[0]?.clientY ?? null);
@@ -116,6 +126,7 @@ export function ShortsPlayerShell() {
               initialVolume={settings.volume}
               initialMuted={settings.muted}
               settingsReady={settingsReady}
+              originalAudioLocale={originalLocale}
               onVolumeChange={onVolumeChange}
               onError={() => {
                 moveBy(1);
