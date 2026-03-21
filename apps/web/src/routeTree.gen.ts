@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as WatchRouteImport } from './routes/watch'
 import { Route as TrendingRouteImport } from './routes/trending'
 import { Route as SubscriptionsRouteImport } from './routes/subscriptions'
+import { Route as ShortsRouteImport } from './routes/shorts'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
@@ -38,6 +39,11 @@ const TrendingRoute = TrendingRouteImport.update({
 const SubscriptionsRoute = SubscriptionsRouteImport.update({
   id: '/subscriptions',
   path: '/subscriptions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShortsRoute = ShortsRouteImport.update({
+  id: '/shorts',
+  path: '/shorts',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsRoute = SettingsRouteImport.update({
@@ -113,6 +119,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
+  '/shorts': typeof ShortsRoute
   '/subscriptions': typeof SubscriptionsRoute
   '/trending': typeof TrendingRoute
   '/watch': typeof WatchRoute
@@ -130,6 +137,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
+  '/shorts': typeof ShortsRoute
   '/subscriptions': typeof SubscriptionsRoute
   '/trending': typeof TrendingRoute
   '/watch': typeof WatchRoute
@@ -148,6 +156,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
+  '/shorts': typeof ShortsRoute
   '/subscriptions': typeof SubscriptionsRoute
   '/trending': typeof TrendingRoute
   '/watch': typeof WatchRoute
@@ -167,6 +176,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/search'
     | '/settings'
+    | '/shorts'
     | '/subscriptions'
     | '/trending'
     | '/watch'
@@ -184,6 +194,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/search'
     | '/settings'
+    | '/shorts'
     | '/subscriptions'
     | '/trending'
     | '/watch'
@@ -201,6 +212,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/search'
     | '/settings'
+    | '/shorts'
     | '/subscriptions'
     | '/trending'
     | '/watch'
@@ -219,6 +231,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   SearchRoute: typeof SearchRoute
   SettingsRoute: typeof SettingsRoute
+  ShortsRoute: typeof ShortsRoute
   SubscriptionsRoute: typeof SubscriptionsRoute
   TrendingRoute: typeof TrendingRoute
   WatchRoute: typeof WatchRoute
@@ -246,6 +259,13 @@ declare module '@tanstack/react-router' {
       path: '/subscriptions'
       fullPath: '/subscriptions'
       preLoaderRoute: typeof SubscriptionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shorts': {
+      id: '/shorts'
+      path: '/shorts'
+      fullPath: '/shorts'
+      preLoaderRoute: typeof ShortsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/settings': {
@@ -347,6 +367,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   SearchRoute: SearchRoute,
   SettingsRoute: SettingsRoute,
+  ShortsRoute: ShortsRoute,
   SubscriptionsRoute: SubscriptionsRoute,
   TrendingRoute: TrendingRoute,
   WatchRoute: WatchRoute,
