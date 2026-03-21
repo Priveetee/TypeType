@@ -20,11 +20,12 @@ export function proxyDashManifest(url: string): string {
   return isRemoteUrl(url) ? proxyUrl(url) : url;
 }
 
-function isBiliBiliCdn(url: string): boolean {
+function needsProxy(url: string): boolean {
   try {
     const parsed = new URL(url);
     if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return false;
-    return parsed.hostname.endsWith("hdslb.com");
+    const host = parsed.hostname;
+    return host.endsWith("hdslb.com") || host.endsWith("ytimg.com");
   } catch {
     return false;
   }
@@ -33,7 +34,7 @@ function isBiliBiliCdn(url: string): boolean {
 export function proxyImage(url: string): string {
   if (!url) return url;
   const normalized = url.startsWith("httpss://") ? `https://${url.slice(9)}` : url;
-  if (!isBiliBiliCdn(normalized)) return normalized;
+  if (!needsProxy(normalized)) return normalized;
   return proxyUrl(normalized);
 }
 
