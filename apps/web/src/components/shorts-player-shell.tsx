@@ -54,7 +54,7 @@ export function ShortsPlayerShell() {
 
   return (
     <section className="h-[calc(100svh-4.5rem)] overflow-hidden">
-      <div className="mx-auto flex h-full w-full max-w-[440px] flex-col gap-2">
+      <div className="mx-auto flex h-full w-full max-w-[440px] flex-col gap-2 md:max-w-[520px] lg:max-w-[640px] xl:max-w-[720px] 2xl:max-w-[880px]">
         <div className="flex items-center justify-between text-xs text-zinc-400">
           <p>
             Shorts {index + 1} / {shorts.length}
@@ -68,7 +68,7 @@ export function ShortsPlayerShell() {
           )}
         </div>
         <div
-          className="shorts-shell relative min-h-0 flex-1 overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 [&_media-player]:h-full [&_media-player]:w-full"
+          className="shorts-shell relative min-h-0 flex-1 overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 aspect-[9/16] [&_media-player]:h-full [&_media-player]:w-full"
           onWheel={(event) => {
             const target = event.target as HTMLElement;
             const isMenuScrollable =
