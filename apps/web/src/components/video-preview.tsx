@@ -99,13 +99,21 @@ type Hls = { destroy: () => void };
 type DashJs = { destroy: () => void };
 
 async function loadHls(video: HTMLVideoElement, url: string): Promise<Hls | null> {
-  const { default: Hls } = await import("hls.js");
-  if (!Hls.isSupported()) return null;
+  if (!supportsNativeHls(video)) return null;
+  video.src = url;
+  return {
+    destroy: () => {
+      video.pause();
+      video.removeAttribute("src");
+      video.load();
+    },
+  };
+}
 
-  const hls = new Hls({ maxMaxBufferLength: 30, maxBufferLength: 10 });
-  hls.loadSource(url);
-  hls.attachMedia(video);
-  return hls;
+function supportsNativeHls(video: HTMLVideoElement): boolean {
+  const appleType = video.canPlayType("application/vnd.apple.mpegurl");
+  const legacyType = video.canPlayType("application/x-mpegURL");
+  return appleType !== "" || legacyType !== "";
 }
 
 async function loadDash(video: HTMLVideoElement, url: string): Promise<DashJs | null> {
