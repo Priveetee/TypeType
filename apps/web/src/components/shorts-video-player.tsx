@@ -4,6 +4,7 @@ import { DefaultVideoLayout, defaultLayoutIcons } from "@vidstack/react/player/l
 import { toProxiedVttUrl } from "../lib/proxy";
 import type { SubtitleItem } from "../types/api";
 import { AudioTrackSelector } from "./audio-track-selector";
+import { PlayerDefaults } from "./player-internals";
 import { onProviderChange } from "./video-player-core";
 import { VolumeRestorer } from "./volume-restorer";
 
@@ -16,6 +17,9 @@ type Props = {
   initialMuted?: boolean;
   settingsReady?: boolean;
   originalAudioLocale?: string | null;
+  defaultAudioLanguage?: string;
+  defaultSubtitleLanguage?: string;
+  subtitlesEnabled?: boolean;
   onVolumeChange?: (volume: number, muted: boolean) => void;
   onError?: () => void;
   onEnded?: () => void;
@@ -30,6 +34,9 @@ export function ShortsVideoPlayer({
   initialMuted = false,
   settingsReady = false,
   originalAudioLocale,
+  defaultAudioLanguage,
+  defaultSubtitleLanguage,
+  subtitlesEnabled,
   onVolumeChange,
   onError,
   onEnded,
@@ -86,6 +93,11 @@ export function ShortsVideoPlayer({
           slots={{
             settingsMenuItemsStart: <AudioTrackSelector originalLocale={originalAudioLocale} />,
           }}
+        />
+        <PlayerDefaults
+          defaultAudioLanguage={defaultAudioLanguage}
+          defaultSubtitleLanguage={defaultSubtitleLanguage}
+          subtitlesEnabled={subtitlesEnabled}
         />
         <VolumeRestorer
           initialVolume={initialVolume}

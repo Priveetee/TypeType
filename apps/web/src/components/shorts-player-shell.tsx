@@ -127,6 +127,9 @@ export function ShortsPlayerShell() {
               initialMuted={settings.muted}
               settingsReady={settingsReady}
               originalAudioLocale={originalLocale}
+              defaultAudioLanguage={settings.defaultAudioLanguage || undefined}
+              defaultSubtitleLanguage={settings.defaultSubtitleLanguage || undefined}
+              subtitlesEnabled={settings.subtitlesEnabled}
               onVolumeChange={onVolumeChange}
               onError={() => {
                 moveBy(1);
