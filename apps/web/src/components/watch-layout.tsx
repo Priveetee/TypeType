@@ -17,6 +17,7 @@ import { PlayerDefaults, PlayerFocuser } from "./player-internals";
 import { RelatedVideos } from "./related-videos";
 import { VideoPlayer } from "./video-player";
 import { WatchActions } from "./watch-actions";
+import { WatchCommentActions } from "./watch-comment-actions";
 import { WatchComments } from "./watch-comments";
 import { WatchDescription } from "./watch-description";
 import { WatchInfo } from "./watch-info";
@@ -160,6 +161,7 @@ export function WatchLayout({ stream, startTime }: Props) {
         <WatchInfo stream={stream} />
         <WatchActions stream={stream} />
         {stream.description && <WatchDescription description={stream.description} />}
+        <WatchCommentActions stream={stream} />
         <WatchComments videoUrl={stream.id} />
       </div>
       <div className="w-full lg:flex-1 lg:min-w-64">
