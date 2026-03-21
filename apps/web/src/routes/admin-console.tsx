@@ -127,7 +127,11 @@ function AdminConsolePage() {
                   { id, role: nextRole },
                   {
                     onSuccess: () => setToast(`Role set to ${nextRole}`),
-                    onError: () => setToast("Unable to update role"),
+                    onError: (error) => {
+                      const message =
+                        error instanceof Error ? error.message : "Unable to update role";
+                      setToast(message);
+                    },
                   },
                 );
               }}
@@ -137,14 +141,22 @@ function AdminConsolePage() {
                   {
                     onSuccess: () =>
                       setToast(!suspendedFlag ? "User suspended" : "User unsuspended"),
-                    onError: () => setToast("Unable to update suspension"),
+                    onError: (error) => {
+                      const message =
+                        error instanceof Error ? error.message : "Unable to update suspension";
+                      setToast(message);
+                    },
                   },
                 );
               }}
               onReset={(id, email) => {
                 resetToken.mutate(id, {
                   onSuccess: (result) => setResetTokenData({ email, token: result.resetToken }),
-                  onError: () => setToast("Unable to generate reset token"),
+                  onError: (error) => {
+                    const message =
+                      error instanceof Error ? error.message : "Unable to generate reset token";
+                    setToast(message);
+                  },
                 });
               }}
             />

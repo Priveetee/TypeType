@@ -21,7 +21,6 @@ export async function authed(url: string, init?: RequestInit): Promise<Response>
       throw new ApiError("Session expired", 401);
     }
   }
-  if (res.status === 403) throw new ApiError("Insufficient role", 403);
   return res;
 }
 

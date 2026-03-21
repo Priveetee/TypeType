@@ -41,14 +41,21 @@ export async function fetchAdminUsers(page: number, limit: number): Promise<Admi
     page: toNumberParam(page),
     limit: toNumberParam(limit),
   });
-  const body = await authedJson<AdminUsersPage>(`${BASE}/admin/users?${search}`);
-  if (!isPaginatedResponse(body)) {
-    throw new ApiError("Invalid admin users payload", 500);
+  try {
+    const res = await authedJson<AdminUsersPage>(`${BASE}/admin/users?${search}`);
+    if (!isPaginatedResponse(res)) {
+      throw new ApiError("Invalid admin users payload", 500);
+    }
+    return {
+      ...res,
+      items: res.items.map(normalizeAdminUser),
+    };
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 403) {
+      throw new ApiError("Insufficient role", 403);
+    }
+    throw error;
   }
-  return {
-    ...body,
-    items: body.items.map(normalizeAdminUser),
-  };
 }
 
 export async function updateUserRole(id: string, role: AuthRole): Promise<void> {
@@ -57,21 +64,36 @@ export async function updateUserRole(id: string, role: AuthRole): Promise<void> 
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ role }),
   });
-  if (res.status !== 204) throw new ApiError("Failed to update role", res.status);
+  if (res.status !== 204) {
+    const errorBody = (await res.json().catch(() => ({
+      error: "Failed to update role",
+    }))) as Partial<{ error: string }>;
+    throw new ApiError(errorBody.error ?? "Failed to update role", res.status);
+  }
 }
 
 export async function suspendUser(id: string): Promise<void> {
   const res = await authed(`${BASE}/admin/users/${encodeURIComponent(id)}/suspend`, {
     method: "POST",
   });
-  if (res.status !== 204) throw new ApiError("Failed to suspend user", res.status);
+  if (res.status !== 204) {
+    const errorBody = (await res.json().catch(() => ({
+      error: "Failed to suspend user",
+    }))) as Partial<{ error: string }>;
+    throw new ApiError(errorBody.error ?? "Failed to suspend user", res.status);
+  }
 }
 
 export async function unsuspendUser(id: string): Promise<void> {
   const res = await authed(`${BASE}/admin/users/${encodeURIComponent(id)}/suspend`, {
     method: "DELETE",
   });
-  if (res.status !== 204) throw new ApiError("Failed to unsuspend user", res.status);
+  if (res.status !== 204) {
+    const errorBody = (await res.json().catch(() => ({
+      error: "Failed to unsuspend user",
+    }))) as Partial<{ error: string }>;
+    throw new ApiError(errorBody.error ?? "Failed to unsuspend user", res.status);
+  }
 }
 
 export async function createPasswordResetToken(id: string): Promise<PasswordResetToken> {
