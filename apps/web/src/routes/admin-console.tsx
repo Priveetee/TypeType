@@ -159,6 +159,7 @@ function AdminConsolePage() {
           email={resetTokenData.email}
           token={resetTokenData.token}
           onClose={() => setResetTokenData(null)}
+          onCopied={() => setToast("Token copied to clipboard")}
         />
       )}
     </div>
