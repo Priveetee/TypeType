@@ -7,12 +7,22 @@ import { VerifiedBadgeIcon } from "../components/watch-icons";
 import { useBlockedFilter } from "../hooks/use-blocked-filter";
 import { useChannel } from "../hooks/use-channel";
 import { useSubscriptions } from "../hooks/use-subscriptions";
+import { ApiError } from "../lib/api";
 import { formatViews } from "../lib/format";
 
 function ChannelPage() {
   const { url } = Route.useSearch();
-  const { meta, videos, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } =
-    useChannel(url);
+  const {
+    meta,
+    videos,
+    isLoading,
+    isError,
+    error,
+    refetch,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useChannel(url);
   const { add, remove, isSubscribed } = useSubscriptions();
   const { filter } = useBlockedFilter();
 
@@ -28,6 +38,21 @@ function ChannelPage() {
   }
 
   if (isLoading) return <PageSpinner />;
+  if (isError) {
+    const message = error instanceof ApiError ? error.message : "Unable to load channel right now.";
+    return (
+      <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-6 flex flex-col gap-3 max-w-xl">
+        <p className="text-sm text-zinc-100">{message}</p>
+        <button
+          type="button"
+          onClick={() => refetch()}
+          className="h-9 w-fit rounded-md bg-zinc-100 px-3 text-xs font-medium text-zinc-900 hover:bg-white"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6">
