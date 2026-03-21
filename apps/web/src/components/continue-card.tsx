@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { useWatchPrefetch } from "../hooks/use-watch-prefetch";
 import { formatDuration } from "../lib/format";
 import type { HistoryItem } from "../types/user";
 
@@ -8,12 +9,15 @@ type ContinueCardProps = {
 
 export function ContinueCard({ item }: ContinueCardProps) {
   const pct = Math.min(100, Math.round((item.progress / item.duration) * 100));
+  const prefetch = useWatchPrefetch(item.url);
 
   return (
     <Link
       to="/watch"
       search={{ v: item.url }}
       className="flex-shrink-0 w-44 flex flex-col gap-2 group"
+      onMouseEnter={prefetch.onMouseEnter}
+      onMouseLeave={prefetch.onMouseLeave}
     >
       <div className="relative aspect-video rounded-lg overflow-hidden bg-zinc-800">
         <img src={item.thumbnail} alt={item.title} className="w-full h-full object-cover" />

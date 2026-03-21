@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { useWatchPrefetch } from "../hooks/use-watch-prefetch";
 import { formatDuration } from "../lib/format";
 import { proxyImage } from "../lib/proxy";
 import type { HistoryItem } from "../types/user";
@@ -39,12 +40,20 @@ function formatWatchedAt(timestamp: number): string {
 
 export function HistoryCard({ item, onRemove, index }: HistoryCardProps) {
   const delay = Math.min(index * 45, 270);
+  const prefetch = useWatchPrefetch(item.url);
+
   return (
     <div
       className="flex flex-col gap-2 group relative animate-card-pop-in"
       style={{ animationDelay: `${delay}ms` }}
     >
-      <Link to="/watch" search={{ v: item.url }} className="block">
+      <Link
+        to="/watch"
+        search={{ v: item.url }}
+        className="block"
+        onMouseEnter={prefetch.onMouseEnter}
+        onMouseLeave={prefetch.onMouseLeave}
+      >
         <div className="relative aspect-video rounded-lg overflow-hidden bg-zinc-800">
           <img
             src={proxyImage(item.thumbnail)}
@@ -78,7 +87,12 @@ export function HistoryCard({ item, onRemove, index }: HistoryCardProps) {
           <HistoryChannelAvatar item={item} className="w-7 h-7" />
         )}
         <div className="flex flex-col gap-0.5 min-w-0">
-          <Link to="/watch" search={{ v: item.url }}>
+          <Link
+            to="/watch"
+            search={{ v: item.url }}
+            onMouseEnter={prefetch.onMouseEnter}
+            onMouseLeave={prefetch.onMouseLeave}
+          >
             <p className="text-sm font-medium text-zinc-100 line-clamp-2 leading-snug">
               {item.title}
             </p>

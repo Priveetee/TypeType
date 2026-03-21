@@ -2,6 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useCallback, useRef, useState } from "react";
 import { streamQueryOptions } from "../hooks/use-stream";
+import { useWatchPrefetch } from "../hooks/use-watch-prefetch";
 import { formatDuration, formatViews } from "../lib/format";
 import type { VideoStream } from "../types/stream";
 import { ChannelAvatar } from "./channel-avatar";
@@ -14,10 +15,10 @@ type Props = {
 
 export function VideoCard({ stream }: Props) {
   const queryClient = useQueryClient();
-  const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const previewTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [previewStream, setPreviewStream] = useState<VideoStream | undefined>(undefined);
   const [showPreview, setShowPreview] = useState(false);
+  const prefetch = useWatchPrefetch(stream.id);
 
   const fetchStreamData = useCallback(async () => {
     const cached = queryClient.getQueryData<VideoStream>(["stream", stream.id]);
@@ -30,9 +31,7 @@ export function VideoCard({ stream }: Props) {
   }, [queryClient, stream.id]);
 
   const handleMouseEnter = () => {
-    hoverTimer.current = setTimeout(() => {
-      void queryClient.prefetchQuery(streamQueryOptions(stream.id));
-    }, 300);
+    prefetch.onMouseEnter();
 
     previewTimer.current = setTimeout(() => {
       void fetchStreamData().then(() => setShowPreview(true));
@@ -40,10 +39,7 @@ export function VideoCard({ stream }: Props) {
   };
 
   const handleMouseLeave = () => {
-    if (hoverTimer.current) {
-      clearTimeout(hoverTimer.current);
-      hoverTimer.current = null;
-    }
+    prefetch.onMouseLeave();
     if (previewTimer.current) {
       clearTimeout(previewTimer.current);
       previewTimer.current = null;

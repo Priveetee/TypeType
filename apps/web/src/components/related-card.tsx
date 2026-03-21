@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { useWatchPrefetch } from "../hooks/use-watch-prefetch";
 import { formatDuration, formatViews } from "../lib/format";
 import type { VideoStream } from "../types/stream";
 import { ChannelAvatar } from "./channel-avatar";
@@ -9,12 +10,16 @@ type Props = {
 };
 
 export function RelatedCard({ stream }: Props) {
+  const prefetch = useWatchPrefetch(stream.id);
+
   return (
     <div className="flex gap-2 group">
       <Link
         to="/watch"
         search={{ v: stream.id }}
         className="relative w-40 aspect-video rounded-md overflow-hidden bg-zinc-800 flex-shrink-0"
+        onMouseEnter={prefetch.onMouseEnter}
+        onMouseLeave={prefetch.onMouseLeave}
       >
         <img
           src={stream.thumbnail}
@@ -32,6 +37,8 @@ export function RelatedCard({ stream }: Props) {
           to="/watch"
           search={{ v: stream.id }}
           className="text-xs font-medium text-zinc-100 line-clamp-2 leading-snug hover:text-white"
+          onMouseEnter={prefetch.onMouseEnter}
+          onMouseLeave={prefetch.onMouseLeave}
         >
           {stream.title}
         </Link>
