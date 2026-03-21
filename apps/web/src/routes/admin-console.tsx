@@ -4,6 +4,7 @@ import { AdminUserDetailPanel } from "../components/admin-user-detail-panel";
 import { AdminUserGrid } from "../components/admin-user-grid";
 import { AdminUserToolbar } from "../components/admin-user-toolbar";
 import { AdminUsersPagination } from "../components/admin-users-pagination";
+import { ResetTokenModal } from "../components/reset-token-modal";
 import { Toast } from "../components/toast";
 import { useAdminUsers } from "../hooks/use-admin-users";
 import { useAuth } from "../hooks/use-auth";
@@ -20,6 +21,9 @@ function AdminConsolePage() {
   const [filter, setFilter] = useState<AdminFilter>("all");
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [resetTokenData, setResetTokenData] = useState<{ email: string; token: string } | null>(
+    null,
+  );
 
   useEffect(() => {
     if (!toast) return;
@@ -129,17 +133,17 @@ function AdminConsolePage() {
               }}
               onSuspend={(id, suspendedFlag) => {
                 suspend.mutate(
-                  { id, suspended: suspendedFlag },
+                  { id, suspended: !suspendedFlag },
                   {
                     onSuccess: () =>
-                      setToast(suspendedFlag ? "User unsuspended" : "User suspended"),
+                      setToast(!suspendedFlag ? "User suspended" : "User unsuspended"),
                     onError: () => setToast("Unable to update suspension"),
                   },
                 );
               }}
               onReset={(id, email) => {
                 resetToken.mutate(id, {
-                  onSuccess: (result) => setToast(`Reset token for ${email}: ${result.resetToken}`),
+                  onSuccess: (result) => setResetTokenData({ email, token: result.resetToken }),
                   onError: () => setToast("Unable to generate reset token"),
                 });
               }}
@@ -150,6 +154,13 @@ function AdminConsolePage() {
         </section>
       )}
       <Toast message={toast} />
+      {resetTokenData && (
+        <ResetTokenModal
+          email={resetTokenData.email}
+          token={resetTokenData.token}
+          onClose={() => setResetTokenData(null)}
+        />
+      )}
     </div>
   );
 }
