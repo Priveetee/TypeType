@@ -9,7 +9,7 @@ type CommentPage = {
   commentsDisabled: boolean;
 };
 
-export function useInfiniteComments(videoUrl: string) {
+export function useInfiniteComments(videoUrl: string, enabled = true) {
   return useInfiniteQuery({
     queryKey: ["comments", videoUrl],
     queryFn: async ({ pageParam }: { pageParam: string | undefined }) => {
@@ -22,6 +22,6 @@ export function useInfiniteComments(videoUrl: string) {
     },
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (last: CommentPage) => last.nextpage ?? undefined,
-    enabled: videoUrl.length > 0,
+    enabled: enabled && videoUrl.length > 0,
   });
 }

@@ -3,9 +3,10 @@ import { useEffect, useRef } from "react";
 type Props = {
   onIntersect: () => void;
   enabled: boolean;
+  root?: Element | null;
 };
 
-export function ScrollSentinel({ onIntersect, enabled }: Props) {
+export function ScrollSentinel({ onIntersect, enabled, root }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const onIntersectRef = useRef(onIntersect);
   onIntersectRef.current = onIntersect;
@@ -18,12 +19,12 @@ export function ScrollSentinel({ onIntersect, enabled }: Props) {
       ([entry]) => {
         if (entry.isIntersecting) onIntersectRef.current();
       },
-      { rootMargin: "300px" },
+      { root: root ?? null, rootMargin: "300px" },
     );
 
     observer.observe(el);
     return () => observer.disconnect();
-  }, [enabled]);
+  }, [enabled, root]);
 
   return <div ref={ref} />;
 }
