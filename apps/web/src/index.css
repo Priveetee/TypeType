@@ -105,3 +105,30 @@
 .vds-playback-menu .vds-menu-section:has(.vds-quality-slider) {
   display: none;
 }
+
+.shorts-shell media-player,
+.shorts-shell media-player .vds-media-provider,
+.shorts-shell media-player .vds-video-layout,
+.shorts-shell media-player .vds-video,
+.shorts-shell media-player media-provider,
+.shorts-shell media-player .vds-poster {
+  height: 100%;
+  width: 100%;
+  max-height: none;
+  max-width: none;
+  aspect-ratio: auto;
+}
+
+.shorts-shell media-player .vds-video-layout video {
+  height: 100%;
+  width: 100%;
+  max-height: none;
+  max-width: none;
+  aspect-ratio: auto;
+  object-fit: cover;
+}
+
+.shorts-shell media-player .vds-video,
+.shorts-shell media-player .vds-poster {
+  object-fit: cover;
+}
