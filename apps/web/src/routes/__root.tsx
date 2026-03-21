@@ -74,6 +74,7 @@ function RootLayout() {
     return (
       <div className="min-h-screen bg-zinc-950 text-zinc-100">
         <Navbar />
+        <Sidebar />
         <main className="pt-14">
           <Outlet />
         </main>
