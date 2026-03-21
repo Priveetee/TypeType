@@ -11,6 +11,15 @@ export function proxyUrl(url: string): string {
   return `${absoluteBase()}/proxy?url=${encodeURIComponent(url)}`;
 }
 
+function isRemoteUrl(url: string): boolean {
+  return url.startsWith("http://") || url.startsWith("https://");
+}
+
+export function proxyDashManifest(url: string): string {
+  if (!url) return url;
+  return isRemoteUrl(url) ? proxyUrl(url) : url;
+}
+
 function isBiliBiliCdn(url: string): boolean {
   try {
     const parsed = new URL(url);

@@ -4,6 +4,7 @@ import { buildDashManifest } from "./dash-manifest";
 import { API_BASE as BASE } from "./env";
 import { buildNicoMasterPlaylist } from "./nico-manifest";
 import { detectProvider } from "./provider";
+import { proxyDashManifest } from "./proxy";
 
 function fallbackSrc(stream: VideoStream, maxHeight?: number): MediaSrc {
   if (stream.videoOnlyStreams?.length && stream.audioStreams?.length) {
@@ -31,7 +32,7 @@ export function resolveManifestSrc(
 
   if (stream.hlsUrl) {
     return {
-      src: `${BASE}/streams/hls-manifest?url=${encodeURIComponent(stream.id)}`,
+      src: proxyDashManifest(`${BASE}/streams/hls-manifest?url=${encodeURIComponent(stream.id)}`),
       type: "application/x-mpegurl",
     };
   }
@@ -41,14 +42,16 @@ export function resolveManifestSrc(
     const src = buildNicoMasterPlaylist(stream.videoOnlyStreams, stream.audioStreams ?? [], origin);
     if (src) return { src, type: "application/x-mpegurl" };
     return {
-      src: `${BASE}/proxy/nicovideo?url=${encodeURIComponent(stream.videoOnlyStreams[0].url)}`,
+      src: proxyDashManifest(
+        `${BASE}/proxy/nicovideo?url=${encodeURIComponent(stream.videoOnlyStreams[0].url)}`,
+      ),
       type: "application/x-mpegurl",
     };
   }
 
   if (provider === "bilibili") {
     return {
-      src: `${BASE}/streams/manifest?url=${encodeURIComponent(stream.id)}`,
+      src: proxyDashManifest(`${BASE}/streams/manifest?url=${encodeURIComponent(stream.id)}`),
       type: "application/dash+xml",
     };
   }
@@ -57,14 +60,16 @@ export function resolveManifestSrc(
 
   if (!isLive && stream.videoOnlyStreams?.length && isMultiLanguage) {
     return {
-      src: `${BASE}/streams/manifest?url=${encodeURIComponent(stream.id)}`,
+      src: proxyDashManifest(`${BASE}/streams/manifest?url=${encodeURIComponent(stream.id)}`),
       type: "application/dash+xml",
     };
   }
 
   if (!isLive && stream.videoOnlyStreams?.length && !nativeFailed) {
     return {
-      src: `${BASE}/streams/native-manifest?url=${encodeURIComponent(stream.id)}`,
+      src: proxyDashManifest(
+        `${BASE}/streams/native-manifest?url=${encodeURIComponent(stream.id)}`,
+      ),
       type: "application/dash+xml",
     };
   }
