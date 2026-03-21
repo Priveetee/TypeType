@@ -1,7 +1,11 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
+import { useCallback, useRef, useState } from "react";
+import { streamQueryOptions } from "../hooks/use-stream";
 import { formatDuration, formatViews } from "../lib/format";
 import type { VideoStream } from "../types/stream";
 import { ChannelAvatar } from "./channel-avatar";
+import { VideoPreview } from "./video-preview";
 import { VerifiedBadgeIcon } from "./watch-icons";
 
 type Props = {
@@ -9,8 +13,50 @@ type Props = {
 };
 
 export function VideoCard({ stream }: Props) {
+  const queryClient = useQueryClient();
+  const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const previewTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [previewStream, setPreviewStream] = useState<VideoStream | undefined>(undefined);
+  const [showPreview, setShowPreview] = useState(false);
+
+  const fetchStreamData = useCallback(async () => {
+    const cached = queryClient.getQueryData<VideoStream>(["stream", stream.id]);
+    if (cached?.videoOnlyStreams?.length) {
+      setPreviewStream(cached);
+      return;
+    }
+    const data = await queryClient.fetchQuery(streamQueryOptions(stream.id));
+    if (data?.videoOnlyStreams?.length) setPreviewStream(data);
+  }, [queryClient, stream.id]);
+
+  const handleMouseEnter = () => {
+    hoverTimer.current = setTimeout(() => {
+      void queryClient.prefetchQuery(streamQueryOptions(stream.id));
+    }, 300);
+
+    previewTimer.current = setTimeout(() => {
+      void fetchStreamData().then(() => setShowPreview(true));
+    }, 5000);
+  };
+
+  const handleMouseLeave = () => {
+    if (hoverTimer.current) {
+      clearTimeout(hoverTimer.current);
+      hoverTimer.current = null;
+    }
+    if (previewTimer.current) {
+      clearTimeout(previewTimer.current);
+      previewTimer.current = null;
+    }
+    setShowPreview(false);
+  };
+
   return (
-    <div className="flex flex-col gap-2 group">
+    <article
+      className="flex flex-col gap-2 group"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       <Link to="/watch" search={{ v: stream.id }} className="block">
         <div className="relative aspect-video rounded-lg overflow-hidden bg-zinc-800">
           <img
@@ -18,6 +64,7 @@ export function VideoCard({ stream }: Props) {
             alt={stream.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
           />
+          <VideoPreview stream={previewStream} show={showPreview} />
           {stream.duration > 0 && (
             <span className="absolute bottom-1.5 right-1.5 bg-black/80 text-white text-xs px-1 rounded">
               {formatDuration(stream.duration)}
@@ -65,6 +112,6 @@ export function VideoCard({ stream }: Props) {
           </p>
         </div>
       </div>
-    </div>
+    </article>
   );
 }
