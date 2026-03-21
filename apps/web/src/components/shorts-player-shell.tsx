@@ -1,7 +1,12 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PageSpinner } from "../components/page-spinner";
+import { ShortsActions } from "../components/shorts-actions";
+import { ShortsCommentsSheet } from "../components/shorts-comments-sheet";
+import { ShortsDesktopOverlay } from "../components/shorts-desktop-overlay";
+import { ShortsError } from "../components/shorts-error";
+import { ShortsInfoOverlay } from "../components/shorts-info-overlay";
+import { ShortsNavigation } from "../components/shorts-navigation";
 import { ShortsVideoPlayer } from "../components/shorts-video-player";
 import { useSettings } from "../hooks/use-settings";
 import { useShortsFeed } from "../hooks/use-shorts-feed";
@@ -10,11 +15,15 @@ import { useVolumeSync } from "../hooks/use-volume-sync";
 import { ApiError } from "../lib/api";
 import { useShortsNavigation } from "../lib/shorts-navigation";
 import { resolveManifestSrc } from "../lib/stream-src";
+import { useUiStore } from "../stores/ui-store";
 
 export function ShortsPlayerShell() {
   const queryClient = useQueryClient();
   const { shorts, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } = useShortsFeed();
   const { settings, update, query: settingsQuery } = useSettings();
+  const sidebarCollapsed = useUiStore((s) => s.sidebarCollapsed);
+  const playerRef = useRef<HTMLDivElement>(null);
+  const [commentsOpen, setCommentsOpen] = useState(false);
   const settingsReady =
     (settingsQuery.isSuccess && !settingsQuery.isPlaceholderData) || settingsQuery.isError;
   const { index, moveBy, onWheel, onTouchStart, onTouchEnd } = useShortsNavigation(
@@ -24,8 +33,10 @@ export function ShortsPlayerShell() {
     fetchNextPage,
   );
   const active = shorts[index];
+  const activeId = active?.id ?? "";
   const streamQuery = useStream(active?.id ?? "");
   const stream = streamQuery.data;
+  const current = stream ?? active;
   const onVolumeChange = useVolumeSync(update.mutate);
   const originalLocale =
     stream?.audioStreams?.find((a) => a.audioTrackName?.toLowerCase().includes("original"))
@@ -38,6 +49,11 @@ export function ShortsPlayerShell() {
     }
   }, [index, queryClient, shorts]);
 
+  useEffect(() => {
+    if (!activeId) return;
+    setCommentsOpen(false);
+  }, [activeId]);
+
   if (isLoading) return <PageSpinner />;
   if (!active) {
     return (
@@ -47,98 +63,106 @@ export function ShortsPlayerShell() {
     );
   }
 
-  const streamErrorMessage =
+  const hasPrev = index > 0;
+  const hasNext = index < shorts.length - 1 || hasNextPage;
+  const errorMessage =
     streamQuery.isError && streamQuery.error instanceof ApiError
       ? streamQuery.error.message
       : "Couldn't load this short.";
 
+  const handleWheel = (e: React.WheelEvent) => {
+    const target = e.target as HTMLElement;
+    const isMenu = target.closest("[role='menu'], .vds-menu-items") !== null;
+    if (!isMenu) onWheel(e.deltaY);
+  };
+
   return (
-    <section className="h-[calc(100svh-4.5rem)] overflow-hidden">
-      <div className="mx-auto flex h-full w-full max-w-[440px] flex-col gap-2 md:max-w-[520px] lg:max-w-[640px] xl:max-w-[720px] 2xl:max-w-[880px]">
-        <div className="flex items-center justify-between text-xs text-zinc-400">
-          <p>
-            Shorts {index + 1} / {shorts.length}
-          </p>
-          {active.channelUrl ? (
-            <Link to="/channel" search={{ url: active.channelUrl }} className="hover:text-zinc-200">
-              {active.channelName}
-            </Link>
-          ) : (
-            <p>{active.channelName}</p>
-          )}
-        </div>
-        <div
-          className="shorts-shell relative min-h-0 flex-1 overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 aspect-[9/16] [&_media-player]:h-full [&_media-player]:w-full"
-          onWheel={(event) => {
-            const target = event.target as HTMLElement;
-            const isMenuScrollable =
-              target.closest(
-                "[role='menu'], [role='menuitem'], [role='option'], .vds-menu-items",
-              ) !== null;
-            if (!isMenuScrollable) {
-              onWheel(event.deltaY);
-            }
-          }}
-          onTouchStart={(event) => {
-            onTouchStart(event.touches[0]?.clientY ?? null);
-          }}
-          onTouchEnd={(event) => {
-            onTouchEnd(event.changedTouches[0]?.clientY ?? null);
-          }}
-        >
-          {!streamQuery.isError && streamQuery.isLoading && (
-            <div className="absolute inset-0 z-20 flex items-center justify-center bg-zinc-950/80">
-              <PageSpinner />
-            </div>
-          )}
-          {streamQuery.isError && (
-            <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/80 p-5">
-              <div className="flex max-w-sm flex-col items-center gap-3 text-center">
-                <p className="text-sm text-zinc-100">{streamErrorMessage}</p>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      void streamQuery.refetch();
-                    }}
-                    className="h-9 rounded-md bg-zinc-100 px-3 text-xs font-medium text-zinc-900 hover:bg-white"
-                  >
-                    Retry short
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => moveBy(1)}
-                    className="h-9 rounded-md border border-zinc-600 px-3 text-xs text-zinc-200 hover:border-zinc-400"
-                  >
-                    Next short
-                  </button>
-                </div>
+    <section
+      className={`h-[calc(100svh-4.5rem)] overflow-hidden px-2 pb-2 pt-1 sm:px-4 sm:pb-4 sm:pt-3 ${
+        sidebarCollapsed ? "md:pl-16" : "md:pl-52"
+      }`}
+    >
+      <div className="relative h-full w-full">
+        {current && (
+          <ShortsDesktopOverlay
+            stream={current}
+            hasPrev={hasPrev}
+            hasNext={hasNext}
+            onPrev={() => moveBy(-1)}
+            onNext={() => moveBy(1)}
+            onOpenComments={() => setCommentsOpen(true)}
+          />
+        )}
+        <div className="relative flex h-full items-center justify-center">
+          <div
+            ref={playerRef}
+            className="shorts-shell relative mx-auto aspect-[9/16] h-full max-h-[calc(100svh-5.5rem)] w-auto max-w-full overflow-hidden rounded-xl bg-black sm:rounded-2xl md:h-[calc(100svh-6rem)] md:max-h-none"
+            onWheel={handleWheel}
+            onTouchStart={(e) => onTouchStart(e.touches[0]?.clientY ?? null)}
+            onTouchEnd={(e) => onTouchEnd(e.changedTouches[0]?.clientY ?? null)}
+          >
+            {!streamQuery.isError && streamQuery.isLoading && (
+              <div className="absolute inset-0 z-20 flex items-center justify-center bg-zinc-950/80">
+                <PageSpinner />
               </div>
-            </div>
-          )}
-          {stream && !streamQuery.isError && (
-            <ShortsVideoPlayer
-              key={stream.id}
-              src={resolveManifestSrc(stream, false, false, false)}
-              title={stream.title}
-              poster={stream.thumbnail}
-              subtitles={stream.subtitles}
-              initialVolume={settings.volume}
-              initialMuted={settings.muted}
-              settingsReady={settingsReady}
-              originalAudioLocale={originalLocale}
-              defaultAudioLanguage={settings.defaultAudioLanguage || undefined}
-              defaultSubtitleLanguage={settings.defaultSubtitleLanguage || undefined}
-              subtitlesEnabled={settings.subtitlesEnabled}
-              onVolumeChange={onVolumeChange}
-              onError={() => {
-                moveBy(1);
-              }}
-              onEnded={() => moveBy(1)}
+            )}
+            {streamQuery.isError && (
+              <ShortsError
+                message={errorMessage}
+                onRetry={() => streamQuery.refetch()}
+                onNext={() => moveBy(1)}
+              />
+            )}
+            {stream && !streamQuery.isError && (
+              <ShortsVideoPlayer
+                key={stream.id}
+                src={resolveManifestSrc(stream, false, false, false)}
+                title={stream.title}
+                poster={stream.thumbnail}
+                subtitles={stream.subtitles}
+                initialVolume={settings.volume}
+                initialMuted={settings.muted}
+                settingsReady={settingsReady}
+                originalAudioLocale={originalLocale}
+                defaultAudioLanguage={settings.defaultAudioLanguage || undefined}
+                defaultSubtitleLanguage={settings.defaultSubtitleLanguage || undefined}
+                subtitlesEnabled={settings.subtitlesEnabled}
+                onVolumeChange={onVolumeChange}
+                onError={() => moveBy(1)}
+                onEnded={() => {
+                  if (settings.autoplay) moveBy(1);
+                }}
+              />
+            )}
+            {current && (
+              <div className="md:hidden">
+                <ShortsInfoOverlay stream={current} />
+              </div>
+            )}
+            {current && (
+              <ShortsActions
+                stream={current}
+                onOpenComments={() => setCommentsOpen(true)}
+                className="absolute bottom-16 right-2 z-30 md:hidden"
+              />
+            )}
+          </div>
+          <div className="mt-3 flex items-center justify-center md:hidden">
+            <ShortsNavigation
+              onPrev={() => moveBy(-1)}
+              onNext={() => moveBy(1)}
+              hasPrev={hasPrev}
+              hasNext={hasNext}
             />
-          )}
+          </div>
         </div>
       </div>
+      <ShortsCommentsSheet
+        videoUrl={active.id}
+        anchorEl={playerRef.current}
+        open={commentsOpen}
+        onClose={() => setCommentsOpen(false)}
+      />
     </section>
   );
 }
