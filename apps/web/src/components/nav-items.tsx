@@ -17,6 +17,17 @@ export const NAV_ITEMS: NavItem[] = [
     icon: <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />,
   },
   {
+    label: "Shorts",
+    to: "/shorts",
+    icon: (
+      <>
+        <path d="M8 5l10 5-10 5" />
+        <path d="M8 14l10 5-10 5" />
+        <path d="M6 3l4 2" />
+      </>
+    ),
+  },
+  {
     label: "Subscriptions",
     to: "/subscriptions",
     icon: (

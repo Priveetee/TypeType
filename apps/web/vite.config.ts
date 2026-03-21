@@ -10,7 +10,7 @@ export default defineConfig({
     tailwindcss(),
   ],
   server: {
-    allowedHosts: [".trycloudflare.com"],
+    allowedHosts: true,
     proxy: {
       "/api": {
         target: "http://localhost:8080",

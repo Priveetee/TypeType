@@ -25,6 +25,7 @@ function RootLayout() {
   const collapsed = useUiStore((s) => s.sidebarCollapsed);
   const { isAuthed, isAdmin, status } = useAuth();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const shortsPage = pathname === "/shorts";
 
   useEffect(() => {
     void bootstrapSession();
@@ -67,6 +68,17 @@ function RootLayout() {
 
   if (authPage) {
     return <AuthShell />;
+  }
+
+  if (shortsPage) {
+    return (
+      <div className="min-h-screen bg-zinc-950 text-zinc-100">
+        <Navbar />
+        <main className="pt-14">
+          <Outlet />
+        </main>
+      </div>
+    );
   }
 
   return (
