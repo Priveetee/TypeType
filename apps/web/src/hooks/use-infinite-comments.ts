@@ -23,5 +23,7 @@ export function useInfiniteComments(videoUrl: string, enabled = true) {
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (last: CommentPage) => last.nextpage ?? undefined,
     enabled: enabled && videoUrl.length > 0,
+    staleTime: 30 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 }

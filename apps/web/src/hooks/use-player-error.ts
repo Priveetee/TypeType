@@ -1,5 +1,5 @@
 import type { MediaSrc } from "@vidstack/react";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { resolveManifestSrc } from "../lib/stream-src";
 import type { VideoStream } from "../types/stream";
 
@@ -19,7 +19,10 @@ export function usePlayerError(stream: VideoStream, isLive: boolean): UsePlayerE
   const [playerFailed, setPlayerFailed] = useState(false);
   const [retryKey, setRetryKey] = useState(0);
 
-  const manifestSrc = resolveManifestSrc(stream, isLive, nativeFailed, qualityFailed);
+  const manifestSrc = useMemo(
+    () => resolveManifestSrc(stream, isLive, nativeFailed, qualityFailed),
+    [stream, isLive, nativeFailed, qualityFailed],
+  );
 
   const handleError = useCallback(() => {
     if (nativeEnabled && !nativeFailed) {
