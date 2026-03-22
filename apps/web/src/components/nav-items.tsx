@@ -80,6 +80,16 @@ export const NAV_ITEMS: NavItem[] = [
     ),
   },
   {
+    label: "Privacy",
+    to: "/privacy",
+    icon: (
+      <>
+        <rect x="3" y="11" width="18" height="10" rx="2" />
+        <path d="M7 11V8a5 5 0 0 1 10 0v3" />
+      </>
+    ),
+  },
+  {
     label: "Admin",
     to: "/admin-console",
     adminOnly: true,
