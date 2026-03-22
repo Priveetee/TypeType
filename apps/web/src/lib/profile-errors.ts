@@ -10,7 +10,7 @@ const PROFILE_ERROR_MESSAGES: Record<string, string> = {
 
 type ProfileField = "publicUsername" | "bio";
 
-export type ProfileServerError = {
+type ProfileServerError = {
   code: string;
   message: string;
   field: ProfileField | null;
@@ -23,13 +23,6 @@ const FIELD_BY_CODE: Record<string, ProfileField | null> = {
   BIO_TOO_LONG: "bio",
   PROFILE_UPDATE_FAILED: null,
 };
-
-export function profileErrorMessage(error: unknown): string {
-  if (error instanceof ApiError) {
-    return PROFILE_ERROR_MESSAGES[error.message] ?? PROFILE_ERROR_MESSAGES.PROFILE_UPDATE_FAILED;
-  }
-  return PROFILE_ERROR_MESSAGES.PROFILE_UPDATE_FAILED;
-}
 
 export function parseProfileServerError(error: unknown): ProfileServerError {
   if (error instanceof ApiError) {

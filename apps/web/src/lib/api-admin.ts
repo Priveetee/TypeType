@@ -3,7 +3,7 @@ import { ApiError } from "./api";
 import { authed, authedJson } from "./authed";
 import { API_BASE as BASE } from "./env";
 
-export type AdminUsersPage = {
+type AdminUsersPage = {
   items: AuthUser[];
   page: number;
   limit: number;
