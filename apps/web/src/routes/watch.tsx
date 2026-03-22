@@ -1,12 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef } from "react";
+import { lazy, Suspense, useEffect, useRef } from "react";
 import { PageSpinner } from "../components/page-spinner";
 import { StreamError } from "../components/stream-error";
-import { WatchLayout } from "../components/watch-layout";
 import { useHistory } from "../hooks/use-history";
 import { useProgress } from "../hooks/use-progress";
 import { useStream } from "../hooks/use-stream";
 import { ApiError } from "../lib/api";
+
+const WatchLayout = lazy(() =>
+  import("../components/watch-layout").then((module) => ({ default: module.WatchLayout })),
+);
 
 function WatchPage() {
   const { v } = Route.useSearch();
@@ -52,7 +55,11 @@ function WatchPage() {
   const durationMs = stream.duration * 1000;
   const startTime = resumeMs >= 5000 && resumeMs < durationMs * 0.95 ? resumeMs : 0;
 
-  return <WatchLayout stream={stream} startTime={startTime} />;
+  return (
+    <Suspense fallback={<PageSpinner />}>
+      <WatchLayout stream={stream} startTime={startTime} />
+    </Suspense>
+  );
 }
 
 export const Route = createFileRoute("/watch")({

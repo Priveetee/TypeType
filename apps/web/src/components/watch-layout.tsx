@@ -8,6 +8,7 @@ import { useVolumeSync } from "../hooks/use-volume-sync";
 import { buildChaptersVtt } from "../lib/chapters-vtt";
 import { detectProvider } from "../lib/provider";
 import { proxyUrl } from "../lib/proxy";
+import { trackRecommendationEvent } from "../lib/recommendation-tracker";
 import { buildThumbnailVtt } from "../lib/thumbnail-vtt";
 import { useDanmakuStore } from "../stores/danmaku-store";
 import type { VideoStream } from "../types/stream";
@@ -17,7 +18,6 @@ import { PlayerDefaults, PlayerFocuser } from "./player-internals";
 import { RelatedVideos } from "./related-videos";
 import { VideoPlayer } from "./video-player";
 import { WatchActions } from "./watch-actions";
-import { WatchCommentActions } from "./watch-comment-actions";
 import { WatchComments } from "./watch-comments";
 import { WatchDescription } from "./watch-description";
 import { WatchInfo } from "./watch-info";
@@ -52,6 +52,8 @@ export function WatchLayout({ stream, startTime }: Props) {
   const saveMutateRef = useRef(save.mutate);
   saveMutateRef.current = save.mutate;
   const handleVolumeChange = useVolumeSync(update.mutate);
+  const watchSentRef = useRef(false);
+  const trackedStreamIdRef = useRef("");
 
   const saveRef = useRef<(seeked: boolean) => void>(() => {});
   saveRef.current = (seeked: boolean) => {
@@ -63,6 +65,11 @@ export function WatchLayout({ stream, startTime }: Props) {
   };
   const handleSave = useCallback(() => saveRef.current(false), []);
   const handleSeekSave = useCallback(() => saveRef.current(true), []);
+
+  if (trackedStreamIdRef.current !== stream.id) {
+    trackedStreamIdRef.current = stream.id;
+    watchSentRef.current = false;
+  }
 
   useEffect(() => {
     if (!stream.previewFrames) {
@@ -111,6 +118,21 @@ export function WatchLayout({ stream, startTime }: Props) {
       document.removeEventListener("visibilitychange", onVisibilityChange);
     };
   }, [isLive]);
+
+  useEffect(() => {
+    if (isLive || stream.duration <= 0 || watchSentRef.current) return;
+    const onBeforeUnload = () => {
+      const ratio = Math.max(0, Math.min(positionRef.current / (stream.duration * 1000), 1));
+      if (ratio < 0.2 || watchSentRef.current) return;
+      watchSentRef.current = true;
+      trackRecommendationEvent("watch", stream, { watchRatio: ratio });
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => {
+      onBeforeUnload();
+      window.removeEventListener("beforeunload", onBeforeUnload);
+    };
+  }, [isLive, stream]);
 
   return (
     <div className="flex flex-col gap-6 lg:flex-row lg:items-start [animation:page-fade-in_0.2s_ease-out]">
@@ -161,8 +183,7 @@ export function WatchLayout({ stream, startTime }: Props) {
         <WatchInfo stream={stream} />
         <WatchActions stream={stream} />
         {stream.description && <WatchDescription description={stream.description} />}
-        <WatchCommentActions stream={stream} />
-        <WatchComments videoUrl={stream.id} />
+        <WatchComments key={stream.id} videoUrl={stream.id} />
       </div>
       <div className="w-full lg:flex-1 lg:min-w-64">
         <RelatedVideos streams={stream.related ?? []} />
