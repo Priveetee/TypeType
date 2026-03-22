@@ -6,6 +6,8 @@ import { WatchComment } from "./watch-comment";
 import { WatchCommentSkeleton } from "./watch-comment-skeleton";
 
 const SKELETON_KEYS = Array.from({ length: 4 }, (_, i) => `scs-${i}`);
+const INITIAL_RENDER_COUNT = 20;
+const RENDER_STEP = 14;
 
 type Props = {
   videoUrl: string;
@@ -17,6 +19,7 @@ type Props = {
 export function ShortsCommentsSheet({ videoUrl, anchorEl, open, onClose }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isMounted, setIsMounted] = useState(false);
+  const [renderCount, setRenderCount] = useState(INITIAL_RENDER_COUNT);
   const { data, isFetchingNextPage, hasNextPage, fetchNextPage, isLoading } = useInfiniteComments(
     videoUrl,
     open,
@@ -47,6 +50,7 @@ export function ShortsCommentsSheet({ videoUrl, anchorEl, open, onClose }: Props
   useEffect(() => {
     if (!open) return;
     scrollRef.current?.scrollTo({ top: 0, behavior: "auto" });
+    setRenderCount(INITIAL_RENDER_COUNT);
   }, [open]);
 
   const desktopStyle = useMemo(() => {
@@ -72,12 +76,18 @@ export function ShortsCommentsSheet({ videoUrl, anchorEl, open, onClose }: Props
     };
   }, [anchorEl]);
 
-  if (!isMounted) return null;
-
   const commentsDisabled = data?.pages[0]?.commentsDisabled ?? false;
   const comments =
     data?.pages.flatMap((p) => p.comments).filter((comment) => comment.text && comment.author) ??
     [];
+  const visibleComments = useMemo(() => comments.slice(0, renderCount), [comments, renderCount]);
+  const hasHiddenComments = visibleComments.length < comments.length;
+  const revealMore = useCallback(() => {
+    if (!hasHiddenComments) return;
+    setRenderCount((count) => Math.min(count + RENDER_STEP, comments.length));
+  }, [hasHiddenComments, comments.length]);
+
+  if (!isMounted) return null;
 
   return createPortal(
     <>
@@ -117,16 +127,21 @@ export function ShortsCommentsSheet({ videoUrl, anchorEl, open, onClose }: Props
             <p className="text-sm text-zinc-500">Comments are disabled for this video.</p>
           ) : (
             <>
-              {comments.map((comment, i) => (
+              {visibleComments.map((comment, i) => (
                 <div key={comment.id || `short-comment-${i}`}>
                   <WatchComment comment={comment} videoUrl={videoUrl} />
                 </div>
               ))}
+              <ScrollSentinel
+                onIntersect={revealMore}
+                enabled={hasHiddenComments}
+                root={scrollRef.current}
+              />
               {(isLoading || isFetchingNextPage) &&
                 SKELETON_KEYS.map((key) => <WatchCommentSkeleton key={key} />)}
               <ScrollSentinel
                 onIntersect={loadMore}
-                enabled={!!hasNextPage && !isFetchingNextPage}
+                enabled={!hasHiddenComments && !!hasNextPage && !isFetchingNextPage}
                 root={scrollRef.current}
               />
             </>
