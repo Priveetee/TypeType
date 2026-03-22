@@ -3,22 +3,25 @@ import { Link } from "@tanstack/react-router";
 import { useCallback, useRef, useState } from "react";
 import { streamQueryOptions } from "../hooks/use-stream";
 import { useWatchPrefetch } from "../hooks/use-watch-prefetch";
-import { formatDuration, formatViews } from "../lib/format";
+import { formatDuration, formatPublishedDate, formatViews } from "../lib/format";
 import type { VideoStream } from "../types/stream";
 import { ChannelAvatar } from "./channel-avatar";
+import { VideoCardFeedbackMenu } from "./video-card-feedback-menu";
 import { VideoPreview } from "./video-preview";
 import { VerifiedBadgeIcon } from "./watch-icons";
 
 type Props = {
   stream: VideoStream;
+  onOpen?: () => void;
 };
 
-export function VideoCard({ stream }: Props) {
+export function VideoCard({ stream, onOpen }: Props) {
   const queryClient = useQueryClient();
   const previewTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [previewStream, setPreviewStream] = useState<VideoStream | undefined>(undefined);
   const [showPreview, setShowPreview] = useState(false);
   const prefetch = useWatchPrefetch(stream.id);
+  const publishedText = formatPublishedDate(stream.uploaded, stream.uploadDate);
 
   const fetchStreamData = useCallback(async () => {
     const cached = queryClient.getQueryData<VideoStream>(["stream", stream.id]);
@@ -32,7 +35,6 @@ export function VideoCard({ stream }: Props) {
 
   const handleMouseEnter = () => {
     prefetch.onMouseEnter();
-
     previewTimer.current = setTimeout(() => {
       void fetchStreamData().then(() => setShowPreview(true));
     }, 5000);
@@ -53,12 +55,21 @@ export function VideoCard({ stream }: Props) {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <Link to="/watch" search={{ v: stream.id }} className="block">
+      <Link
+        to="/watch"
+        search={{ v: stream.id }}
+        className="block"
+        onMouseDown={onOpen}
+        onTouchStart={onOpen}
+        onClick={onOpen}
+      >
         <div className="relative aspect-video rounded-lg overflow-hidden bg-zinc-800">
           <img
             src={stream.thumbnail}
             alt={stream.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+            loading="lazy"
+            decoding="async"
           />
           <VideoPreview stream={previewStream} show={showPreview} />
           {stream.duration > 0 && (
@@ -85,6 +96,9 @@ export function VideoCard({ stream }: Props) {
             to="/watch"
             search={{ v: stream.id }}
             className="text-sm font-medium text-zinc-100 line-clamp-2 leading-snug hover:text-white"
+            onMouseDown={onOpen}
+            onTouchStart={onOpen}
+            onClick={onOpen}
           >
             {stream.title}
           </Link>
@@ -104,9 +118,11 @@ export function VideoCard({ stream }: Props) {
             </p>
           )}
           <p className="text-xs text-zinc-500">
-            {formatViews(stream.views)} · {stream.uploadDate}
+            {formatViews(stream.views)}
+            {publishedText && ` · ${publishedText}`}
           </p>
         </div>
+        <VideoCardFeedbackMenu stream={stream} />
       </div>
     </article>
   );

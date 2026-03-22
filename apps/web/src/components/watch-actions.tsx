@@ -1,6 +1,5 @@
 import { useRef, useState } from "react";
 import { useAuth } from "../hooks/use-auth";
-import { useBlocked } from "../hooks/use-blocked";
 import { useFavoritesPlaylist } from "../hooks/use-favorites-playlist";
 import { useShareUrl } from "../hooks/use-share-url";
 import { useWatchLaterPlaylist } from "../hooks/use-watch-later-playlist";
@@ -10,8 +9,8 @@ import type { VideoStream } from "../types/stream";
 import { DanmakuControls } from "./danmaku-controls";
 import { PlaylistAddDropdown } from "./playlist-add-dropdown";
 import { Toast } from "./toast";
-import { WatchActionBlockControls } from "./watch-action-block-controls";
 import { ClockIcon, ListPlusIcon, ShareIcon, StarIcon } from "./watch-icons";
+import { WatchMoreActions } from "./watch-more-actions";
 
 type Props = {
   stream: VideoStream;
@@ -24,9 +23,8 @@ export function WatchActions({ stream }: Props) {
   const { copied, share } = useShareUrl();
   const [playlistOpen, setPlaylistOpen] = useState(false);
   const [toastLabel, setToastLabel] = useState<string | null>(null);
-  const [globalBlock, setGlobalBlock] = useState(false);
   const saveAnchorRef = useRef<HTMLButtonElement>(null);
-  const { isAuthed, canGlobalBlock } = useAuth();
+  const { isAuthed } = useAuth();
   const {
     add: addWatchLater,
     remove: removeWatchLater,
@@ -39,11 +37,8 @@ export function WatchActions({ stream }: Props) {
     isInFavorites,
     isPending: favPending,
   } = useFavoritesPlaylist();
-  const { channels: blockedChannels, addChannel, removeChannel } = useBlocked();
   const inWatchLater = isInWatchLater(stream.id);
   const favorited = isInFavorites(stream.id);
-  const channelBlocked =
-    !!stream.channelUrl && (blockedChannels.data ?? []).some((b) => b.url === stream.channelUrl);
   const isNicoNico = detectProvider(stream.id) === "nicovideo";
 
   function handleSaved(label: string) {
@@ -68,6 +63,7 @@ export function WatchActions({ stream }: Props) {
       handleSaved("Saved to Favorites");
     }
   }
+
   async function handleWatchLater() {
     if (!isAuthed) {
       goto("/");
@@ -85,24 +81,6 @@ export function WatchActions({ stream }: Props) {
       });
       handleSaved("Saved to Watch Later");
     }
-  }
-  function toggleChannelBlock() {
-    const channelUrl = stream.channelUrl;
-    if (!channelUrl) return;
-    if (!isAuthed) {
-      goto("/");
-      return;
-    }
-    if (channelBlocked) {
-      removeChannel.mutate(channelUrl);
-      return;
-    }
-    addChannel.mutate({
-      url: channelUrl,
-      name: stream.channelName,
-      thumbnailUrl: stream.channelAvatar,
-      global: globalBlock,
-    });
   }
 
   return (
@@ -146,15 +124,12 @@ export function WatchActions({ stream }: Props) {
         <ListPlusIcon />
         Save
       </button>
-      {stream.channelUrl && (
-        <WatchActionBlockControls
-          canGlobalBlock={canGlobalBlock}
-          channelBlocked={channelBlocked}
-          globalBlock={globalBlock}
-          onToggleGlobal={() => setGlobalBlock((v) => !v)}
-          onToggleChannel={toggleChannelBlock}
-        />
-      )}
+      <WatchMoreActions
+        stream={stream}
+        isAuthed={isAuthed}
+        onSaved={handleSaved}
+        className={`${BTN} ${BTN_IDLE}`}
+      />
       {isNicoNico && <DanmakuControls />}
       {playlistOpen && (
         <PlaylistAddDropdown

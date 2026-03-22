@@ -51,15 +51,6 @@ export function ClockIcon() {
   );
 }
 
-export function BanIcon() {
-  return (
-    <SvgIcon label="Block">
-      <circle cx="12" cy="12" r="10" />
-      <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
-    </SvgIcon>
-  );
-}
-
 export function StarIcon({ filled }: { filled?: boolean }) {
   return (
     <SvgIcon label="Favorite">
@@ -77,6 +68,16 @@ export function DanmakuIcon() {
       <line x1="3" y1="7" x2="21" y2="7" />
       <line x1="3" y1="12" x2="14" y2="12" />
       <line x1="3" y1="17" x2="17" y2="17" />
+    </SvgIcon>
+  );
+}
+
+export function MoreIcon() {
+  return (
+    <SvgIcon label="More actions">
+      <circle cx="5" cy="12" r="1.5" fill="currentColor" />
+      <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+      <circle cx="19" cy="12" r="1.5" fill="currentColor" />
     </SvgIcon>
   );
 }
