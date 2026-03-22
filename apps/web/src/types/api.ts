@@ -77,6 +77,12 @@ export type SearchPageResponse = {
   isCorrectedSearch: boolean;
 };
 
+export type HomeRecommendationsResponse = {
+  items: VideoItem[];
+  nextCursor: string | null;
+  hasMore: boolean;
+};
+
 export type CommentItem = {
   id: string;
   text: string;

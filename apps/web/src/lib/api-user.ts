@@ -1,4 +1,4 @@
-import type { VideoItem } from "../types/api";
+import type { HomeRecommendationsResponse, VideoItem } from "../types/api";
 import type { HistoryItem, SearchHistoryItem, SettingsItem, SubscriptionItem } from "../types/user";
 import { ApiError } from "./api";
 import { authed, authedJson } from "./authed";
@@ -111,4 +111,14 @@ type SubscriptionFeedPage = {
 export async function fetchSubscriptionFeed(page: number): Promise<SubscriptionFeedPage> {
   const search = new URLSearchParams({ page: String(page), limit: "30" });
   return authedJson(`${BASE}/subscriptions/feed?${search.toString()}`);
+}
+
+export async function fetchHomeRecommendations(
+  service: number,
+  limit: number,
+  cursor?: string,
+): Promise<HomeRecommendationsResponse> {
+  const search = new URLSearchParams({ service: String(service), limit: String(limit) });
+  if (cursor) search.set("cursor", cursor);
+  return authedJson(`${BASE}/recommendations/home?${search.toString()}`);
 }
