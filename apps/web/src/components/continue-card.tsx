@@ -20,7 +20,13 @@ export function ContinueCard({ item }: ContinueCardProps) {
       onMouseLeave={prefetch.onMouseLeave}
     >
       <div className="relative aspect-video rounded-lg overflow-hidden bg-zinc-800">
-        <img src={item.thumbnail} alt={item.title} className="w-full h-full object-cover" />
+        <img
+          src={item.thumbnail}
+          alt={item.title}
+          className="w-full h-full object-cover"
+          loading="lazy"
+          decoding="async"
+        />
         <span className="absolute bottom-1 right-1 bg-black/80 text-white text-[10px] font-medium px-1 py-0.5 rounded">
           {formatDuration(item.duration)}
         </span>

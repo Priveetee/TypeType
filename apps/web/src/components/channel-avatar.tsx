@@ -40,6 +40,8 @@ export function ChannelAvatar({ src, name, className = "w-8 h-8" }: Props) {
       src={src}
       alt={name}
       className={`${className} rounded-full flex-shrink-0`}
+      loading="lazy"
+      decoding="async"
       onError={() => setFailed(true)}
     />
   );

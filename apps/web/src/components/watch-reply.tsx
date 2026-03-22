@@ -13,6 +13,8 @@ export function WatchReply({ reply }: Props) {
         src={reply.authorAvatarUrl || undefined}
         alt={reply.author}
         className="w-6 h-6 rounded-full flex-shrink-0 mt-0.5"
+        loading="lazy"
+        decoding="async"
       />
       <div className="flex flex-col gap-1 flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">

@@ -33,6 +33,8 @@ export function WatchComment({ comment, videoUrl }: Props) {
           src={comment.authorAvatarUrl}
           alt={comment.author}
           className="w-8 h-8 rounded-full flex-shrink-0 mt-0.5 bg-zinc-700"
+          loading="lazy"
+          decoding="async"
         />
       ) : (
         <div className="w-8 h-8 rounded-full flex-shrink-0 mt-0.5 bg-zinc-700" />

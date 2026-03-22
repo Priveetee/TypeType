@@ -42,6 +42,8 @@ export function PlaylistVideoRow({ video, onRemove }: Props) {
             src={video.thumbnail}
             alt={video.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+            loading="lazy"
+            decoding="async"
           />
           <button
             type="button"

@@ -25,6 +25,8 @@ export function RelatedCard({ stream }: Props) {
           src={stream.thumbnail}
           alt={stream.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+          loading="lazy"
+          decoding="async"
         />
         {stream.duration > 0 && (
           <span className="absolute bottom-1 right-1 bg-black/80 text-white text-[10px] px-1 rounded">

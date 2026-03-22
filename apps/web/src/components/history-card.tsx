@@ -59,6 +59,8 @@ export function HistoryCard({ item, onRemove, index }: HistoryCardProps) {
             src={proxyImage(item.thumbnail)}
             alt={item.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+            loading="lazy"
+            decoding="async"
           />
           {item.duration > 0 && (
             <span className="absolute bottom-1.5 right-1.5 bg-black/80 text-white text-xs px-1 rounded">
