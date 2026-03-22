@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useSubscriptions } from "../hooks/use-subscriptions";
-import { formatSubscribers, formatViews } from "../lib/format";
+import { formatPublishedDate, formatSubscribers, formatViews } from "../lib/format";
 import type { VideoStream } from "../types/stream";
 import { ChannelAvatar } from "./channel-avatar";
 import { Toast } from "./toast";
@@ -15,6 +15,7 @@ export function WatchInfo({ stream }: Props) {
   const { add, remove, isSubscribed } = useSubscriptions();
   const subscribed = stream.channelUrl ? isSubscribed(stream.channelUrl) : false;
   const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const publishedText = formatPublishedDate(stream.uploaded, stream.uploadDate);
 
   useEffect(() => {
     if (!toastMsg) return;
@@ -45,7 +46,7 @@ export function WatchInfo({ stream }: Props) {
       </p>
       <p className="text-xs text-zinc-500">
         {formatSubscribers(stream.uploaderSubscriberCount)}
-        {stream.uploadDate && ` · ${stream.uploadDate}`}
+        {publishedText && ` · ${publishedText}`}
       </p>
     </div>
   );
@@ -78,7 +79,7 @@ export function WatchInfo({ stream }: Props) {
                 </p>
                 <p className="text-xs text-zinc-500">
                   {formatSubscribers(stream.uploaderSubscriberCount)}
-                  {stream.uploadDate && ` · ${stream.uploadDate}`}
+                  {publishedText && ` · ${publishedText}`}
                 </p>
               </div>
             </Link>
