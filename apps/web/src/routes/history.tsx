@@ -29,6 +29,15 @@ function startOfMonth(date: Date): number {
 
 type DateRange = { from: number; to: number } | null;
 
+function dedupeByUrl(items: HistoryItem[]): HistoryItem[] {
+  const seen = new Set<string>();
+  return items.filter((item) => {
+    if (seen.has(item.url)) return false;
+    seen.add(item.url);
+    return true;
+  });
+}
+
 function rangeFromFilter(filter: FilterState | null): DateRange {
   if (filter === null) return null;
   const now = new Date();
@@ -63,8 +72,8 @@ function HistoryPage() {
     staleTime: 30_000,
   });
 
-  const filtered = filter !== null ? (allItemsQuery.data?.items ?? []) : items;
-  const filteredTotal = filter !== null ? (allItemsQuery.data?.total ?? 0) : total;
+  const filtered = filter !== null ? dedupeByUrl(allItemsQuery.data?.items ?? []) : items;
+  const filteredTotal = filter !== null ? filtered.length : total;
 
   return (
     <div className="flex gap-8 items-start">
