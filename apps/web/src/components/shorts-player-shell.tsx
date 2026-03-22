@@ -43,7 +43,16 @@ export function ShortsPlayerShell() {
       ?.audioLocale ?? null;
 
   useEffect(() => {
-    const nextIds = shorts.slice(index + 1, index + 4).map((item) => item.id);
+    if (typeof window !== "undefined") {
+      const slowNetwork =
+        "connection" in navigator &&
+        typeof navigator.connection === "object" &&
+        navigator.connection !== null &&
+        "saveData" in navigator.connection &&
+        navigator.connection.saveData === true;
+      if (slowNetwork) return;
+    }
+    const nextIds = shorts.slice(index + 1, index + 3).map((item) => item.id);
     for (const id of nextIds) {
       void queryClient.prefetchQuery(streamQueryOptions(id));
     }

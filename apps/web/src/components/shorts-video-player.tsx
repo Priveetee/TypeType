@@ -103,7 +103,7 @@ export function ShortsVideoPlayer({
           initialVolume={initialVolume}
           initialMuted={initialMuted}
           settingsReady={settingsReady}
-          autoplay
+          autoplay={false}
           onVolumeChange={onVolumeChange}
         />
       </MediaPlayer>
