@@ -12,18 +12,12 @@ export const NAV_ITEMS: NavItem[] = [
     icon: <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />,
   },
   {
-    label: "Trending",
-    to: "/trending",
-    icon: <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />,
-  },
-  {
     label: "Shorts",
     to: "/shorts",
     icon: (
       <>
-        <path d="M8 5l10 5-10 5" />
-        <path d="M8 14l10 5-10 5" />
-        <path d="M6 3l4 2" />
+        <rect x="7" y="3" width="10" height="18" rx="4" />
+        <path d="M11 9l4 3-4 3V9z" />
       </>
     ),
   },
@@ -56,6 +50,17 @@ export const NAV_ITEMS: NavItem[] = [
         <path d="M3 9h15" />
         <path d="M3 13h9" />
         <path d="M15 13l4 3-4 3V13z" />
+      </>
+    ),
+  },
+  {
+    label: "Import",
+    to: "/import",
+    icon: (
+      <>
+        <path d="M12 3v12" />
+        <path d="M8 11l4 4 4-4" />
+        <path d="M4 19h16" />
       </>
     ),
   },
@@ -95,11 +100,8 @@ export const NAV_ITEMS: NavItem[] = [
     adminOnly: true,
     icon: (
       <>
-        <path d="M14.7 6.3l3 3" />
-        <path d="M11.8 9.2l4 4" />
-        <path d="M8.9 12.1l3.1 3.1" />
-        <path d="M6 15l3 3" />
-        <path d="M3 21l6-2 10-10a2.12 2.12 0 1 0-3-3L6 16l-3 5z" />
+        <path d="M12 2l7 3v6c0 5-3.5 9-7 11-3.5-2-7-6-7-11V5l7-3z" />
+        <path d="M9 12l2 2 4-4" />
       </>
     ),
   },

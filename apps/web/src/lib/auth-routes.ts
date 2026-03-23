@@ -1,5 +1,6 @@
 export type RedirectTarget =
   | "/"
+  | "/import"
   | "/history"
   | "/playlists"
   | "/privacy"
@@ -8,6 +9,7 @@ export type RedirectTarget =
   | "/subscriptions";
 
 const PROTECTED_PREFIXES = [
+  "/import",
   "/history",
   "/playlists",
   "/privacy",
@@ -38,6 +40,7 @@ export function isAuthPage(pathname: string): boolean {
 
 export function sanitizeRedirect(value: string | undefined): RedirectTarget {
   if (!value) return "/";
+  if (value === "/import") return "/import";
   if (value === "/history") return "/history";
   if (value === "/privacy") return "/privacy";
   if (value === "/profile") return "/profile";
