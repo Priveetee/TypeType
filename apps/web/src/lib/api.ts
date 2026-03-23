@@ -4,7 +4,6 @@ import type {
   CommentsPageResponse,
   SearchPageResponse,
   StreamResponse,
-  VideoItem,
 } from "../types/api";
 
 import { API_BASE as BASE } from "./env";
@@ -52,10 +51,6 @@ async function request<T>(url: string): Promise<T> {
   const body = await readBody(res);
   if (!res.ok) throw new ApiError(toErrorMessage(res.status, res.statusText, body), res.status);
   return body as T;
-}
-
-export function fetchTrending(service: number): Promise<VideoItem[]> {
-  return request(`${BASE}/trending?service=${service}`);
 }
 
 export function fetchStream(url: string): Promise<StreamResponse> {

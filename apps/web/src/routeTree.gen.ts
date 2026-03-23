@@ -10,7 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WatchRouteImport } from './routes/watch'
-import { Route as TrendingRouteImport } from './routes/trending'
 import { Route as SubscriptionsRouteImport } from './routes/subscriptions'
 import { Route as ShortsRouteImport } from './routes/shorts'
 import { Route as SettingsRouteImport } from './routes/settings'
@@ -21,6 +20,7 @@ import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PlaylistsRouteImport } from './routes/playlists'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as ImportRouteImport } from './routes/import'
 import { Route as HistoryRouteImport } from './routes/history'
 import { Route as ChannelRouteImport } from './routes/channel'
 import { Route as AdminConsoleRouteImport } from './routes/admin-console'
@@ -30,11 +30,6 @@ import { Route as PlaylistsIdRouteImport } from './routes/playlists_.$id'
 const WatchRoute = WatchRouteImport.update({
   id: '/watch',
   path: '/watch',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TrendingRoute = TrendingRouteImport.update({
-  id: '/trending',
-  path: '/trending',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SubscriptionsRoute = SubscriptionsRouteImport.update({
@@ -87,6 +82,11 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ImportRoute = ImportRouteImport.update({
+  id: '/import',
+  path: '/import',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HistoryRoute = HistoryRouteImport.update({
   id: '/history',
   path: '/history',
@@ -118,6 +118,7 @@ export interface FileRoutesByFullPath {
   '/admin-console': typeof AdminConsoleRoute
   '/channel': typeof ChannelRoute
   '/history': typeof HistoryRoute
+  '/import': typeof ImportRoute
   '/login': typeof LoginRoute
   '/playlists': typeof PlaylistsRoute
   '/privacy': typeof PrivacyRoute
@@ -128,7 +129,6 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRoute
   '/shorts': typeof ShortsRoute
   '/subscriptions': typeof SubscriptionsRoute
-  '/trending': typeof TrendingRoute
   '/watch': typeof WatchRoute
   '/playlists/$id': typeof PlaylistsIdRoute
 }
@@ -137,6 +137,7 @@ export interface FileRoutesByTo {
   '/admin-console': typeof AdminConsoleRoute
   '/channel': typeof ChannelRoute
   '/history': typeof HistoryRoute
+  '/import': typeof ImportRoute
   '/login': typeof LoginRoute
   '/playlists': typeof PlaylistsRoute
   '/privacy': typeof PrivacyRoute
@@ -147,7 +148,6 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRoute
   '/shorts': typeof ShortsRoute
   '/subscriptions': typeof SubscriptionsRoute
-  '/trending': typeof TrendingRoute
   '/watch': typeof WatchRoute
   '/playlists/$id': typeof PlaylistsIdRoute
 }
@@ -157,6 +157,7 @@ export interface FileRoutesById {
   '/admin-console': typeof AdminConsoleRoute
   '/channel': typeof ChannelRoute
   '/history': typeof HistoryRoute
+  '/import': typeof ImportRoute
   '/login': typeof LoginRoute
   '/playlists': typeof PlaylistsRoute
   '/privacy': typeof PrivacyRoute
@@ -167,7 +168,6 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRoute
   '/shorts': typeof ShortsRoute
   '/subscriptions': typeof SubscriptionsRoute
-  '/trending': typeof TrendingRoute
   '/watch': typeof WatchRoute
   '/playlists_/$id': typeof PlaylistsIdRoute
 }
@@ -178,6 +178,7 @@ export interface FileRouteTypes {
     | '/admin-console'
     | '/channel'
     | '/history'
+    | '/import'
     | '/login'
     | '/playlists'
     | '/privacy'
@@ -188,7 +189,6 @@ export interface FileRouteTypes {
     | '/settings'
     | '/shorts'
     | '/subscriptions'
-    | '/trending'
     | '/watch'
     | '/playlists/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -197,6 +197,7 @@ export interface FileRouteTypes {
     | '/admin-console'
     | '/channel'
     | '/history'
+    | '/import'
     | '/login'
     | '/playlists'
     | '/privacy'
@@ -207,7 +208,6 @@ export interface FileRouteTypes {
     | '/settings'
     | '/shorts'
     | '/subscriptions'
-    | '/trending'
     | '/watch'
     | '/playlists/$id'
   id:
@@ -216,6 +216,7 @@ export interface FileRouteTypes {
     | '/admin-console'
     | '/channel'
     | '/history'
+    | '/import'
     | '/login'
     | '/playlists'
     | '/privacy'
@@ -226,7 +227,6 @@ export interface FileRouteTypes {
     | '/settings'
     | '/shorts'
     | '/subscriptions'
-    | '/trending'
     | '/watch'
     | '/playlists_/$id'
   fileRoutesById: FileRoutesById
@@ -236,6 +236,7 @@ export interface RootRouteChildren {
   AdminConsoleRoute: typeof AdminConsoleRoute
   ChannelRoute: typeof ChannelRoute
   HistoryRoute: typeof HistoryRoute
+  ImportRoute: typeof ImportRoute
   LoginRoute: typeof LoginRoute
   PlaylistsRoute: typeof PlaylistsRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -246,7 +247,6 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRoute
   ShortsRoute: typeof ShortsRoute
   SubscriptionsRoute: typeof SubscriptionsRoute
-  TrendingRoute: typeof TrendingRoute
   WatchRoute: typeof WatchRoute
   PlaylistsIdRoute: typeof PlaylistsIdRoute
 }
@@ -258,13 +258,6 @@ declare module '@tanstack/react-router' {
       path: '/watch'
       fullPath: '/watch'
       preLoaderRoute: typeof WatchRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/trending': {
-      id: '/trending'
-      path: '/trending'
-      fullPath: '/trending'
-      preLoaderRoute: typeof TrendingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/subscriptions': {
@@ -337,6 +330,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/import': {
+      id: '/import'
+      path: '/import'
+      fullPath: '/import'
+      preLoaderRoute: typeof ImportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/history': {
       id: '/history'
       path: '/history'
@@ -380,6 +380,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminConsoleRoute: AdminConsoleRoute,
   ChannelRoute: ChannelRoute,
   HistoryRoute: HistoryRoute,
+  ImportRoute: ImportRoute,
   LoginRoute: LoginRoute,
   PlaylistsRoute: PlaylistsRoute,
   PrivacyRoute: PrivacyRoute,
@@ -390,7 +391,6 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRoute,
   ShortsRoute: ShortsRoute,
   SubscriptionsRoute: SubscriptionsRoute,
-  TrendingRoute: TrendingRoute,
   WatchRoute: WatchRoute,
   PlaylistsIdRoute: PlaylistsIdRoute,
 }

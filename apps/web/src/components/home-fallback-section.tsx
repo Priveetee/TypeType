@@ -1,8 +1,6 @@
 import { useBlockedFilter } from "../hooks/use-blocked-filter";
-import { useSettings } from "../hooks/use-settings";
 import { useSubscriptionFeed } from "../hooks/use-subscription-feed";
 import { useSubscriptions } from "../hooks/use-subscriptions";
-import { useTrending } from "../hooks/use-trending";
 import { ScrollSentinel } from "./scroll-sentinel";
 import { VideoCardSkeleton } from "./video-card-skeleton";
 import { VideoGrid } from "./video-grid";
@@ -32,17 +30,17 @@ function FeedSection() {
   );
 }
 
-function TrendingSection() {
-  const { settings } = useSettings();
-  const { data: streams, isLoading } = useTrending(settings.defaultService);
-  const { filter } = useBlockedFilter();
-  if (isLoading) return <SkeletonGrid />;
-  return <VideoGrid streams={filter(streams ?? [])} />;
-}
-
 export function HomeFallbackSection() {
   const { query } = useSubscriptions();
   const hasSubs = (query.data ?? []).length > 0;
   if (query.isLoading) return <SkeletonGrid />;
-  return hasSubs ? <FeedSection /> : <TrendingSection />;
+  if (hasSubs) return <FeedSection />;
+  return (
+    <section className="rounded-xl border border-zinc-800 bg-zinc-900/70 p-6 text-center">
+      <h2 className="text-sm font-semibold text-zinc-100">No subscriptions yet</h2>
+      <p className="mt-1 text-xs text-zinc-400">
+        Subscribe to channels to unlock a personalized home feed.
+      </p>
+    </section>
+  );
 }
