@@ -3,6 +3,8 @@ import { useState } from "react";
 import { AuthCard } from "../components/auth-card";
 import { AuthErrorBanner } from "../components/auth-error-banner";
 import { useAuth } from "../hooks/use-auth";
+import { useRegisterStatus } from "../hooks/use-register-status";
+import { ApiError } from "../lib/api";
 import { sanitizeRedirect } from "../lib/auth-routes";
 import { registerSession } from "../lib/auth-session";
 import { goto } from "../lib/route-redirect";
@@ -11,14 +13,25 @@ function RegisterPage() {
   const { isAuthed, isGuest } = useAuth();
   const { redirect } = Route.useSearch();
   const target = sanitizeRedirect(redirect);
+  const registerStatus = useRegisterStatus();
+  const status = registerStatus.data;
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const postAuthTarget = redirect ? target : "/import";
+
+  const closedByPolicy = status ? !status.allowRegistration && !status.bootstrapAvailable : false;
+  const subtitle = status?.bootstrapAvailable
+    ? "Fresh install detected. The first account will be admin."
+    : closedByPolicy
+      ? "Registrations are currently closed."
+      : "Use your email to create an account.";
+  const bannerMessage = error ?? (closedByPolicy ? "Registrations are currently closed." : null);
 
   if (isAuthed && !isGuest) {
-    goto(target);
+    goto(postAuthTarget);
     return null;
   }
 
@@ -32,20 +45,21 @@ function RegisterPage() {
         email: email.trim(),
         password,
       });
-      goto(target);
-    } catch {
-      setError("Unable to create account.");
+      goto(postAuthTarget);
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 403) {
+        setError("Registrations are currently closed.");
+      } else {
+        setError("Unable to create account.");
+      }
     }
     setPending(false);
   }
 
   return (
     <div className="min-h-[calc(100vh-56px)] flex items-center justify-center px-4">
-      <AuthCard
-        title="Create account"
-        subtitle="On a fresh install, the first account is automatically admin."
-      >
-        <AuthErrorBanner message={error} />
+      <AuthCard title="Create account" subtitle={subtitle}>
+        <AuthErrorBanner message={bannerMessage} />
         <form className="flex flex-col gap-3" onSubmit={submitRegister}>
           <input
             type="text"
@@ -76,10 +90,10 @@ function RegisterPage() {
           />
           <button
             type="submit"
-            disabled={pending}
+            disabled={pending || closedByPolicy}
             className="h-10 rounded-lg bg-zinc-100 text-zinc-900 text-sm font-medium disabled:opacity-60"
           >
-            {pending ? "Creating account..." : "Register"}
+            {closedByPolicy ? "Registrations closed" : pending ? "Creating account..." : "Register"}
           </button>
         </form>
         <div className="mt-4 text-xs text-zinc-500">
