@@ -1,3 +1,4 @@
+import type { AdminSettings } from "../types/admin";
 import type { AuthRole, AuthUser, PasswordResetToken } from "../types/auth";
 import { ApiError } from "./api";
 import { authed, authedJson } from "./authed";
@@ -9,6 +10,16 @@ type AdminUsersPage = {
   limit: number;
   total: number;
 };
+
+function isAdminSettings(value: unknown): value is AdminSettings {
+  if (!value || typeof value !== "object") return false;
+  const record = value as Partial<AdminSettings>;
+  return (
+    typeof record.allowRegistration === "boolean" &&
+    typeof record.allowGuest === "boolean" &&
+    typeof record.forceEmailVerification === "boolean"
+  );
+}
 
 function normalizeAdminUser(user: AuthUser): AuthUser {
   return {
@@ -105,4 +116,23 @@ export async function createPasswordResetToken(id: string): Promise<PasswordRese
     throw new ApiError("Failed to create reset token", res.status);
   }
   return { resetToken: body.resetToken };
+}
+
+export async function fetchAdminSettings(): Promise<AdminSettings> {
+  const payload = await authedJson<unknown>(`${BASE}/admin/settings`);
+  if (!isAdminSettings(payload)) throw new ApiError("Invalid admin settings payload", 500);
+  return payload;
+}
+
+export async function updateAdminSettings(settings: AdminSettings): Promise<AdminSettings> {
+  const res = await authed(`${BASE}/admin/settings`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(settings),
+  });
+  const body = await res.json().catch(() => null);
+  if (!res.ok) throw new ApiError("Failed to update admin settings", res.status);
+  if (body === null && (res.status === 200 || res.status === 204)) return settings;
+  if (!isAdminSettings(body)) throw new ApiError("Failed to update admin settings", res.status);
+  return body;
 }
