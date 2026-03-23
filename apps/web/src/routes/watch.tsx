@@ -11,6 +11,19 @@ const WatchLayout = lazy(() =>
   import("../components/watch-layout").then((module) => ({ default: module.WatchLayout })),
 );
 
+function PlayerOnlyLoader() {
+  return (
+    <div className="flex flex-col gap-6 lg:flex-row lg:items-start [animation:page-fade-in_0.2s_ease-out]">
+      <div className="flex-[2] min-w-0 max-w-[133.333vh] flex flex-col gap-4">
+        <div className="aspect-video w-full overflow-hidden rounded-lg bg-black">
+          <PageSpinner fullScreen={false} />
+        </div>
+      </div>
+      <div className="w-full lg:flex-1 lg:min-w-64" />
+    </div>
+  );
+}
+
 function WatchPage() {
   const { v } = Route.useSearch();
   const { data: stream, isLoading, isError, error, refetch } = useStream(v);
@@ -34,7 +47,7 @@ function WatchPage() {
     });
   }, [stream]);
 
-  if (isLoading || progressFetch.isPending) return <PageSpinner />;
+  if (isLoading || progressFetch.isPending) return <PlayerOnlyLoader />;
 
   if (isError || !stream) {
     const message =
@@ -56,7 +69,7 @@ function WatchPage() {
   const startTime = resumeMs >= 5000 && resumeMs < durationMs * 0.95 ? resumeMs : 0;
 
   return (
-    <Suspense fallback={<PageSpinner />}>
+    <Suspense fallback={<PlayerOnlyLoader />}>
       <WatchLayout stream={stream} startTime={startTime} />
     </Suspense>
   );

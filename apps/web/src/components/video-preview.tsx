@@ -11,8 +11,6 @@ type Props = {
 
 export function VideoPreview({ stream, show }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const hlsRef = useRef<Hls | null>(null);
-  const dashRef = useRef<DashJs | null>(null);
 
   useEffect(() => {
     if (!show || !stream || !videoRef.current) return;
@@ -20,25 +18,32 @@ export function VideoPreview({ stream, show }: Props) {
     const video = videoRef.current;
     const src = resolvePreviewSrc(stream);
     if (!src) return;
-
-    let cleanup = () => {};
+    let disposed = false;
+    let hls: Hls | null = null;
+    let dash: DashJs | null = null;
 
     if (src.type === "application/x-mpegurl") {
-      void loadHls(video, src.url).then((hls) => {
-        hlsRef.current = hls;
-        cleanup = () => hls?.destroy();
+      void loadHls(video, src.url).then((nextHls) => {
+        if (disposed) {
+          nextHls?.destroy();
+          return;
+        }
+        hls = nextHls;
       });
     } else if (src.type === "application/dash+xml") {
       void loadDash(video, src.url).then((player) => {
-        dashRef.current = player;
-        cleanup = () => player?.destroy();
+        if (disposed) {
+          player?.destroy();
+          return;
+        }
+        dash = player;
       });
     }
 
     return () => {
-      cleanup();
-      hlsRef.current = null;
-      dashRef.current = null;
+      disposed = true;
+      hls?.destroy();
+      dash?.destroy();
     };
   }, [show, stream]);
 

@@ -1,24 +1,29 @@
-import { useQueryClient } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { PageSpinner } from "../components/page-spinner";
 import { ShortsActions } from "../components/shorts-actions";
-import { ShortsCommentsSheet } from "../components/shorts-comments-sheet";
 import { ShortsDesktopOverlay } from "../components/shorts-desktop-overlay";
 import { ShortsError } from "../components/shorts-error";
 import { ShortsInfoOverlay } from "../components/shorts-info-overlay";
 import { ShortsNavigation } from "../components/shorts-navigation";
+import { ShortsShellLoader } from "../components/shorts-shell-loader";
 import { ShortsVideoPlayer } from "../components/shorts-video-player";
 import { useSettings } from "../hooks/use-settings";
 import { useShortsFeed } from "../hooks/use-shorts-feed";
-import { streamQueryOptions, useStream } from "../hooks/use-stream";
+import { useShortsPrefetch } from "../hooks/use-shorts-prefetch";
+import { useStream } from "../hooks/use-stream";
 import { useVolumeSync } from "../hooks/use-volume-sync";
 import { ApiError } from "../lib/api";
 import { useShortsNavigation } from "../lib/shorts-navigation";
 import { resolveManifestSrc } from "../lib/stream-src";
 import { useUiStore } from "../stores/ui-store";
 
+const ShortsCommentsSheet = lazy(() =>
+  import("../components/shorts-comments-sheet").then((module) => ({
+    default: module.ShortsCommentsSheet,
+  })),
+);
+
 export function ShortsPlayerShell() {
-  const queryClient = useQueryClient();
   const { shorts, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } = useShortsFeed();
   const { settings, update, query: settingsQuery } = useSettings();
   const sidebarCollapsed = useUiStore((s) => s.sidebarCollapsed);
@@ -41,29 +46,20 @@ export function ShortsPlayerShell() {
   const originalLocale =
     stream?.audioStreams?.find((a) => a.audioTrackName?.toLowerCase().includes("original"))
       ?.audioLocale ?? null;
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const slowNetwork =
-        "connection" in navigator &&
-        typeof navigator.connection === "object" &&
-        navigator.connection !== null &&
-        "saveData" in navigator.connection &&
-        navigator.connection.saveData === true;
-      if (slowNetwork) return;
-    }
-    const nextIds = shorts.slice(index + 1, index + 3).map((item) => item.id);
-    for (const id of nextIds) {
-      void queryClient.prefetchQuery(streamQueryOptions(id));
-    }
-  }, [index, queryClient, shorts]);
+  useShortsPrefetch(
+    shorts.map((item) => item.id),
+    index,
+  );
 
   useEffect(() => {
     if (!activeId) return;
     setCommentsOpen(false);
   }, [activeId]);
 
-  if (isLoading) return <PageSpinner />;
+  const sectionClass = `h-[calc(100svh-4.5rem)] overflow-hidden px-2 pb-2 pt-1 sm:px-4 sm:pb-4 sm:pt-3 ${
+    sidebarCollapsed ? "md:pl-16" : "md:pl-52"
+  }`;
+  if (isLoading) return <ShortsShellLoader sectionClass={sectionClass} />;
   if (!active) {
     return (
       <div className="flex items-center justify-center pt-24">
@@ -71,7 +67,6 @@ export function ShortsPlayerShell() {
       </div>
     );
   }
-
   const hasPrev = index > 0;
   const hasNext = index < shorts.length - 1 || hasNextPage;
   const errorMessage =
@@ -86,11 +81,7 @@ export function ShortsPlayerShell() {
   };
 
   return (
-    <section
-      className={`h-[calc(100svh-4.5rem)] overflow-hidden px-2 pb-2 pt-1 sm:px-4 sm:pb-4 sm:pt-3 ${
-        sidebarCollapsed ? "md:pl-16" : "md:pl-52"
-      }`}
-    >
+    <section className={sectionClass}>
       <div className="relative h-full w-full">
         {current && (
           <ShortsDesktopOverlay
@@ -112,7 +103,7 @@ export function ShortsPlayerShell() {
           >
             {!streamQuery.isError && streamQuery.isLoading && (
               <div className="absolute inset-0 z-20 flex items-center justify-center bg-zinc-950/80">
-                <PageSpinner />
+                <PageSpinner fullScreen={false} />
               </div>
             )}
             {streamQuery.isError && (
@@ -152,7 +143,7 @@ export function ShortsPlayerShell() {
               <ShortsActions
                 stream={current}
                 onOpenComments={() => setCommentsOpen(true)}
-                className="absolute bottom-16 right-2 z-30 md:hidden"
+                className="absolute bottom-32 right-2 z-30 md:hidden"
               />
             )}
           </div>
@@ -166,12 +157,14 @@ export function ShortsPlayerShell() {
           </div>
         </div>
       </div>
-      <ShortsCommentsSheet
-        videoUrl={active.id}
-        anchorEl={playerRef.current}
-        open={commentsOpen}
-        onClose={() => setCommentsOpen(false)}
-      />
+      <Suspense fallback={null}>
+        <ShortsCommentsSheet
+          videoUrl={active.id}
+          anchorEl={playerRef.current}
+          open={commentsOpen}
+          onClose={() => setCommentsOpen(false)}
+        />
+      </Suspense>
     </section>
   );
 }
