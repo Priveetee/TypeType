@@ -12,8 +12,9 @@ function normalizeDescription(raw: string): string {
 }
 
 export function mapVideoItem(item: VideoItem): VideoStream {
+  const canonicalUrl = item.url.trim().length > 0 ? item.url : item.id;
   return {
-    id: item.id,
+    id: canonicalUrl,
     title: item.title,
     thumbnail: proxyImage(item.thumbnailUrl),
     rawThumbnail: item.thumbnailUrl,

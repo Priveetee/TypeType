@@ -2,7 +2,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ShortsPlayerShell } from "../components/shorts-player-shell";
 
 function ShortsPage() {
-  return <ShortsPlayerShell />;
+  const { v } = Route.useSearch();
+  return <ShortsPlayerShell targetUrl={v} />;
 }
 
-export const Route = createFileRoute("/shorts")({ component: ShortsPage });
+export const Route = createFileRoute("/shorts")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    v: typeof search.v === "string" ? search.v : undefined,
+  }),
+  component: ShortsPage,
+});

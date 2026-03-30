@@ -29,6 +29,18 @@ export function useShortsNavigation(
     [fetchNextPage, hasNextPage, isFetchingNextPage, itemCount],
   );
 
+  const moveTo = useCallback(
+    (target: number) => {
+      setIndex(() => {
+        if (itemCount === 0) return 0;
+        const next = Math.min(itemCount - 1, Math.max(0, target));
+        if (next >= itemCount - 2 && hasNextPage && !isFetchingNextPage) fetchNextPage();
+        return next;
+      });
+    },
+    [fetchNextPage, hasNextPage, isFetchingNextPage, itemCount],
+  );
+
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "ArrowDown") moveBy(1);
@@ -67,5 +79,5 @@ export function useShortsNavigation(
     [moveBy],
   );
 
-  return { index, moveBy, onWheel, onTouchStart, onTouchEnd };
+  return { index, moveBy, moveTo, onWheel, onTouchStart, onTouchEnd };
 }

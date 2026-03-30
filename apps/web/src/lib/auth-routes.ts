@@ -6,7 +6,10 @@ export type RedirectTarget =
   | "/privacy"
   | "/profile"
   | "/settings"
-  | "/subscriptions";
+  | "/subscriptions"
+  | `/shorts?v=${string}`;
+
+const SHORTS_REDIRECT_PREFIX = "/shorts?v=";
 
 const PROTECTED_PREFIXES = [
   "/import",
@@ -40,6 +43,7 @@ export function isAuthPage(pathname: string): boolean {
 
 export function sanitizeRedirect(value: string | undefined): RedirectTarget {
   if (!value) return "/";
+  if (value.startsWith(SHORTS_REDIRECT_PREFIX)) return value as `/shorts?v=${string}`;
   if (value === "/import") return "/import";
   if (value === "/history") return "/history";
   if (value === "/privacy") return "/privacy";

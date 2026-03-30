@@ -32,7 +32,8 @@ export function ShortsActions({ stream, onOpenComments, className }: Props) {
 
   async function toggleFavorite() {
     if (!isAuthed) {
-      window.location.assign(`/login?redirect=${encodeURIComponent("/shorts")}`);
+      const redirect = `/shorts?v=${encodeURIComponent(stream.id)}`;
+      window.location.assign(`/login?redirect=${encodeURIComponent(redirect)}`);
       return;
     }
     if (favorited) {
@@ -49,7 +50,8 @@ export function ShortsActions({ stream, onOpenComments, className }: Props) {
 
   async function toggleWatchLater() {
     if (!isAuthed) {
-      window.location.assign(`/login?redirect=${encodeURIComponent("/shorts")}`);
+      const redirect = `/shorts?v=${encodeURIComponent(stream.id)}`;
+      window.location.assign(`/login?redirect=${encodeURIComponent(redirect)}`);
       return;
     }
     if (watchLater) {

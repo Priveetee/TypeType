@@ -27,7 +27,8 @@ export function ShortsInfoOverlay({ stream, variant = "overlay", className }: Pr
   function handleSubscribe() {
     if (!stream.channelUrl) return;
     if (!isAuthed) {
-      window.location.assign(`/login?redirect=${encodeURIComponent("/shorts")}`);
+      const redirect = `/shorts?v=${encodeURIComponent(stream.id)}`;
+      window.location.assign(`/login?redirect=${encodeURIComponent(redirect)}`);
       return;
     }
     if (subscribed) {
@@ -97,7 +98,7 @@ export function ShortsInfoOverlay({ stream, variant = "overlay", className }: Pr
 
   return (
     <div
-      className={`absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-black/85 via-black/45 to-transparent px-3 pb-3 pt-20 sm:px-4 sm:pb-4 ${className ?? ""}`}
+      className={`pointer-events-none absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-black/85 via-black/45 to-transparent px-3 pb-3 pt-20 sm:px-4 sm:pb-4 ${className ?? ""}`}
     >
       <div className="max-w-[calc(100%-4.5rem)]">
         <div className="flex items-center gap-2">
@@ -119,7 +120,7 @@ export function ShortsInfoOverlay({ stream, variant = "overlay", className }: Pr
               onClick={handleSubscribe}
               disabled={add.isPending || remove.isPending}
               aria-pressed={subscribed}
-              className={overlayButtonClass}
+              className={`${overlayButtonClass} pointer-events-auto`}
             >
               {subscribed ? "Subscribed" : "Subscribe"}
             </button>
@@ -140,7 +141,11 @@ type ChannelLinkProps = {
 function ChannelLink({ url, children }: ChannelLinkProps) {
   if (!url) return <>{children}</>;
   return (
-    <Link to="/channel" search={{ url }} className="hover:opacity-80 transition-opacity">
+    <Link
+      to="/channel"
+      search={{ url }}
+      className="pointer-events-auto hover:opacity-80 transition-opacity"
+    >
       {children}
     </Link>
   );
