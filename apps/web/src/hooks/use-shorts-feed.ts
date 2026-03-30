@@ -1,9 +1,12 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { fetchSearch } from "../lib/api";
+import { fetchSubscriptionShorts } from "../lib/api-user";
 import { mapVideoItem } from "../lib/mappers";
 import type { VideoStream } from "../types/stream";
+import { useAuth } from "./use-auth";
 import { useBlockedFilter } from "./use-blocked-filter";
+import { useSettings } from "./use-settings";
 
 type ShortsFeed = {
   shorts: VideoStream[];
@@ -13,34 +16,67 @@ type ShortsFeed = {
   fetchNextPage: () => void;
 };
 
-const SHORTS_QUERY = "mrbeast shorts";
+const SHORTS_QUERY = "shorts";
 
 export function useShortsFeed(): ShortsFeed {
+  const { isAuthed } = useAuth();
+  const { settings } = useSettings();
   const { filter } = useBlockedFilter();
-  const discovery = useQuery({
-    queryKey: ["shorts-discovery"],
-    queryFn: async () => {
-      const page = await fetchSearch(SHORTS_QUERY, 0);
-      const all = page.items.map(mapVideoItem).filter((stream) => stream.isShortFormContent);
-      const seen = new Set<string>();
-      return all.filter((stream) => {
-        if (seen.has(stream.id)) return false;
-        seen.add(stream.id);
-        return true;
-      });
-    },
+  const subscriptions = useInfiniteQuery({
+    queryKey: ["shorts-subscriptions"],
+    queryFn: ({ pageParam }) => fetchSubscriptionShorts(pageParam as number, 30),
+    initialPageParam: 0,
+    getNextPageParam: (last, pages) => (last.nextpage !== null ? pages.length : undefined),
+    enabled: isAuthed,
     staleTime: 5 * 60 * 1000,
   });
 
-  const shorts = useMemo(() => filter(discovery.data ?? []), [filter, discovery.data]);
+  const discovery = useInfiniteQuery({
+    queryKey: ["shorts-discovery", settings.defaultService],
+    queryFn: ({ pageParam }) =>
+      fetchSearch(SHORTS_QUERY, settings.defaultService, pageParam as string | undefined),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (last) => last.nextpage ?? undefined,
+    enabled: true,
+    staleTime: 90 * 1000,
+  });
+
+  const shorts = useMemo(() => {
+    const subscriptionItems = (subscriptions.data?.pages ?? [])
+      .flatMap((page) => page.videos)
+      .map(mapVideoItem);
+
+    const discoveryItems = (discovery.data?.pages ?? [])
+      .flatMap((page) => page.items)
+      .filter((video) => video.isShortFormContent)
+      .map(mapVideoItem);
+
+    const merged = isAuthed ? subscriptionItems : discoveryItems;
+    const seen = new Set<string>();
+    const deduped = merged.filter((stream) => {
+      if (seen.has(stream.id)) return false;
+      seen.add(stream.id);
+      return true;
+    });
+
+    return filter(deduped);
+  }, [subscriptions.data, discovery.data, filter, isAuthed]);
 
   return {
     shorts,
-    isLoading: shorts.length > 0 ? false : discovery.isLoading,
-    isFetchingNextPage: false,
-    hasNextPage: false,
+    isLoading: shorts.length > 0 ? false : isAuthed ? subscriptions.isLoading : discovery.isLoading,
+    isFetchingNextPage: isAuthed ? subscriptions.isFetchingNextPage : discovery.isFetchingNextPage,
+    hasNextPage: isAuthed ? subscriptions.hasNextPage : discovery.hasNextPage,
     fetchNextPage: () => {
-      return;
+      if (isAuthed) {
+        if (subscriptions.hasNextPage) {
+          void subscriptions.fetchNextPage();
+        }
+        return;
+      }
+      if (discovery.hasNextPage) {
+        void discovery.fetchNextPage();
+      }
     },
   };
 }

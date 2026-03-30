@@ -113,6 +113,14 @@ export async function fetchSubscriptionFeed(page: number): Promise<SubscriptionF
   return authedJson(`${BASE}/subscriptions/feed?${search.toString()}`);
 }
 
+export async function fetchSubscriptionShorts(
+  page: number,
+  limit = 30,
+): Promise<SubscriptionFeedPage> {
+  const search = new URLSearchParams({ page: String(page), limit: String(limit) });
+  return authedJson(`${BASE}/subscriptions/shorts?${search.toString()}`);
+}
+
 export async function fetchHomeRecommendations(
   service: number,
   limit: number,

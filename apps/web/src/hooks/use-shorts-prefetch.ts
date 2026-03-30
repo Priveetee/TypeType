@@ -17,7 +17,7 @@ export function useShortsPrefetch(shortIds: string[], index: number) {
     }
     const nextIds = shortIds.slice(index + 1, index + 3);
     for (const id of nextIds) {
-      void queryClient.prefetchQuery(streamQueryOptions(id));
+      void queryClient.prefetchQuery(streamQueryOptions(id)).catch(() => undefined);
     }
   }, [index, queryClient, shortIds]);
 }
