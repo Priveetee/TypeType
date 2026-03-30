@@ -32,6 +32,7 @@ export function useWatchPrefetch(videoUrl: string) {
       prefetchedAt.set(videoUrl, Date.now());
       void queryClient
         .prefetchQuery(streamQueryOptions(videoUrl))
+        .catch(() => undefined)
         .finally(() => inFlight.delete(videoUrl));
     }, HOVER_DELAY_MS);
   }, [clearPending, queryClient, videoUrl]);

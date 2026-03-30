@@ -1,7 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useCallback, useRef, useState } from "react";
-import { streamQueryOptions } from "../hooks/use-stream";
+import { isMemberOnlyApiError, streamQueryOptions } from "../hooks/use-stream";
 import { useWatchPrefetch } from "../hooks/use-watch-prefetch";
 import { formatDuration, formatPublishedDate, formatViews } from "../lib/format";
 import type { VideoStream } from "../types/stream";
@@ -20,17 +20,26 @@ export function VideoCard({ stream, onOpen }: Props) {
   const previewTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [previewStream, setPreviewStream] = useState<VideoStream | undefined>(undefined);
   const [showPreview, setShowPreview] = useState(false);
+  const [memberOnly, setMemberOnly] = useState(false);
   const prefetch = useWatchPrefetch(stream.id);
   const publishedText = formatPublishedDate(stream.uploaded, stream.uploadDate);
 
   const fetchStreamData = useCallback(async () => {
     const cached = queryClient.getQueryData<VideoStream>(["stream", stream.id]);
     if (cached?.videoOnlyStreams?.length) {
+      setMemberOnly(false);
       setPreviewStream(cached);
       return;
     }
-    const data = await queryClient.fetchQuery(streamQueryOptions(stream.id));
-    if (data?.videoOnlyStreams?.length) setPreviewStream(data);
+    try {
+      const data = await queryClient.fetchQuery(streamQueryOptions(stream.id));
+      setMemberOnly(Boolean(data.requiresMembership));
+      if (data?.videoOnlyStreams?.length) setPreviewStream(data);
+    } catch (error) {
+      if (isMemberOnlyApiError(error)) {
+        setMemberOnly(true);
+      }
+    }
   }, [queryClient, stream.id]);
 
   const handleMouseEnter = () => {
@@ -48,6 +57,8 @@ export function VideoCard({ stream, onOpen }: Props) {
     }
     setShowPreview(false);
   };
+
+  const isMemberOnly = memberOnly || stream.requiresMembership === true;
 
   return (
     <article
@@ -72,6 +83,11 @@ export function VideoCard({ stream, onOpen }: Props) {
             decoding="async"
           />
           <VideoPreview stream={previewStream} show={showPreview} />
+          {isMemberOnly && (
+            <span className="absolute left-1.5 top-1.5 rounded bg-amber-500 px-1.5 py-0.5 text-[10px] font-semibold text-black">
+              Members only
+            </span>
+          )}
           {stream.duration > 0 && (
             <span className="absolute bottom-1.5 right-1.5 bg-black/80 text-white text-xs px-1 rounded">
               {formatDuration(stream.duration)}

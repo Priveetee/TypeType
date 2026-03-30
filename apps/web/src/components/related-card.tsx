@@ -28,6 +28,11 @@ export function RelatedCard({ stream }: Props) {
           loading="lazy"
           decoding="async"
         />
+        {stream.requiresMembership && (
+          <span className="absolute left-1 top-1 rounded bg-amber-500 px-1.5 py-0.5 text-[10px] font-semibold text-black">
+            Members only
+          </span>
+        )}
         {stream.duration > 0 && (
           <span className="absolute bottom-1 right-1 bg-black/80 text-white text-[10px] px-1 rounded">
             {formatDuration(stream.duration)}

@@ -4,7 +4,12 @@ import { PageSpinner } from "../components/page-spinner";
 import { StreamError } from "../components/stream-error";
 import { useHistory } from "../hooks/use-history";
 import { useProgress } from "../hooks/use-progress";
-import { useStream } from "../hooks/use-stream";
+import {
+  isMemberOnlyApiError,
+  isStreamUnavailableError,
+  MEMBER_ONLY_MESSAGE,
+  useStream,
+} from "../hooks/use-stream";
 import { ApiError } from "../lib/api";
 
 const WatchLayout = lazy(() =>
@@ -50,16 +55,31 @@ function WatchPage() {
   if (isLoading || progressFetch.isPending) return <PlayerOnlyLoader />;
 
   if (isError || !stream) {
-    const message =
-      error instanceof ApiError && error.status === 400 ? error.message : "Failed to load stream.";
+    const genericExtractorError =
+      error instanceof ApiError &&
+      error.status === 422 &&
+      error.message ===
+        "Error occurs when fetching the page. Try increase the loading timeout in Settings.";
+    const message = genericExtractorError
+      ? "This video may be members-only or temporarily unavailable"
+      : error instanceof ApiError && (error.status === 400 || error.status === 422)
+        ? error.message
+        : isStreamUnavailableError(error)
+          ? "This video is currently unavailable"
+          : "Failed to load stream.";
+    const isMemberOnlyError = isMemberOnlyApiError(error);
     return (
       <StreamError
-        message={message}
+        message={isMemberOnlyError ? MEMBER_ONLY_MESSAGE : message}
         onRetry={() => {
           void refetch();
         }}
       />
     );
+  }
+
+  if (stream.requiresMembership) {
+    return <StreamError message={MEMBER_ONLY_MESSAGE} />;
   }
 
   const savedPosition = progressFetch.data?.position ?? 0;

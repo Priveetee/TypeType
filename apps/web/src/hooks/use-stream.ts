@@ -1,6 +1,8 @@
 import { queryOptions, useQuery } from "@tanstack/react-query";
-import { fetchStream } from "../lib/api";
+import { ApiError, fetchStream } from "../lib/api";
 import { mapStreamResponse } from "../lib/mappers";
+
+export const MEMBER_ONLY_MESSAGE = "This video is only available for members";
 
 export function streamQueryOptions(url: string) {
   return queryOptions({
@@ -9,9 +11,30 @@ export function streamQueryOptions(url: string) {
     enabled: url.startsWith("http"),
     staleTime: 3 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
-    retry: (count) => count < 4,
+    retry: (count, error) => {
+      if (
+        error instanceof ApiError &&
+        (error.status === 400 || error.status === 404 || error.status === 422)
+      ) {
+        return false;
+      }
+      return count < 2;
+    },
     retryDelay: (attempt) => Math.min(250 * 2 ** attempt, 1500),
   });
+}
+
+export function isStreamUnavailableError(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+  return (
+    error.message.includes("Error occurs when fetching the page") ||
+    error.message.includes(MEMBER_ONLY_MESSAGE) ||
+    error.message.includes("No suitable stream")
+  );
+}
+
+export function isMemberOnlyApiError(error: unknown): boolean {
+  return error instanceof ApiError && error.status === 400 && error.message === MEMBER_ONLY_MESSAGE;
 }
 
 export function useStream(url: string) {

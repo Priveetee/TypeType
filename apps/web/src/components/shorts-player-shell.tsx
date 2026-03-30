@@ -10,7 +10,7 @@ import { ShortsVideoPlayer } from "../components/shorts-video-player";
 import { useSettings } from "../hooks/use-settings";
 import { useShortsFeed } from "../hooks/use-shorts-feed";
 import { useShortsPrefetch } from "../hooks/use-shorts-prefetch";
-import { useStream } from "../hooks/use-stream";
+import { isMemberOnlyApiError, useStream } from "../hooks/use-stream";
 import { useVolumeSync } from "../hooks/use-volume-sync";
 import { ApiError } from "../lib/api";
 import { useShortsNavigation } from "../lib/shorts-navigation";
@@ -73,6 +73,7 @@ export function ShortsPlayerShell() {
     streamQuery.isError && streamQuery.error instanceof ApiError
       ? streamQuery.error.message
       : "Couldn't load this short.";
+  const isMemberOnlyShort = isMemberOnlyApiError(streamQuery.error);
 
   const handleWheel = (e: React.WheelEvent) => {
     const target = e.target as HTMLElement;
@@ -108,7 +109,9 @@ export function ShortsPlayerShell() {
             )}
             {streamQuery.isError && (
               <ShortsError
-                message={errorMessage}
+                message={
+                  isMemberOnlyShort ? "This short is only available for members" : errorMessage
+                }
                 onRetry={() => streamQuery.refetch()}
                 onNext={() => moveBy(1)}
               />

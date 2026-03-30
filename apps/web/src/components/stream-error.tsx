@@ -10,10 +10,17 @@ type Props = {
 export function StreamError({ message, onRetry }: Props) {
   const router = useRouter();
   const countryCode = parseGeoRestriction(message);
+  const isMemberOnly = message === "This video is only available for members";
 
   return (
     <div className="fixed inset-0 bg-zinc-950 flex flex-col items-center justify-center gap-5">
-      <img src="/error-cat.gif" width="220" height="220" alt="" className="rounded-2xl" />
+      <img
+        src={isMemberOnly ? "/member-only-source.gif" : "/error-cat.gif"}
+        width="220"
+        height="220"
+        alt=""
+        className="rounded-2xl"
+      />
       <div className="flex flex-col items-center gap-1.5">
         <p className="text-white text-base font-semibold tracking-tight">
           Couldn't load this video
