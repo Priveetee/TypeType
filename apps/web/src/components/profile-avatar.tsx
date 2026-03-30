@@ -5,9 +5,10 @@ import type { AuthMe } from "../types/auth";
 type ProfileAvatarProps = {
   me: AuthMe;
   className: string;
+  plain?: boolean;
 };
 
-export function ProfileAvatar({ me, className }: ProfileAvatarProps) {
+export function ProfileAvatar({ me, className, plain = false }: ProfileAvatarProps) {
   const seed = `${me.id}:${me.publicUsername ?? "profile"}`;
   const avatarUrl =
     me.avatarType === "emoji" && typeof me.avatarCode === "string" && me.avatarCode.length > 0
@@ -17,7 +18,13 @@ export function ProfileAvatar({ me, className }: ProfileAvatarProps) {
         : getOpenMojiUrl(pickOpenMojiCode(seed));
 
   return (
-    <div className={`${className} overflow-hidden rounded-xl border border-zinc-700 bg-zinc-800`}>
+    <div
+      className={
+        plain
+          ? `${className} overflow-hidden rounded-full`
+          : `${className} overflow-hidden rounded-xl border border-zinc-700 bg-zinc-800`
+      }
+    >
       <img
         src={avatarUrl}
         alt={me.publicUsername ?? me.id}

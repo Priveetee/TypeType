@@ -1,12 +1,14 @@
 import { Link } from "@tanstack/react-router";
 import { goto } from "../lib/route-redirect";
-import type { AuthStatus } from "../types/auth";
+import type { AuthMe, AuthStatus } from "../types/auth";
+import { ProfileAvatar } from "./profile-avatar";
 
 type Props = {
   status: AuthStatus;
   isAuthed: boolean;
   isGuest: boolean;
   isAdmin: boolean;
+  me: AuthMe | null;
   signOut: () => void;
 };
 
@@ -17,12 +19,30 @@ function statusLabel(status: AuthStatus): string {
   return "Signed out";
 }
 
-export function NavbarAccountControls({ status, isAuthed, isGuest, isAdmin, signOut }: Props) {
+export function NavbarAccountControls({ status, isAuthed, isGuest, isAdmin, me, signOut }: Props) {
+  const profileName = me?.publicUsername?.trim() ? me.publicUsername : null;
+
   return (
     <>
-      <span className="text-[11px] uppercase tracking-wider text-zinc-500 px-2">
-        {statusLabel(status)}
-      </span>
+      {!isAuthed || isGuest || !me ? (
+        <span className="text-[11px] uppercase tracking-wider text-zinc-500 px-2">
+          {statusLabel(status)}
+        </span>
+      ) : (
+        <div className="inline-flex items-center gap-2">
+          <Link to="/profile" className="inline-flex h-8 w-8 items-center justify-center">
+            <ProfileAvatar me={me} className="h-7 w-7" plain />
+          </Link>
+          {profileName && (
+            <Link
+              to="/profile"
+              className="max-w-28 truncate text-sm font-medium text-zinc-100 hover:text-white"
+            >
+              {profileName}
+            </Link>
+          )}
+        </div>
+      )}
       {!isAuthed && (
         <div className="flex items-center gap-2">
           <Link

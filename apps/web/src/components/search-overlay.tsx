@@ -96,7 +96,7 @@ export function SearchOverlay({ onClose }: Props) {
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-start justify-center pt-24 px-4"
+      className="fixed inset-0 z-50 flex items-start justify-center pt-20 px-4"
     >
       <button
         type="button"
@@ -105,7 +105,7 @@ export function SearchOverlay({ onClose }: Props) {
         className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-default"
         onClick={onClose}
       />
-      <div className="relative w-full max-w-2xl flex flex-col">
+      <div className="relative w-full max-w-3xl flex flex-col">
         <form onSubmit={handleSubmit}>
           <input
             ref={inputRef}
@@ -117,7 +117,7 @@ export function SearchOverlay({ onClose }: Props) {
             }}
             onKeyDown={handleKeyDown}
             placeholder="Search videos, channels..."
-            className="w-full h-12 bg-zinc-900 border border-zinc-700 rounded-lg px-4 text-base text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-400"
+            className="w-full h-14 bg-zinc-900 border border-zinc-700 rounded-xl px-5 text-lg text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-400"
           />
         </form>
         {items.length > 0 && (

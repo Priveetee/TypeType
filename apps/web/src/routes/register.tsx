@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AuthCard } from "../components/auth-card";
 import { AuthErrorBanner } from "../components/auth-error-banner";
+import { Toast } from "../components/toast";
 import { useAuth } from "../hooks/use-auth";
 import { useRegisterStatus } from "../hooks/use-register-status";
 import { ApiError } from "../lib/api";
@@ -20,7 +21,14 @@ function RegisterPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
   const postAuthTarget = redirect ? target : "/import";
+
+  useEffect(() => {
+    if (!toast) return;
+    const id = window.setTimeout(() => setToast(null), 1800);
+    return () => window.clearTimeout(id);
+  }, [toast]);
 
   const closedByPolicy = status ? !status.allowRegistration && !status.bootstrapAvailable : false;
   const subtitle = status?.bootstrapAvailable
@@ -45,6 +53,7 @@ function RegisterPage() {
         email: email.trim(),
         password,
       });
+      setToast("Account created");
       goto(postAuthTarget);
     } catch (error) {
       if (error instanceof ApiError && error.status === 403) {
@@ -58,6 +67,7 @@ function RegisterPage() {
 
   return (
     <div className="min-h-[calc(100vh-56px)] flex items-center justify-center px-4">
+      <Toast message={toast} />
       <AuthCard title="Create account" subtitle={subtitle}>
         <AuthErrorBanner message={bannerMessage} />
         <form className="flex flex-col gap-3" onSubmit={submitRegister}>
