@@ -16,6 +16,7 @@ type Props = {
   initialVolume?: number;
   initialMuted?: boolean;
   settingsReady?: boolean;
+  autoplay?: boolean;
   originalAudioLocale?: string | null;
   defaultAudioLanguage?: string;
   defaultSubtitleLanguage?: string;
@@ -33,6 +34,7 @@ export function ShortsVideoPlayer({
   initialVolume = 1,
   initialMuted = false,
   settingsReady = false,
+  autoplay = true,
   originalAudioLocale,
   defaultAudioLanguage,
   defaultSubtitleLanguage,
@@ -52,6 +54,7 @@ export function ShortsVideoPlayer({
         logLevel="warn"
         crossOrigin
         playsInline
+        autoPlay={autoplay}
         storage={null}
         onProviderChange={onProviderChange}
         onError={() => onError?.()}
@@ -90,8 +93,14 @@ export function ShortsVideoPlayer({
         <DefaultVideoLayout
           icons={defaultLayoutIcons}
           translations={{ Captions: "Subtitles" }}
+          smallLayoutWhen
+          noModal
+          menuContainer="body"
+          menuGroup="bottom"
+          disableTimeSlider
           slots={{
             settingsMenuItemsStart: <AudioTrackSelector originalLocale={originalAudioLocale} />,
+            settingsMenuItemsEnd: undefined,
           }}
         />
         <PlayerDefaults
@@ -103,7 +112,7 @@ export function ShortsVideoPlayer({
           initialVolume={initialVolume}
           initialMuted={initialMuted}
           settingsReady={settingsReady}
-          autoplay={false}
+          autoplay={autoplay}
           onVolumeChange={onVolumeChange}
         />
       </MediaPlayer>

@@ -132,3 +132,31 @@
 .shorts-shell media-player .vds-poster {
   object-fit: cover;
 }
+
+.shorts-shell .vds-controls {
+  padding-bottom: 0.75rem;
+}
+
+.shorts-shell .vds-time-group,
+.shorts-shell .vds-time-slider,
+.shorts-shell .vds-live-button,
+.shorts-shell .vds-seek-forward-button,
+.shorts-shell .vds-seek-backward-button,
+.shorts-shell .vds-pip-button,
+.shorts-shell .vds-fullscreen-button,
+.shorts-shell .vds-chapter-title {
+  display: none;
+}
+
+.shorts-shell .vds-controls-group {
+  padding-left: 0.4rem;
+  padding-right: 0.4rem;
+}
+
+.shorts-shell .vds-controls-group:last-child {
+  justify-content: space-between;
+}
+
+.shorts-shell .vds-menu-items[data-root] {
+  max-height: min(62vh, 30rem);
+}
