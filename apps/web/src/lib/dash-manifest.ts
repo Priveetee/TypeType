@@ -22,6 +22,11 @@ function normalizeAudioCodec(codec: string): string {
   return codec;
 }
 
+function normalizeAudioLanguageTag(value: string | null): string {
+  if (value === null || value.length === 0) return "und";
+  return value.toLowerCase().replace(/_/g, "-");
+}
+
 function videoRepresentation(stream: ValidVideoStream, id: number): string {
   return (
     `<Representation id="v${id}" codecs="${stream.codec}"` +
@@ -51,9 +56,10 @@ function audioRepresentation(stream: ValidAudioStream, id: number): string {
   );
 }
 
-function adaptationSet(mimeType: string, representations: string[]): string {
+function adaptationSet(mimeType: string, representations: string[], language?: string): string {
+  const langAttribute = language ? ` lang="${language}"` : "";
   return (
-    `<AdaptationSet mimeType="${mimeType}" startWithSAP="1" subsegmentAlignment="true">` +
+    `<AdaptationSet mimeType="${mimeType}"${langAttribute} startWithSAP="1" subsegmentAlignment="true">` +
     representations.join("") +
     `</AdaptationSet>`
   );
@@ -85,7 +91,11 @@ export function buildDashManifest(
   if (videos.length === 0 || audios.length === 0) return null;
 
   const videoGroups = groupBy(videos, (s) => (s.mimeType || "video/mp4").split(";")[0].trim());
-  const audioGroups = groupBy(audios, (s) => (s.mimeType || "audio/mp4").split(";")[0].trim());
+  const audioGroups = groupBy(audios, (s) => {
+    const mime = (s.mimeType || "audio/mp4").split(";")[0].trim();
+    const language = normalizeAudioLanguageTag(s.audioLocale);
+    return `${mime}|${language}`;
+  });
 
   const sets: string[] = [];
   let vi = 0;
@@ -98,11 +108,13 @@ export function buildDashManifest(
     );
   }
   let ai = 0;
-  for (const [mime, streams] of audioGroups) {
+  for (const [groupKey, streams] of audioGroups) {
+    const [mime, language] = groupKey.split("|");
     sets.push(
       adaptationSet(
         mime,
         streams.map((s) => audioRepresentation(s, ai++)),
+        language,
       ),
     );
   }

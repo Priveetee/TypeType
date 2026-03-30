@@ -1,4 +1,4 @@
-import type { HomeRecommendationsResponse, VideoItem } from "../types/api";
+import type { HomeRecommendationsResponse, SubscriptionFeedPage } from "../types/api";
 import type { HistoryItem, SearchHistoryItem, SettingsItem, SubscriptionItem } from "../types/user";
 import { ApiError } from "./api";
 import { authed, authedJson } from "./authed";
@@ -102,11 +102,6 @@ export async function addSearchHistory(term: string): Promise<SearchHistoryItem>
 export async function clearSearchHistory(): Promise<void> {
   await authed(`${BASE}/search-history`, { method: "DELETE" });
 }
-
-type SubscriptionFeedPage = {
-  videos: VideoItem[];
-  nextpage: string | null;
-};
 
 export async function fetchSubscriptionFeed(page: number): Promise<SubscriptionFeedPage> {
   const search = new URLSearchParams({ page: String(page), limit: "30" });

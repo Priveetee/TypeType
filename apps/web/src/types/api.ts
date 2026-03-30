@@ -83,6 +83,11 @@ export type HomeRecommendationsResponse = {
   hasMore: boolean;
 };
 
+export type SubscriptionFeedPage = {
+  videos: VideoItem[];
+  nextpage: string | null;
+};
+
 export type CommentItem = {
   id: string;
   text: string;
