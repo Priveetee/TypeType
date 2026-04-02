@@ -84,7 +84,7 @@ export function ShortsActions({ stream, onOpenComments, className }: Props) {
       <ActionButton
         icon={Clock3}
         label="Watch later"
-        stateLabel={watchLater ? "Saved" : "Save"}
+        stateLabel={watchLater ? "Saved" : "Watch Later"}
         active={watchLater}
         disabled={watchLaterPending}
         onClick={() => void toggleWatchLater()}
