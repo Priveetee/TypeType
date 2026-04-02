@@ -28,16 +28,8 @@ export function ShortsPlayerShell({ targetUrl }: Props) {
     isFetchingNextPage,
     fetchNextPage,
   );
-  const {
-    active,
-    activeId,
-    stream,
-    streamQuery,
-    current,
-    originalLocale,
-    errorMessage,
-    isMemberOnlyShort,
-  } = useShortsActiveStream({ shorts, index });
+  const { active, activeId, stream, streamQuery, current, errorMessage, isMemberOnlyShort } =
+    useShortsActiveStream({ shorts, index });
   const onVolumeChange = useVolumeSync(update.mutate);
   useShortsPrefetch(
     shorts.map((item) => item.id),
@@ -94,7 +86,6 @@ export function ShortsPlayerShell({ targetUrl }: Props) {
       autoplay={settings.autoplay}
       initialVolume={settings.volume}
       initialMuted={settings.muted}
-      originalAudioLocale={originalLocale}
       defaultAudioLanguage={settings.defaultAudioLanguage || undefined}
       defaultSubtitleLanguage={settings.defaultSubtitleLanguage || undefined}
       subtitlesEnabled={settings.subtitlesEnabled}

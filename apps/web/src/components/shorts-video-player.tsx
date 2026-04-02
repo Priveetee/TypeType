@@ -17,7 +17,6 @@ type Props = {
   initialMuted?: boolean;
   settingsReady?: boolean;
   autoplay?: boolean;
-  originalAudioLocale?: string | null;
   defaultAudioLanguage?: string;
   defaultSubtitleLanguage?: string;
   subtitlesEnabled?: boolean;
@@ -35,7 +34,6 @@ export function ShortsVideoPlayer({
   initialMuted = false,
   settingsReady = false,
   autoplay = true,
-  originalAudioLocale,
   defaultAudioLanguage,
   defaultSubtitleLanguage,
   subtitlesEnabled,
@@ -97,10 +95,8 @@ export function ShortsVideoPlayer({
           noModal
           menuContainer="body"
           menuGroup="bottom"
-          disableTimeSlider
           slots={{
-            settingsMenuItemsStart: <AudioTrackSelector originalLocale={originalAudioLocale} />,
-            settingsMenuItemsEnd: undefined,
+            settingsMenuItemsStart: <AudioTrackSelector />,
           }}
         />
         <PlayerDefaults

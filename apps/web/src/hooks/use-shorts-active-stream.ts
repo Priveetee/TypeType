@@ -13,9 +13,6 @@ export function useShortsActiveStream({ shorts, index }: Params) {
   const streamQuery = useStream(active?.id ?? "");
   const stream = streamQuery.data;
   const current = stream ?? active;
-  const originalLocale =
-    stream?.audioStreams?.find((audio) => audio.audioTrackName?.toLowerCase().includes("original"))
-      ?.audioLocale ?? null;
   const errorMessage =
     streamQuery.isError && streamQuery.error instanceof ApiError
       ? streamQuery.error.message
@@ -28,7 +25,6 @@ export function useShortsActiveStream({ shorts, index }: Params) {
     stream,
     streamQuery,
     current,
-    originalLocale,
     errorMessage,
     isMemberOnlyShort,
   };
