@@ -1,7 +1,6 @@
 import { lazy, Suspense } from "react";
 import { PageSpinner } from "../components/page-spinner";
 import { ShortsActions } from "../components/shorts-actions";
-import { ShortsDesktopOverlay } from "../components/shorts-desktop-overlay";
 import { ShortsError } from "../components/shorts-error";
 import { ShortsInfoOverlay } from "../components/shorts-info-overlay";
 import { ShortsNavigation } from "../components/shorts-navigation";
@@ -32,7 +31,6 @@ type Props = {
   autoplay: boolean;
   initialVolume: number;
   initialMuted: boolean;
-  originalAudioLocale: string | null;
   defaultAudioLanguage?: string;
   defaultSubtitleLanguage?: string;
   subtitlesEnabled?: boolean;
@@ -64,7 +62,6 @@ export function ShortsPlayerStage({
   autoplay,
   initialVolume,
   initialMuted,
-  originalAudioLocale,
   defaultAudioLanguage,
   defaultSubtitleLanguage,
   subtitlesEnabled,
@@ -89,19 +86,14 @@ export function ShortsPlayerStage({
 
   return (
     <section className={sectionClass}>
-      <div className="relative h-full w-full">
-        <ShortsDesktopOverlay
-          stream={current}
-          hasPrev={hasPrev}
-          hasNext={hasNext}
-          onPrev={onPrev}
-          onNext={onNext}
-          onOpenComments={onOpenComments}
-        />
-        <div className="relative flex h-full items-center justify-center">
+      <div className="relative flex h-full items-center justify-center">
+        <div className="hidden md:absolute md:bottom-3 md:left-0 md:z-20 md:block">
+          <ShortsInfoOverlay stream={current} variant="panel" />
+        </div>
+        <div className="relative flex items-center gap-3 lg:gap-4">
           <div
             ref={playerRef}
-            className="shorts-shell relative mx-auto aspect-[9/16] h-full max-h-[calc(100svh-5.5rem)] w-auto max-w-full overflow-hidden rounded-xl bg-black sm:rounded-2xl md:h-[calc(100svh-6rem)] md:max-h-none"
+            className="shorts-shell relative aspect-[9/16] h-full max-h-[calc(100svh-5.5rem)] w-auto max-w-full overflow-hidden rounded-xl bg-black sm:rounded-2xl md:h-[calc(100svh-6rem)] md:max-h-none"
             onWheel={onWheel}
             onTouchStart={(e) => onTouchStart(e.touches[0]?.clientY ?? null)}
             onTouchEnd={(e) => onTouchEnd(e.changedTouches[0]?.clientY ?? null)}
@@ -131,7 +123,6 @@ export function ShortsPlayerStage({
                 initialMuted={initialMuted}
                 settingsReady={settingsReady}
                 autoplay={shouldAutoplay}
-                originalAudioLocale={originalAudioLocale}
                 defaultAudioLanguage={defaultAudioLanguage}
                 defaultSubtitleLanguage={defaultSubtitleLanguage}
                 subtitlesEnabled={subtitlesEnabled}
@@ -149,9 +140,13 @@ export function ShortsPlayerStage({
               className="absolute bottom-32 right-2 z-30 md:hidden"
             />
           </div>
-          <div className="mt-3 flex items-center justify-center md:hidden">
+          <div className="hidden flex-col items-center gap-3 md:flex">
+            <ShortsActions stream={current} onOpenComments={onOpenComments} />
             <ShortsNavigation onPrev={onPrev} onNext={onNext} hasPrev={hasPrev} hasNext={hasNext} />
           </div>
+        </div>
+        <div className="mt-3 flex items-center justify-center md:hidden">
+          <ShortsNavigation onPrev={onPrev} onNext={onNext} hasPrev={hasPrev} hasNext={hasNext} />
         </div>
       </div>
       <Suspense fallback={null}>

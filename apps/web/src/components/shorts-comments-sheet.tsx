@@ -57,17 +57,16 @@ export function ShortsCommentsSheet({ videoUrl, anchorEl, open, onClose }: Props
     if (!anchorEl || typeof window === "undefined") {
       return {
         top: "5rem",
-        left: "6rem",
+        left: "1rem",
         height: "calc(100svh - 7rem)",
-        width: "32rem",
+        width: "min(26rem, calc(100vw - 2rem))",
       };
     }
     const rect = anchorEl.getBoundingClientRect();
     const gap = 14;
-    const rightOffset = Math.max((window.innerWidth - rect.right) / 2, 14);
-    const leftBoundary = Math.max(12, rightOffset);
+    const leftBoundary = 12;
     const available = rect.left - leftBoundary - gap;
-    const width = Math.min(Math.max(available, 320), 560);
+    const width = Math.min(Math.max(available, 320), 460);
     return {
       top: `${rect.top}px`,
       left: `${Math.max(rect.left - width - gap, leftBoundary)}px`,
