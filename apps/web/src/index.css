@@ -133,30 +133,15 @@
   object-fit: cover;
 }
 
-.shorts-shell .vds-controls {
-  padding-bottom: 0.75rem;
+.shorts-shell .vds-video-layout .vds-controls-group:first-child {
+  justify-content: flex-end;
+  gap: 0.4rem;
+  padding-inline: 0.55rem;
+  padding-top: 0.4rem;
 }
 
-.shorts-shell .vds-time-group,
-.shorts-shell .vds-time-slider,
-.shorts-shell .vds-live-button,
-.shorts-shell .vds-seek-forward-button,
-.shorts-shell .vds-seek-backward-button,
-.shorts-shell .vds-pip-button,
-.shorts-shell .vds-fullscreen-button,
-.shorts-shell .vds-chapter-title {
-  display: none;
-}
-
-.shorts-shell .vds-controls-group {
-  padding-left: 0.4rem;
-  padding-right: 0.4rem;
-}
-
-.shorts-shell .vds-controls-group:last-child {
-  justify-content: space-between;
-}
-
-.shorts-shell .vds-menu-items[data-root] {
-  max-height: min(62vh, 30rem);
+.shorts-shell .shorts-top-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
 }
