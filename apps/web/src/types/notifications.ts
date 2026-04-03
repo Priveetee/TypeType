@@ -1,0 +1,24 @@
+import type { VideoItem } from "./api";
+
+export type SubscriptionNewVideoNotification = {
+  type: "subscription_new_video";
+  title: string;
+  createdAt: number;
+  channelUrl: string;
+  channelName: string;
+  channelAvatarUrl: string;
+  video: VideoItem;
+};
+
+export type NotificationItem = SubscriptionNewVideoNotification;
+
+export type NotificationsPage = {
+  items: NotificationItem[];
+  unreadCount: number;
+  nextpage: number | null;
+};
+
+export type ReadAllNotificationsResponse = {
+  readAt: number;
+  unreadCount: number;
+};

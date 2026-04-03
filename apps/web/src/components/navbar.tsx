@@ -4,6 +4,7 @@ import { useAuth } from "../hooks/use-auth";
 import { isAuthPage } from "../lib/auth-routes";
 import { useUiStore } from "../stores/ui-store";
 import { NavbarAccountControls } from "./navbar-account-controls";
+import { NavbarNotifications } from "./navbar-notifications";
 import { SearchOverlay } from "./search-overlay";
 import { Toast } from "./toast";
 
@@ -140,6 +141,7 @@ export function Navbar() {
             </>
           )}
         </div>
+        <NavbarNotifications />
         <NavbarAccountControls
           status={status}
           isAuthed={isAuthed}
