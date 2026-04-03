@@ -1,33 +1,29 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
+import { useDebouncedValue } from "../hooks/use-debounced-value";
 import { useSearchHistory } from "../hooks/use-search-history";
 import { useSettings } from "../hooks/use-settings";
 import { fetchSuggestions } from "../lib/api";
+import { ConfirmModal } from "./confirm-modal";
+import type { SearchOverlayItem } from "./search-overlay-list";
+import { SearchOverlayList } from "./search-overlay-list";
 
 type Props = {
   onClose: () => void;
 };
 
-function useDebounced(value: string, delay: number): string {
-  const [debounced, setDebounced] = useState(value);
-  useEffect(() => {
-    const t = setTimeout(() => setDebounced(value), delay);
-    return () => clearTimeout(t);
-  }, [value, delay]);
-  return debounced;
-}
-
 export function SearchOverlay({ onClose }: Props) {
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [confirmClearOpen, setConfirmClearOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
   const navigate = useNavigate();
   const { settings } = useSettings();
   const service = settings.defaultService;
-  const { query: historyQuery, add, clear } = useSearchHistory();
-  const history = historyQuery.data ?? [];
-  const debouncedQuery = useDebounced(query, 300);
+  const { visibleItems, canLoadMore, loadMore, add, clear } = useSearchHistory();
+  const debouncedQuery = useDebouncedValue(query, 300);
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => inputRef.current?.focus());
@@ -58,12 +54,20 @@ export function SearchOverlay({ onClose }: Props) {
     };
   }, [debouncedQuery, service]);
 
+  useEffect(() => {
+    if (selectedIndex < 0) return;
+    const element = listRef.current?.querySelector<HTMLButtonElement>(
+      `button[data-item-index="${selectedIndex}"]`,
+    );
+    element?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [selectedIndex]);
+
   const showSuggestions = query.trim().length > 0 && suggestions.length > 0;
-  const showHistory = query.trim().length === 0 && history.length > 0;
-  const items = showHistory
-    ? history.slice(0, 8).map((h) => h.term)
+  const showHistory = query.trim().length === 0 && visibleItems.length > 0;
+  const items: SearchOverlayItem[] = showHistory
+    ? visibleItems.map((item) => ({ key: item.id, label: item.term }))
     : showSuggestions
-      ? suggestions.slice(0, 8)
+      ? suggestions.slice(0, 8).map((term) => ({ key: term, label: term }))
       : [];
 
   function navigateAndClose(term: string) {
@@ -75,7 +79,7 @@ export function SearchOverlay({ onClose }: Props) {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (selectedIndex >= 0 && items[selectedIndex]) {
-      navigateAndClose(items[selectedIndex]);
+      navigateAndClose(items[selectedIndex].label);
       return;
     }
     if (!query.trim()) return;
@@ -90,6 +94,20 @@ export function SearchOverlay({ onClose }: Props) {
       e.preventDefault();
       setSelectedIndex((i) => Math.max(i - 1, -1));
     }
+  }
+
+  function handleHistoryScroll(e: React.UIEvent<HTMLUListElement>) {
+    if (!showHistory || !canLoadMore) return;
+    const target = e.currentTarget;
+    const threshold = target.scrollHeight - target.clientHeight - 24;
+    if (target.scrollTop >= threshold) {
+      loadMore();
+    }
+  }
+
+  function handleConfirmClear() {
+    clear.mutate();
+    setConfirmClearOpen(false);
   }
 
   return (
@@ -120,40 +138,25 @@ export function SearchOverlay({ onClose }: Props) {
             className="w-full h-14 bg-zinc-900 border border-zinc-700 rounded-xl px-5 text-lg text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-400"
           />
         </form>
-        {items.length > 0 && (
-          <ul className="mt-1 bg-zinc-900 border border-zinc-700 rounded-lg overflow-hidden">
-            {showHistory && (
-              <li className="px-4 py-2 flex items-center justify-between">
-                <span className="text-xs text-zinc-500 uppercase tracking-wider">
-                  Recent searches
-                </span>
-                <button
-                  type="button"
-                  onClick={() => clear.mutate()}
-                  className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors"
-                >
-                  Clear
-                </button>
-              </li>
-            )}
-            {items.map((item, index) => (
-              <li key={item}>
-                <button
-                  type="button"
-                  className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
-                    index === selectedIndex
-                      ? "bg-zinc-700 text-zinc-100"
-                      : "text-zinc-300 hover:bg-zinc-800"
-                  }`}
-                  onClick={() => navigateAndClose(item)}
-                >
-                  {item}
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
+        <SearchOverlayList
+          items={items}
+          showHistory={showHistory}
+          selectedIndex={selectedIndex}
+          listRef={listRef}
+          onScroll={handleHistoryScroll}
+          onClearAll={() => setConfirmClearOpen(true)}
+          onSelect={navigateAndClose}
+        />
       </div>
+      {confirmClearOpen && (
+        <ConfirmModal
+          title="Clear search history?"
+          description="This removes all saved searches from your account."
+          confirmLabel="Clear all"
+          onConfirm={handleConfirmClear}
+          onCancel={() => setConfirmClearOpen(false)}
+        />
+      )}
     </div>
   );
 }
