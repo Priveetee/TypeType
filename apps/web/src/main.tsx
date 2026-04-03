@@ -5,7 +5,10 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import { PageSpinner } from "./components/page-spinner";
 import { ApiError } from "./lib/api";
+import { initErrorCapture } from "./lib/error-capture";
 import { routeTree } from "./routeTree.gen";
+
+initErrorCapture();
 
 const router = createRouter({ routeTree, defaultPendingComponent: PageSpinner });
 const queryClient = new QueryClient({
