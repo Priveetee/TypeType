@@ -1,8 +1,13 @@
-import type { MediaSrc } from "@vidstack/react";
-import { MediaPlayer, MediaProvider, Track } from "@vidstack/react";
-import { DefaultVideoLayout, defaultLayoutIcons } from "@vidstack/react/player/layouts/default";
 import { useState } from "react";
 import { toProxiedVttUrl } from "../lib/proxy";
+import type { MediaSrc } from "../lib/vidstack";
+import {
+  DefaultVideoLayout,
+  defaultLayoutIcons,
+  MediaPlayer,
+  MediaProvider,
+  Track,
+} from "../lib/vidstack";
 import type { SponsorBlockSegmentItem, SubtitleItem } from "../types/api";
 import { AudioTrackSelector } from "./audio-track-selector";
 import { FormatSelector } from "./format-selector";

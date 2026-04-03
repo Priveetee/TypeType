@@ -11,7 +11,7 @@
   "dependencies": {
     "@tanstack/react-query": "^5.96.1",
     "@tanstack/react-router": "^1.168.10",
-    "@vidstack/react": "^1.0.0",
+    "@vidstack/react": "1.12.13",
     "country-flag-icons": "^1.6.15",
     "dashjs": "^5.1.1",
     "lucide-react": "^0.577.0",

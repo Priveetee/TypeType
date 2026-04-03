@@ -1,5 +1,5 @@
-import { useMediaState } from "@vidstack/react";
 import { useEffect, useRef } from "react";
+import { useMediaState } from "../lib/vidstack";
 import type { SponsorBlockSegmentItem } from "../types/api";
 
 const CATEGORY_COLORS: Record<string, string> = {

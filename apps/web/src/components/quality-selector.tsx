@@ -1,10 +1,13 @@
-import type { MenuInstance } from "@vidstack/react";
-import { Menu, useVideoQualityOptions } from "@vidstack/react";
-import { ClipIcon } from "@vidstack/react/icons";
-import type { DefaultLayoutIcon } from "@vidstack/react/player/layouts/default";
-import { DefaultMenuButton, DefaultMenuRadioGroup } from "@vidstack/react/player/layouts/default";
 import { useRef } from "react";
 import { activeFamily, codecFamily } from "../lib/quality-utils";
+import type { DefaultLayoutIcon, MenuInstance } from "../lib/vidstack";
+import {
+  ClipIcon,
+  DefaultMenuButton,
+  DefaultMenuRadioGroup,
+  Menu,
+  useVideoQualityOptions,
+} from "../lib/vidstack";
 
 const qualityIcon: DefaultLayoutIcon = (props) => <ClipIcon {...props} />;
 

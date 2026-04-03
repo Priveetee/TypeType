@@ -1,11 +1,11 @@
+import { useEffect, useRef } from "react";
 import {
   useAudioOptions,
   useMediaPlayer,
   useMediaRemote,
   useMediaState,
   useVideoQualityOptions,
-} from "@vidstack/react";
-import { useEffect, useRef } from "react";
+} from "../lib/vidstack";
 import type { SponsorBlockSegmentItem } from "../types/api";
 
 export function SeekBridge({

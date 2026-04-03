@@ -1,5 +1,5 @@
-import { useMediaRemote, useMediaState } from "@vidstack/react";
 import { useEffect, useRef } from "react";
+import { useMediaRemote, useMediaState } from "../lib/vidstack";
 
 type Props = {
   initialVolume: number;

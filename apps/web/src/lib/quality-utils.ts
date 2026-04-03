@@ -1,4 +1,4 @@
-import type { VideoQualityOption } from "@vidstack/react";
+import type { VideoQualityOption } from "./vidstack";
 
 type CodecFamily = "H.264" | "VP9";
 

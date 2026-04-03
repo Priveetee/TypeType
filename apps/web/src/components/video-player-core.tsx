@@ -1,6 +1,6 @@
-import type { MediaProviderAdapter } from "@vidstack/react";
-import { isDASHProvider, Track, useMediaState } from "@vidstack/react";
 import * as dashjs from "dashjs";
+import type { MediaProviderAdapter } from "../lib/vidstack";
+import { isDASHProvider, Track, useMediaState } from "../lib/vidstack";
 
 function shimDashjsQualityApi(player: dashjs.MediaPlayerClass): void {
   Reflect.set(

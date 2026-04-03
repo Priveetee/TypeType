@@ -1,8 +1,8 @@
-import type { MediaSrc } from "@vidstack/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { recordClientEvent } from "../lib/client-debug-log";
 import { sanitizeVideoContext } from "../lib/debug-sanitize";
 import { resolveManifestSrc } from "../lib/stream-src";
+import type { MediaSrc } from "../lib/vidstack";
 import type { VideoStream } from "../types/stream";
 
 type UsePlayerErrorReturn = {

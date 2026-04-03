@@ -1,9 +1,12 @@
-import type { MenuInstance } from "@vidstack/react";
-import { Menu, useAudioOptions } from "@vidstack/react";
-import { LanguageIcon } from "@vidstack/react/icons";
-import type { DefaultLayoutIcon } from "@vidstack/react/player/layouts/default";
-import { DefaultMenuButton, DefaultMenuRadioGroup } from "@vidstack/react/player/layouts/default";
 import { useRef } from "react";
+import type { DefaultLayoutIcon, MenuInstance } from "../lib/vidstack";
+import {
+  DefaultMenuButton,
+  DefaultMenuRadioGroup,
+  LanguageIcon,
+  Menu,
+  useAudioOptions,
+} from "../lib/vidstack";
 
 const languageIcon: DefaultLayoutIcon = (props) => <LanguageIcon {...props} />;
 

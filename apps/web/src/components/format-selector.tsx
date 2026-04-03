@@ -1,8 +1,12 @@
-import type { MenuInstance } from "@vidstack/react";
-import { Menu, useVideoQualityOptions } from "@vidstack/react";
-import { DefaultMenuButton, DefaultMenuRadioGroup } from "@vidstack/react/player/layouts/default";
 import { useRef } from "react";
 import { activeFamily, groupByFamily } from "../lib/quality-utils";
+import type { MenuInstance } from "../lib/vidstack";
+import {
+  DefaultMenuButton,
+  DefaultMenuRadioGroup,
+  Menu,
+  useVideoQualityOptions,
+} from "../lib/vidstack";
 
 const FORMAT_OPTIONS: { label: string; value: "H.264" | "VP9" }[] = [
   { label: "H.264", value: "H.264" },

@@ -1,4 +1,3 @@
-import type { MediaSrc } from "@vidstack/react";
 import type { AudioStreamItem } from "../types/api";
 import type { VideoStream } from "../types/stream";
 import { buildDashManifest } from "./dash-manifest";
@@ -6,6 +5,7 @@ import { API_BASE as BASE } from "./env";
 import { buildNicoMasterPlaylist } from "./nico-manifest";
 import { detectProvider } from "./provider";
 import { proxyDashManifest } from "./proxy";
+import type { MediaSrc } from "./vidstack";
 
 type ResolveManifestOptions = {
   preferNativeManifest?: boolean;

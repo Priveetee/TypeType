@@ -1,7 +1,5 @@
-import { Menu } from "@vidstack/react";
-import { OdometerIcon } from "@vidstack/react/icons";
-import type { DefaultLayoutIcon } from "@vidstack/react/player/layouts/default";
-import { DefaultMenuButton, DefaultMenuRadioGroup } from "@vidstack/react/player/layouts/default";
+import type { DefaultLayoutIcon } from "../lib/vidstack";
+import { DefaultMenuButton, DefaultMenuRadioGroup, Menu, OdometerIcon } from "../lib/vidstack";
 
 const sizeIcon: DefaultLayoutIcon = (props) => <OdometerIcon {...props} />;
 
