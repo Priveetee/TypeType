@@ -45,9 +45,12 @@ export function ShortsVideoPlayer({
   onError,
   onEnded,
 }: Props) {
+  const srcKey = typeof src === "string" ? src : String(src.src);
+
   return (
     <div style={{ position: "absolute", inset: 0, backgroundColor: "black" }}>
       <MediaPlayer
+        key={srcKey}
         src={src}
         title={title}
         poster={poster}

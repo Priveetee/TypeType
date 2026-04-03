@@ -139,7 +139,7 @@ export function WatchLayout({ stream, startTime }: Props) {
       <div className="flex-[2] min-w-0 max-w-[133.333vh] flex flex-col gap-4">
         <div className="rounded-lg overflow-hidden">
           <VideoPlayer
-            key={retryKey}
+            key={`${stream.id}:${retryKey}`}
             src={manifestSrc}
             title={stream.title}
             poster={stream.thumbnail}
