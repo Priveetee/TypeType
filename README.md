@@ -4,6 +4,8 @@ TypeType is a self-hosted, privacy-respecting video platform frontend.
 
 It is a clean TypeScript rewrite and runs as a SPA served by nginx.
 
+Current focus is desktop and laptop UX. Mobile support is planned for a later phase.
+
 ## Runtime services
 
 TypeType frontend depends on:
@@ -90,7 +92,12 @@ Published tags:
 
 - Architecture and API boundary: `Architecture.md`
 - Agent operating rules: `AGENTS.md`
-- Project context and intent: `MANIFESTO.md`
+
+## Roadmap
+
+- Continue stabilizing desktop watch experience
+- Add dedicated mobile UX and layout support
+- Keep API compatibility with TypeType-Server
 
 ## Acknowledgments
 
