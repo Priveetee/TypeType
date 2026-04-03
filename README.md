@@ -92,6 +92,15 @@ Published tags:
 - Agent operating rules: `AGENTS.md`
 - Project context and intent: `MANIFESTO.md`
 
+## Acknowledgments
+
+A huge thanks to the projects that made this possible. TypeType is a clean rewrite, and this frontend would not exist without the work these teams published first.
+
+- [TeamPiped/Piped-Frontend](https://github.com/TeamPiped/Piped-Frontend) - UX and API pattern reference
+- [FreeTubeApp/FreeTube](https://github.com/FreeTubeApp/FreeTube) - video player behavior reference
+- [InfinityLoop1308/PipePipe](https://github.com/InfinityLoop1308/PipePipe) - multi-service behavior reference
+- [InfinityLoop1308/PipePipeExtractor](https://github.com/InfinityLoop1308/PipePipeExtractor) - extraction engine used by the backend API
+
 ## License
 
 MIT
