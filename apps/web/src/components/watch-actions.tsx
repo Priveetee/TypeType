@@ -8,8 +8,9 @@ import { goto } from "../lib/route-redirect";
 import type { VideoStream } from "../types/stream";
 import { DanmakuControls } from "./danmaku-controls";
 import { PlaylistAddDropdown } from "./playlist-add-dropdown";
+import { ReportBugModal } from "./report-bug-modal";
 import { Toast } from "./toast";
-import { ClockIcon, ListPlusIcon, ShareIcon, StarIcon } from "./watch-icons";
+import { BugIcon, ClockIcon, ListPlusIcon, ShareIcon, StarIcon } from "./watch-icons";
 import { WatchMoreActions } from "./watch-more-actions";
 
 type Props = {
@@ -22,6 +23,7 @@ const BTN_ON = "text-zinc-100 bg-zinc-800";
 export function WatchActions({ stream }: Props) {
   const { copied, share } = useShareUrl();
   const [playlistOpen, setPlaylistOpen] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
   const [toastLabel, setToastLabel] = useState<string | null>(null);
   const saveAnchorRef = useRef<HTMLButtonElement>(null);
   const { isAuthed } = useAuth();
@@ -131,6 +133,12 @@ export function WatchActions({ stream }: Props) {
         className={`${BTN} ${BTN_IDLE}`}
       />
       {isNicoNico && <DanmakuControls />}
+      {isAuthed && (
+        <button type="button" onClick={() => setReportOpen(true)} className={`${BTN} ${BTN_IDLE}`}>
+          <BugIcon />
+          Report
+        </button>
+      )}
       {playlistOpen && (
         <PlaylistAddDropdown
           stream={stream}
@@ -139,6 +147,7 @@ export function WatchActions({ stream }: Props) {
           onSaved={handleSaved}
         />
       )}
+      {reportOpen && <ReportBugModal videoUrl={stream.id} onClose={() => setReportOpen(false)} />}
     </div>
   );
 }

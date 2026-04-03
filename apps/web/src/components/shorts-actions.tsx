@@ -1,9 +1,11 @@
-import { Clock3, MessageCircle, Share2, Star } from "lucide-react";
+import { Bug, Clock3, MessageCircle, Share2, Star } from "lucide-react";
+import { useState } from "react";
 import { useAuth } from "../hooks/use-auth";
 import { useFavoritesPlaylist } from "../hooks/use-favorites-playlist";
 import { useShareUrl } from "../hooks/use-share-url";
 import { useWatchLaterPlaylist } from "../hooks/use-watch-later-playlist";
 import type { VideoStream } from "../types/stream";
+import { ReportBugModal } from "./report-bug-modal";
 
 type Props = {
   stream: VideoStream;
@@ -14,6 +16,7 @@ type Props = {
 export function ShortsActions({ stream, onOpenComments, className }: Props) {
   const { isAuthed } = useAuth();
   const { copied, share } = useShareUrl();
+  const [reportOpen, setReportOpen] = useState(false);
   const {
     add: addFavorite,
     remove: removeFavorite,
@@ -96,6 +99,15 @@ export function ShortsActions({ stream, onOpenComments, className }: Props) {
         stateLabel={copied ? "Copied" : "Link"}
         onClick={handleShare}
       />
+      {isAuthed && (
+        <ActionButton
+          icon={Bug}
+          label="Report bug"
+          stateLabel="Report"
+          onClick={() => setReportOpen(true)}
+        />
+      )}
+      {reportOpen && <ReportBugModal videoUrl={stream.id} onClose={() => setReportOpen(false)} />}
     </div>
   );
 }
