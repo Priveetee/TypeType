@@ -16,9 +16,9 @@ import type { VideoStream } from "../types/stream";
 import { DanmakuOverlay } from "./danmaku-overlay";
 import { PlayerError } from "./player-error";
 import { PlayerDefaults, PlayerFocuser } from "./player-internals";
+import { RelatedVideos } from "./related-videos";
 import { VideoPlayer } from "./video-player";
-import { WatchCinemaLayout } from "./watch-cinema-layout";
-import { WatchDefaultLayout } from "./watch-default-layout";
+import { WatchMeta } from "./watch-meta";
 
 type Props = {
   stream: VideoStream;
@@ -42,14 +42,13 @@ export function WatchLayout({ stream, startTime }: Props) {
   const originalLocale =
     stream.audioStreams?.find((a) => a.audioTrackName?.toLowerCase().includes("original"))
       ?.audioLocale ?? null;
-  const cinemaRelated = (stream.related ?? []).slice(0, 3);
+  const cinemaMode = useWatchLayoutStore((state) => state.cinemaMode);
 
   const positionRef = useRef(0);
   const seekRef = useRef<((seconds: number) => void) | null>(null);
   const saveMutateRef = useRef(save.mutate);
   saveMutateRef.current = save.mutate;
   const handleVolumeChange = useVolumeSync(update.mutate);
-  const cinemaMode = useWatchLayoutStore((state) => state.cinemaMode);
   const { thumbnailVtt, chaptersVtt } = useWatchVttAssets(stream);
 
   const saveRef = useRef<(seeked: boolean) => void>(() => {});
@@ -106,55 +105,68 @@ export function WatchLayout({ stream, startTime }: Props) {
     </>
   );
 
-  const playerProps = {
-    src: manifestSrc,
-    title: stream.title,
-    poster: stream.thumbnail,
-    streamType: isLive ? "live" : "on-demand",
-    startTime,
-    subtitles: stream.subtitles,
-    sponsorBlockSegments: stream.sponsorBlockSegments,
-    thumbnailVtt,
-    chaptersVtt,
-    initialVolume: settings.volume,
-    initialMuted: settings.muted,
-    settingsReady,
-    autoplay: settingsReady && settings.autoplay,
-    originalAudioLocale: originalLocale,
-    overlay,
-    onVolumeChange: handleVolumeChange,
-    onTimeUpdate: handleTimeUpdate,
-    onPause: handleSave,
-    onSeeked: handleSeekSave,
-    onError: handleError,
-    onEnded: handleEnded,
-    onSeekReady: (seek: (seconds: number) => void) => {
-      seekRef.current = seek;
-    },
-  } as const;
+  const relatedStreams = stream.related ?? [];
+  const anim = "[animation:page-fade-in_0.2s_ease-out]";
+  const containerClass = `flex flex-col gap-6 ${cinemaMode ? "" : "lg:flex-row lg:items-start"} ${anim}`;
+  const playerWrapClass = cinemaMode
+    ? "overflow-hidden bg-black"
+    : "min-w-0 flex-[2] max-w-[133.333vh] flex flex-col gap-4";
+  const playerBoxClass = cinemaMode
+    ? "mx-auto h-[min(calc(100vw*9/16),82svh)] w-[min(100vw,calc(82svh*16/9))]"
+    : "overflow-hidden rounded-lg";
 
-  const player = (
-    <>
-      <VideoPlayer key={`${stream.id}:${retryKey}`} {...playerProps} />
-      {playerFailed && <PlayerError onRetry={reset} />}
-    </>
+  return (
+    <div className={containerClass}>
+      <div className={playerWrapClass}>
+        <div className={playerBoxClass}>
+          <VideoPlayer
+            key={`${stream.id}:${retryKey}`}
+            src={manifestSrc}
+            title={stream.title}
+            poster={stream.thumbnail}
+            streamType={isLive ? "live" : "on-demand"}
+            startTime={startTime}
+            subtitles={stream.subtitles}
+            sponsorBlockSegments={stream.sponsorBlockSegments}
+            thumbnailVtt={thumbnailVtt}
+            chaptersVtt={chaptersVtt}
+            initialVolume={settings.volume}
+            initialMuted={settings.muted}
+            settingsReady={settingsReady}
+            autoplay={settingsReady && settings.autoplay}
+            originalAudioLocale={originalLocale}
+            overlay={overlay}
+            onVolumeChange={handleVolumeChange}
+            onTimeUpdate={handleTimeUpdate}
+            onPause={handleSave}
+            onSeeked={handleSeekSave}
+            onError={handleError}
+            onEnded={handleEnded}
+            onSeekReady={(s) => {
+              seekRef.current = s;
+            }}
+            className={cinemaMode ? "w-full h-full dark [--video-aspect-ratio:16/9]" : undefined}
+            mediaClassName={cinemaMode ? "object-cover" : undefined}
+          />
+          {playerFailed && <PlayerError onRetry={reset} />}
+        </div>
+        {!cinemaMode && <WatchMeta stream={stream} />}
+      </div>
+      {!cinemaMode && (
+        <div className="w-full lg:flex-1 lg:min-w-64">
+          <RelatedVideos streams={relatedStreams} />
+        </div>
+      )}
+      {cinemaMode && (
+        <div className="mx-auto flex w-full max-w-[1700px] flex-col gap-6 px-4 lg:flex-row lg:items-start">
+          <div className="min-w-0 flex-[2] max-w-[1200px] flex flex-col gap-4">
+            <WatchMeta stream={stream} />
+          </div>
+          <div className="w-full lg:flex-1 lg:min-w-64">
+            <RelatedVideos streams={relatedStreams} />
+          </div>
+        </div>
+      )}
+    </div>
   );
-
-  if (cinemaMode) {
-    const widePlayer = (
-      <>
-        <VideoPlayer
-          key={`${stream.id}:${retryKey}`}
-          {...playerProps}
-          className="w-full h-full dark [--video-aspect-ratio:16/9]"
-          mediaClassName="object-cover"
-        />
-        {playerFailed && <PlayerError onRetry={reset} />}
-      </>
-    );
-
-    return <WatchCinemaLayout player={widePlayer} stream={stream} related={cinemaRelated} />;
-  }
-
-  return <WatchDefaultLayout player={player} stream={stream} />;
 }
