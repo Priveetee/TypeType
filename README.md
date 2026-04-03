@@ -33,6 +33,8 @@ DRAGONFLY_URL=redis://dragonfly:6379
 docker compose up -d
 ```
 
+The frontend container mounts local `nginx.conf` by default, so proxy and upload-limit updates are applied from this repository file.
+
 3) Check services:
 
 ```sh
@@ -58,6 +60,7 @@ docker compose ps
 - Frontend not loading: run `docker compose logs typetype`.
 - Backend API not responding: run `docker compose logs typetype-server`.
 - Port already in use: change host ports in `docker-compose.yml` and restart with `docker compose up -d`.
+- After updating `nginx.conf`: restart frontend with `docker compose up -d typetype`.
 
 ## Local development
 
