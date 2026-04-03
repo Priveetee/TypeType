@@ -67,6 +67,8 @@ export function SponsorBlockSkipper({ segments }: { segments: SponsorBlockSegmen
 type PlayerDefaultsProps = {
   defaultQuality?: string;
   defaultAudioLanguage?: string;
+  preferOriginalLanguage?: boolean;
+  originalAudioLocale?: string | null;
   subtitlesEnabled?: boolean;
   defaultSubtitleLanguage?: string;
 };
@@ -74,6 +76,8 @@ type PlayerDefaultsProps = {
 export function PlayerDefaults({
   defaultQuality,
   defaultAudioLanguage,
+  preferOriginalLanguage,
+  originalAudioLocale,
   subtitlesEnabled,
   defaultSubtitleLanguage,
 }: PlayerDefaultsProps) {
@@ -85,6 +89,10 @@ export function PlayerDefaults({
   const audioApplied = useRef(false);
   const subtitleApplied = useRef(false);
 
+  const audioLanguage = preferOriginalLanguage
+    ? (originalAudioLocale ?? undefined)
+    : defaultAudioLanguage;
+
   useEffect(() => {
     if (!canPlay || qualityApplied.current || !defaultQuality) return;
     const match = qualityOptions.find((o) => o.label === defaultQuality);
@@ -95,13 +103,13 @@ export function PlayerDefaults({
   }, [canPlay, qualityOptions, defaultQuality]);
 
   useEffect(() => {
-    if (!canPlay || audioApplied.current || !defaultAudioLanguage) return;
-    const match = audioOptions.find((o) => o.track.language === defaultAudioLanguage);
+    if (!canPlay || audioApplied.current || !audioLanguage) return;
+    const match = audioOptions.find((o) => o.track.language === audioLanguage);
     if (match) {
       match.select();
       audioApplied.current = true;
     }
-  }, [canPlay, audioOptions, defaultAudioLanguage]);
+  }, [canPlay, audioOptions, audioLanguage]);
 
   useEffect(() => {
     if (!canPlay || subtitleApplied.current || !subtitlesEnabled) return;

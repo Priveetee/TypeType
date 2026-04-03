@@ -11,6 +11,7 @@ type ResolveManifestOptions = {
   preferNativeManifest?: boolean;
   compactAudioTracks?: boolean;
   preferredAudioLanguage?: string;
+  preferOriginalLanguage?: boolean;
   maxCompactAudioTracks?: number;
 };
 

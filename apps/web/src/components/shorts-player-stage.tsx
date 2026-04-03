@@ -32,6 +32,8 @@ type Props = {
   initialVolume: number;
   initialMuted: boolean;
   defaultAudioLanguage?: string;
+  preferOriginalLanguage?: boolean;
+  originalAudioLocale?: string | null;
   defaultSubtitleLanguage?: string;
   subtitlesEnabled?: boolean;
   onOpenComments: () => void;
@@ -63,6 +65,8 @@ export function ShortsPlayerStage({
   initialVolume,
   initialMuted,
   defaultAudioLanguage,
+  preferOriginalLanguage,
+  originalAudioLocale,
   defaultSubtitleLanguage,
   subtitlesEnabled,
   onOpenComments,
@@ -79,7 +83,8 @@ export function ShortsPlayerStage({
   const playerSrc = stream
     ? resolveManifestSrc(stream, false, false, false, {
         compactAudioTracks: true,
-        preferredAudioLanguage: defaultAudioLanguage,
+        preferredAudioLanguage: preferOriginalLanguage ? undefined : defaultAudioLanguage,
+        preferOriginalLanguage,
         maxCompactAudioTracks: 3,
       })
     : undefined;
@@ -124,6 +129,8 @@ export function ShortsPlayerStage({
                 settingsReady={settingsReady}
                 autoplay={shouldAutoplay}
                 defaultAudioLanguage={defaultAudioLanguage}
+                preferOriginalLanguage={preferOriginalLanguage}
+                originalAudioLocale={originalAudioLocale}
                 defaultSubtitleLanguage={defaultSubtitleLanguage}
                 subtitlesEnabled={subtitlesEnabled}
                 onVolumeChange={onVolumeChange}

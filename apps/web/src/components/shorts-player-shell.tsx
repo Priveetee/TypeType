@@ -9,6 +9,14 @@ import { useShortsRouteSync } from "../hooks/use-shorts-route-sync";
 import { useVolumeSync } from "../hooks/use-volume-sync";
 import { useShortsNavigation } from "../lib/shorts-navigation";
 import { useUiStore } from "../stores/ui-store";
+import type { VideoStream } from "../types/stream";
+
+function findOriginalAudioLocale(stream: VideoStream | undefined): string | null {
+  return (
+    stream?.audioStreams?.find((track) => track.audioTrackName?.toLowerCase().includes("original"))
+      ?.audioLocale ?? null
+  );
+}
 
 type Props = {
   targetUrl?: string;
@@ -30,6 +38,7 @@ export function ShortsPlayerShell({ targetUrl }: Props) {
   );
   const { active, activeId, stream, streamQuery, current, errorMessage, isMemberOnlyShort } =
     useShortsActiveStream({ shorts, index });
+  const originalAudioLocale = findOriginalAudioLocale(stream);
   const onVolumeChange = useVolumeSync(update.mutate);
   useShortsPrefetch(
     shorts.map((item) => item.id),
@@ -87,6 +96,8 @@ export function ShortsPlayerShell({ targetUrl }: Props) {
       initialVolume={settings.volume}
       initialMuted={settings.muted}
       defaultAudioLanguage={settings.defaultAudioLanguage || undefined}
+      preferOriginalLanguage={settings.preferOriginalLanguage}
+      originalAudioLocale={originalAudioLocale}
       defaultSubtitleLanguage={settings.defaultSubtitleLanguage || undefined}
       subtitlesEnabled={settings.subtitlesEnabled}
       onOpenComments={() => setCommentsOpen(true)}

@@ -18,6 +18,8 @@ type Props = {
   settingsReady?: boolean;
   autoplay?: boolean;
   defaultAudioLanguage?: string;
+  preferOriginalLanguage?: boolean;
+  originalAudioLocale?: string | null;
   defaultSubtitleLanguage?: string;
   subtitlesEnabled?: boolean;
   onVolumeChange?: (volume: number, muted: boolean) => void;
@@ -35,6 +37,8 @@ export function ShortsVideoPlayer({
   settingsReady = false,
   autoplay = true,
   defaultAudioLanguage,
+  preferOriginalLanguage,
+  originalAudioLocale,
   defaultSubtitleLanguage,
   subtitlesEnabled,
   onVolumeChange,
@@ -101,6 +105,8 @@ export function ShortsVideoPlayer({
         />
         <PlayerDefaults
           defaultAudioLanguage={defaultAudioLanguage}
+          preferOriginalLanguage={preferOriginalLanguage}
+          originalAudioLocale={originalAudioLocale}
           defaultSubtitleLanguage={defaultSubtitleLanguage}
           subtitlesEnabled={subtitlesEnabled}
         />

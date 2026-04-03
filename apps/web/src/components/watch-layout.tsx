@@ -163,6 +163,8 @@ export function WatchLayout({ stream, startTime }: Props) {
                 <PlayerDefaults
                   defaultQuality={qualityFailed ? undefined : settings.defaultQuality}
                   defaultAudioLanguage={settings.defaultAudioLanguage || undefined}
+                  preferOriginalLanguage={settings.preferOriginalLanguage}
+                  originalAudioLocale={originalLocale}
                   subtitlesEnabled={settings.subtitlesEnabled}
                   defaultSubtitleLanguage={settings.defaultSubtitleLanguage || undefined}
                 />
