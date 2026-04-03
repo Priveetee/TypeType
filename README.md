@@ -17,7 +17,7 @@ The easiest setup is Docker Compose at repository root.
 
 ## Quick start (Docker)
 
-Create `.env` in repo root:
+1) Create `.env` in repo root:
 
 ```env
 ALLOWED_ORIGINS=http://localhost:80
@@ -27,17 +27,37 @@ DATABASE_PASSWORD=typetype
 DRAGONFLY_URL=redis://dragonfly:6379
 ```
 
-Start stack:
+2) Start stack:
 
 ```sh
 docker compose up -d
 ```
 
-Open:
+3) Check services:
+
+```sh
+docker compose ps
+```
+
+4) Open:
 
 - Frontend: `http://localhost:80`
 - Server API: `http://localhost:8080`
 - Token service: `http://localhost:8081`
+
+## Synology notes
+
+- Use Container Manager > Project and point it to this `docker-compose.yml`.
+- Put the `.env` file next to `docker-compose.yml` before starting the project.
+- If port `80` is already used, change `docker-compose.yml` to another host port, for example `8088:80`, and set `ALLOWED_ORIGINS=http://localhost:8088`.
+- First start can take a few minutes while images are pulled.
+
+## Troubleshooting
+
+- `.env not found`: create `.env` in repository root (same folder as `docker-compose.yml`).
+- Frontend not loading: run `docker compose logs typetype`.
+- Backend API not responding: run `docker compose logs typetype-server`.
+- Port already in use: change host ports in `docker-compose.yml` and restart with `docker compose up -d`.
 
 ## Local development
 
