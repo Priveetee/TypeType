@@ -60,7 +60,7 @@ export function RecommendationFeedbackDropdown({
     function onMouseDown(e: MouseEvent) {
       const target = e.target as Node;
       const outsidePanel = panelRef.current && !panelRef.current.contains(target);
-      const outsideAnchor = !anchorElRef.current || !anchorElRef.current.contains(target);
+      const outsideAnchor = !anchorElRef.current?.contains(target);
       if (outsidePanel && outsideAnchor) onCloseRef.current();
     }
     window.addEventListener("mousedown", onMouseDown);
