@@ -145,3 +145,10 @@
   align-items: center;
   gap: 0.25rem;
 }
+
+.vds-captions [data-part="cue-display"] {
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%);
+  text-align: center;
+}
