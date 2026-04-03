@@ -12,7 +12,10 @@
     "knip": "knip",
     "sherif": "sherif"
   },
-  "packageManager": "bun@1.3.10",
+  "packageManager": "bun@1.3.11",
+  "overrides": {
+    "picomatch": "^2.3.2"
+  },
   "devDependencies": {
     "@biomejs/biome": "latest",
     "knip": "latest",
