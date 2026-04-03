@@ -15,9 +15,8 @@ type ActiveModal = "history" | "subscriptions" | "search-history" | null;
 export function SettingsPrivacy() {
   const { total: historyTotal, clear: clearHistory } = useHistory();
   const { query: subsQuery, remove: removeSubscription } = useSubscriptions();
-  const { query: searchHistoryQuery, clear: clearSearchHistory } = useSearchHistory();
+  const { total: searchHistoryTotal, clear: clearSearchHistory } = useSearchHistory();
   const subscriptions = subsQuery.data ?? [];
-  const searchEntries = searchHistoryQuery.data ?? [];
   const [modal, setModal] = useState<ActiveModal>(null);
   const [toast, setToast] = useState<string | null>(null);
 
@@ -47,7 +46,7 @@ export function SettingsPrivacy() {
 
   const historyLabel = historyTotal === 1 ? "1 entry" : `${historyTotal} entries`;
   const subsLabel = subscriptions.length === 1 ? "1 channel" : `${subscriptions.length} channels`;
-  const searchLabel = searchEntries.length === 1 ? "1 entry" : `${searchEntries.length} entries`;
+  const searchLabel = searchHistoryTotal === 1 ? "1 entry" : `${searchHistoryTotal} entries`;
 
   const modalTitle =
     modal === "history"
@@ -83,7 +82,7 @@ export function SettingsPrivacy() {
           </div>
           <button
             type="button"
-            disabled={searchEntries.length === 0}
+            disabled={searchHistoryTotal === 0}
             onClick={() => setModal("search-history")}
             className="text-xs text-red-400 hover:text-red-300 disabled:text-zinc-600 disabled:cursor-not-allowed transition-colors ml-6 flex-shrink-0"
           >

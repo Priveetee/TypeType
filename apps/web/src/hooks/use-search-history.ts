@@ -49,6 +49,7 @@ export function useSearchHistory() {
 
   return {
     query,
+    total,
     visibleItems,
     canLoadMore,
     loadMore,
