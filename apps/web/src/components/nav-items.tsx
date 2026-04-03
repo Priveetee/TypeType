@@ -16,8 +16,11 @@ export const NAV_ITEMS: NavItem[] = [
     to: "/shorts",
     icon: (
       <>
-        <rect x="7" y="3" width="10" height="18" rx="4" />
-        <path d="M11 9l4 3-4 3V9z" />
+        <rect x="5" y="3" width="14" height="18" rx="3" />
+        <path d="M5 8h14" />
+        <path d="M9 3v5" />
+        <path d="M13 3v5" />
+        <path d="M11 11l4 2.5-4 2.5V11z" fill="currentColor" stroke="none" />
       </>
     ),
   },
