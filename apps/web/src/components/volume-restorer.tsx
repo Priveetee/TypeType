@@ -27,8 +27,12 @@ export function VolumeRestorer({
     restoredRef.current = true;
     remote.changeVolume(initialVolume);
     if (initialMuted) remote.mute();
-    if (autoplay) remote.play();
-  }, [settingsReady, canPlay, remote, initialVolume, initialMuted, autoplay]);
+  }, [settingsReady, canPlay, remote, initialVolume, initialMuted]);
+
+  useEffect(() => {
+    if (!settingsReady || !canPlay || !autoplay) return;
+    remote.play();
+  }, [settingsReady, canPlay, autoplay, remote]);
 
   useEffect(() => {
     if (!restoredRef.current) return;

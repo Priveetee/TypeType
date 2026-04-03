@@ -5,22 +5,20 @@ import { usePlayerError } from "../hooks/use-player-error";
 import { useSaveProgress } from "../hooks/use-progress";
 import { useSettings } from "../hooks/use-settings";
 import { useVolumeSync } from "../hooks/use-volume-sync";
-import { buildChaptersVtt } from "../lib/chapters-vtt";
+import {
+  useWatchRecommendationTracking,
+  useWatchVttAssets,
+} from "../hooks/use-watch-layout-assets";
 import { detectProvider } from "../lib/provider";
-import { proxyUrl } from "../lib/proxy";
-import { trackRecommendationEvent } from "../lib/recommendation-tracker";
-import { buildThumbnailVtt } from "../lib/thumbnail-vtt";
 import { useDanmakuStore } from "../stores/danmaku-store";
+import { useWatchLayoutStore } from "../stores/watch-layout-store";
 import type { VideoStream } from "../types/stream";
 import { DanmakuOverlay } from "./danmaku-overlay";
 import { PlayerError } from "./player-error";
 import { PlayerDefaults, PlayerFocuser } from "./player-internals";
-import { RelatedVideos } from "./related-videos";
 import { VideoPlayer } from "./video-player";
-import { WatchActions } from "./watch-actions";
-import { WatchComments } from "./watch-comments";
-import { WatchDescription } from "./watch-description";
-import { WatchInfo } from "./watch-info";
+import { WatchCinemaLayout } from "./watch-cinema-layout";
+import { WatchDefaultLayout } from "./watch-default-layout";
 
 type Props = {
   stream: VideoStream;
@@ -44,16 +42,15 @@ export function WatchLayout({ stream, startTime }: Props) {
   const originalLocale =
     stream.audioStreams?.find((a) => a.audioTrackName?.toLowerCase().includes("original"))
       ?.audioLocale ?? null;
+  const cinemaRelated = (stream.related ?? []).slice(0, 3);
 
   const positionRef = useRef(0);
   const seekRef = useRef<((seconds: number) => void) | null>(null);
-  const thumbnailVtt = useRef<string | null>(null);
-  const chaptersVtt = useRef<string | null>(null);
   const saveMutateRef = useRef(save.mutate);
   saveMutateRef.current = save.mutate;
   const handleVolumeChange = useVolumeSync(update.mutate);
-  const watchSentRef = useRef(false);
-  const trackedStreamIdRef = useRef("");
+  const cinemaMode = useWatchLayoutStore((state) => state.cinemaMode);
+  const { thumbnailVtt, chaptersVtt } = useWatchVttAssets(stream);
 
   const saveRef = useRef<(seeked: boolean) => void>(() => {});
   saveRef.current = (seeked: boolean) => {
@@ -66,34 +63,7 @@ export function WatchLayout({ stream, startTime }: Props) {
   const handleSave = useCallback(() => saveRef.current(false), []);
   const handleSeekSave = useCallback(() => saveRef.current(true), []);
 
-  if (trackedStreamIdRef.current !== stream.id) {
-    trackedStreamIdRef.current = stream.id;
-    watchSentRef.current = false;
-  }
-
-  useEffect(() => {
-    if (!stream.previewFrames) {
-      thumbnailVtt.current = null;
-      return;
-    }
-    const proxied = stream.previewFrames.map((frame) => ({
-      ...frame,
-      urls: frame.urls.map(proxyUrl),
-    }));
-    thumbnailVtt.current = buildThumbnailVtt(proxied);
-    return () => {
-      if (thumbnailVtt.current) URL.revokeObjectURL(thumbnailVtt.current);
-    };
-  }, [stream.previewFrames]);
-
-  useEffect(() => {
-    chaptersVtt.current = stream.streamSegments
-      ? buildChaptersVtt(stream.streamSegments, stream.duration)
-      : null;
-    return () => {
-      if (chaptersVtt.current) URL.revokeObjectURL(chaptersVtt.current);
-    };
-  }, [stream.streamSegments, stream.duration]);
+  useWatchRecommendationTracking(stream, isLive, positionRef);
 
   const handleTimeUpdate = useCallback((positionMs: number) => {
     positionRef.current = positionMs;
@@ -119,77 +89,72 @@ export function WatchLayout({ stream, startTime }: Props) {
     };
   }, [isLive]);
 
-  useEffect(() => {
-    if (isLive || stream.duration <= 0 || watchSentRef.current) return;
-    const onBeforeUnload = () => {
-      const ratio = Math.max(0, Math.min(positionRef.current / (stream.duration * 1000), 1));
-      if (ratio < 0.2 || watchSentRef.current) return;
-      watchSentRef.current = true;
-      trackRecommendationEvent("watch", stream, { watchRatio: ratio });
-    };
-    window.addEventListener("beforeunload", onBeforeUnload);
-    return () => {
-      onBeforeUnload();
-      window.removeEventListener("beforeunload", onBeforeUnload);
-    };
-  }, [isLive, stream]);
-
-  return (
-    <div className="flex flex-col gap-6 lg:flex-row lg:items-start [animation:page-fade-in_0.2s_ease-out]">
-      <div className="flex-[2] min-w-0 max-w-[133.333vh] flex flex-col gap-4">
-        <div className="rounded-lg overflow-hidden">
-          <VideoPlayer
-            key={`${stream.id}:${retryKey}`}
-            src={manifestSrc}
-            title={stream.title}
-            poster={stream.thumbnail}
-            streamType={isLive ? "live" : "on-demand"}
-            startTime={startTime}
-            subtitles={stream.subtitles}
-            sponsorBlockSegments={stream.sponsorBlockSegments}
-            thumbnailVtt={thumbnailVtt.current ?? undefined}
-            chaptersVtt={chaptersVtt.current ?? undefined}
-            initialVolume={settings.volume}
-            initialMuted={settings.muted}
-            settingsReady={settingsReady}
-            autoplay={settingsReady && settings.autoplay}
-            originalAudioLocale={originalLocale}
-            overlay={
-              <>
-                {isNicoNico && bulletCommentsOn && bulletComments && (
-                  <DanmakuOverlay comments={bulletComments} positionRef={positionRef} />
-                )}
-                <PlayerFocuser />
-                <PlayerDefaults
-                  defaultQuality={qualityFailed ? undefined : settings.defaultQuality}
-                  defaultAudioLanguage={settings.defaultAudioLanguage || undefined}
-                  preferOriginalLanguage={settings.preferOriginalLanguage}
-                  originalAudioLocale={originalLocale}
-                  subtitlesEnabled={settings.subtitlesEnabled}
-                  defaultSubtitleLanguage={settings.defaultSubtitleLanguage || undefined}
-                />
-              </>
-            }
-            onVolumeChange={handleVolumeChange}
-            onTimeUpdate={handleTimeUpdate}
-            onPause={handleSave}
-            onSeeked={handleSeekSave}
-            onError={handleError}
-            onEnded={handleEnded}
-            onSeekReady={(seek) => {
-              seekRef.current = seek;
-            }}
-          />
-          {playerFailed && <PlayerError onRetry={reset} />}
-        </div>
-        <WatchInfo stream={stream} />
-        <WatchActions stream={stream} />
-        {stream.description && <WatchDescription description={stream.description} />}
-        <WatchComments key={stream.id} videoUrl={stream.id} />
-      </div>
-      <div className="w-full lg:flex-1 lg:min-w-64">
-        <RelatedVideos streams={stream.related ?? []} />
-      </div>
-    </div>
+  const overlay = (
+    <>
+      {isNicoNico && bulletCommentsOn && bulletComments && (
+        <DanmakuOverlay comments={bulletComments} positionRef={positionRef} />
+      )}
+      <PlayerFocuser />
+      <PlayerDefaults
+        defaultQuality={qualityFailed ? undefined : settings.defaultQuality}
+        defaultAudioLanguage={settings.defaultAudioLanguage || undefined}
+        preferOriginalLanguage={settings.preferOriginalLanguage}
+        originalAudioLocale={originalLocale}
+        subtitlesEnabled={settings.subtitlesEnabled}
+        defaultSubtitleLanguage={settings.defaultSubtitleLanguage || undefined}
+      />
+    </>
   );
+
+  const playerProps = {
+    src: manifestSrc,
+    title: stream.title,
+    poster: stream.thumbnail,
+    streamType: isLive ? "live" : "on-demand",
+    startTime,
+    subtitles: stream.subtitles,
+    sponsorBlockSegments: stream.sponsorBlockSegments,
+    thumbnailVtt,
+    chaptersVtt,
+    initialVolume: settings.volume,
+    initialMuted: settings.muted,
+    settingsReady,
+    autoplay: settingsReady && settings.autoplay,
+    originalAudioLocale: originalLocale,
+    overlay,
+    onVolumeChange: handleVolumeChange,
+    onTimeUpdate: handleTimeUpdate,
+    onPause: handleSave,
+    onSeeked: handleSeekSave,
+    onError: handleError,
+    onEnded: handleEnded,
+    onSeekReady: (seek: (seconds: number) => void) => {
+      seekRef.current = seek;
+    },
+  } as const;
+
+  const player = (
+    <>
+      <VideoPlayer key={`${stream.id}:${retryKey}`} {...playerProps} />
+      {playerFailed && <PlayerError onRetry={reset} />}
+    </>
+  );
+
+  if (cinemaMode) {
+    const widePlayer = (
+      <>
+        <VideoPlayer
+          key={`${stream.id}:${retryKey}`}
+          {...playerProps}
+          className="w-full h-full dark [--video-aspect-ratio:16/9]"
+          mediaClassName="object-cover"
+        />
+        {playerFailed && <PlayerError onRetry={reset} />}
+      </>
+    );
+
+    return <WatchCinemaLayout player={widePlayer} stream={stream} related={cinemaRelated} />;
+  }
+
+  return <WatchDefaultLayout player={player} stream={stream} />;
 }

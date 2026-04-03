@@ -10,6 +10,7 @@ import {
 } from "../lib/vidstack";
 import type { SponsorBlockSegmentItem, SubtitleItem } from "../types/api";
 import { AudioTrackSelector } from "./audio-track-selector";
+import { CinemaModeControl } from "./cinema-mode-control";
 import { FormatSelector } from "./format-selector";
 import { PlayerSeeker, SeekBridge, SponsorBlockSkipper } from "./player-internals";
 import { QualitySelector } from "./quality-selector";
@@ -94,6 +95,7 @@ export function VideoPlayer({
       logLevel="warn"
       crossOrigin
       playsInline
+      autoPlay={autoplay}
       storage={null}
       title={title}
       poster={poster}
@@ -109,7 +111,7 @@ export function VideoPlayer({
       onEnded={() => onEnded?.()}
     >
       <MediaProvider
-        className={mediaClassName}
+        className={mediaClassName ?? "h-full w-full"}
         mediaProps={mediaClassName ? { className: mediaClassName } : undefined}
       >
         {subtitles?.map((s) => (
@@ -137,6 +139,7 @@ export function VideoPlayer({
               <FormatSelector />
             </>
           ),
+          beforeFullscreenButton: <CinemaModeControl />,
           captionsMenuItemsEnd: hasSubtitles ? (
             <SubtitleSizeSelector value={subtitleSize} onChange={setSubtitleSize} />
           ) : undefined,

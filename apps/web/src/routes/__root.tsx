@@ -6,6 +6,7 @@ import { useAuth } from "../hooks/use-auth";
 import { isAdminRoute, isAuthPage, requiresAuth } from "../lib/auth-routes";
 import { bootstrapSession } from "../lib/auth-session";
 import { useUiStore } from "../stores/ui-store";
+import { useWatchLayoutStore } from "../stores/watch-layout-store";
 
 function AuthShell() {
   return (
@@ -23,9 +24,11 @@ function AuthShell() {
 
 function RootLayout() {
   const collapsed = useUiStore((s) => s.sidebarCollapsed);
+  const cinemaMode = useWatchLayoutStore((s) => s.cinemaMode);
   const { isAuthed, isAdmin, status } = useAuth();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const shortsPage = pathname === "/shorts";
+  const watchCinemaPage = pathname === "/watch" && cinemaMode;
 
   useEffect(() => {
     void bootstrapSession();
@@ -74,7 +77,7 @@ function RootLayout() {
     return (
       <div className="min-h-screen bg-zinc-950 text-zinc-100">
         <Navbar />
-        <Sidebar />
+        {!watchCinemaPage && <Sidebar />}
         <main className="pt-14">
           <Outlet />
         </main>
@@ -85,9 +88,13 @@ function RootLayout() {
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
       <Navbar />
-      <Sidebar />
+      {!watchCinemaPage && <Sidebar />}
       <main
-        className={`pt-14 px-4 py-6 transition-all duration-200 ${collapsed ? "ml-14" : "ml-48"}`}
+        className={
+          watchCinemaPage
+            ? "pt-14 px-0 py-0"
+            : `pt-14 px-4 py-6 transition-all duration-200 ${collapsed ? "ml-14" : "ml-48"}`
+        }
       >
         <Outlet />
       </main>
