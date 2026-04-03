@@ -77,7 +77,7 @@ function RootLayout() {
     return (
       <div className="min-h-screen bg-zinc-950 text-zinc-100">
         <Navbar />
-        {!watchCinemaPage && <Sidebar />}
+        <Sidebar />
         <main className="pt-14">
           <Outlet />
         </main>
@@ -85,17 +85,15 @@ function RootLayout() {
     );
   }
 
+  const mainClasses = watchCinemaPage
+    ? "pt-14"
+    : `pt-14 px-4 py-6 transition-all duration-200 ${collapsed ? "ml-14" : "ml-48"}`;
+
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
       <Navbar />
-      {!watchCinemaPage && <Sidebar />}
-      <main
-        className={
-          watchCinemaPage
-            ? "pt-14 px-0 py-0"
-            : `pt-14 px-4 py-6 transition-all duration-200 ${collapsed ? "ml-14" : "ml-48"}`
-        }
-      >
+      <Sidebar className={watchCinemaPage ? "hidden" : undefined} />
+      <main className={mainClasses}>
         <Outlet />
       </main>
     </div>
