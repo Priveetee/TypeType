@@ -1,26 +1,17 @@
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
 import { addHistory, clearHistory, fetchHistory, removeHistory } from "../lib/api-user";
 import type { HistoryItem } from "../types/user";
 import { useAuth } from "./use-auth";
+import { useDebouncedValue } from "./use-debounced-value";
 
 const PAGE_SIZE = 40;
 
 const historyKey = (q: string) => ["history", q];
 
-function useDebounced(value: string, ms: number): string {
-  const [debounced, setDebounced] = useState(value);
-  useEffect(() => {
-    const id = setTimeout(() => setDebounced(value), ms);
-    return () => clearTimeout(id);
-  }, [value, ms]);
-  return debounced;
-}
-
 export function useHistory(searchQuery = "") {
   const qc = useQueryClient();
   const { isAuthed } = useAuth();
-  const debouncedQuery = useDebounced(searchQuery, 300);
+  const debouncedQuery = useDebouncedValue(searchQuery, 300);
 
   const query = useInfiniteQuery({
     queryKey: historyKey(debouncedQuery),

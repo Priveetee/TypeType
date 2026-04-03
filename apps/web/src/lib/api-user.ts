@@ -2,8 +2,8 @@ import type { HomeRecommendationsResponse, SubscriptionFeedPage } from "../types
 import type { HistoryItem, SearchHistoryItem, SettingsItem, SubscriptionItem } from "../types/user";
 import { ApiError } from "./api";
 import { authed, authedJson } from "./authed";
-
 import { API_BASE as BASE } from "./env";
+import { normalizeApiPayload } from "./text-normalize";
 
 type HistoryParams = {
   q?: string;
@@ -16,6 +16,13 @@ type HistoryParams = {
 type HistoryPage = {
   items: HistoryItem[];
   total: number;
+};
+
+type SearchHistoryPage = {
+  items: SearchHistoryItem[];
+  total: number;
+  page: number;
+  limit: number;
 };
 
 export async function fetchHistory(params: HistoryParams = {}): Promise<HistoryPage> {
@@ -87,8 +94,18 @@ export function updateSettings(settings: SettingsItem): Promise<SettingsItem> {
   });
 }
 
-export function fetchSearchHistory(): Promise<SearchHistoryItem[]> {
-  return authedJson(`${BASE}/search-history`);
+export async function fetchSearchHistoryPage(
+  page: number,
+  limit: number,
+): Promise<SearchHistoryPage> {
+  const params = new URLSearchParams({ page: String(page), limit: String(limit) });
+  const res = await authed(`${BASE}/search-history?${params}`);
+  const body = normalizeApiPayload(await res.json().catch(() => []));
+  if (!res.ok) throw new ApiError((body as { error: string }).error, res.status);
+  const items = Array.isArray(body) ? (body as SearchHistoryItem[]) : [];
+  const totalHeader = Number(res.headers.get("X-Total-Count"));
+  const total = Number.isFinite(totalHeader) ? totalHeader : items.length;
+  return { items, total, page, limit };
 }
 
 export async function addSearchHistory(term: string): Promise<SearchHistoryItem> {
