@@ -4,6 +4,7 @@ import { recordApiError } from "./api-error-log";
 import { refreshSession } from "./auth-session";
 import { extractRequestId, recordClientEvent } from "./client-debug-log";
 import { sanitizeDebugText, sanitizeRequestPath } from "./debug-sanitize";
+import { normalizeApiPayload } from "./text-normalize";
 
 function withBearer(init: RequestInit | undefined, token: string): RequestInit {
   const headers = new Headers(init?.headers);
@@ -96,7 +97,7 @@ export async function authed(url: string, init?: RequestInit): Promise<Response>
 
 export async function authedJson<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await authed(url, init);
-  const body = await res.json();
+  const body = normalizeApiPayload(await res.json());
   if (!res.ok) throw new ApiError((body as { error: string }).error, res.status);
   return body as T;
 }

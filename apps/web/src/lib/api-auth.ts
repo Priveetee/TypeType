@@ -4,6 +4,7 @@ import { recordApiError } from "./api-error-log";
 import { extractRequestId, recordClientEvent } from "./client-debug-log";
 import { sanitizeDebugText, sanitizeRequestPath } from "./debug-sanitize";
 import { API_BASE as BASE } from "./env";
+import { normalizeApiPayload } from "./text-normalize";
 
 type AuthPayload = {
   email: string;
@@ -15,7 +16,9 @@ type RegisterPayload = AuthPayload & {
 };
 
 async function parseAuthResponse(res: Response): Promise<AuthResponse> {
-  const body = (await res.json().catch(() => ({ token: "" }))) as Partial<AuthResponse>;
+  const body = normalizeApiPayload(
+    await res.json().catch(() => ({ token: "" })),
+  ) as Partial<AuthResponse>;
   if (!res.ok || typeof body.token !== "string" || body.token.length === 0) {
     recordApiError({
       endpoint: "/auth",
@@ -53,7 +56,7 @@ async function authedJson<T>(url: string, token: string): Promise<T> {
     });
     throw error;
   }
-  const body = await res.json().catch(() => ({ error: "Request failed" }));
+  const body = normalizeApiPayload(await res.json().catch(() => ({ error: "Request failed" })));
   if (!res.ok) {
     const requestId = extractRequestId(res.headers);
     const message = (body as { error?: string }).error ?? "Request failed";

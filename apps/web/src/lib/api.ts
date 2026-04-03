@@ -8,8 +8,8 @@ import type {
 import { recordApiError } from "./api-error-log";
 import { extractRequestId, recordClientEvent } from "./client-debug-log";
 import { sanitizeDebugText, sanitizeRequestPath } from "./debug-sanitize";
-
 import { API_BASE as BASE } from "./env";
+import { normalizeApiPayload } from "./text-normalize";
 
 export class ApiError extends Error {
   status: number;
@@ -28,9 +28,15 @@ type ErrorLikeBody = {
 async function readBody(res: Response): Promise<unknown> {
   const contentType = res.headers.get("Content-Type") ?? "";
   if (contentType.includes("application/json")) {
-    return res.json().catch(() => null);
+    return res
+      .json()
+      .then(normalizeApiPayload)
+      .catch(() => null);
   }
-  return res.text().catch(() => "");
+  return res
+    .text()
+    .then(normalizeApiPayload)
+    .catch(() => "");
 }
 
 function toErrorMessage(status: number, statusText: string, body: unknown): string {

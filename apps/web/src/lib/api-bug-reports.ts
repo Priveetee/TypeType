@@ -14,6 +14,7 @@ import { authed, authedJson } from "./authed";
 import { extractRequestId, recordClientEvent } from "./client-debug-log";
 import { sanitizeDebugText, sanitizeRequestPath } from "./debug-sanitize";
 import { API_BASE as BASE } from "./env";
+import { normalizeApiPayload } from "./text-normalize";
 
 export async function submitBugReport(
   request: CreateBugReportRequest,
@@ -24,7 +25,7 @@ export async function submitBugReport(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(request),
   });
-  const body = (await res.json()) as CreateBugReportResponse;
+  const body = normalizeApiPayload((await res.json()) as CreateBugReportResponse);
   if (!res.ok) {
     const requestId = extractRequestId(res.headers);
     const message = (body as unknown as { error: string }).error ?? "Failed";
@@ -52,7 +53,7 @@ export async function submitBugReport(
     path: sanitizeRequestPath(endpoint),
     status: res.status,
   });
-  return body;
+  return body as CreateBugReportResponse;
 }
 
 type FetchBugReportsParams = {
@@ -89,7 +90,7 @@ export async function updateBugReportStatus(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ status }),
   });
-  const body = (await res.json()) as UpdateStatusResponse;
+  const body = normalizeApiPayload((await res.json()) as UpdateStatusResponse);
   if (!res.ok) {
     const requestId = extractRequestId(res.headers);
     const message = (body as unknown as { error: string }).error ?? "Failed";
@@ -112,7 +113,7 @@ export async function updateBugReportStatus(
       res.status,
     );
   }
-  return body;
+  return body as UpdateStatusResponse;
 }
 
 export async function createGitHubIssue(id: string): Promise<CreateGitHubIssueResponse> {
@@ -120,9 +121,9 @@ export async function createGitHubIssue(id: string): Promise<CreateGitHubIssueRe
   const res = await authed(endpoint, {
     method: "POST",
   });
-  const body = (await res.json()) as
-    | CreateGitHubIssueResponse
-    | { error: string; githubIssueUrl?: string };
+  const body = normalizeApiPayload(
+    (await res.json()) as CreateGitHubIssueResponse | { error: string; githubIssueUrl?: string },
+  );
   if (!res.ok) {
     const errorBody = body as { error: string; githubIssueUrl?: string };
     const requestId = extractRequestId(res.headers);
