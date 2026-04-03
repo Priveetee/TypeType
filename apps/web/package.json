@@ -9,8 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@tanstack/react-query": "^5.0.0",
-    "@tanstack/react-router": "^1.0.0",
+    "@tanstack/react-query": "^5.96.1",
+    "@tanstack/react-router": "^1.168.10",
     "@vidstack/react": "^1.0.0",
     "country-flag-icons": "^1.6.15",
     "dashjs": "^5.1.1",
@@ -18,17 +18,17 @@
     "media-icons": "^1.1.5",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "simple-icons": "^16.10.0",
-    "zustand": "^5.0.0"
+    "simple-icons": "^16.14.0",
+    "zustand": "^5.0.12"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.0.0",
-    "@tanstack/router-plugin": "^1.166.2",
-    "@types/node": "^25.3.5",
+    "@tailwindcss/vite": "^4.2.2",
+    "@tanstack/router-plugin": "^1.167.12",
+    "@types/node": "^25.5.1",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^5.1.1",
-    "tailwindcss": "^4.0.0",
+    "@vitejs/plugin-react": "^5.2.0",
+    "tailwindcss": "^4.2.2",
     "typescript": "~5.9.3",
     "vite": "^7.3.1"
   }
