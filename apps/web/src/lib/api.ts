@@ -5,6 +5,9 @@ import type {
   SearchPageResponse,
   StreamResponse,
 } from "../types/api";
+import { recordApiError } from "./api-error-log";
+import { extractRequestId, recordClientEvent } from "./client-debug-log";
+import { sanitizeDebugText, sanitizeRequestPath } from "./debug-sanitize";
 
 import { API_BASE as BASE } from "./env";
 
@@ -47,9 +50,44 @@ function toErrorMessage(status: number, statusText: string, body: unknown): stri
 }
 
 async function request<T>(url: string): Promise<T> {
-  const res = await fetch(url);
+  let res: Response;
+  try {
+    res = await fetch(url);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "network_error";
+    recordApiError({
+      endpoint: url,
+      status: 520,
+      code: "NETWORK_ERROR",
+      message,
+    });
+    recordClientEvent("api.network_error", {
+      method: "GET",
+      path: sanitizeRequestPath(url),
+      message: sanitizeDebugText(message),
+    });
+    throw error;
+  }
   const body = await readBody(res);
-  if (!res.ok) throw new ApiError(toErrorMessage(res.status, res.statusText, body), res.status);
+  if (!res.ok) {
+    const requestId = extractRequestId(res.headers);
+    const errorMessage = toErrorMessage(res.status, res.statusText, body);
+    recordApiError({
+      endpoint: url,
+      status: res.status,
+      code: "HTTP_ERROR",
+      message: errorMessage,
+      requestId,
+    });
+    recordClientEvent("api.response_error", {
+      method: "GET",
+      path: sanitizeRequestPath(url),
+      status: res.status,
+      requestId,
+      message: sanitizeDebugText(errorMessage),
+    });
+    throw new ApiError(errorMessage, res.status);
+  }
   return body as T;
 }
 

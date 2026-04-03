@@ -1,5 +1,8 @@
 import type { AuthMe, AuthResponse } from "../types/auth";
 import { ApiError } from "./api";
+import { recordApiError } from "./api-error-log";
+import { extractRequestId, recordClientEvent } from "./client-debug-log";
+import { sanitizeDebugText, sanitizeRequestPath } from "./debug-sanitize";
 import { API_BASE as BASE } from "./env";
 
 type AuthPayload = {
@@ -14,16 +17,62 @@ type RegisterPayload = AuthPayload & {
 async function parseAuthResponse(res: Response): Promise<AuthResponse> {
   const body = (await res.json().catch(() => ({ token: "" }))) as Partial<AuthResponse>;
   if (!res.ok || typeof body.token !== "string" || body.token.length === 0) {
+    recordApiError({
+      endpoint: "/auth",
+      status: res.status,
+      code: "AUTH_API_ERROR",
+      message: "Authentication failed",
+      requestId: extractRequestId(res.headers),
+    });
+    recordClientEvent("auth.api_error", {
+      status: res.status,
+      requestId: extractRequestId(res.headers),
+      message: "Authentication failed",
+    });
     throw new ApiError("Authentication failed", res.status);
   }
   return { token: body.token };
 }
 
 async function authedJson<T>(url: string, token: string): Promise<T> {
-  const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+  let res: Response;
+  try {
+    res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "network_error";
+    recordApiError({
+      endpoint: url,
+      status: 520,
+      code: "NETWORK_ERROR",
+      message,
+    });
+    recordClientEvent("auth.api_network_error", {
+      method: "GET",
+      path: sanitizeRequestPath(url),
+      message: sanitizeDebugText(message),
+    });
+    throw error;
+  }
   const body = await res.json().catch(() => ({ error: "Request failed" }));
-  if (!res.ok)
-    throw new ApiError((body as { error?: string }).error ?? "Request failed", res.status);
+  if (!res.ok) {
+    const requestId = extractRequestId(res.headers);
+    const message = (body as { error?: string }).error ?? "Request failed";
+    recordApiError({
+      endpoint: url,
+      status: res.status,
+      code: "AUTH_HTTP_ERROR",
+      message,
+      requestId,
+    });
+    recordClientEvent("auth.api_error", {
+      method: "GET",
+      path: sanitizeRequestPath(url),
+      status: res.status,
+      requestId,
+      message: sanitizeDebugText(message),
+    });
+    throw new ApiError(message, res.status);
+  }
   return body as T;
 }
 
@@ -76,6 +125,21 @@ export async function resetPassword(payload: {
     body: JSON.stringify(payload),
   });
   if (!res.ok && res.status !== 204) {
+    const requestId = extractRequestId(res.headers);
+    recordApiError({
+      endpoint: `${BASE}/auth/reset-password`,
+      status: res.status,
+      code: "RESET_PASSWORD_ERROR",
+      message: "Invalid or expired reset token",
+      requestId,
+    });
+    recordClientEvent("auth.reset_password_error", {
+      method: "POST",
+      path: sanitizeRequestPath(`${BASE}/auth/reset-password`),
+      status: res.status,
+      requestId,
+      message: "Invalid or expired reset token",
+    });
     throw new ApiError("Invalid or expired reset token", res.status);
   }
 }

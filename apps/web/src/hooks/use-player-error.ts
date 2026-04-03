@@ -1,5 +1,7 @@
 import type { MediaSrc } from "@vidstack/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { recordClientEvent } from "../lib/client-debug-log";
+import { sanitizeVideoContext } from "../lib/debug-sanitize";
 import { resolveManifestSrc } from "../lib/stream-src";
 import type { VideoStream } from "../types/stream";
 
@@ -31,6 +33,7 @@ function hasMultipleAudioLanguages(stream: VideoStream): boolean {
 
 export function usePlayerError(stream: VideoStream, isLive: boolean): UsePlayerErrorReturn {
   const streamId = stream.id;
+  const debugVideo = sanitizeVideoContext(streamId) ?? "unknown";
   const preferNativeManifest = !hasMultipleAudioLanguages(stream);
   const nativeEnabled = !isLive && Boolean(stream.videoOnlyStreams?.length) && preferNativeManifest;
   const [nativeFailed, setNativeFailed] = useState(false);
@@ -48,15 +51,18 @@ export function usePlayerError(stream: VideoStream, isLive: boolean): UsePlayerE
 
   const handleError = useCallback(() => {
     if (nativeEnabled && !nativeFailed) {
+      recordClientEvent("player.native_manifest_failed", { video: debugVideo });
       setNativeFailed(true);
       setRetryKey((k) => k + 1);
     } else if (!qualityFailed) {
+      recordClientEvent("player.quality_failed", { video: debugVideo });
       setQualityFailed(true);
       setRetryKey((k) => k + 1);
     } else {
+      recordClientEvent("player.failed", { video: debugVideo });
       setPlayerFailed(true);
     }
-  }, [nativeEnabled, nativeFailed, qualityFailed]);
+  }, [debugVideo, nativeEnabled, nativeFailed, qualityFailed]);
 
   const reset = useCallback(() => {
     setNativeFailed(false);
