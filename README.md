@@ -31,6 +31,13 @@ Then start all services:
 docker compose up -d
 ```
 
+Container tags are published to GHCR with:
+
+- `latest` on default branch builds
+- `sha-<short-sha>` on every build
+- branch tags (for example `main`)
+- release tags when pushing Git tags like `v1.2.3` (`1.2.3` and `1.2`)
+
 | Service | Port | Description |
 |---|---|---|
 | TypeType (frontend) | `80` | nginx serving the React SPA |
