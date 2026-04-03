@@ -52,6 +52,7 @@ export type SettingsItem = {
   subtitlesEnabled: boolean;
   defaultSubtitleLanguage: string;
   defaultAudioLanguage: string;
+  preferOriginalLanguage: boolean;
 };
 
 export type SearchHistoryItem = {

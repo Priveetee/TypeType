@@ -14,6 +14,7 @@ const DEFAULTS: SettingsItem = {
   subtitlesEnabled: false,
   defaultSubtitleLanguage: "",
   defaultAudioLanguage: "",
+  preferOriginalLanguage: false,
 };
 
 export function useSettings() {
