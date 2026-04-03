@@ -1,39 +1,60 @@
-import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchNotifications, markAllNotificationsRead } from "../lib/api-notifications";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  fetchNotifications,
+  fetchUnreadNotificationsCount,
+  markAllNotificationsRead,
+} from "../lib/api-notifications";
 import { useAuth } from "./use-auth";
 
 const KEY = ["notifications"];
+const UNREAD_KEY = ["notifications-unread-count"];
 const PAGE_SIZE = 20;
 
-export function useNotifications() {
+export function useNotifications(open: boolean) {
   const qc = useQueryClient();
   const { isAuthed, isGuest } = useAuth();
   const enabled = isAuthed && !isGuest;
+
+  const unreadQuery = useQuery({
+    queryKey: UNREAD_KEY,
+    queryFn: () => fetchUnreadNotificationsCount(),
+    enabled,
+    refetchInterval: enabled ? 90_000 : false,
+    retry: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
 
   const query = useInfiniteQuery({
     queryKey: KEY,
     queryFn: ({ pageParam = 0 }) => fetchNotifications(pageParam, PAGE_SIZE),
     getNextPageParam: (lastPage) => lastPage.nextpage ?? undefined,
     initialPageParam: 0,
-    enabled,
-    refetchInterval: enabled ? 60_000 : false,
+    enabled: enabled && open,
+    staleTime: 30_000,
+    retry: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 
   const markAllRead = useMutation({
     mutationFn: () => markAllNotificationsRead(),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: KEY });
+      qc.invalidateQueries({ queryKey: UNREAD_KEY });
     },
   });
 
   return {
     query,
+    unreadQuery,
     markAllRead,
-    unreadCount: query.data?.pages[0]?.unreadCount ?? 0,
+    unreadCount: unreadQuery.data?.unreadCount ?? 0,
     items: query.data?.pages.flatMap((page) => page.items) ?? [],
     hasNextPage: query.hasNextPage,
     fetchNextPage: query.fetchNextPage,
     isFetchingNextPage: query.isFetchingNextPage,
+    isFetchNextPageError: query.isFetchNextPageError,
     enabled,
   };
 }

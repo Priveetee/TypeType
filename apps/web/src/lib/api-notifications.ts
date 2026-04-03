@@ -1,6 +1,14 @@
-import type { NotificationsPage, ReadAllNotificationsResponse } from "../types/notifications";
+import type {
+  NotificationsPage,
+  ReadAllNotificationsResponse,
+  UnreadNotificationsCount,
+} from "../types/notifications";
 import { authedJson } from "./authed";
 import { API_BASE as BASE } from "./env";
+
+export function fetchUnreadNotificationsCount(): Promise<UnreadNotificationsCount> {
+  return authedJson(`${BASE}/notifications/unread-count`);
+}
 
 export function fetchNotifications(page = 0, limit = 20): Promise<NotificationsPage> {
   const search = new URLSearchParams({ page: String(page), limit: String(limit) });

@@ -22,3 +22,7 @@ export type ReadAllNotificationsResponse = {
   readAt: number;
   unreadCount: number;
 };
+
+export type UnreadNotificationsCount = {
+  unreadCount: number;
+};
