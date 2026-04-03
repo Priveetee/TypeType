@@ -45,7 +45,7 @@ function NavIcon({ children, label }: { children: React.ReactNode; label: string
   );
 }
 
-export function Sidebar() {
+export function Sidebar({ className }: { className?: string }) {
   const collapsed = useUiStore((s) => s.sidebarCollapsed);
   const { isAdmin } = useAuth();
   const { settings, update } = useSettings();
@@ -60,12 +60,13 @@ export function Sidebar() {
     navigate({ to: "/search", search: { q, service: id } });
   }
 
+  const baseClasses = `fixed top-14 left-0 bottom-0 z-40 bg-zinc-950 flex flex-col py-4 transition-all duration-200 ${
+    collapsed ? "w-14" : "w-48"
+  }`;
+  const classes = className ? `${baseClasses} ${className}` : baseClasses;
+
   return (
-    <aside
-      className={`fixed top-14 left-0 bottom-0 z-40 bg-zinc-950 flex flex-col py-4 transition-all duration-200 ${
-        collapsed ? "w-14" : "w-48"
-      }`}
-    >
+    <aside className={classes}>
       <div className="flex flex-col gap-1 px-2">
         {NAV_ITEMS.filter((item) => !item.adminOnly || isAdmin).map((item) => (
           <Link
