@@ -4,7 +4,14 @@ TypeType is a self-hosted, privacy-respecting video platform frontend.
 
 It is a clean TypeScript rewrite and runs as a SPA served by nginx.
 
-Current focus is desktop and laptop UX. Mobile support is planned for a later phase.
+Current focus is a reliable desktop-first UX with responsive support for mobile layouts.
+
+## Core product areas
+
+- Watch experience (video playback, subtitles, audio language selection, history/progress).
+- Shorts experience (vertical navigation, subscriptions feed, blended discovery support).
+- Import and restore tools (YouTube Takeout import and PipePipe backup restore).
+- User controls (settings, recommendation privacy, playlists, favorites, watch later).
 
 ## Runtime services
 
@@ -115,6 +122,12 @@ Published tags:
 
 - Architecture and API boundary: `Architecture.md`
 - Agent operating rules: `AGENTS.md`
+
+## API contract notes
+
+- Frontend runtime uses `/api` proxy in production container mode.
+- Authenticated endpoints require `Authorization: Bearer <token>`.
+- Recommendation personalization is controlled through `/settings`.
 
 ## Roadmap
 
