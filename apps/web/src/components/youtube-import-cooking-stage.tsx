@@ -13,7 +13,7 @@ type Props = {
 
 export function YoutubeImportCookingStage({ job, preview, report }: Props) {
   const running = job ? job.status === "pending" || job.status === "running" : false;
-  const gif = running ? "/import-cooking-chef.gif" : "/import-dudu-cooking.gif";
+  const video = running ? "/import-cooking-chef.webm" : "/import-dudu-cooking.webm";
   const title = running ? "Cooking your import" : "Import kitchen done";
   const text = running
     ? "We are unpacking and syncing your data. This can take a few minutes."
@@ -23,9 +23,12 @@ export function YoutubeImportCookingStage({ job, preview, report }: Props) {
     <div className="space-y-4">
       <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-[180px_minmax(0,1fr)] sm:items-center">
-          <img
-            src={gif}
-            alt="Cooking progress"
+          <video
+            src={video}
+            autoPlay
+            loop
+            muted
+            playsInline
             className="h-32 w-full rounded-xl object-cover sm:h-28"
           />
           <div>
