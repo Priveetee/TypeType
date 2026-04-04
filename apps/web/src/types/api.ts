@@ -83,6 +83,12 @@ export type HomeRecommendationsResponse = {
   hasMore: boolean;
 };
 
+export type HomeRecommendationMetricsResponse = {
+  ndcgAt10: number;
+  diversityAt10: number;
+  duplicateRateAt10: number;
+};
+
 export type SubscriptionFeedPage = {
   videos: VideoItem[];
   nextpage: string | null;

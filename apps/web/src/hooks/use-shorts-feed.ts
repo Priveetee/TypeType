@@ -60,8 +60,9 @@ export function useShortsFeed(): ShortsFeed {
   const { filter } = useBlockedFilter();
 
   const subscriptions = useInfiniteQuery({
-    queryKey: ["shorts-subscriptions"],
-    queryFn: ({ pageParam }) => fetchSubscriptionShorts(pageParam as number, 30),
+    queryKey: ["shorts-subscriptions", settings.defaultService],
+    queryFn: ({ pageParam }) =>
+      fetchSubscriptionShorts(pageParam as number, 30, settings.defaultService, true),
     initialPageParam: 0,
     getNextPageParam: (last) => parseNextPage(last.nextpage),
     enabled: isAuthed,

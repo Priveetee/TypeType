@@ -1,4 +1,4 @@
-import type { HomeRecommendationsResponse, SubscriptionFeedPage } from "../types/api";
+import type { SubscriptionFeedPage } from "../types/api";
 import type { HistoryItem, SearchHistoryItem, SettingsItem, SubscriptionItem } from "../types/user";
 import { ApiError } from "./api";
 import { authed, authedJson } from "./authed";
@@ -128,17 +128,14 @@ export async function fetchSubscriptionFeed(page: number): Promise<SubscriptionF
 export async function fetchSubscriptionShorts(
   page: number,
   limit = 30,
+  service?: number,
+  blended = true,
 ): Promise<SubscriptionFeedPage> {
-  const search = new URLSearchParams({ page: String(page), limit: String(limit) });
+  const search = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+    blended: String(blended),
+  });
+  if (service !== undefined) search.set("service", String(service));
   return authedJson(`${BASE}/subscriptions/shorts?${search.toString()}`);
-}
-
-export async function fetchHomeRecommendations(
-  service: number,
-  limit: number,
-  cursor?: string,
-): Promise<HomeRecommendationsResponse> {
-  const search = new URLSearchParams({ service: String(service), limit: String(limit) });
-  if (cursor) search.set("cursor", cursor);
-  return authedJson(`${BASE}/recommendations/home?${search.toString()}`);
 }

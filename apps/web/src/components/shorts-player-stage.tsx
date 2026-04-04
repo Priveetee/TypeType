@@ -40,6 +40,7 @@ type Props = {
   onCloseComments: () => void;
   onRetry: () => void;
   onNext: () => void;
+  onAutoNext: () => void;
   onPrev: () => void;
   onWheel: (event: React.WheelEvent) => void;
   onTouchStart: (clientY: number | null) => void;
@@ -73,6 +74,7 @@ export function ShortsPlayerStage({
   onCloseComments,
   onRetry,
   onNext,
+  onAutoNext,
   onPrev,
   onWheel,
   onTouchStart,
@@ -88,7 +90,6 @@ export function ShortsPlayerStage({
         maxCompactAudioTracks: 3,
       })
     : undefined;
-
   return (
     <section className={sectionClass}>
       <div className="relative flex h-full items-center justify-center">
@@ -134,8 +135,8 @@ export function ShortsPlayerStage({
                 defaultSubtitleLanguage={defaultSubtitleLanguage}
                 subtitlesEnabled={subtitlesEnabled}
                 onVolumeChange={onVolumeChange}
-                onError={onNext}
-                onEnded={onNext}
+                onError={onAutoNext}
+                onEnded={onAutoNext}
               />
             )}
             <div className="pointer-events-none md:hidden">

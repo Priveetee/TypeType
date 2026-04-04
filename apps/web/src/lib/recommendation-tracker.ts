@@ -5,7 +5,11 @@ import { API_BASE as BASE } from "./env";
 
 type RecommendationEventType = "impression" | "click" | "watch";
 type RecommendationFeedbackType = "not_interested" | "less_from_channel";
-type EventOptions = { watchRatio?: number };
+type RecommendationEventTypeAll = RecommendationEventType | "short_skip";
+type EventOptions = {
+  watchRatio?: number;
+  watchDurationMs?: number;
+};
 
 const sentEvents = new Set<string>();
 const sentFeedback = new Set<string>();
@@ -32,12 +36,12 @@ function post(path: string, payload: Record<string, unknown>) {
   });
 }
 
-function eventKey(type: RecommendationEventType, videoUrl: string): string {
+function eventKey(type: RecommendationEventTypeAll, videoUrl: string): string {
   return `${type}:${videoUrl}`;
 }
 
 export function trackRecommendationEvent(
-  type: RecommendationEventType,
+  type: RecommendationEventTypeAll,
   stream: Pick<VideoStream, "id" | "channelUrl" | "title">,
   opts?: EventOptions,
 ) {
@@ -53,8 +57,16 @@ export function trackRecommendationEvent(
     uploaderUrl: stream.channelUrl ?? null,
     title: stream.title,
     watchRatio: opts?.watchRatio ?? null,
+    watchDurationMs: opts?.watchDurationMs ?? null,
     occurredAt: Date.now(),
   });
+}
+
+export function trackShortSkip(
+  stream: Pick<VideoStream, "id" | "channelUrl" | "title">,
+  watchDurationMs: number,
+) {
+  trackRecommendationEvent("short_skip", stream, { watchDurationMs });
 }
 
 export function sendRecommendationFeedback(

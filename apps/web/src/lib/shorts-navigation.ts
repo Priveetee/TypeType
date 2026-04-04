@@ -2,43 +2,71 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 const WHEEL_THRESHOLD = 45;
 const SWIPE_THRESHOLD = 50;
+type MoveReason = "user" | "auto";
 
 export function useShortsNavigation(
   itemCount: number,
   hasNextPage: boolean,
   isFetchingNextPage: boolean,
   fetchNextPage: () => void,
+  onMove?: (delta: number, reason: MoveReason) => void,
 ) {
   const [index, setIndex] = useState(0);
+  const indexRef = useRef(0);
   const touchStartRef = useRef<number | null>(null);
   const wheelLockRef = useRef(false);
 
   useEffect(() => {
-    if (index >= itemCount) setIndex(0);
-  }, [index, itemCount]);
+    indexRef.current = index;
+  }, [index]);
+
+  useEffect(() => {
+    if (indexRef.current >= itemCount) {
+      indexRef.current = 0;
+      setIndex(0);
+    }
+  }, [itemCount]);
 
   const moveBy = useCallback(
-    (delta: number) => {
-      setIndex((current) => {
-        if (itemCount === 0) return 0;
-        const next = Math.min(itemCount - 1, Math.max(0, current + delta));
-        if (next >= itemCount - 2 && hasNextPage && !isFetchingNextPage) fetchNextPage();
-        return next;
-      });
+    (delta: number, reason: MoveReason = "user") => {
+      if (itemCount === 0) {
+        if (indexRef.current !== 0) {
+          indexRef.current = 0;
+          setIndex(0);
+        }
+        return;
+      }
+      const current = indexRef.current;
+      const next = Math.min(itemCount - 1, Math.max(0, current + delta));
+      const actualDelta = next - current;
+      if (actualDelta === 0) return;
+      indexRef.current = next;
+      setIndex(next);
+      if (next >= itemCount - 2 && hasNextPage && !isFetchingNextPage) fetchNextPage();
+      onMove?.(actualDelta, reason);
     },
-    [fetchNextPage, hasNextPage, isFetchingNextPage, itemCount],
+    [fetchNextPage, hasNextPage, isFetchingNextPage, itemCount, onMove],
   );
 
   const moveTo = useCallback(
-    (target: number) => {
-      setIndex(() => {
-        if (itemCount === 0) return 0;
-        const next = Math.min(itemCount - 1, Math.max(0, target));
-        if (next >= itemCount - 2 && hasNextPage && !isFetchingNextPage) fetchNextPage();
-        return next;
-      });
+    (target: number, reason: MoveReason = "auto") => {
+      if (itemCount === 0) {
+        if (indexRef.current !== 0) {
+          indexRef.current = 0;
+          setIndex(0);
+        }
+        return;
+      }
+      const current = indexRef.current;
+      const next = Math.min(itemCount - 1, Math.max(0, target));
+      const actualDelta = next - current;
+      if (actualDelta === 0) return;
+      indexRef.current = next;
+      setIndex(next);
+      if (next >= itemCount - 2 && hasNextPage && !isFetchingNextPage) fetchNextPage();
+      onMove?.(actualDelta, reason);
     },
-    [fetchNextPage, hasNextPage, isFetchingNextPage, itemCount],
+    [fetchNextPage, hasNextPage, isFetchingNextPage, itemCount, onMove],
   );
 
   useEffect(() => {
@@ -58,7 +86,7 @@ export function useShortsNavigation(
       setTimeout(() => {
         wheelLockRef.current = false;
       }, 250);
-      moveBy(deltaY > 0 ? 1 : -1);
+      moveBy(deltaY > 0 ? 1 : -1, "user");
     },
     [moveBy],
   );
@@ -74,7 +102,7 @@ export function useShortsNavigation(
       if (start === null || clientY === null) return;
       const delta = start - clientY;
       if (Math.abs(delta) < SWIPE_THRESHOLD) return;
-      moveBy(delta > 0 ? 1 : -1);
+      moveBy(delta > 0 ? 1 : -1, "user");
     },
     [moveBy],
   );
