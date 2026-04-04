@@ -25,7 +25,10 @@ import { Route as HistoryRouteImport } from './routes/history'
 import { Route as ChannelRouteImport } from './routes/channel'
 import { Route as AdminConsoleRouteImport } from './routes/admin-console'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ImportIndexRouteImport } from './routes/import/index'
 import { Route as PlaylistsIdRouteImport } from './routes/playlists_.$id'
+import { Route as ImportYoutubeRouteImport } from './routes/import/youtube'
+import { Route as ImportPipepipeRouteImport } from './routes/import/pipepipe'
 
 const WatchRoute = WatchRouteImport.update({
   id: '/watch',
@@ -107,10 +110,25 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ImportIndexRoute = ImportIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ImportRoute,
+} as any)
 const PlaylistsIdRoute = PlaylistsIdRouteImport.update({
   id: '/playlists_/$id',
   path: '/playlists/$id',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ImportYoutubeRoute = ImportYoutubeRouteImport.update({
+  id: '/youtube',
+  path: '/youtube',
+  getParentRoute: () => ImportRoute,
+} as any)
+const ImportPipepipeRoute = ImportPipepipeRouteImport.update({
+  id: '/pipepipe',
+  path: '/pipepipe',
+  getParentRoute: () => ImportRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -118,7 +136,7 @@ export interface FileRoutesByFullPath {
   '/admin-console': typeof AdminConsoleRoute
   '/channel': typeof ChannelRoute
   '/history': typeof HistoryRoute
-  '/import': typeof ImportRoute
+  '/import': typeof ImportRouteWithChildren
   '/login': typeof LoginRoute
   '/playlists': typeof PlaylistsRoute
   '/privacy': typeof PrivacyRoute
@@ -130,14 +148,16 @@ export interface FileRoutesByFullPath {
   '/shorts': typeof ShortsRoute
   '/subscriptions': typeof SubscriptionsRoute
   '/watch': typeof WatchRoute
+  '/import/pipepipe': typeof ImportPipepipeRoute
+  '/import/youtube': typeof ImportYoutubeRoute
   '/playlists/$id': typeof PlaylistsIdRoute
+  '/import/': typeof ImportIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin-console': typeof AdminConsoleRoute
   '/channel': typeof ChannelRoute
   '/history': typeof HistoryRoute
-  '/import': typeof ImportRoute
   '/login': typeof LoginRoute
   '/playlists': typeof PlaylistsRoute
   '/privacy': typeof PrivacyRoute
@@ -149,7 +169,10 @@ export interface FileRoutesByTo {
   '/shorts': typeof ShortsRoute
   '/subscriptions': typeof SubscriptionsRoute
   '/watch': typeof WatchRoute
+  '/import/pipepipe': typeof ImportPipepipeRoute
+  '/import/youtube': typeof ImportYoutubeRoute
   '/playlists/$id': typeof PlaylistsIdRoute
+  '/import': typeof ImportIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -157,7 +180,7 @@ export interface FileRoutesById {
   '/admin-console': typeof AdminConsoleRoute
   '/channel': typeof ChannelRoute
   '/history': typeof HistoryRoute
-  '/import': typeof ImportRoute
+  '/import': typeof ImportRouteWithChildren
   '/login': typeof LoginRoute
   '/playlists': typeof PlaylistsRoute
   '/privacy': typeof PrivacyRoute
@@ -169,7 +192,10 @@ export interface FileRoutesById {
   '/shorts': typeof ShortsRoute
   '/subscriptions': typeof SubscriptionsRoute
   '/watch': typeof WatchRoute
+  '/import/pipepipe': typeof ImportPipepipeRoute
+  '/import/youtube': typeof ImportYoutubeRoute
   '/playlists_/$id': typeof PlaylistsIdRoute
+  '/import/': typeof ImportIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -190,14 +216,16 @@ export interface FileRouteTypes {
     | '/shorts'
     | '/subscriptions'
     | '/watch'
+    | '/import/pipepipe'
+    | '/import/youtube'
     | '/playlists/$id'
+    | '/import/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/admin-console'
     | '/channel'
     | '/history'
-    | '/import'
     | '/login'
     | '/playlists'
     | '/privacy'
@@ -209,7 +237,10 @@ export interface FileRouteTypes {
     | '/shorts'
     | '/subscriptions'
     | '/watch'
+    | '/import/pipepipe'
+    | '/import/youtube'
     | '/playlists/$id'
+    | '/import'
   id:
     | '__root__'
     | '/'
@@ -228,7 +259,10 @@ export interface FileRouteTypes {
     | '/shorts'
     | '/subscriptions'
     | '/watch'
+    | '/import/pipepipe'
+    | '/import/youtube'
     | '/playlists_/$id'
+    | '/import/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -236,7 +270,7 @@ export interface RootRouteChildren {
   AdminConsoleRoute: typeof AdminConsoleRoute
   ChannelRoute: typeof ChannelRoute
   HistoryRoute: typeof HistoryRoute
-  ImportRoute: typeof ImportRoute
+  ImportRoute: typeof ImportRouteWithChildren
   LoginRoute: typeof LoginRoute
   PlaylistsRoute: typeof PlaylistsRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -365,6 +399,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/import/': {
+      id: '/import/'
+      path: '/'
+      fullPath: '/import/'
+      preLoaderRoute: typeof ImportIndexRouteImport
+      parentRoute: typeof ImportRoute
+    }
     '/playlists_/$id': {
       id: '/playlists_/$id'
       path: '/playlists/$id'
@@ -372,15 +413,44 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlaylistsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/import/youtube': {
+      id: '/import/youtube'
+      path: '/youtube'
+      fullPath: '/import/youtube'
+      preLoaderRoute: typeof ImportYoutubeRouteImport
+      parentRoute: typeof ImportRoute
+    }
+    '/import/pipepipe': {
+      id: '/import/pipepipe'
+      path: '/pipepipe'
+      fullPath: '/import/pipepipe'
+      preLoaderRoute: typeof ImportPipepipeRouteImport
+      parentRoute: typeof ImportRoute
+    }
   }
 }
+
+interface ImportRouteChildren {
+  ImportPipepipeRoute: typeof ImportPipepipeRoute
+  ImportYoutubeRoute: typeof ImportYoutubeRoute
+  ImportIndexRoute: typeof ImportIndexRoute
+}
+
+const ImportRouteChildren: ImportRouteChildren = {
+  ImportPipepipeRoute: ImportPipepipeRoute,
+  ImportYoutubeRoute: ImportYoutubeRoute,
+  ImportIndexRoute: ImportIndexRoute,
+}
+
+const ImportRouteWithChildren =
+  ImportRoute._addFileChildren(ImportRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminConsoleRoute: AdminConsoleRoute,
   ChannelRoute: ChannelRoute,
   HistoryRoute: HistoryRoute,
-  ImportRoute: ImportRoute,
+  ImportRoute: ImportRouteWithChildren,
   LoginRoute: LoginRoute,
   PlaylistsRoute: PlaylistsRoute,
   PrivacyRoute: PrivacyRoute,
