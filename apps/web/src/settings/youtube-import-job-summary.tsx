@@ -3,7 +3,6 @@ import type {
   YoutubeTakeoutPreview,
   YoutubeTakeoutReport,
 } from "../lib/api-youtube-import";
-import { YoutubeImportProgressBar } from "./youtube-import-progress-bar";
 
 type Props = {
   job: YoutubeTakeoutImportJob | null;
@@ -27,12 +26,9 @@ function reportText(report: YoutubeTakeoutReport): string {
 
 export function YoutubeImportJobSummary({ job, preview, report }: Props) {
   if (!job) return null;
-  const progress =
-    typeof job.progress === "number" ? job.progress : job.status === "completed" ? 100 : 0;
-  const active = job.status === "pending" || job.status === "running";
 
   return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-900">
+    <div className="rounded-xl border border-zinc-800/70 bg-zinc-900/90">
       <div className="px-4 py-4 text-xs text-zinc-400">
         <p>
           <span className="text-zinc-500">Import ID:</span> {job.jobId}
@@ -58,7 +54,6 @@ export function YoutubeImportJobSummary({ job, preview, report }: Props) {
           </p>
         )}
       </div>
-      <YoutubeImportProgressBar progress={progress} active={active} />
     </div>
   );
 }
