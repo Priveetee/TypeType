@@ -74,3 +74,11 @@ export async function saveRecommendationOnboardingPreferences(
 export async function completeRecommendationOnboarding(): Promise<RecommendationOnboardingStateResponse> {
   return authedJson(`${BASE}/recommendations/onboarding/complete`, { method: "POST" });
 }
+
+export async function skipRecommendationOnboarding(): Promise<RecommendationOnboardingStateResponse> {
+  return authedJson(`${BASE}/recommendations/onboarding/skip`, { method: "POST" });
+}
+
+export async function reapplyRecommendationOnboarding(): Promise<RecommendationOnboardingStateResponse> {
+  return authedJson(`${BASE}/recommendations/onboarding/reapply`, { method: "POST" });
+}

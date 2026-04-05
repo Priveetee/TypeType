@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { Navbar } from "../components/navbar";
 import { Sidebar } from "../components/sidebar";
 import { useAuth } from "../hooks/use-auth";
+import { useRecommendationOnboardingState } from "../hooks/use-recommendation-onboarding";
 import { isAdminRoute, isAuthPage, requiresAuth } from "../lib/auth-routes";
 import { bootstrapSession } from "../lib/auth-session";
 import { useUiStore } from "../stores/ui-store";
@@ -27,8 +28,11 @@ function RootLayout() {
   const cinemaMode = useWatchLayoutStore((s) => s.cinemaMode);
   const { isAuthed, isAdmin, status } = useAuth();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const onboardingPage = pathname === "/onboarding";
   const shortsPage = pathname === "/shorts";
   const watchCinemaPage = pathname === "/watch" && cinemaMode;
+  const onboardingState = useRecommendationOnboardingState(status === "authenticated");
+  const onboardingRequired = onboardingState.data?.requiresOnboarding === true;
 
   useEffect(() => {
     void bootstrapSession();
@@ -56,13 +60,36 @@ function RootLayout() {
     }
     if (isAdminRoute(pathname) && !isAdmin) {
       window.location.replace("/");
+      return;
     }
-  }, [isAuthed, isAdmin, status, pathname]);
+    if (status !== "authenticated") return;
+    if (onboardingState.isError) return;
+    if (onboardingRequired && !onboardingPage) {
+      window.location.replace("/onboarding");
+      return;
+    }
+  }, [
+    isAuthed,
+    isAdmin,
+    status,
+    pathname,
+    onboardingState.isError,
+    onboardingRequired,
+    onboardingPage,
+  ]);
 
   if (status === "loading" && (requiresAuth(pathname) || isAdminRoute(pathname))) {
     return (
       <div className="min-h-screen bg-zinc-950 text-zinc-100 flex items-center justify-center">
         <p className="text-sm text-zinc-400">Loading session...</p>
+      </div>
+    );
+  }
+
+  if (status === "authenticated" && !onboardingPage && onboardingState.isPending) {
+    return (
+      <div className="min-h-screen bg-zinc-950 text-zinc-100 flex items-center justify-center">
+        <p className="text-sm text-zinc-400">Loading recommendations...</p>
       </div>
     );
   }

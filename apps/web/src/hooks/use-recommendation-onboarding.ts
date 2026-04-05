@@ -3,7 +3,9 @@ import {
   completeRecommendationOnboarding,
   fetchRecommendationOnboardingState,
   fetchRecommendationOnboardingTopics,
+  reapplyRecommendationOnboarding,
   saveRecommendationOnboardingPreferences,
+  skipRecommendationOnboarding,
 } from "../lib/api-recommendations";
 
 const ONBOARDING_STATE_KEY = ["recommendation-onboarding-state"];
@@ -62,5 +64,19 @@ export function useRecommendationOnboardingActions() {
     },
   });
 
-  return { save, complete };
+  const skip = useMutation({
+    mutationFn: () => skipRecommendationOnboarding(),
+    onSuccess: (state) => {
+      queryClient.setQueryData(ONBOARDING_STATE_KEY, state);
+    },
+  });
+
+  const reapply = useMutation({
+    mutationFn: () => reapplyRecommendationOnboarding(),
+    onSuccess: (state) => {
+      queryClient.setQueryData(ONBOARDING_STATE_KEY, state);
+    },
+  });
+
+  return { save, complete, skip, reapply };
 }

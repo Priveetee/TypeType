@@ -17,6 +17,24 @@ function SettingsPage() {
       {settings.defaultService === 0 && <SettingsLanguage />}
       <SettingsService />
       <section className="flex flex-col gap-3">
+        <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider px-1">
+          Recommendations
+        </p>
+        <div className="bg-zinc-900 rounded-xl border border-zinc-800 px-4 py-4 flex items-center justify-between">
+          <div className="flex flex-col gap-1">
+            <span className="text-sm text-zinc-100">Tune recommendation profile</span>
+            <span className="text-xs text-zinc-500">Adjust interests and favorite channels.</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => goto("/settings/recommendations")}
+            className="h-8 rounded-md bg-zinc-900 px-2.5 text-xs text-zinc-300 transition-colors hover:text-zinc-100"
+          >
+            Open
+          </button>
+        </div>
+      </section>
+      <section className="flex flex-col gap-3">
         <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider px-1">Migration</p>
         <div className="bg-zinc-900 rounded-xl border border-zinc-800 px-4 py-4 flex items-center justify-between">
           <div className="flex flex-col gap-1">
