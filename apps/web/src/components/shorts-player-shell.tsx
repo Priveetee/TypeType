@@ -7,8 +7,9 @@ import { useShortsFeed } from "../hooks/use-shorts-feed";
 import { useShortsPrefetch } from "../hooks/use-shorts-prefetch";
 import { useShortsRouteSync } from "../hooks/use-shorts-route-sync";
 import { useVolumeSync } from "../hooks/use-volume-sync";
-import { trackShortSkip } from "../lib/recommendation-tracker";
+import { trackRecommendationEvent } from "../lib/recommendation-tracker";
 import { useShortsNavigation } from "../lib/shorts-navigation";
+import { trackShortsAutoAdvance, trackShortsUserMove } from "../lib/shorts-tracking";
 import { useUiStore } from "../stores/ui-store";
 import type { VideoStream } from "../types/stream";
 
@@ -26,17 +27,31 @@ type Props = {
 export function ShortsPlayerShell({ targetUrl }: Props) {
   const { shorts, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } = useShortsFeed();
   const { settings, update, query: settingsQuery } = useSettings();
+  const shortsIntent = "auto" as const;
   const sidebarCollapsed = useUiStore((s) => s.sidebarCollapsed);
   const playerRef = useRef<HTMLDivElement>(null);
   const activeEnteredAtRef = useRef<number>(Date.now());
-  const activeStreamRef = useRef<Pick<VideoStream, "id" | "channelUrl" | "title"> | null>(null);
+  const activeStreamRef = useRef<VideoStream | null>(null);
   const [commentsOpen, setCommentsOpen] = useState(false);
   const settingsReady =
     (settingsQuery.isSuccess && !settingsQuery.isPlaceholderData) || settingsQuery.isError;
+
   const onMove = (delta: number, reason: "user" | "auto") => {
-    if (reason !== "user" || delta === 0 || !activeStreamRef.current) return;
-    const watchDurationMs = Math.max(0, Date.now() - activeEnteredAtRef.current);
-    trackShortSkip(activeStreamRef.current, watchDurationMs);
+    const stream = activeStreamRef.current;
+    if (reason !== "user" || delta === 0 || !stream) return;
+    trackShortsUserMove(stream, activeEnteredAtRef.current, settings.defaultService, shortsIntent);
+  };
+
+  const handleAutoNext = () => {
+    const stream = activeStreamRef.current;
+    if (stream)
+      trackShortsAutoAdvance(
+        stream,
+        activeEnteredAtRef.current,
+        settings.defaultService,
+        shortsIntent,
+      );
+    moveBy(1, "auto");
   };
   const { index, moveBy, moveTo, onWheel, onTouchStart, onTouchEnd } = useShortsNavigation(
     shorts.length,
@@ -52,13 +67,13 @@ export function ShortsPlayerShell({ targetUrl }: Props) {
       activeStreamRef.current = null;
       return;
     }
-    activeStreamRef.current = {
-      id: active.id,
-      channelUrl: active.channelUrl,
-      title: active.title,
-    };
+    activeStreamRef.current = active;
     activeEnteredAtRef.current = Date.now();
-  }, [active]);
+    trackRecommendationEvent("impression", active, {
+      serviceId: settings.defaultService,
+      intent: shortsIntent,
+    });
+  }, [active, settings.defaultService, shortsIntent]);
   const originalAudioLocale = findOriginalAudioLocale(stream);
   const onVolumeChange = useVolumeSync(update.mutate);
   useShortsPrefetch(
@@ -125,7 +140,7 @@ export function ShortsPlayerShell({ targetUrl }: Props) {
       onCloseComments={() => setCommentsOpen(false)}
       onRetry={() => streamQuery.refetch()}
       onNext={() => moveBy(1, "user")}
-      onAutoNext={() => moveBy(1, "auto")}
+      onAutoNext={handleAutoNext}
       onPrev={() => moveBy(-1, "user")}
       onWheel={handleWheel}
       onTouchStart={onTouchStart}
