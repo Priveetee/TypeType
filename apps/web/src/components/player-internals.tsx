@@ -8,6 +8,17 @@ import {
 } from "../lib/vidstack";
 import type { SponsorBlockSegmentItem } from "../types/api";
 
+function normalizeLanguageTag(value: string | null | undefined): string {
+  if (!value) return "";
+  const [base] = value.toLowerCase().split("-");
+  return base ?? "";
+}
+
+function includesOriginal(value: string | undefined): boolean {
+  if (!value) return false;
+  return value.toLowerCase().includes("original");
+}
+
 export function SeekBridge({
   onSeekReady,
 }: {
@@ -89,9 +100,8 @@ export function PlayerDefaults({
   const audioApplied = useRef(false);
   const subtitleApplied = useRef(false);
 
-  const audioLanguage = preferOriginalLanguage
-    ? (originalAudioLocale ?? undefined)
-    : defaultAudioLanguage;
+  const preferredTag = normalizeLanguageTag(defaultAudioLanguage);
+  const originalTag = normalizeLanguageTag(originalAudioLocale);
 
   useEffect(() => {
     if (!canPlay || qualityApplied.current || !defaultQuality) return;
@@ -103,13 +113,16 @@ export function PlayerDefaults({
   }, [canPlay, qualityOptions, defaultQuality]);
 
   useEffect(() => {
-    if (!canPlay || audioApplied.current || !audioLanguage) return;
-    const match = audioOptions.find((o) => o.track.language === audioLanguage);
+    if (!canPlay || audioApplied.current || audioOptions.length === 0) return;
+    const match = preferOriginalLanguage
+      ? (audioOptions.find((option) => includesOriginal(option.label)) ??
+        audioOptions.find((option) => normalizeLanguageTag(option.track.language) === originalTag))
+      : audioOptions.find((option) => normalizeLanguageTag(option.track.language) === preferredTag);
     if (match) {
       match.select();
       audioApplied.current = true;
     }
-  }, [canPlay, audioOptions, audioLanguage]);
+  }, [canPlay, audioOptions, preferOriginalLanguage, originalTag, preferredTag]);
 
   useEffect(() => {
     if (!canPlay || subtitleApplied.current || !subtitlesEnabled) return;
