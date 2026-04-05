@@ -143,13 +143,13 @@ export function ShortsPlayerStage({
               <ShortsInfoOverlay stream={current} />
             </div>
             <ShortsActions
-              stream={current}
+              stream={active}
               onOpenComments={onOpenComments}
               className="absolute bottom-32 right-2 z-30 md:hidden"
             />
           </div>
           <div className="hidden flex-col items-center gap-3 md:flex">
-            <ShortsActions stream={current} onOpenComments={onOpenComments} />
+            <ShortsActions stream={active} onOpenComments={onOpenComments} />
             <ShortsNavigation onPrev={onPrev} onNext={onNext} hasPrev={hasPrev} hasNext={hasNext} />
           </div>
         </div>

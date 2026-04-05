@@ -1,11 +1,18 @@
-import { Bug, Clock3, MessageCircle, Share2, Star } from "lucide-react";
-import { useState } from "react";
+import { Ban, Clock3, MessageCircle, Share2, Star, UserMinus } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../hooks/use-auth";
 import { useFavoritesPlaylist } from "../hooks/use-favorites-playlist";
+import { useSettings } from "../hooks/use-settings";
 import { useShareUrl } from "../hooks/use-share-url";
 import { useWatchLaterPlaylist } from "../hooks/use-watch-later-playlist";
+import {
+  sendRecommendationFeedback,
+  trackRecommendationEvent,
+} from "../lib/recommendation-tracker";
+import { useShortsFeedbackStore } from "../stores/shorts-feedback-store";
 import type { VideoStream } from "../types/stream";
-import { ReportBugModal } from "./report-bug-modal";
+import { ShortsActionButton } from "./shorts-action-button";
+import { Toast } from "./toast";
 
 type Props = {
   stream: VideoStream;
@@ -15,8 +22,12 @@ type Props = {
 
 export function ShortsActions({ stream, onOpenComments, className }: Props) {
   const { isAuthed } = useAuth();
+  const { settings } = useSettings();
+  const shortsIntent = "auto" as const;
   const { copied, share } = useShareUrl();
-  const [reportOpen, setReportOpen] = useState(false);
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const hideVideo = useShortsFeedbackStore((s) => s.hideVideo);
+  const hideChannel = useShortsFeedbackStore((s) => s.hideChannel);
   const {
     add: addFavorite,
     remove: removeFavorite,
@@ -33,12 +44,21 @@ export function ShortsActions({ stream, onOpenComments, className }: Props) {
   const favorited = isInFavorites(stream.id);
   const watchLater = isInWatchLater(stream.id);
 
+  useEffect(() => {
+    if (!toastMsg) return;
+    const timer = setTimeout(() => setToastMsg(null), 1800);
+    return () => clearTimeout(timer);
+  }, [toastMsg]);
+
+  function requireAuth(): boolean {
+    if (isAuthed) return true;
+    const redirect = `/shorts?v=${encodeURIComponent(stream.id)}`;
+    window.location.assign(`/login?redirect=${encodeURIComponent(redirect)}`);
+    return false;
+  }
+
   async function toggleFavorite() {
-    if (!isAuthed) {
-      const redirect = `/shorts?v=${encodeURIComponent(stream.id)}`;
-      window.location.assign(`/login?redirect=${encodeURIComponent(redirect)}`);
-      return;
-    }
+    if (!requireAuth()) return;
     if (favorited) {
       await removeFavorite(stream.id);
       return;
@@ -49,14 +69,14 @@ export function ShortsActions({ stream, onOpenComments, className }: Props) {
       thumbnail: stream.thumbnail,
       duration: stream.duration,
     });
+    trackRecommendationEvent("favorite", stream, {
+      serviceId: settings.defaultService,
+      intent: shortsIntent,
+    });
   }
 
   async function toggleWatchLater() {
-    if (!isAuthed) {
-      const redirect = `/shorts?v=${encodeURIComponent(stream.id)}`;
-      window.location.assign(`/login?redirect=${encodeURIComponent(redirect)}`);
-      return;
-    }
+    if (!requireAuth()) return;
     if (watchLater) {
       await removeWatchLater(stream.id);
       return;
@@ -67,6 +87,10 @@ export function ShortsActions({ stream, onOpenComments, className }: Props) {
       thumbnail: stream.thumbnail,
       duration: stream.duration,
     });
+    trackRecommendationEvent("watch_later_add", stream, {
+      serviceId: settings.defaultService,
+      intent: shortsIntent,
+    });
   }
 
   function handleShare() {
@@ -74,9 +98,22 @@ export function ShortsActions({ stream, onOpenComments, className }: Props) {
     void share(watchUrl);
   }
 
+  function markNotInterested() {
+    sendRecommendationFeedback("not_interested", stream);
+    hideVideo(stream.id);
+    setToastMsg("Understood. We will fine-tune your Shorts.");
+  }
+
+  function showLessFromChannel() {
+    if (!stream.channelUrl) return;
+    sendRecommendationFeedback("less_from_channel", stream);
+    hideChannel(stream.channelUrl);
+    setToastMsg("Okay. We will show less from this channel.");
+  }
+
   return (
-    <div className={`flex flex-col items-center gap-3 ${className ?? ""}`}>
-      <ActionButton
+    <div className={`relative flex flex-col items-center gap-3 ${className ?? ""}`}>
+      <ShortsActionButton
         icon={Star}
         label="Favorite"
         stateLabel={favorited ? "Saved" : "Save"}
@@ -84,7 +121,7 @@ export function ShortsActions({ stream, onOpenComments, className }: Props) {
         disabled={favoritesPending}
         onClick={() => void toggleFavorite()}
       />
-      <ActionButton
+      <ShortsActionButton
         icon={Clock3}
         label="Watch later"
         stateLabel={watchLater ? "Saved" : "Watch Later"}
@@ -92,61 +129,22 @@ export function ShortsActions({ stream, onOpenComments, className }: Props) {
         disabled={watchLaterPending}
         onClick={() => void toggleWatchLater()}
       />
-      <ActionButton icon={MessageCircle} label="Comments" onClick={onOpenComments} />
-      <ActionButton
+      <ShortsActionButton icon={Ban} label="Not interested" onClick={markNotInterested} />
+      <ShortsActionButton
+        icon={UserMinus}
+        label="Less channel"
+        stateLabel="Less channel"
+        onClick={showLessFromChannel}
+        disabled={!stream.channelUrl}
+      />
+      <ShortsActionButton icon={MessageCircle} label="Comments" onClick={onOpenComments} />
+      <ShortsActionButton
         icon={Share2}
         label="Share"
         stateLabel={copied ? "Copied" : "Link"}
         onClick={handleShare}
       />
-      {isAuthed && (
-        <ActionButton
-          icon={Bug}
-          label="Report bug"
-          stateLabel="Report"
-          onClick={() => setReportOpen(true)}
-        />
-      )}
-      {reportOpen && <ReportBugModal videoUrl={stream.id} onClose={() => setReportOpen(false)} />}
+      <Toast message={toastMsg} />
     </div>
-  );
-}
-
-type ActionButtonProps = {
-  icon: React.ComponentType<{ className?: string }>;
-  label: string;
-  stateLabel?: string;
-  active?: boolean;
-  disabled?: boolean;
-  onClick?: () => void;
-};
-
-function ActionButton({
-  icon: Icon,
-  label,
-  stateLabel,
-  active,
-  disabled,
-  onClick,
-}: ActionButtonProps) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      className="flex flex-col items-center gap-1 text-white/90 transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
-      aria-label={label}
-    >
-      <div
-        className={`flex h-12 w-12 items-center justify-center rounded-full border transition-colors ${
-          active
-            ? "border-zinc-200/80 bg-zinc-100 text-zinc-900"
-            : "border-zinc-700/80 bg-zinc-900/80 hover:border-zinc-500 hover:bg-zinc-800"
-        }`}
-      >
-        <Icon className="h-6 w-6" />
-      </div>
-      <span className="text-[11px] leading-tight text-white/90">{stateLabel ?? label}</span>
-    </button>
   );
 }
