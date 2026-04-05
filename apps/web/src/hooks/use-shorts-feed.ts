@@ -1,10 +1,19 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { fetchSearch } from "../lib/api";
+import { fetchShortsRecommendations, type RecommendationIntent } from "../lib/api-recommendations";
 import { fetchSubscriptionShorts } from "../lib/api-user";
-import { mapVideoItem } from "../lib/mappers";
-import type { SearchPageResponse, SubscriptionFeedPage } from "../types/api";
+import { useShortsFeedbackStore } from "../stores/shorts-feedback-store";
 import type { VideoStream } from "../types/stream";
+import {
+  blendRecommendationsWithSubscriptions,
+  dedupeShorts,
+  fromDiscovery,
+  fromRecommendations,
+  fromSubscriptions,
+  interleaveByChannel,
+  parseNextPage,
+} from "./shorts-feed-utils";
 import { useAuth } from "./use-auth";
 import { useBlockedFilter } from "./use-blocked-filter";
 import { useSettings } from "./use-settings";
@@ -16,56 +25,41 @@ type ShortsFeed = {
   hasNextPage: boolean;
   fetchNextPage: () => void;
 };
-
 const SHORTS_QUERY = "shorts";
-
-function isStrictShort(stream: VideoStream): boolean {
-  if (stream.id.includes("/shorts/")) return true;
-  const normalizedType = stream.streamType?.toLowerCase() ?? "";
-  if (normalizedType.includes("short")) return true;
-  if (stream.isShortFormContent) return true;
-  return stream.duration > 0 && stream.duration <= 180;
-}
-
-function parseNextPage(nextpage: string | null): number | undefined {
-  if (nextpage === null) return undefined;
-  const parsed = Number(nextpage);
-  return Number.isFinite(parsed) ? parsed : undefined;
-}
-
-function flattenSubscriptionShorts(pages: SubscriptionFeedPage[] | undefined): VideoStream[] {
-  return (pages ?? []).flatMap((page) => page.videos).map(mapVideoItem);
-}
-
-function flattenDiscoveryShorts(pages: SearchPageResponse[] | undefined): VideoStream[] {
-  return (pages ?? [])
-    .flatMap((page) => page.items)
-    .filter((video) => video.isShortFormContent)
-    .map(mapVideoItem)
-    .filter(isStrictShort);
-}
-
-function dedupeShorts(streams: VideoStream[]): VideoStream[] {
-  const seen = new Set<string>();
-  return streams.filter((stream) => {
-    if (seen.has(stream.id)) return false;
-    seen.add(stream.id);
-    return true;
-  });
-}
 
 export function useShortsFeed(): ShortsFeed {
   const { isAuthed } = useAuth();
   const { settings } = useSettings();
   const { filter } = useBlockedFilter();
+  const hiddenVideoIds = useShortsFeedbackStore((s) => s.hiddenVideoIds);
+  const hiddenChannelUrls = useShortsFeedbackStore((s) => s.hiddenChannelUrls);
+  const intent: RecommendationIntent = "auto";
 
-  const subscriptions = useInfiniteQuery({
-    queryKey: ["shorts-subscriptions", settings.defaultService],
+  const recommendations = useInfiniteQuery({
+    queryKey: ["shorts-recommendations", settings.defaultService, intent],
+    queryFn: ({ pageParam }) =>
+      fetchShortsRecommendations(
+        settings.defaultService,
+        30,
+        pageParam as string | undefined,
+        intent,
+      ),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (last) => (last.hasMore ? (last.nextCursor ?? undefined) : undefined),
+    enabled: isAuthed,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const recommendationShorts = fromRecommendations(recommendations.data?.pages);
+  const hasRecommendationShorts = recommendationShorts.length > 0;
+
+  const fallbackSubscriptions = useInfiniteQuery({
+    queryKey: ["shorts-subscriptions-fallback", settings.defaultService],
     queryFn: ({ pageParam }) =>
       fetchSubscriptionShorts(pageParam as number, 30, settings.defaultService, true),
     initialPageParam: 0,
     getNextPageParam: (last) => parseNextPage(last.nextpage),
-    enabled: isAuthed,
+    enabled: isAuthed && recommendations.isSuccess && !hasRecommendationShorts,
     staleTime: 5 * 60 * 1000,
   });
 
@@ -80,23 +74,53 @@ export function useShortsFeed(): ShortsFeed {
   });
 
   const shorts = useMemo(() => {
+    const fallbackShorts = fromSubscriptions(fallbackSubscriptions.data?.pages);
     const merged = isAuthed
-      ? flattenSubscriptionShorts(subscriptions.data?.pages)
-      : flattenDiscoveryShorts(discovery.data?.pages);
-    return filter(dedupeShorts(merged));
-  }, [subscriptions.data, discovery.data, filter, isAuthed]);
+      ? hasRecommendationShorts
+        ? blendRecommendationsWithSubscriptions(recommendationShorts, fallbackShorts)
+        : fallbackShorts
+      : fromDiscovery(discovery.data?.pages);
+    return filter(
+      interleaveByChannel(dedupeShorts(merged)).filter((stream) => {
+        if (hiddenVideoIds.includes(stream.id)) return false;
+        if (!stream.channelUrl) return true;
+        return !hiddenChannelUrls.includes(stream.channelUrl);
+      }),
+    );
+  }, [
+    isAuthed,
+    hasRecommendationShorts,
+    recommendationShorts,
+    fallbackSubscriptions.data,
+    discovery.data,
+    filter,
+    hiddenVideoIds,
+    hiddenChannelUrls,
+  ]);
 
+  const useRecommendations = isAuthed && hasRecommendationShorts;
   return {
     shorts,
-    isLoading: shorts.length > 0 ? false : isAuthed ? subscriptions.isLoading : discovery.isLoading,
-    isFetchingNextPage: isAuthed ? subscriptions.isFetchingNextPage : discovery.isFetchingNextPage,
-    hasNextPage: isAuthed ? subscriptions.hasNextPage : discovery.hasNextPage,
+    isLoading:
+      shorts.length > 0 ? false : isAuthed ? recommendations.isLoading : discovery.isLoading,
+    isFetchingNextPage: isAuthed
+      ? useRecommendations
+        ? recommendations.isFetchingNextPage
+        : fallbackSubscriptions.isFetchingNextPage
+      : discovery.isFetchingNextPage,
+    hasNextPage: isAuthed
+      ? useRecommendations
+        ? recommendations.hasNextPage
+        : fallbackSubscriptions.hasNextPage
+      : discovery.hasNextPage,
     fetchNextPage: () => {
       if (isAuthed) {
-        if (subscriptions.hasNextPage) {
-          void subscriptions.fetchNextPage();
+        if (useRecommendations && recommendations.hasNextPage) {
+          void recommendations.fetchNextPage();
           return;
         }
+        if (!useRecommendations && fallbackSubscriptions.hasNextPage)
+          void fallbackSubscriptions.fetchNextPage();
         return;
       }
       if (discovery.hasNextPage) void discovery.fetchNextPage();

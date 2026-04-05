@@ -19,6 +19,21 @@ export async function fetchHomeRecommendations(
   return authedJson(`${BASE}/recommendations/home?${search.toString()}`);
 }
 
+export async function fetchShortsRecommendations(
+  service: number,
+  limit: number,
+  cursor?: string,
+  intent: RecommendationIntent = "quick",
+): Promise<HomeRecommendationsResponse> {
+  const search = new URLSearchParams({
+    service: String(service),
+    limit: String(limit),
+    intent,
+  });
+  if (cursor) search.set("cursor", cursor);
+  return authedJson(`${BASE}/recommendations/shorts?${search.toString()}`);
+}
+
 export async function fetchHomeRecommendationMetrics(
   service: number,
   clicked: string[],
