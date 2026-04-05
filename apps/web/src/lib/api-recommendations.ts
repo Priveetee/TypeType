@@ -1,4 +1,9 @@
-import type { HomeRecommendationMetricsResponse, HomeRecommendationsResponse } from "../types/api";
+import type {
+  HomeRecommendationMetricsResponse,
+  HomeRecommendationsResponse,
+  RecommendationOnboardingStateResponse,
+  RecommendationOnboardingTopicsResponse,
+} from "../types/api";
 import { authedJson } from "./authed";
 import { API_BASE as BASE } from "./env";
 
@@ -41,4 +46,31 @@ export async function fetchHomeRecommendationMetrics(
   const search = new URLSearchParams({ service: String(service) });
   if (clicked.length > 0) search.set("clicked", clicked.join(","));
   return authedJson(`${BASE}/recommendations/home/metrics?${search.toString()}`);
+}
+
+type RecommendationOnboardingPreferencesRequest = {
+  selectedTopics: string[];
+  selectedChannels: string[];
+};
+
+export async function fetchRecommendationOnboardingTopics(): Promise<RecommendationOnboardingTopicsResponse> {
+  return authedJson(`${BASE}/recommendations/onboarding/topics`);
+}
+
+export async function fetchRecommendationOnboardingState(): Promise<RecommendationOnboardingStateResponse> {
+  return authedJson(`${BASE}/recommendations/onboarding/state`);
+}
+
+export async function saveRecommendationOnboardingPreferences(
+  payload: RecommendationOnboardingPreferencesRequest,
+): Promise<RecommendationOnboardingStateResponse> {
+  return authedJson(`${BASE}/recommendations/onboarding/preferences`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function completeRecommendationOnboarding(): Promise<RecommendationOnboardingStateResponse> {
+  return authedJson(`${BASE}/recommendations/onboarding/complete`, { method: "POST" });
 }

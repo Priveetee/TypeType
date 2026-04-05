@@ -89,6 +89,24 @@ export type HomeRecommendationMetricsResponse = {
   duplicateRateAt10: number;
 };
 
+export type RecommendationOnboardingTopicGroup = {
+  id: string;
+  label: string;
+  topics: string[];
+};
+
+export type RecommendationOnboardingTopicsResponse = {
+  minTopics: number;
+  groups: RecommendationOnboardingTopicGroup[];
+};
+
+export type RecommendationOnboardingStateResponse = {
+  requiresOnboarding: boolean;
+  completedAt: number | null;
+  selectedTopics: string[];
+  selectedChannels: string[];
+};
+
 export type SubscriptionFeedPage = {
   videos: VideoItem[];
   nextpage: string | null;
