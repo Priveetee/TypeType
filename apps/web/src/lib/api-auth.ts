@@ -6,12 +6,14 @@ import { sanitizeDebugText, sanitizeRequestPath } from "./debug-sanitize";
 import { API_BASE as BASE } from "./env";
 import { normalizeApiPayload } from "./text-normalize";
 
-type AuthPayload = {
-  email: string;
+type LoginPayload = {
+  identifier: string;
   password: string;
 };
 
-type RegisterPayload = AuthPayload & {
+type RegisterPayload = {
+  email: string;
+  password: string;
   name: string;
 };
 
@@ -100,7 +102,7 @@ export async function registerAuth(payload: RegisterPayload): Promise<AuthRespon
   return parseAuthResponse(res);
 }
 
-export async function loginAuth(payload: AuthPayload): Promise<AuthResponse> {
+export async function loginAuth(payload: LoginPayload): Promise<AuthResponse> {
   const res = await fetch(`${BASE}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

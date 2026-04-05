@@ -4,11 +4,13 @@ import { ApiError } from "./api";
 import { fetchMe, loginAuth, refreshAuth, registerAuth } from "./api-auth";
 
 type Credentials = {
-  email: string;
+  identifier: string;
   password: string;
 };
 
-type RegisterPayload = Credentials & {
+type RegisterPayload = {
+  email: string;
+  password: string;
   name: string;
 };
 
@@ -27,7 +29,7 @@ export async function refreshSession(): Promise<string> {
 }
 
 export async function bootstrapSession(): Promise<void> {
-  const { token, setBootstrapping, setSignedOut } = useAuthStore.getState();
+  const { token, me, setBootstrapping, setSession, setSignedOut } = useAuthStore.getState();
   if (!token) return;
   setBootstrapping();
   try {
@@ -41,6 +43,10 @@ export async function bootstrapSession(): Promise<void> {
         setSignedOut();
         return;
       }
+    }
+    if (me) {
+      setSession(token, me);
+      return;
     }
     setSignedOut();
   }

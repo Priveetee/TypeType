@@ -12,7 +12,7 @@ function LoginPage() {
   const { isAuthed, isGuest } = useAuth();
   const { redirect } = Route.useSearch();
   const target = sanitizeRedirect(redirect);
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -34,7 +34,7 @@ function LoginPage() {
     setPending(true);
     setError(null);
     try {
-      await loginSession({ email: email.trim(), password });
+      await loginSession({ identifier: identifier.trim(), password });
       setToast("Signed in");
       goto(target);
     } catch {
@@ -50,11 +50,11 @@ function LoginPage() {
         <AuthErrorBanner message={error} />
         <form className="flex flex-col gap-3" onSubmit={submitLogin}>
           <input
-            type="email"
-            autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Email"
+            type="text"
+            autoComplete="username"
+            value={identifier}
+            onChange={(e) => setIdentifier(e.target.value)}
+            placeholder="Email or username"
             className="h-10 rounded-lg border border-zinc-700 bg-zinc-950 px-3 text-sm text-zinc-100"
             required
           />
