@@ -79,6 +79,17 @@
   }
 }
 
+@keyframes onboarding-step-enter {
+  from {
+    opacity: 0;
+    transform: translateX(16px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--color-zinc-600) var(--color-zinc-950);
