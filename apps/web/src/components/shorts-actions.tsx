@@ -18,9 +18,10 @@ type Props = {
   stream: VideoStream;
   onOpenComments: () => void;
   className?: string;
+  compact?: boolean;
 };
 
-export function ShortsActions({ stream, onOpenComments, className }: Props) {
+export function ShortsActions({ stream, onOpenComments, className, compact }: Props) {
   const { isAuthed } = useAuth();
   const { settings } = useSettings();
   const shortsIntent = "auto" as const;
@@ -112,13 +113,14 @@ export function ShortsActions({ stream, onOpenComments, className }: Props) {
   }
 
   return (
-    <div className={`relative flex flex-col items-center gap-3 ${className ?? ""}`}>
+    <div className={`pointer-events-auto flex flex-col items-center gap-3 ${className ?? ""}`}>
       <ShortsActionButton
         icon={Star}
         label="Favorite"
         stateLabel={favorited ? "Saved" : "Save"}
         active={favorited}
         disabled={favoritesPending}
+        compact={compact}
         onClick={() => void toggleFavorite()}
       />
       <ShortsActionButton
@@ -127,21 +129,34 @@ export function ShortsActions({ stream, onOpenComments, className }: Props) {
         stateLabel={watchLater ? "Saved" : "Watch Later"}
         active={watchLater}
         disabled={watchLaterPending}
+        compact={compact}
         onClick={() => void toggleWatchLater()}
       />
-      <ShortsActionButton icon={Ban} label="Not interested" onClick={markNotInterested} />
+      <ShortsActionButton
+        icon={Ban}
+        label="Not interested"
+        compact={compact}
+        onClick={markNotInterested}
+      />
       <ShortsActionButton
         icon={UserMinus}
         label="Less channel"
         stateLabel="Less channel"
+        compact={compact}
         onClick={showLessFromChannel}
         disabled={!stream.channelUrl}
       />
-      <ShortsActionButton icon={MessageCircle} label="Comments" onClick={onOpenComments} />
+      <ShortsActionButton
+        icon={MessageCircle}
+        label="Comments"
+        compact={compact}
+        onClick={onOpenComments}
+      />
       <ShortsActionButton
         icon={Share2}
         label="Share"
         stateLabel={copied ? "Copied" : "Link"}
+        compact={compact}
         onClick={handleShare}
       />
       <Toast message={toastMsg} />

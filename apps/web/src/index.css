@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "@vidstack/react/player/styles/default/theme.css";
 @import "@vidstack/react/player/styles/default/layouts/video.css";
+@import "./styles/shorts-overrides.css";
 
 @keyframes card-pop-in {
   from {
@@ -15,6 +16,18 @@
 
 @theme {
   --animate-card-pop-in: card-pop-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  background: var(--color-zinc-950);
+}
+
+html,
+body {
+  overscroll-behavior-y: none;
 }
 
 @keyframes danmaku-scroll {
@@ -113,53 +126,10 @@
   background: var(--color-zinc-500);
 }
 
+*::-webkit-scrollbar-corner {
+  background: var(--color-zinc-950);
+}
+
 .vds-playback-menu .vds-menu-section:has(.vds-quality-slider) {
   display: none;
-}
-
-.shorts-shell media-player,
-.shorts-shell media-player .vds-media-provider,
-.shorts-shell media-player .vds-video-layout,
-.shorts-shell media-player .vds-video,
-.shorts-shell media-player media-provider,
-.shorts-shell media-player .vds-poster {
-  height: 100%;
-  width: 100%;
-  max-height: none;
-  max-width: none;
-  aspect-ratio: auto;
-}
-
-.shorts-shell media-player .vds-video-layout video {
-  height: 100%;
-  width: 100%;
-  max-height: none;
-  max-width: none;
-  aspect-ratio: auto;
-  object-fit: cover;
-}
-
-.shorts-shell media-player .vds-video,
-.shorts-shell media-player .vds-poster {
-  object-fit: cover;
-}
-
-.shorts-shell .vds-video-layout .vds-controls-group:first-child {
-  justify-content: flex-end;
-  gap: 0.4rem;
-  padding-inline: 0.55rem;
-  padding-top: 0.4rem;
-}
-
-.shorts-shell .shorts-top-controls {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.vds-captions [data-part="cue-display"] {
-  left: 50% !important;
-  right: auto !important;
-  transform: translateX(-50%);
-  text-align: center;
 }

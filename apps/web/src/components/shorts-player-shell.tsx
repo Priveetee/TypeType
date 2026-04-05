@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ShortsPlayerStage } from "../components/shorts-player-stage";
 import { ShortsShellLoader } from "../components/shorts-shell-loader";
+import { useMobile } from "../hooks/use-mobile";
 import { useSettings } from "../hooks/use-settings";
 import { useShortsActiveStream } from "../hooks/use-shorts-active-stream";
 import { useShortsFeed } from "../hooks/use-shorts-feed";
@@ -25,6 +26,7 @@ type Props = {
 };
 
 export function ShortsPlayerShell({ targetUrl }: Props) {
+  const isMobile = useMobile();
   const { shorts, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } = useShortsFeed();
   const { settings, update, query: settingsQuery } = useSettings();
   const shortsIntent = "auto" as const;
@@ -94,7 +96,7 @@ export function ShortsPlayerShell({ targetUrl }: Props) {
   });
 
   const sectionClass = `h-[calc(100svh-4.5rem)] overflow-hidden px-2 pb-2 pt-1 sm:px-4 sm:pb-4 sm:pt-3 ${
-    sidebarCollapsed ? "md:pl-16" : "md:pl-52"
+    isMobile ? "pl-2" : sidebarCollapsed ? "md:pl-16" : "md:pl-52"
   }`;
   if (isLoading) return <ShortsShellLoader sectionClass={sectionClass} />;
   if (!active) {
@@ -111,6 +113,14 @@ export function ShortsPlayerShell({ targetUrl }: Props) {
     const target = e.target as HTMLElement;
     const isMenu = target.closest("[role='menu'], .vds-menu-items") !== null;
     if (!isMenu) onWheel(e.deltaY);
+  };
+
+  const handleTouchStart = (clientY: number | null, target: EventTarget | null) => {
+    onTouchStart(clientY, target);
+  };
+
+  const handleTouchEnd = (clientY: number | null, target: EventTarget | null) => {
+    onTouchEnd(clientY, target);
   };
 
   return (
@@ -143,8 +153,8 @@ export function ShortsPlayerShell({ targetUrl }: Props) {
       onAutoNext={handleAutoNext}
       onPrev={() => moveBy(-1, "user")}
       onWheel={handleWheel}
-      onTouchStart={onTouchStart}
-      onTouchEnd={onTouchEnd}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
       onVolumeChange={onVolumeChange}
     />
   );

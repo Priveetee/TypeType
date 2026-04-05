@@ -4,6 +4,7 @@ type Props = {
   stateLabel?: string;
   active?: boolean;
   disabled?: boolean;
+  compact?: boolean;
   onClick?: () => void;
 };
 
@@ -13,26 +14,36 @@ export function ShortsActionButton({
   stateLabel,
   active,
   disabled,
+  compact,
   onClick,
 }: Props) {
+  const sizeClass = compact ? "h-9 w-9" : "h-12 w-12";
+  const iconClass = compact ? "h-4 w-4" : "h-6 w-6";
+  const rootClass = compact
+    ? "flex flex-col items-center gap-0.5 text-white/90 transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+    : "flex flex-col items-center gap-1 text-white/90 transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-50";
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="flex flex-col items-center gap-1 text-white/90 transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+      className={rootClass}
       aria-label={label}
     >
       <div
-        className={`flex h-12 w-12 items-center justify-center rounded-full border transition-colors ${
+        className={`flex ${sizeClass} items-center justify-center rounded-full border transition-colors ${
           active
             ? "border-zinc-200/80 bg-zinc-100 text-zinc-900"
             : "border-zinc-700/80 bg-zinc-900/80 hover:border-zinc-500 hover:bg-zinc-800"
         }`}
       >
-        <Icon className="h-6 w-6" />
+        <Icon className={iconClass} />
       </div>
-      <span className="text-[11px] leading-tight text-white/90">{stateLabel ?? label}</span>
+      <span
+        className={compact ? "sr-only" : "text-[10px] sm:text-[11px] leading-tight text-white/90"}
+      >
+        {stateLabel ?? label}
+      </span>
     </button>
   );
 }

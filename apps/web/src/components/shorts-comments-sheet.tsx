@@ -97,7 +97,7 @@ export function ShortsCommentsSheet({ videoUrl, anchorEl, open, onClose }: Props
         onClick={onClose}
       />
       <section
-        className="fixed inset-x-3 bottom-3 z-[80] max-h-[82svh] rounded-2xl border border-zinc-700/80 bg-zinc-950/92 p-4 shadow-2xl backdrop-blur transition-all duration-300 ease-out md:inset-x-auto md:max-h-none"
+        className="fixed inset-x-3 bottom-3 z-[80] h-[82svh] rounded-2xl border border-zinc-700/80 bg-zinc-950/92 p-4 shadow-2xl backdrop-blur transition-all duration-300 ease-out md:inset-x-auto md:h-auto"
         style={{
           top: window.innerWidth >= 768 ? desktopStyle.top : undefined,
           left: window.innerWidth >= 768 ? desktopStyle.left : undefined,
@@ -120,7 +120,8 @@ export function ShortsCommentsSheet({ videoUrl, anchorEl, open, onClose }: Props
         <div className="h-px bg-zinc-800" />
         <div
           ref={scrollRef}
-          className="mt-3 h-[calc(100%-3rem)] space-y-5 overflow-y-auto pr-1 scroll-smooth"
+          className="mt-3 h-[calc(100%-3rem)] space-y-5 overflow-y-auto overscroll-y-contain pr-1"
+          style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}
         >
           {commentsDisabled ? (
             <p className="text-sm text-zinc-500">Comments are disabled for this video.</p>

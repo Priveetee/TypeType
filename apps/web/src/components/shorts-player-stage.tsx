@@ -13,7 +13,6 @@ const ShortsCommentsSheet = lazy(() =>
     default: module.ShortsCommentsSheet,
   })),
 );
-
 type Props = {
   sectionClass: string;
   playerRef: React.RefObject<HTMLDivElement | null>;
@@ -43,8 +42,8 @@ type Props = {
   onAutoNext: () => void;
   onPrev: () => void;
   onWheel: (event: React.WheelEvent) => void;
-  onTouchStart: (clientY: number | null) => void;
-  onTouchEnd: (clientY: number | null) => void;
+  onTouchStart: (clientY: number | null, target: EventTarget | null) => void;
+  onTouchEnd: (clientY: number | null, target: EventTarget | null) => void;
   onVolumeChange: (volume: number, muted: boolean) => void;
 };
 
@@ -92,17 +91,21 @@ export function ShortsPlayerStage({
     : undefined;
   return (
     <section className={sectionClass}>
-      <div className="relative flex h-full items-center justify-center">
+      <div className="relative flex h-full flex-col items-center justify-start md:flex-row md:justify-center">
         <div className="hidden md:absolute md:bottom-3 md:left-0 md:z-20 md:block">
           <ShortsInfoOverlay stream={current} variant="panel" />
         </div>
-        <div className="relative flex items-center gap-3 lg:gap-4">
+        <div className="relative flex w-full items-center justify-center gap-3 lg:gap-4 md:w-auto">
           <div
             ref={playerRef}
-            className="shorts-shell relative aspect-[9/16] h-full max-h-[calc(100svh-5.5rem)] w-auto max-w-full overflow-hidden rounded-xl bg-black sm:rounded-2xl md:h-[calc(100svh-6rem)] md:max-h-none"
-            onWheel={onWheel}
-            onTouchStart={(e) => onTouchStart(e.touches[0]?.clientY ?? null)}
-            onTouchEnd={(e) => onTouchEnd(e.changedTouches[0]?.clientY ?? null)}
+            className="shorts-shell relative aspect-[9/16] h-[calc(100svh-5.25rem)] w-auto max-h-[42rem] max-w-full overflow-hidden rounded-xl bg-black sm:rounded-2xl md:h-[calc(100svh-6rem)] md:max-h-none"
+            onWheel={(event) => !commentsOpen && onWheel(event)}
+            onTouchStart={(e) =>
+              !commentsOpen && onTouchStart(e.touches[0]?.clientY ?? null, e.target)
+            }
+            onTouchEnd={(e) =>
+              !commentsOpen && onTouchEnd(e.changedTouches[0]?.clientY ?? null, e.target)
+            }
           >
             {!streamError && streamLoading && (
               <div className="absolute inset-0 z-20 flex items-center justify-center bg-zinc-950/80">
@@ -145,16 +148,14 @@ export function ShortsPlayerStage({
             <ShortsActions
               stream={active}
               onOpenComments={onOpenComments}
-              className="absolute bottom-32 right-2 z-30 md:hidden"
+              className="absolute bottom-24 right-1.5 z-30 md:hidden"
+              compact
             />
           </div>
           <div className="hidden flex-col items-center gap-3 md:flex">
             <ShortsActions stream={active} onOpenComments={onOpenComments} />
             <ShortsNavigation onPrev={onPrev} onNext={onNext} hasPrev={hasPrev} hasNext={hasNext} />
           </div>
-        </div>
-        <div className="mt-3 flex items-center justify-center md:hidden">
-          <ShortsNavigation onPrev={onPrev} onNext={onNext} hasPrev={hasPrev} hasNext={hasNext} />
         </div>
       </div>
       <Suspense fallback={null}>
