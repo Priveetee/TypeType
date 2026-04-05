@@ -9,8 +9,16 @@ type Props = {
   isGuest: boolean;
   isAdmin: boolean;
   me: AuthMe | null;
+  isMobile: boolean;
   signOut: () => void;
 };
+
+function loginHref() {
+  const path = window.location.pathname;
+  const search = window.location.search;
+  const redirect = `${path}${search}`;
+  return `/login?redirect=${encodeURIComponent(redirect)}`;
+}
 
 function statusLabel(status: AuthStatus): string {
   if (status === "guest") return "Guest";
@@ -19,17 +27,43 @@ function statusLabel(status: AuthStatus): string {
   return "Signed out";
 }
 
-export function NavbarAccountControls({ status, isAuthed, isGuest, isAdmin, me, signOut }: Props) {
+export function NavbarAccountControls({
+  status,
+  isAuthed,
+  isGuest,
+  isAdmin,
+  me,
+  isMobile,
+  signOut,
+}: Props) {
   const profileName = me?.publicUsername?.trim() ? me.publicUsername : null;
+
+  if (isMobile) {
+    if (!isAuthed || isGuest || !me) {
+      return (
+        <a
+          href={loginHref()}
+          className="h-8 px-3 inline-flex items-center text-xs rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-200"
+        >
+          Sign in
+        </a>
+      );
+    }
+    return (
+      <Link to="/profile" className="inline-flex h-9 w-9 items-center justify-center">
+        <ProfileAvatar me={me} className="h-8 w-8" plain />
+      </Link>
+    );
+  }
 
   return (
     <>
       {!isAuthed || isGuest || !me ? (
-        <span className="text-[11px] uppercase tracking-wider text-zinc-500 px-2">
+        <span className="hidden sm:inline text-[11px] uppercase tracking-wider text-zinc-500 px-2">
           {statusLabel(status)}
         </span>
       ) : (
-        <div className="inline-flex items-center gap-2">
+        <div className="hidden sm:inline-flex items-center gap-2">
           <Link to="/profile" className="inline-flex h-8 w-8 items-center justify-center">
             <ProfileAvatar me={me} className="h-7 w-7" plain />
           </Link>
@@ -47,7 +81,7 @@ export function NavbarAccountControls({ status, isAuthed, isGuest, isAdmin, me, 
         <div className="flex items-center gap-2">
           <Link
             to="/login"
-            search={{ redirect: undefined }}
+            search={{ redirect: `${window.location.pathname}${window.location.search}` }}
             className="h-8 px-3 inline-flex items-center text-xs rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-200"
           >
             Sign in
@@ -55,7 +89,7 @@ export function NavbarAccountControls({ status, isAuthed, isGuest, isAdmin, me, 
           <button
             type="button"
             onClick={() => goto("/")}
-            className="h-8 px-3 text-xs rounded-full bg-zinc-900 hover:bg-zinc-800 text-zinc-400"
+            className="hidden sm:inline-flex h-8 px-3 text-xs rounded-full bg-zinc-900 hover:bg-zinc-800 text-zinc-400"
           >
             Browse
           </button>
@@ -63,11 +97,19 @@ export function NavbarAccountControls({ status, isAuthed, isGuest, isAdmin, me, 
       )}
       {isAuthed && (
         <div className="flex items-center gap-2">
+          {!isGuest && me && (
+            <Link
+              to="/profile"
+              className="inline-flex h-8 w-8 items-center justify-center sm:hidden"
+            >
+              <ProfileAvatar me={me} className="h-7 w-7" plain />
+            </Link>
+          )}
           {isGuest && (
             <>
               <Link
                 to="/login"
-                search={{ redirect: undefined }}
+                search={{ redirect: `${window.location.pathname}${window.location.search}` }}
                 className="h-8 px-3 inline-flex items-center text-xs rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-200"
               >
                 Login
@@ -84,7 +126,7 @@ export function NavbarAccountControls({ status, isAuthed, isGuest, isAdmin, me, 
           {!isGuest && !isAdmin && (
             <Link
               to="/settings"
-              className="h-8 px-3 inline-flex items-center text-xs rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-200"
+              className="hidden sm:inline-flex h-8 px-3 items-center text-xs rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-200"
             >
               Account
             </Link>

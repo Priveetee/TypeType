@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { Navbar } from "../components/navbar";
 import { Sidebar } from "../components/sidebar";
 import { useAuth } from "../hooks/use-auth";
+import { useMobile } from "../hooks/use-mobile";
 import { useRecommendationOnboardingState } from "../hooks/use-recommendation-onboarding";
 import { isAdminRoute, isAuthPage, requiresAuth } from "../lib/auth-routes";
 import { bootstrapSession } from "../lib/auth-session";
@@ -24,7 +25,9 @@ function AuthShell() {
 }
 
 function RootLayout() {
+  const isMobile = useMobile();
   const collapsed = useUiStore((s) => s.sidebarCollapsed);
+  const closeMobileSidebar = useUiStore((s) => s.closeMobileSidebar);
   const cinemaMode = useWatchLayoutStore((s) => s.cinemaMode);
   const { isAuthed, isAdmin, status } = useAuth();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
@@ -45,6 +48,10 @@ function RootLayout() {
     const timer = setTimeout(() => loader.remove(), 300);
     return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    if (!isMobile) closeMobileSidebar();
+  }, [isMobile, closeMobileSidebar]);
 
   useEffect(() => {
     if (status === "loading") return;
@@ -104,7 +111,7 @@ function RootLayout() {
     return (
       <div className="min-h-screen bg-zinc-950 text-zinc-100">
         <Navbar />
-        <Sidebar />
+        {(isMobile || !watchCinemaPage) && <Sidebar />}
         <main className="pt-14">
           <Outlet />
         </main>
@@ -114,12 +121,14 @@ function RootLayout() {
 
   const mainClasses = watchCinemaPage
     ? "pt-14"
-    : `pt-14 px-4 py-6 transition-all duration-200 ${collapsed ? "ml-14" : "ml-48"}`;
+    : `pt-14 px-3 sm:px-4 py-5 sm:py-6 transition-all duration-200 ${
+        isMobile ? "ml-0" : collapsed ? "ml-14" : "ml-48"
+      }`;
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
       <Navbar />
-      <Sidebar className={watchCinemaPage ? "hidden" : undefined} />
+      {(isMobile || !watchCinemaPage) && <Sidebar />}
       <main className={mainClasses}>
         <Outlet />
       </main>

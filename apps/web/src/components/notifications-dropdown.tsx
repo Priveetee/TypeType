@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useMobile } from "../hooks/use-mobile";
 import { useNotifications } from "../hooks/use-notifications";
 import { NotificationBellIcon } from "./notification-bell-icon";
 import { NotificationRow } from "./notification-row";
@@ -6,6 +7,7 @@ import { ScrollSentinel } from "./scroll-sentinel";
 
 export function NotificationsDropdown() {
   const [open, setOpen] = useState(false);
+  const isMobile = useMobile();
   const rootRef = useRef<HTMLDivElement>(null);
   const [scrollRoot, setScrollRoot] = useState<HTMLDivElement | null>(null);
   const [hasLoaded, setHasLoaded] = useState(false);
@@ -54,7 +56,13 @@ export function NotificationsDropdown() {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full z-50 mt-2 w-[26rem] overflow-hidden rounded-xl border border-zinc-700 bg-zinc-900 shadow-2xl">
+        <div
+          className={
+            isMobile
+              ? "fixed left-2 right-2 top-16 z-50 overflow-hidden rounded-xl border border-zinc-700 bg-zinc-900 shadow-2xl"
+              : "absolute right-0 top-full z-50 mt-2 w-[calc(100vw-1rem)] max-w-[26rem] overflow-hidden rounded-xl border border-zinc-700 bg-zinc-900 shadow-2xl"
+          }
+        >
           <div className="flex items-center justify-between border-b border-zinc-800 px-3 py-2">
             <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
               Notifications
