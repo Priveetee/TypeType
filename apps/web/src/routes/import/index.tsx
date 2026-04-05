@@ -2,12 +2,12 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 
 function ImportPage() {
   return (
-    <div className="flex flex-col gap-6 pt-10 [animation:page-fade-in_0.2s_ease-out]">
+    <div className="flex flex-col gap-6 pt-8 sm:pt-10 [animation:page-fade-in_0.2s_ease-out]">
       <div className="px-1 pt-1">
         <p className="font-mono text-xs uppercase tracking-[0.2em] text-zinc-500">
           Migration assistant
         </p>
-        <h1 className="mt-2 font-mono text-2xl font-semibold tracking-tight text-zinc-100">
+        <h1 className="mt-2 font-mono text-xl sm:text-2xl font-semibold tracking-tight text-zinc-100">
           Import your data in minutes
         </h1>
         <p className="mt-2 max-w-2xl text-sm text-zinc-400">

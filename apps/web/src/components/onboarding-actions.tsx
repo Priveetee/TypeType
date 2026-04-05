@@ -28,7 +28,7 @@ export function OnboardingActions({
   const onboardingMode = mode === "onboarding";
 
   return (
-    <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-zinc-800 pt-4">
+    <footer className="sticky bottom-0 z-20 flex flex-wrap items-center justify-between gap-3 border-t border-zinc-800 bg-zinc-950/95 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] pt-3 backdrop-blur sm:static sm:bg-transparent sm:pb-0 sm:pt-4">
       <div className="flex items-center gap-4">
         {!firstStep && (
           <button

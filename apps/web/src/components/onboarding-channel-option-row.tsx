@@ -25,7 +25,7 @@ export function OnboardingChannelOptionRow({
     <button
       type="button"
       onClick={onClick}
-      className={`flex items-center gap-3 rounded-xl border px-3 py-2 text-left transition-colors ${
+      className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 sm:py-2 text-left transition-colors ${
         active
           ? "border-zinc-200 bg-zinc-100/90 text-zinc-900"
           : "border-zinc-700 text-zinc-200 hover:border-zinc-500"

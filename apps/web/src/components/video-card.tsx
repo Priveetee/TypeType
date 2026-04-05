@@ -85,7 +85,7 @@ export function VideoCard({ stream, onOpen, onImpression }: Props) {
   return (
     <article
       ref={rootRef}
-      className="flex flex-col gap-2 group"
+      className="group flex flex-col gap-2"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -97,7 +97,7 @@ export function VideoCard({ stream, onOpen, onImpression }: Props) {
         onTouchStart={onOpen}
         onClick={onOpen}
       >
-        <div className="relative aspect-video rounded-lg overflow-hidden bg-zinc-800">
+        <div className="relative aspect-video overflow-hidden rounded-xl bg-zinc-800 sm:rounded-lg">
           <img
             src={stream.thumbnail}
             alt={stream.title}
@@ -118,7 +118,7 @@ export function VideoCard({ stream, onOpen, onImpression }: Props) {
           )}
         </div>
       </Link>
-      <div className="flex gap-2">
+      <div className="flex gap-2 px-1 sm:px-0">
         {stream.channelUrl ? (
           <Link to="/channel" search={{ url: stream.channelUrl }} className="flex-shrink-0 mt-0.5">
             <ChannelAvatar

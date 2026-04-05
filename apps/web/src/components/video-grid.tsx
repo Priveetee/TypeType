@@ -10,7 +10,7 @@ type VideoGridProps = {
 export function VideoGrid({ streams, onCardOpen, onCardImpression }: VideoGridProps) {
   const unique = streams.filter((s, i, arr) => arr.findIndex((x) => x.id === s.id) === i);
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8">
+    <div className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2 sm:gap-y-8 md:grid-cols-3 lg:grid-cols-4">
       {unique.map((stream, index) => (
         <div
           key={stream.id}

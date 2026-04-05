@@ -40,7 +40,7 @@ export function OnboardingInterestsStep({
         </p>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-1.5 sm:gap-2">
         {topics?.groups.map((group) => {
           const selected = group.id === activeGroup?.id;
           return (
@@ -48,7 +48,7 @@ export function OnboardingInterestsStep({
               key={group.id}
               type="button"
               onClick={() => onSelectGroup(group.id)}
-              className={`rounded-full border px-3 py-1 text-xs transition-colors ${
+              className={`rounded-full border px-2.5 sm:px-3 py-1 text-xs transition-colors ${
                 selected
                   ? "border-zinc-200 bg-zinc-100 text-zinc-900"
                   : "border-zinc-700 text-zinc-300 hover:border-zinc-500"
@@ -61,7 +61,7 @@ export function OnboardingInterestsStep({
       </div>
 
       {activeGroup && (
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-1.5 sm:gap-2">
           {activeGroup.topics.map((topic) => {
             const selected = selectedTopicKeys.has(topic.toLowerCase());
             return (
@@ -69,7 +69,7 @@ export function OnboardingInterestsStep({
                 key={topic}
                 type="button"
                 onClick={() => onToggleTopic(topic)}
-                className={`rounded-full border px-3 py-1 text-xs transition-colors ${
+                className={`rounded-full border px-2.5 sm:px-3 py-1 text-xs transition-colors ${
                   selected
                     ? "border-zinc-200 bg-zinc-100 text-zinc-900"
                     : "border-zinc-700 text-zinc-200 hover:border-zinc-500"

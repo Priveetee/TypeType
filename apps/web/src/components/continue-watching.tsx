@@ -25,7 +25,7 @@ export function ContinueWatching() {
         {displayed.map((item, index) => (
           <div
             key={item.id}
-            className="animate-card-pop-in"
+            className="animate-card-pop-in first:pl-0.5 sm:first:pl-0"
             style={{ animationDelay: `${Math.min(index * 45, 270)}ms` }}
           >
             <ContinueCard item={item} />

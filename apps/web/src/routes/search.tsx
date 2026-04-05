@@ -30,7 +30,7 @@ function SearchPage() {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-3 sm:gap-x-4 gap-y-6 sm:gap-y-8">
         {SKELETON_KEYS.map((k) => (
           <VideoCardSkeleton key={k} />
         ))}
@@ -68,7 +68,7 @@ function SearchPage() {
       {streams.length === 0 ? (
         <p className="text-zinc-400 text-sm">No results for &ldquo;{q}&rdquo;</p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-3 sm:gap-x-4 gap-y-6 sm:gap-y-8">
           {streams.map((stream, index) => (
             <div
               key={stream.id}

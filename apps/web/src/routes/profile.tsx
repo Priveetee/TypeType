@@ -44,7 +44,7 @@ function ProfilePage() {
   return (
     <div className="flex flex-col gap-6 [animation:page-fade-in_0.2s_ease-out]">
       <h1 className="text-lg font-semibold text-zinc-100">Profile</h1>
-      <section className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 flex flex-col gap-5">
+      <section className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 sm:p-5 flex flex-col gap-5">
         {me && (
           <div className="flex items-center gap-3">
             <ProfileAvatar me={me} className="h-12 w-12" />
@@ -120,21 +120,21 @@ function ProfilePage() {
                 },
               );
             }}
-            className="h-9 rounded-md bg-zinc-100 px-3 text-xs font-medium text-zinc-900 disabled:opacity-50"
+            className="h-9 w-full sm:w-auto rounded-md bg-zinc-100 px-3 text-xs font-medium text-zinc-900 disabled:opacity-50"
           >
             Save profile
           </button>
         </div>
       </section>
       {me && !me.id.startsWith("guest:") && (
-        <section className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 flex items-center justify-between gap-3">
+        <section className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 sm:p-5 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-sm text-zinc-100">Password</p>
             <p className="text-xs text-zinc-500">Reset your account password</p>
           </div>
           <Link
             to="/reset-password"
-            className="h-9 rounded-md border border-zinc-700 bg-zinc-900 px-3 inline-flex items-center text-xs text-zinc-200 hover:border-zinc-500"
+            className="h-9 w-full sm:w-auto rounded-md border border-zinc-700 bg-zinc-900 px-3 inline-flex items-center justify-center text-xs text-zinc-200 hover:border-zinc-500"
           >
             Reset password
           </Link>

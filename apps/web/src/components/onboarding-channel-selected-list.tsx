@@ -15,7 +15,7 @@ export function OnboardingChannelSelectedList({ channels, onRemove }: Props) {
             key={channel}
             type="button"
             onClick={() => onRemove(channel)}
-            className="rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-left text-zinc-300 hover:border-zinc-600"
+            className="rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2.5 sm:py-2 text-left text-zinc-300 hover:border-zinc-600"
           >
             {channel}
           </button>

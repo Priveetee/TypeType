@@ -9,7 +9,7 @@ const SKELETON_KEYS = Array.from({ length: 12 }, (_, i) => `hfs-${i}`);
 
 function SkeletonGrid() {
   return (
-    <div className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+    <div className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2 sm:gap-y-8 md:grid-cols-3 lg:grid-cols-4">
       {SKELETON_KEYS.map((k) => (
         <VideoCardSkeleton key={k} />
       ))}

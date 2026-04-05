@@ -21,7 +21,7 @@ export function OnboardingWorkflow({ state, topics, actions, mode = "onboarding"
   const flow = useOnboardingWorkflow({ state, topics, actions });
 
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col gap-7 pt-8 pb-8 [animation:page-fade-in_0.2s_ease-out]">
+    <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 sm:gap-7 pt-6 sm:pt-8 pb-6 sm:pb-8 [animation:page-fade-in_0.2s_ease-out]">
       <Toast message={flow.toast} />
       <OnboardingHeader mode={mode} step={flow.step} />
 

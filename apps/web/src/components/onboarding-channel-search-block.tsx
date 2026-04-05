@@ -28,7 +28,7 @@ export function OnboardingChannelSearchBlock({
         value={query}
         onChange={(e) => onChangeQuery(e.target.value)}
         placeholder="Search a YouTube channel"
-        className="mt-2 h-10 w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 text-sm text-zinc-100"
+        className="mt-2 h-11 sm:h-10 w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 text-sm text-zinc-100"
       />
       {loading && <p className="mt-2 text-xs text-zinc-500">Searching channels...</p>}
       {channels.length > 0 && (

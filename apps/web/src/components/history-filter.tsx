@@ -87,7 +87,7 @@ export function HistoryFilter({
   };
 
   return (
-    <aside className="w-52 flex-shrink-0 hidden lg:flex flex-col gap-5 sticky top-20 self-start">
+    <aside className="w-full lg:w-52 flex-shrink-0 flex flex-col gap-4 lg:gap-5 lg:sticky lg:top-20 lg:self-start">
       <div>
         <p className="text-[11px] text-zinc-600 uppercase tracking-wider mb-2.5">
           {resultCount} {resultCount === 1 ? "video" : "videos"}
@@ -108,7 +108,7 @@ export function HistoryFilter({
 
       <div>
         <p className="text-[11px] text-zinc-600 uppercase tracking-wider mb-2">Date</p>
-        <div className="flex flex-col gap-0.5">
+        <div className="grid grid-cols-2 gap-1 lg:flex lg:flex-col lg:gap-0.5">
           {PRESET_OPTIONS.map((opt) => (
             <button
               key={opt.value}
@@ -127,7 +127,7 @@ export function HistoryFilter({
           <button
             type="button"
             onClick={handleOlderToggle}
-            className={`h-8 px-2.5 rounded-lg text-xs text-left transition-colors ${
+            className={`col-span-2 h-8 px-2.5 rounded-lg text-xs text-left transition-colors ${
               olderActive
                 ? "bg-zinc-100 text-zinc-950 font-medium"
                 : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
