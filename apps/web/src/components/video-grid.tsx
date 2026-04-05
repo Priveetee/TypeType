@@ -3,9 +3,11 @@ import { VideoCard } from "./video-card";
 
 type VideoGridProps = {
   streams: VideoStream[];
+  onCardOpen?: (stream: VideoStream) => void;
+  onCardImpression?: (stream: VideoStream) => void;
 };
 
-export function VideoGrid({ streams }: VideoGridProps) {
+export function VideoGrid({ streams, onCardOpen, onCardImpression }: VideoGridProps) {
   const unique = streams.filter((s, i, arr) => arr.findIndex((x) => x.id === s.id) === i);
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8">
@@ -15,7 +17,11 @@ export function VideoGrid({ streams }: VideoGridProps) {
           className="animate-card-pop-in"
           style={{ animationDelay: `${Math.min(index * 45, 270)}ms` }}
         >
-          <VideoCard stream={stream} />
+          <VideoCard
+            stream={stream}
+            onOpen={onCardOpen ? () => onCardOpen(stream) : undefined}
+            onImpression={onCardImpression ? () => onCardImpression(stream) : undefined}
+          />
         </div>
       ))}
     </div>

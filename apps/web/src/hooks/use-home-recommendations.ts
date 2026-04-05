@@ -9,6 +9,8 @@ const PAGE_SIZE = 30;
 
 type Result = {
   streams: VideoStream[];
+  serviceId: number;
+  intent: RecommendationIntent;
   isLoading: boolean;
   isFetchingNextPage: boolean;
   hasNextPage: boolean;
@@ -38,6 +40,8 @@ export function useHomeRecommendations(): Result {
 
   return {
     streams,
+    serviceId: settings.defaultService,
+    intent,
     isLoading: query.isLoading,
     isFetchingNextPage: query.isFetchingNextPage,
     hasNextPage: query.hasNextPage,

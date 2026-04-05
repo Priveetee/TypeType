@@ -1,3 +1,4 @@
+import { useRecommendationTrackingStore } from "../stores/recommendation-tracking-store";
 import type { VideoStream } from "../types/stream";
 import { trackRecommendationEvent, trackShortSkip } from "./recommendation-tracker";
 
@@ -21,6 +22,7 @@ export function trackShortsUserMove(
   serviceId: number,
   intent: ShortsIntent,
 ) {
+  if (!useRecommendationTrackingStore.getState().enabled) return;
   const { watchDurationMs, watchRatio } = getWatchStats(stream, enteredAtMs);
   if (watchRatio !== undefined && watchRatio >= 0.7) {
     trackRecommendationEvent("watch", stream, {
@@ -40,6 +42,7 @@ export function trackShortsAutoAdvance(
   serviceId: number,
   intent: ShortsIntent,
 ) {
+  if (!useRecommendationTrackingStore.getState().enabled) return;
   const { watchDurationMs, watchRatio } = getWatchStats(stream, enteredAtMs);
   if (watchRatio === undefined || watchRatio < 0.85) return;
   trackRecommendationEvent("watch", stream, {

@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { isMemberOnlyApiError, streamQueryOptions } from "../hooks/use-stream";
 import { useWatchPrefetch } from "../hooks/use-watch-prefetch";
 import { formatDuration, formatPublishedDate, formatViews } from "../lib/format";
@@ -13,16 +13,38 @@ import { VerifiedBadgeIcon } from "./watch-icons";
 type Props = {
   stream: VideoStream;
   onOpen?: () => void;
+  onImpression?: () => void;
 };
 
-export function VideoCard({ stream, onOpen }: Props) {
+export function VideoCard({ stream, onOpen, onImpression }: Props) {
   const queryClient = useQueryClient();
+  const rootRef = useRef<HTMLElement | null>(null);
   const previewTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [previewStream, setPreviewStream] = useState<VideoStream | undefined>(undefined);
   const [showPreview, setShowPreview] = useState(false);
   const [memberOnly, setMemberOnly] = useState(false);
   const prefetch = useWatchPrefetch(stream.id);
   const publishedText = formatPublishedDate(stream.uploaded, stream.uploadDate);
+
+  useEffect(() => {
+    if (!onImpression || typeof IntersectionObserver === "undefined") return;
+    const element = rootRef.current;
+    if (!element) return;
+    let seen = false;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (seen || !entry.isIntersecting || entry.intersectionRatio < 0.6) continue;
+          seen = true;
+          onImpression();
+          observer.disconnect();
+        }
+      },
+      { threshold: [0.6] },
+    );
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [onImpression]);
 
   const fetchStreamData = useCallback(async () => {
     const cached = queryClient.getQueryData<VideoStream>(["stream", stream.id]);
@@ -62,6 +84,7 @@ export function VideoCard({ stream, onOpen }: Props) {
 
   return (
     <article
+      ref={rootRef}
       className="flex flex-col gap-2 group"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
