@@ -111,7 +111,7 @@ function RootLayout() {
     return (
       <div className="min-h-screen bg-zinc-950 text-zinc-100">
         <Navbar />
-        {(isMobile || !watchCinemaPage) && <Sidebar />}
+        <Sidebar />
         <main className="pt-14">
           <Outlet />
         </main>
@@ -128,7 +128,7 @@ function RootLayout() {
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
       <Navbar />
-      {(isMobile || !watchCinemaPage) && <Sidebar />}
+      <Sidebar />
       <main className={mainClasses}>
         <Outlet />
       </main>
