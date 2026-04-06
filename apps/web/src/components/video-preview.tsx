@@ -72,6 +72,11 @@ export function VideoPreview({ stream, show }: Props) {
 
 type PreviewSrc = { url: string; type: "application/x-mpegurl" | "application/dash+xml" } | null;
 
+function isFirefoxBrowser(): boolean {
+  if (typeof navigator === "undefined") return false;
+  return navigator.userAgent.includes("Firefox/");
+}
+
 function resolvePreviewSrc(stream: VideoStream): PreviewSrc {
   if (stream.hlsUrl) {
     return {
@@ -90,6 +95,13 @@ function resolvePreviewSrc(stream: VideoStream): PreviewSrc {
       480,
     );
     if (manifest) return { url: manifest, type: "application/dash+xml" };
+  }
+
+  if (isFirefoxBrowser()) {
+    return {
+      url: proxyDashManifest(`${API_BASE}/streams/manifest?url=${encodeURIComponent(stream.id)}`),
+      type: "application/dash+xml",
+    };
   }
 
   return {

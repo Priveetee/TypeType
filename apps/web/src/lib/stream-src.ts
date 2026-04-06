@@ -15,6 +15,11 @@ type ResolveManifestOptions = {
   maxCompactAudioTracks?: number;
 };
 
+function isFirefoxBrowser(): boolean {
+  if (typeof navigator === "undefined") return false;
+  return navigator.userAgent.includes("Firefox/");
+}
+
 function normalizeLanguageTag(value: string | null): string {
   if (value === null || value.length === 0) return "";
   const [base] = value.toLowerCase().split("-");
@@ -111,6 +116,7 @@ export function resolveManifestSrc(
   const compactAudioTracks = options?.compactAudioTracks ?? isShort;
   const maxCompactAudioTracks = options?.maxCompactAudioTracks ?? (isShort ? 3 : 8);
   const provider = detectProvider(stream.id);
+  const isFirefox = isFirefoxBrowser();
 
   if (stream.hlsUrl) {
     return {
@@ -138,7 +144,13 @@ export function resolveManifestSrc(
     };
   }
 
-  if (!isLive && stream.videoOnlyStreams?.length && !nativeFailed && preferNativeManifest) {
+  if (
+    !isLive &&
+    stream.videoOnlyStreams?.length &&
+    !nativeFailed &&
+    preferNativeManifest &&
+    !isFirefox
+  ) {
     return {
       src: proxyDashManifest(
         `${BASE}/streams/native-manifest?url=${encodeURIComponent(stream.id)}`,
