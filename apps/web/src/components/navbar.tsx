@@ -73,42 +73,42 @@ export function Navbar() {
   return (
     <>
       <nav className={navClass}>
-        {!authPage && (
-          <button
-            type="button"
-            onClick={isMobile ? toggleMobileSidebar : toggleSidebar}
-            className="text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors p-2 rounded-lg"
-            aria-label="Toggle sidebar"
-          >
-            <MenuIcon />
-          </button>
-        )}
-        <Link to="/" className="flex min-w-0 shrink items-center gap-2">
-          <img src="/logo.svg" alt="TypeType" width={28} height={28} />
-          <span className="max-w-28 truncate text-zinc-100 text-sm font-semibold tracking-widest sm:max-w-none">
-            TYPETYPE
-          </span>
-        </Link>
-        <div
-          className={
-            isMobile ? "ml-auto flex items-center gap-1" : "flex flex-1 justify-center px-2"
-          }
-        >
-          {canOpenSearch && isMobile && (
+        <div className="flex min-w-0 items-center gap-2">
+          {!authPage && (
             <button
               type="button"
-              onClick={() => setSearchOpen(true)}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-700 bg-zinc-800 text-zinc-200 hover:bg-zinc-700"
-              aria-label="Search"
+              onClick={isMobile ? toggleMobileSidebar : toggleSidebar}
+              className="text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors p-2 rounded-lg"
+              aria-label="Toggle sidebar"
             >
-              <SearchIcon />
+              <MenuIcon />
             </button>
           )}
-          {canOpenSearch && !isMobile && (
+          <Link to="/" className="flex min-w-0 shrink items-center gap-2">
+            <img src="/logo.svg" alt="TypeType" width={28} height={28} />
+            <span className="max-w-28 truncate text-zinc-100 text-sm font-semibold tracking-widest sm:max-w-none">
+              TYPETYPE
+            </span>
+          </Link>
+        </div>
+
+        {canOpenSearch && isMobile && (
+          <button
+            type="button"
+            onClick={() => setSearchOpen(true)}
+            className="ml-auto inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-700 bg-zinc-800 text-zinc-200 hover:bg-zinc-700"
+            aria-label="Search"
+          >
+            <SearchIcon />
+          </button>
+        )}
+
+        {canOpenSearch && !isMobile && (
+          <div className="mx-4 flex min-w-0 flex-1 justify-center">
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
-              className="hidden sm:inline-flex h-10 w-full max-w-xl items-center justify-between rounded-full border border-zinc-700 bg-zinc-900 px-4 text-sm text-zinc-300 hover:border-zinc-600 hover:bg-zinc-800"
+              className="hidden h-10 w-full max-w-xl items-center justify-between rounded-full border border-zinc-700 bg-zinc-900 px-4 text-sm text-zinc-300 hover:border-zinc-600 hover:bg-zinc-800 sm:inline-flex"
               aria-label="Search"
             >
               <span className="inline-flex items-center gap-2">
@@ -119,7 +119,10 @@ export function Navbar() {
                 /
               </span>
             </button>
-          )}
+          </div>
+        )}
+
+        <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
           <NavbarNotifications />
           <NavbarAccountControls
             status={status}

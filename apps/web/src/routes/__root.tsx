@@ -121,7 +121,7 @@ function RootLayout() {
 
   const mainClasses = watchCinemaPage
     ? "pt-14"
-    : `pt-14 px-3 sm:px-4 py-5 sm:py-6 transition-all duration-200 ${
+    : `pt-14 px-3 sm:px-4 pb-5 sm:pb-6 transition-all duration-200 ${
         isMobile ? "ml-0" : collapsed ? "ml-14" : "ml-48"
       }`;
 
