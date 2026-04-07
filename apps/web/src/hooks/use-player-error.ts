@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { recordClientEvent } from "../lib/client-debug-log";
 import { sanitizeVideoContext } from "../lib/debug-sanitize";
+import { isIosDevice } from "../lib/ios-device";
 import { resolveManifestSrc } from "../lib/stream-src";
 import type { MediaSrc } from "../lib/vidstack";
 import type { VideoStream } from "../types/stream";
@@ -34,7 +35,7 @@ function hasMultipleAudioLanguages(stream: VideoStream): boolean {
 export function usePlayerError(stream: VideoStream, isLive: boolean): UsePlayerErrorReturn {
   const streamId = stream.id;
   const debugVideo = sanitizeVideoContext(streamId) ?? "unknown";
-  const preferNativeManifest = !hasMultipleAudioLanguages(stream);
+  const preferNativeManifest = !isIosDevice() && !hasMultipleAudioLanguages(stream);
   const nativeEnabled = !isLive && Boolean(stream.videoOnlyStreams?.length) && preferNativeManifest;
   const [nativeFailed, setNativeFailed] = useState(false);
   const [qualityFailed, setQualityFailed] = useState(false);

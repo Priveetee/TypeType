@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { isIosDevice } from "../lib/ios-device";
 import {
   useAudioOptions,
   useMediaPlayer,
@@ -34,14 +35,16 @@ export function SeekBridge({
 }
 
 export function PlayerFocuser() {
+  const ios = isIosDevice();
   const player = useMediaPlayer();
   const canPlay = useMediaState("canPlay");
   const focused = useRef(false);
   useEffect(() => {
+    if (ios) return;
     if (!canPlay || focused.current || !player?.el) return;
     focused.current = true;
     player.el.focus({ preventScroll: true });
-  }, [canPlay, player]);
+  }, [ios, canPlay, player]);
   return null;
 }
 
