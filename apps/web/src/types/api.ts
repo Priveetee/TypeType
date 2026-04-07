@@ -83,12 +83,6 @@ export type HomeRecommendationsResponse = {
   hasMore: boolean;
 };
 
-export type HomeRecommendationMetricsResponse = {
-  ndcgAt10: number;
-  diversityAt10: number;
-  duplicateRateAt10: number;
-};
-
 export type RecommendationOnboardingTopicGroup = {
   id: string;
   label: string;

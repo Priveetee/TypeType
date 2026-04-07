@@ -107,10 +107,3 @@ export function sendRecommendationFeedback(
   keepRecent(lastFeedbackPayloads, payload, 5);
   post("/recommendations/feedback", payload);
 }
-
-export function getRecommendationDebugSnapshot() {
-  return {
-    lastEvents: [...lastEventPayloads],
-    lastFeedback: [...lastFeedbackPayloads],
-  };
-}

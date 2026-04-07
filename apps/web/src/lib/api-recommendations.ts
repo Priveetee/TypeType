@@ -1,5 +1,4 @@
 import type {
-  HomeRecommendationMetricsResponse,
   HomeRecommendationsResponse,
   RecommendationOnboardingStateResponse,
   RecommendationOnboardingTopicsResponse,
@@ -37,15 +36,6 @@ export async function fetchShortsRecommendations(
   });
   if (cursor) search.set("cursor", cursor);
   return authedJson(`${BASE}/recommendations/shorts?${search.toString()}`);
-}
-
-export async function fetchHomeRecommendationMetrics(
-  service: number,
-  clicked: string[],
-): Promise<HomeRecommendationMetricsResponse> {
-  const search = new URLSearchParams({ service: String(service) });
-  if (clicked.length > 0) search.set("clicked", clicked.join(","));
-  return authedJson(`${BASE}/recommendations/home/metrics?${search.toString()}`);
 }
 
 type RecommendationOnboardingPreferencesRequest = {

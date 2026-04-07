@@ -6,7 +6,7 @@ import type {
 } from "../types/api";
 import type { VideoStream } from "../types/stream";
 
-export function isLikelyShort(stream: VideoStream): boolean {
+function isLikelyShort(stream: VideoStream): boolean {
   if (stream.id.includes("/shorts/")) return true;
   if (stream.isShortFormContent) return true;
   const normalizedType = stream.streamType?.toLowerCase() ?? "";
