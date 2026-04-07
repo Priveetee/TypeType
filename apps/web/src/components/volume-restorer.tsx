@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef } from "react";
-import { isIosDevice } from "../lib/ios-device";
 import { useMediaRemote, useMediaState } from "../lib/vidstack";
 
 type Props = {
@@ -26,7 +25,6 @@ export function VolumeRestorer({
   const resumeOnReturnRef = useRef(false);
   const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const retryCountRef = useRef(0);
-  const ios = isIosDevice();
 
   const clearRetry = useCallback(() => {
     if (retryTimerRef.current) {
@@ -45,9 +43,12 @@ export function VolumeRestorer({
       if (!settingsReady || !canPlay) return;
       if (!force && !autoplay) return;
       void attemptPlay()
-        .then(() => clearRetry())
+        .then(() => {
+          clearRetry();
+          if (force) resumeOnReturnRef.current = false;
+        })
         .catch(() => {
-          if (!ios) return;
+          if (!force) return;
           if (retryCountRef.current >= 3) return;
           retryCountRef.current += 1;
           const delay = retryCountRef.current * 300;
@@ -60,7 +61,7 @@ export function VolumeRestorer({
           }, delay);
         });
     },
-    [settingsReady, canPlay, autoplay, attemptPlay, clearRetry, ios],
+    [settingsReady, canPlay, autoplay, attemptPlay, clearRetry],
   );
 
   useEffect(() => {
@@ -75,7 +76,7 @@ export function VolumeRestorer({
   }, [tryPlay]);
 
   useEffect(() => {
-    if (!ios || !settingsReady || !autoplay) return;
+    if (!settingsReady) return;
     const markResumeIntent = () => {
       resumeOnReturnRef.current = !paused;
     };
@@ -104,7 +105,7 @@ export function VolumeRestorer({
       window.removeEventListener("focus", onPageShow);
       window.removeEventListener("online", onPageShow);
     };
-  }, [ios, settingsReady, autoplay, paused, tryPlay]);
+  }, [settingsReady, paused, tryPlay]);
 
   useEffect(() => {
     return () => {
