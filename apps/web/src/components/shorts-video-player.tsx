@@ -1,3 +1,4 @@
+import { isIosDevice } from "../lib/ios-device";
 import type { MediaSrc } from "../lib/vidstack";
 import {
   DefaultVideoLayout,
@@ -8,6 +9,7 @@ import {
 } from "../lib/vidstack";
 import type { SubtitleItem } from "../types/api";
 import { AudioTrackSelector } from "./audio-track-selector";
+import { MediaSessionSync } from "./media-session-sync";
 import { PlayerDefaults } from "./player-internals";
 import { buildSafeSubtitleTracks } from "./subtitle-track-utils";
 import { onProviderChange } from "./video-player-core";
@@ -50,6 +52,7 @@ export function ShortsVideoPlayer({
   onError,
   onEnded,
 }: Props) {
+  const ios = isIosDevice();
   const srcKey = typeof src === "string" ? src : String(src.src);
   const subtitleTracks = buildSafeSubtitleTracks(subtitles);
 
@@ -65,6 +68,7 @@ export function ShortsVideoPlayer({
         logLevel="warn"
         crossOrigin
         playsInline
+        {...(ios ? { "webkit-playsinline": "true" } : {})}
         autoPlay={autoplay}
         storage={null}
         onProviderChange={onProviderChange}
@@ -126,6 +130,7 @@ export function ShortsVideoPlayer({
           autoplay={autoplay}
           onVolumeChange={onVolumeChange}
         />
+        <MediaSessionSync title={title} artwork={poster} />
       </MediaPlayer>
     </div>
   );

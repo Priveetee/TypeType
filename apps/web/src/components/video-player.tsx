@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { isIosDevice } from "../lib/ios-device";
 import type { MediaSrc } from "../lib/vidstack";
 import {
   DefaultVideoLayout,
@@ -11,6 +12,7 @@ import type { SponsorBlockSegmentItem, SubtitleItem } from "../types/api";
 import { AudioTrackSelector } from "./audio-track-selector";
 import { CinemaModeControl } from "./cinema-mode-control";
 import { FormatSelector } from "./format-selector";
+import { MediaSessionSync } from "./media-session-sync";
 import { PlayerSeeker, SeekBridge, SponsorBlockSkipper } from "./player-internals";
 import { QualitySelector } from "./quality-selector";
 import { SponsorBlockBar } from "./sponsorblock-bar";
@@ -76,15 +78,14 @@ export function VideoPlayer({
   className,
   mediaClassName,
 }: Props) {
+  const ios = isIosDevice();
   const [subtitleSize, setSubtitleSize] = useState<FontSize>("normal");
   const subtitleTracks = buildSafeSubtitleTracks(subtitles);
   const hasSubtitles = subtitleTracks.length > 0;
   const subtitleStyle: Record<`--${string}`, string | number> = {
     "--media-user-font-size": fontSizeToMultiplier(subtitleSize),
     "--media-user-font-family":
-      "system-ui, -apple-system, 'Segoe UI', 'Noto Sans', 'Noto Sans CJK JP'," +
-      " 'Noto Sans Arabic', 'Hiragino Sans', 'Yu Gothic', 'Microsoft YaHei'," +
-      " 'WenQuanYi Micro Hei', sans-serif",
+      "system-ui, -apple-system, 'Segoe UI', 'Noto Sans', 'Noto Sans CJK JP', 'Noto Sans Arabic', 'Hiragino Sans', 'Yu Gothic', 'Microsoft YaHei', 'WenQuanYi Micro Hei', sans-serif",
   };
 
   return (
@@ -96,6 +97,7 @@ export function VideoPlayer({
       logLevel="warn"
       crossOrigin
       playsInline
+      {...(ios ? { "webkit-playsinline": "true" } : {})}
       autoPlay={autoplay}
       storage={null}
       title={title}
@@ -153,6 +155,12 @@ export function VideoPlayer({
         settingsReady={settingsReady}
         autoplay={autoplay}
         onVolumeChange={onVolumeChange}
+      />
+      <MediaSessionSync
+        title={title}
+        artwork={poster}
+        canSeek={streamType !== "live"}
+        isLive={streamType === "live"}
       />
       {sponsorBlockSegments && <SponsorBlockSkipper segments={sponsorBlockSegments} />}
       {sponsorBlockSegments && <SponsorBlockBar segments={sponsorBlockSegments} />}
