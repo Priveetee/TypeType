@@ -6,15 +6,16 @@ import { WatchInfo } from "./watch-info";
 
 type Props = {
   stream: VideoStream;
+  showComments?: boolean;
 };
 
-export function WatchMeta({ stream }: Props) {
+export function WatchMeta({ stream, showComments = true }: Props) {
   return (
     <>
       <WatchInfo stream={stream} />
       <WatchActions stream={stream} />
       {stream.description && <WatchDescription description={stream.description} />}
-      <WatchComments key={stream.id} videoUrl={stream.id} />
+      {showComments && <WatchComments key={stream.id} videoUrl={stream.id} />}
     </>
   );
 }

@@ -1,4 +1,5 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
+import { isIosDevice } from "../lib/ios-device";
 import { useMediaRemote, useMediaState } from "../lib/vidstack";
 
 type Props = {
@@ -20,7 +21,47 @@ export function VolumeRestorer({
   const volume = useMediaState("volume");
   const muted = useMediaState("muted");
   const canPlay = useMediaState("canPlay");
+  const paused = useMediaState("paused");
   const restoredRef = useRef(false);
+  const resumeOnReturnRef = useRef(false);
+  const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const retryCountRef = useRef(0);
+  const ios = isIosDevice();
+
+  const clearRetry = useCallback(() => {
+    if (retryTimerRef.current) {
+      clearTimeout(retryTimerRef.current);
+      retryTimerRef.current = null;
+    }
+    retryCountRef.current = 0;
+  }, []);
+
+  const attemptPlay = useCallback(() => {
+    return Promise.resolve(remote.play());
+  }, [remote]);
+
+  const tryPlay = useCallback(
+    (force: boolean) => {
+      if (!settingsReady || !canPlay) return;
+      if (!force && !autoplay) return;
+      void attemptPlay()
+        .then(() => clearRetry())
+        .catch(() => {
+          if (!ios) return;
+          if (retryCountRef.current >= 3) return;
+          retryCountRef.current += 1;
+          const delay = retryCountRef.current * 300;
+          if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
+          retryTimerRef.current = setTimeout(() => {
+            retryTimerRef.current = null;
+            void attemptPlay()
+              .then(() => clearRetry())
+              .catch(() => {});
+          }, delay);
+        });
+    },
+    [settingsReady, canPlay, autoplay, attemptPlay, clearRetry, ios],
+  );
 
   useEffect(() => {
     if (!settingsReady || !canPlay || restoredRef.current) return;
@@ -30,9 +71,46 @@ export function VolumeRestorer({
   }, [settingsReady, canPlay, remote, initialVolume, initialMuted]);
 
   useEffect(() => {
-    if (!settingsReady || !canPlay || !autoplay) return;
-    remote.play();
-  }, [settingsReady, canPlay, autoplay, remote]);
+    tryPlay(false);
+  }, [tryPlay]);
+
+  useEffect(() => {
+    if (!ios || !settingsReady || !autoplay) return;
+    const markResumeIntent = () => {
+      resumeOnReturnRef.current = !paused;
+    };
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "hidden") {
+        markResumeIntent();
+        return;
+      }
+      if (resumeOnReturnRef.current) tryPlay(true);
+    };
+    const onPageHide = () => {
+      markResumeIntent();
+    };
+    const onPageShow = () => {
+      if (resumeOnReturnRef.current) tryPlay(true);
+    };
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    window.addEventListener("pagehide", onPageHide);
+    window.addEventListener("pageshow", onPageShow);
+    window.addEventListener("focus", onPageShow);
+    window.addEventListener("online", onPageShow);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      window.removeEventListener("pagehide", onPageHide);
+      window.removeEventListener("pageshow", onPageShow);
+      window.removeEventListener("focus", onPageShow);
+      window.removeEventListener("online", onPageShow);
+    };
+  }, [ios, settingsReady, autoplay, paused, tryPlay]);
+
+  useEffect(() => {
+    return () => {
+      clearRetry();
+    };
+  }, [clearRetry]);
 
   useEffect(() => {
     if (!restoredRef.current) return;

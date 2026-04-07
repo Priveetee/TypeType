@@ -2,7 +2,7 @@ import { useRecommendationTrackingStore } from "../stores/recommendation-trackin
 import type { VideoStream } from "../types/stream";
 import { trackRecommendationEvent, trackShortSkip } from "./recommendation-tracker";
 
-export type ShortsIntent = "quick" | "auto" | "deep";
+type ShortsIntent = "quick" | "auto" | "deep";
 
 type WatchStats = {
   watchDurationMs: number;

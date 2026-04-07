@@ -1,7 +1,7 @@
 import { toProxiedVttUrl } from "../lib/proxy";
 import type { SubtitleItem } from "../types/api";
 
-export type SafeSubtitleTrack = {
+type SafeSubtitleTrack = {
   key: string;
   src: string;
   label: string;

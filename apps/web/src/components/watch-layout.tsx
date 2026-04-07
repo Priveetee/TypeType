@@ -1,6 +1,7 @@
 import { useNavigate } from "@tanstack/react-router";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useRef } from "react";
 import { useBulletComments } from "../hooks/use-bullet-comments";
+import { useMobile } from "../hooks/use-mobile";
 import { usePlayerError } from "../hooks/use-player-error";
 import { useSaveProgress } from "../hooks/use-progress";
 import { useSettings } from "../hooks/use-settings";
@@ -9,6 +10,7 @@ import {
   useWatchRecommendationTracking,
   useWatchVttAssets,
 } from "../hooks/use-watch-layout-assets";
+import { useWatchProgressPersistence } from "../hooks/use-watch-progress-persistence";
 import { detectProvider } from "../lib/provider";
 import { useDanmakuStore } from "../stores/danmaku-store";
 import { useWatchLayoutStore } from "../stores/watch-layout-store";
@@ -18,6 +20,7 @@ import { PlayerError } from "./player-error";
 import { PlayerDefaults, PlayerFocuser } from "./player-internals";
 import { RelatedVideos } from "./related-videos";
 import { VideoPlayer } from "./video-player";
+import { WatchComments } from "./watch-comments";
 import { WatchMeta } from "./watch-meta";
 
 type Props = {
@@ -32,6 +35,7 @@ export function WatchLayout({ stream, startTime }: Props) {
   const settingsReady =
     (settingsQuery.isSuccess && !settingsQuery.isPlaceholderData) || settingsQuery.isError;
   const isLive = stream.streamType === "live_stream" || stream.streamType === "audio_live_stream";
+  const isMobile = useMobile();
   const { manifestSrc, playerFailed, qualityFailed, handleError, reset, retryKey } = usePlayerError(
     stream,
     isLive,
@@ -43,30 +47,16 @@ export function WatchLayout({ stream, startTime }: Props) {
     stream.audioStreams?.find((a) => a.audioTrackName?.toLowerCase().includes("original"))
       ?.audioLocale ?? null;
   const cinemaMode = useWatchLayoutStore((state) => state.cinemaMode);
-
-  const positionRef = useRef(0);
   const seekRef = useRef<((seconds: number) => void) | null>(null);
-  const saveMutateRef = useRef(save.mutate);
-  saveMutateRef.current = save.mutate;
   const handleVolumeChange = useVolumeSync(update.mutate);
   const { thumbnailVtt, chaptersVtt } = useWatchVttAssets(stream);
-
-  const saveRef = useRef<(seeked: boolean) => void>(() => {});
-  saveRef.current = (seeked: boolean) => {
-    const pos = positionRef.current;
-    const durationMs = stream.duration * 1000;
-    if (pos >= durationMs * 0.95) return;
-    if (!seeked && pos < 5000) return;
-    saveMutateRef.current(seeked && pos < 5000 ? 0 : pos);
-  };
-  const handleSave = useCallback(() => saveRef.current(false), []);
-  const handleSeekSave = useCallback(() => saveRef.current(true), []);
+  const { positionRef, handleTimeUpdate, handlePause, handleSeeked } = useWatchProgressPersistence({
+    durationSec: stream.duration,
+    isLive,
+    mutate: save.mutate,
+  });
 
   useWatchRecommendationTracking(stream, isLive, positionRef);
-
-  const handleTimeUpdate = useCallback((positionMs: number) => {
-    positionRef.current = positionMs;
-  }, []);
 
   const handleEnded = useCallback(() => {
     if (!settingsReady || !settings.autoplay) return;
@@ -74,19 +64,6 @@ export function WatchLayout({ stream, startTime }: Props) {
     if (!next) return;
     navigate({ to: "/watch", search: { v: next.id } });
   }, [settingsReady, settings.autoplay, stream.related, navigate]);
-
-  useEffect(() => {
-    if (isLive) return;
-    const onVisibilityChange = () => {
-      if (document.visibilityState === "hidden") saveRef.current(false);
-    };
-    const interval = setInterval(() => saveRef.current(false), 10_000);
-    document.addEventListener("visibilitychange", onVisibilityChange);
-    return () => {
-      clearInterval(interval);
-      document.removeEventListener("visibilitychange", onVisibilityChange);
-    };
-  }, [isLive]);
 
   const overlay = (
     <>
@@ -138,8 +115,8 @@ export function WatchLayout({ stream, startTime }: Props) {
             overlay={overlay}
             onVolumeChange={handleVolumeChange}
             onTimeUpdate={handleTimeUpdate}
-            onPause={handleSave}
-            onSeeked={handleSeekSave}
+            onPause={handlePause}
+            onSeeked={handleSeeked}
             onError={handleError}
             onEnded={handleEnded}
             onSeekReady={(s) => {
@@ -150,11 +127,12 @@ export function WatchLayout({ stream, startTime }: Props) {
           />
           {playerFailed && <PlayerError onRetry={reset} />}
         </div>
-        {!cinemaMode && <WatchMeta stream={stream} />}
+        {!cinemaMode && <WatchMeta stream={stream} showComments={!isMobile} />}
       </div>
       {!cinemaMode && (
-        <div className="w-full lg:flex-1 lg:min-w-64">
+        <div className="w-full lg:flex-1 lg:min-w-64 flex flex-col gap-6">
           <RelatedVideos streams={relatedStreams} />
+          {isMobile && <WatchComments key={stream.id} videoUrl={stream.id} />}
         </div>
       )}
       {cinemaMode && (

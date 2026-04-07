@@ -112,16 +112,17 @@ function RootLayout() {
       <div className="min-h-screen bg-zinc-950 text-zinc-100">
         <Navbar />
         <Sidebar />
-        <main className="pt-14">
+        <main style={{ paddingTop: "calc(3.5rem + env(safe-area-inset-top, 0px))" }}>
           <Outlet />
         </main>
       </div>
     );
   }
 
+  const topPadding = { paddingTop: "calc(3.5rem + env(safe-area-inset-top, 0px))" };
   const mainClasses = watchCinemaPage
-    ? "pt-14"
-    : `pt-14 px-3 sm:px-4 pb-5 sm:pb-6 transition-all duration-200 ${
+    ? ""
+    : `px-3 sm:px-4 pb-5 sm:pb-6 transition-all duration-200 ${
         isMobile ? "ml-0" : collapsed ? "ml-14" : "ml-48"
       }`;
 
@@ -129,7 +130,7 @@ function RootLayout() {
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
       <Navbar />
       <Sidebar />
-      <main className={mainClasses}>
+      <main className={mainClasses} style={topPadding}>
         <Outlet />
       </main>
     </div>
