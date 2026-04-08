@@ -1,9 +1,15 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useDownloaderJob } from "../hooks/use-downloader-job";
 import { useOverlayLock } from "../hooks/use-overlay-lock";
 import type { VideoStream } from "../types/stream";
 import { DownloadModeButton } from "./download-mode-button";
 import { DownloadOptionButton } from "./download-option-button";
-import { buildDownloadOptions, type DownloadMode, type DownloadOption } from "./download-options";
+import {
+  buildDownloaderCreatePayload,
+  buildDownloadOptions,
+  type DownloadMode,
+} from "./download-options";
+import { buildSimpleChoices } from "./download-simple-choices";
 
 type Props = {
   stream: VideoStream;
@@ -11,37 +17,10 @@ type Props = {
   onDone: (message: string) => void;
 };
 
-type SimpleChoice = {
-  id: string;
-  title: string;
-  option: DownloadOption;
-};
-
-function buildSimpleChoices(options: DownloadOption[], mode: DownloadMode): SimpleChoice[] {
-  if (options.length === 0) return [];
-  const best = options[0];
-  const small =
-    mode === "video"
-      ? (options.find((option) => option.height === 360) ??
-        [...options].reverse().find((option) => (option.height ?? 0) >= 360) ??
-        options[options.length - 1])
-      : options[options.length - 1];
-  const balanced =
-    options.find((option) => option.recommended) ?? options[Math.floor(options.length / 2)];
-  const raw = [
-    { id: best.id, title: mode === "video" ? "Best quality" : "Best sound", option: best },
-    { id: balanced.id, title: "Balanced", option: balanced },
-    { id: small.id, title: mode === "video" ? "Small size (360p)" : "Small size", option: small },
-  ];
-  const unique = new Map<string, SimpleChoice>();
-  raw.forEach((choice) => {
-    if (!unique.has(choice.id)) unique.set(choice.id, choice);
-  });
-  return Array.from(unique.values());
-}
-
 export function DownloadSheet({ stream, onClose, onDone }: Props) {
   useOverlayLock(true);
+  const downloader = useDownloaderJob();
+  const { isDone, jobId, isQueued, isRunning, errorText, openArtifact, reset, start } = downloader;
   const allOptions = useMemo(() => buildDownloadOptions(stream), [stream]);
   const [mode, setMode] = useState<DownloadMode>("video");
   const [showAllFormats, setShowAllFormats] = useState(false);
@@ -54,6 +33,14 @@ export function DownloadSheet({ stream, onClose, onDone }: Props) {
     [options, selectedId],
   );
 
+  useEffect(() => {
+    if (!isDone || !jobId) return;
+    openArtifact();
+    onDone(`Download started: ${selected?.label ?? "file"}`);
+    reset();
+    onClose();
+  }, [isDone, jobId, onClose, onDone, openArtifact, reset, selected]);
+
   function selectMode(next: DownloadMode) {
     setMode(next);
     setShowAllFormats(false);
@@ -63,9 +50,11 @@ export function DownloadSheet({ stream, onClose, onDone }: Props) {
 
   function startDownload() {
     if (!selected) return;
-    onDone(`Mock only for now: ${selected.label}`);
-    onClose();
+    start(buildDownloaderCreatePayload(stream.id, selected));
   }
+
+  const pendingLabel = isQueued ? "Creating job..." : "Preparing download...";
+  const startLabel = isQueued || isRunning ? pendingLabel : "Start download";
 
   return (
     <div className="fixed inset-0 z-[90]" role="dialog" aria-modal="true">
@@ -155,11 +144,16 @@ export function DownloadSheet({ stream, onClose, onDone }: Props) {
         <button
           type="button"
           onClick={startDownload}
-          disabled={!selected}
+          disabled={!selected || isQueued || isRunning}
           className="mt-4 w-full rounded-lg bg-zinc-100 px-3 py-2 text-sm font-medium text-zinc-900 transition-colors hover:bg-white disabled:cursor-not-allowed disabled:bg-zinc-700 disabled:text-zinc-300"
         >
-          Start download
+          {startLabel}
         </button>
+        {errorText && (
+          <p className="mt-2 text-xs text-red-300" role="alert">
+            {errorText}
+          </p>
+        )}
       </div>
     </div>
   );

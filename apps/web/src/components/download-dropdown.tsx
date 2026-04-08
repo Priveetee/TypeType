@@ -1,9 +1,14 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useDownloaderJob } from "../hooks/use-downloader-job";
 import type { VideoStream } from "../types/stream";
 import { DownloadModeButton } from "./download-mode-button";
 import { DownloadOptionButton } from "./download-option-button";
-import { buildDownloadOptions, type DownloadMode } from "./download-options";
+import {
+  buildDownloaderCreatePayload,
+  buildDownloadOptions,
+  type DownloadMode,
+} from "./download-options";
 
 const MARGIN = 8;
 
@@ -18,6 +23,8 @@ export function DownloadDropdown({ stream, anchorEl, onClose, onDone }: Props) {
   const panelRef = useRef<HTMLDivElement>(null);
   const [panelStyle, setPanelStyle] = useState<React.CSSProperties>({ visibility: "hidden" });
   const [mode, setMode] = useState<DownloadMode>("video");
+  const downloader = useDownloaderJob();
+  const { isDone, jobId, isQueued, isRunning, errorText, openArtifact, reset, start } = downloader;
   const allOptions = useMemo(() => buildDownloadOptions(stream), [stream]);
   const optionsByMode = useMemo(
     () => ({
@@ -34,6 +41,14 @@ export function DownloadDropdown({ stream, anchorEl, onClose, onDone }: Props) {
     const nextOptions = optionsByMode[mode];
     setSelectedId(nextOptions.find((option) => option.recommended)?.id ?? nextOptions[0]?.id ?? "");
   }, [mode, optionsByMode]);
+
+  useEffect(() => {
+    if (!isDone || !jobId) return;
+    openArtifact();
+    onDone(`Download started: ${selected?.label ?? "file"}`);
+    reset();
+    onClose();
+  }, [isDone, jobId, onClose, onDone, openArtifact, reset, selected]);
 
   useLayoutEffect(() => {
     if (!anchorEl || !panelRef.current) return;
@@ -63,9 +78,11 @@ export function DownloadDropdown({ stream, anchorEl, onClose, onDone }: Props) {
 
   function startDownload() {
     if (!selected) return;
-    onDone(`Mock only for now: ${selected.label}`);
-    onClose();
+    start(buildDownloaderCreatePayload(stream.id, selected));
   }
+
+  const pendingLabel = isQueued ? "Creating job..." : "Preparing download...";
+  const startLabel = isQueued || isRunning ? pendingLabel : "Start download";
 
   return createPortal(
     <div
@@ -106,11 +123,16 @@ export function DownloadDropdown({ stream, anchorEl, onClose, onDone }: Props) {
         <button
           type="button"
           onClick={startDownload}
-          disabled={!selected}
+          disabled={!selected || isQueued || isRunning}
           className="w-full rounded-lg bg-zinc-100 px-3 py-2 text-sm font-medium text-zinc-900 transition-colors hover:bg-white disabled:cursor-not-allowed disabled:bg-zinc-700 disabled:text-zinc-300"
         >
-          Start download
+          {startLabel}
         </button>
+        {errorText && (
+          <p className="mt-2 text-xs text-red-300" role="alert">
+            {errorText}
+          </p>
+        )}
       </div>
     </div>,
     document.body,
