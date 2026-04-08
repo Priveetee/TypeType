@@ -1,3 +1,4 @@
+import type { DownloaderCreateJobRequest, DownloaderMode } from "../types/downloader";
 import type { VideoStream } from "../types/stream";
 
 export type DownloadMode = "video" | "audio";
@@ -8,9 +9,11 @@ export type DownloadOption = {
   label: string;
   detail: string;
   size: string;
-  sourceUrl: string;
   recommended: boolean;
   height?: number;
+  bitrate?: number;
+  format: string;
+  qualityHint: string;
 };
 
 function formatBytes(bytes: number): string {
@@ -32,6 +35,18 @@ function parseContainer(mimeType: string): string {
   return container.toUpperCase();
 }
 
+function pickVideoQuality(height: number): string {
+  if (height >= 1080) return "best";
+  if (height >= 720) return "balanced";
+  return "small";
+}
+
+function pickAudioQuality(bitrate: number): string {
+  if (bitrate >= 192_000) return "best";
+  if (bitrate >= 128_000) return "balanced";
+  return "small";
+}
+
 export function buildDownloadOptions(stream: VideoStream): DownloadOption[] {
   const videos = [...(stream.videoOnlyStreams ?? [])]
     .sort((left, right) => right.height - left.height || right.fps - left.fps)
@@ -46,27 +61,30 @@ export function buildDownloadOptions(stream: VideoStream): DownloadOption[] {
         label: `${resolution}${fps} ${container}`,
         detail: `${codec} · itag ${item.itag}`,
         size: formatBytes(item.contentLength),
-        sourceUrl: item.url,
         recommended: item.height === 720,
         height: item.height,
+        format: container.toLowerCase(),
+        qualityHint: pickVideoQuality(item.height),
       };
     });
 
   const audios = [...(stream.audioStreams ?? [])]
     .sort((left, right) => (right.bitrate ?? 0) - (left.bitrate ?? 0))
     .map((item, index) => {
-      const bitrate = item.bitrate ? `${Math.round(item.bitrate / 1000)} kbps` : "Audio";
       const locale = item.audioLocale || item.quality || "default";
       const codec = item.codec ?? "audio";
       const container = parseContainer(item.mimeType);
+      const bitrate = item.bitrate ?? 0;
       return {
         id: `audio-${item.itag}-${index}`,
         mode: "audio" as const,
-        label: `${bitrate} ${container}`,
+        label: `${item.bitrate ? `${Math.round(item.bitrate / 1000)} kbps` : "Audio"} ${container}`,
         detail: `${locale} · ${codec} · itag ${item.itag}`,
         size: formatBytes(item.contentLength),
-        sourceUrl: item.url,
-        recommended: bitrate.includes("160") || bitrate.includes("192"),
+        recommended: bitrate >= 160_000 && bitrate < 256_000,
+        bitrate,
+        format: container.toLowerCase(),
+        qualityHint: pickAudioQuality(bitrate),
       };
     });
 
@@ -75,4 +93,30 @@ export function buildDownloadOptions(stream: VideoStream): DownloadOption[] {
   if (videos.length > 0) videos[0] = { ...videos[0], recommended: true };
   else if (audios.length > 0) audios[0] = { ...audios[0], recommended: true };
   return [...videos, ...audios];
+}
+
+export function buildDownloaderCreatePayload(
+  videoUrl: string,
+  option: DownloadOption,
+): DownloaderCreateJobRequest {
+  const mode = option.mode as DownloaderMode;
+  const format = option.format.length > 0 ? option.format : mode === "video" ? "mp4" : "mp3";
+  return {
+    url: videoUrl,
+    options: {
+      mode,
+      quality: option.qualityHint,
+      format,
+      sponsorBlock: false,
+      sponsorBlockCategories: ["sponsor", "intro"],
+      thumbnailOnly: false,
+      subtitles: {
+        enabled: false,
+        auto: false,
+        embed: false,
+        languages: ["en"],
+        format: "srt",
+      },
+    },
+  };
 }
