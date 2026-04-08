@@ -121,7 +121,7 @@ function RootLayout() {
 
   const topPadding = { paddingTop: "calc(3.5rem + env(safe-area-inset-top, 0px))" };
   const mainClasses = watchCinemaPage
-    ? ""
+    ? `transition-all duration-200 ${isMobile ? "ml-0" : collapsed ? "ml-14" : "ml-48"}`
     : `px-3 sm:px-4 pb-5 sm:pb-6 transition-all duration-200 ${
         isMobile ? "ml-0" : collapsed ? "ml-14" : "ml-48"
       }`;
