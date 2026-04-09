@@ -1,10 +1,10 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   createDownloaderJob,
+  downloadDownloaderArtifact,
   fetchDownloaderJob,
-  triggerDownloaderArtifact,
 } from "../lib/api-downloader";
-import type { DownloaderCreateJobRequest } from "../types/downloader";
+import type { DownloaderCreateJobRequest, DownloaderJobStage } from "../types/downloader";
 
 const POLL_MS = 1_500;
 
@@ -22,15 +22,20 @@ export function useDownloaderJob() {
       return current === "queued" || current === "running" ? POLL_MS : false;
     },
   });
+  const job = status.data;
 
-  const isQueued = create.isPending || status.data?.status === "queued";
-  const isRunning = status.data?.status === "running";
-  const isDone = status.data?.status === "done";
-  const isFailed = status.data?.status === "failed";
+  const isQueued = create.isPending || job?.status === "queued";
+  const isRunning = job?.status === "running";
+  const isDone = job?.status === "done";
+  const isFailed = job?.status === "failed";
+  const stage: DownloaderJobStage | null = job?.stage ?? null;
+  const progressPercent = typeof job?.progressPercent === "number" ? job.progressPercent : null;
+  const resolved = job?.resolved ?? null;
+  const errorCode = job?.errorCode ?? null;
   const errorText =
     create.error instanceof Error
       ? create.error.message
-      : status.data?.error || (status.error instanceof Error ? status.error.message : null);
+      : job?.error || (status.error instanceof Error ? status.error.message : null);
 
   function start(payload: DownloaderCreateJobRequest) {
     create.mutate(payload);
@@ -38,7 +43,7 @@ export function useDownloaderJob() {
 
   function openArtifact() {
     if (!jobId) return;
-    triggerDownloaderArtifact(jobId);
+    return downloadDownloaderArtifact(jobId);
   }
 
   function reset() {
@@ -50,6 +55,10 @@ export function useDownloaderJob() {
     openArtifact,
     reset,
     jobId,
+    stage,
+    progressPercent,
+    resolved,
+    errorCode,
     isQueued,
     isRunning,
     isDone,

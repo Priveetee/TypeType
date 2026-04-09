@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useArtifactDownloadOnDone } from "../hooks/use-artifact-download-on-done";
 import { useDownloaderJob } from "../hooks/use-downloader-job";
 import type { VideoStream } from "../types/stream";
 import { DownloadModeButton } from "./download-mode-button";
@@ -9,6 +10,7 @@ import {
   buildDownloadOptions,
   type DownloadMode,
 } from "./download-options";
+import { DownloaderJobFeedback } from "./downloader-job-feedback";
 
 const MARGIN = 8;
 
@@ -25,6 +27,7 @@ export function DownloadDropdown({ stream, anchorEl, onClose, onDone }: Props) {
   const [mode, setMode] = useState<DownloadMode>("video");
   const downloader = useDownloaderJob();
   const { isDone, jobId, isQueued, isRunning, errorText, openArtifact, reset, start } = downloader;
+  const [artifactError, setArtifactError] = useState<string | null>(null);
   const allOptions = useMemo(() => buildDownloadOptions(stream), [stream]);
   const optionsByMode = useMemo(
     () => ({
@@ -42,13 +45,16 @@ export function DownloadDropdown({ stream, anchorEl, onClose, onDone }: Props) {
     setSelectedId(nextOptions.find((option) => option.recommended)?.id ?? nextOptions[0]?.id ?? "");
   }, [mode, optionsByMode]);
 
-  useEffect(() => {
-    if (!isDone || !jobId) return;
-    openArtifact();
-    onDone(`Download started: ${selected?.label ?? "file"}`);
-    reset();
-    onClose();
-  }, [isDone, jobId, onClose, onDone, openArtifact, reset, selected]);
+  useArtifactDownloadOnDone({
+    isDone,
+    jobId,
+    selectedLabel: selected?.label ?? "file",
+    openArtifact,
+    onDone,
+    onClose,
+    reset,
+    onArtifactError: setArtifactError,
+  });
 
   useLayoutEffect(() => {
     if (!anchorEl || !panelRef.current) return;
@@ -78,6 +84,7 @@ export function DownloadDropdown({ stream, anchorEl, onClose, onDone }: Props) {
 
   function startDownload() {
     if (!selected) return;
+    setArtifactError(null);
     start(buildDownloaderCreatePayload(stream.id, selected));
   }
 
@@ -128,11 +135,13 @@ export function DownloadDropdown({ stream, anchorEl, onClose, onDone }: Props) {
         >
           {startLabel}
         </button>
-        {errorText && (
-          <p className="mt-2 text-xs text-red-300" role="alert">
-            {errorText}
-          </p>
-        )}
+        <DownloaderJobFeedback
+          stage={downloader.stage}
+          progressPercent={downloader.progressPercent}
+          resolved={downloader.resolved}
+          errorCode={downloader.errorCode}
+          errorText={artifactError ?? errorText}
+        />
       </div>
     </div>,
     document.body,

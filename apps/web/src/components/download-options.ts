@@ -10,7 +10,12 @@ export type DownloadOption = {
   detail: string;
   size: string;
   recommended: boolean;
+  videoItag?: string;
+  audioItag?: string;
   height?: number;
+  fps?: number;
+  videoCodec?: string;
+  audioCodec?: string;
   bitrate?: number;
   format: string;
   qualityHint: string;
@@ -62,7 +67,10 @@ export function buildDownloadOptions(stream: VideoStream): DownloadOption[] {
         detail: `${codec} · itag ${item.itag}`,
         size: formatBytes(item.contentLength),
         recommended: item.height === 720,
+        videoItag: String(item.itag),
         height: item.height,
+        fps: item.fps,
+        videoCodec: item.codec ?? undefined,
         format: container.toLowerCase(),
         qualityHint: pickVideoQuality(item.height),
       };
@@ -82,7 +90,9 @@ export function buildDownloadOptions(stream: VideoStream): DownloadOption[] {
         detail: `${locale} · ${codec} · itag ${item.itag}`,
         size: formatBytes(item.contentLength),
         recommended: bitrate >= 160_000 && bitrate < 256_000,
+        audioItag: String(item.itag),
         bitrate,
+        audioCodec: item.codec ?? undefined,
         format: container.toLowerCase(),
         qualityHint: pickAudioQuality(bitrate),
       };
@@ -107,6 +117,14 @@ export function buildDownloaderCreatePayload(
       mode,
       quality: option.qualityHint,
       format,
+      videoItag: option.videoItag,
+      audioItag: option.audioItag,
+      height: option.height,
+      fps: option.fps,
+      videoCodec: option.videoCodec,
+      audioCodec: option.audioCodec,
+      bitrate: option.bitrate,
+      allowQualityFallback: false,
       sponsorBlock: false,
       sponsorBlockCategories: ["sponsor", "intro"],
       thumbnailOnly: false,

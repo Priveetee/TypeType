@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { useArtifactDownloadOnDone } from "../hooks/use-artifact-download-on-done";
 import { useDownloaderJob } from "../hooks/use-downloader-job";
 import { useOverlayLock } from "../hooks/use-overlay-lock";
 import type { VideoStream } from "../types/stream";
@@ -10,6 +11,7 @@ import {
   type DownloadMode,
 } from "./download-options";
 import { buildSimpleChoices } from "./download-simple-choices";
+import { DownloaderJobFeedback } from "./downloader-job-feedback";
 
 type Props = {
   stream: VideoStream;
@@ -21,6 +23,7 @@ export function DownloadSheet({ stream, onClose, onDone }: Props) {
   useOverlayLock(true);
   const downloader = useDownloaderJob();
   const { isDone, jobId, isQueued, isRunning, errorText, openArtifact, reset, start } = downloader;
+  const [artifactError, setArtifactError] = useState<string | null>(null);
   const allOptions = useMemo(() => buildDownloadOptions(stream), [stream]);
   const [mode, setMode] = useState<DownloadMode>("video");
   const [showAllFormats, setShowAllFormats] = useState(false);
@@ -33,13 +36,16 @@ export function DownloadSheet({ stream, onClose, onDone }: Props) {
     [options, selectedId],
   );
 
-  useEffect(() => {
-    if (!isDone || !jobId) return;
-    openArtifact();
-    onDone(`Download started: ${selected?.label ?? "file"}`);
-    reset();
-    onClose();
-  }, [isDone, jobId, onClose, onDone, openArtifact, reset, selected]);
+  useArtifactDownloadOnDone({
+    isDone,
+    jobId,
+    selectedLabel: selected?.label ?? "file",
+    openArtifact,
+    onDone,
+    onClose,
+    reset,
+    onArtifactError: setArtifactError,
+  });
 
   function selectMode(next: DownloadMode) {
     setMode(next);
@@ -50,6 +56,7 @@ export function DownloadSheet({ stream, onClose, onDone }: Props) {
 
   function startDownload() {
     if (!selected) return;
+    setArtifactError(null);
     start(buildDownloaderCreatePayload(stream.id, selected));
   }
 
@@ -78,7 +85,6 @@ export function DownloadSheet({ stream, onClose, onDone }: Props) {
             Close
           </button>
         </div>
-
         <div className="mb-2 grid grid-cols-2 gap-2">
           <DownloadModeButton
             active={mode === "video"}
@@ -91,7 +97,6 @@ export function DownloadSheet({ stream, onClose, onDone }: Props) {
             label="Audio"
           />
         </div>
-
         {!showAllFormats && (
           <div className="space-y-2">
             {simpleChoices.map((choice) => (
@@ -112,7 +117,6 @@ export function DownloadSheet({ stream, onClose, onDone }: Props) {
             ))}
           </div>
         )}
-
         {showAllFormats && (
           <div
             className="max-h-[44svh] space-y-1.5 overflow-y-auto overscroll-y-contain pr-1 [scrollbar-width:thin] [scrollbar-color:var(--color-zinc-600)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-zinc-600/80 [&::-webkit-scrollbar-track]:bg-transparent md:max-h-[52svh]"
@@ -130,7 +134,6 @@ export function DownloadSheet({ stream, onClose, onDone }: Props) {
             ))}
           </div>
         )}
-
         {options.length > simpleChoices.length && (
           <button
             type="button"
@@ -140,7 +143,6 @@ export function DownloadSheet({ stream, onClose, onDone }: Props) {
             {showAllFormats ? "Simple view" : `All formats (${options.length})`}
           </button>
         )}
-
         <button
           type="button"
           onClick={startDownload}
@@ -149,11 +151,13 @@ export function DownloadSheet({ stream, onClose, onDone }: Props) {
         >
           {startLabel}
         </button>
-        {errorText && (
-          <p className="mt-2 text-xs text-red-300" role="alert">
-            {errorText}
-          </p>
-        )}
+        <DownloaderJobFeedback
+          stage={downloader.stage}
+          progressPercent={downloader.progressPercent}
+          resolved={downloader.resolved}
+          errorCode={downloader.errorCode}
+          errorText={artifactError ?? errorText}
+        />
       </div>
     </div>
   );
