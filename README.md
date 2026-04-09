@@ -19,38 +19,73 @@ TypeType frontend depends on:
 
 - TypeType-Server (API, auth, extraction): `http://localhost:8080`
 - TypeType-Token (PO token helper): `http://localhost:8081`
+- TypeType-Downloader (download jobs, internal)
+- Garage (S3-compatible storage for downloader artifacts, internal)
 
 The easiest setup is Docker Compose at repository root.
 
 ## Quick start (Docker)
 
+End-user one-liner installer (no git/clone needed):
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/Priveetee/TypeType/main/scripts/install-stack.sh | bash
+```
+
+By default, this installs to `~/typetype-stack` and starts the stack.
+
+Requirements before running this command:
+
+- Docker installed
+- Docker Compose v2 available (`docker compose version`)
+- Ports `8080`, `8081`, `8082` must be free
+
+---
+
+One-command interactive setup (recommended):
+
+```sh
+./scripts/setup-stack.sh
+```
+
+This script:
+
+- asks for env values (with safe defaults)
+- writes `.env`
+- pulls images
+- starts containers
+- bootstraps Garage for downloader artifacts
+- prints `docker compose ps`
+
+If you already run another stack on ports `8080/8081/8082`, stop it first or change port mappings in `docker-compose.yml`.
+
+Manual setup (if you prefer):
+
 1) Create `.env` in repo root:
 
-```env
-ALLOWED_ORIGINS=http://localhost:80
-DATABASE_URL=jdbc:postgresql://postgres:5432/typetype
-DATABASE_USER=typetype
-DATABASE_PASSWORD=typetype
-DRAGONFLY_URL=redis://dragonfly:6379
+```sh
+cp .env.example .env
 ```
 
 2) Start stack:
 
 ```sh
+docker compose pull
 docker compose up -d
+docker compose ps
 ```
 
 The frontend container mounts local `nginx.conf` by default, so proxy and upload-limit updates are applied from this repository file.
 
-3) Check services:
+3) Initialize Garage (required once for downloader artifacts):
 
 ```sh
-docker compose ps
+./scripts/bootstrap-garage.sh
 ```
 
 4) Open:
 
-- Frontend: `http://localhost:80`
+- Frontend: `http://localhost:8082`
 - Server API: `http://localhost:8080`
 - Token service: `http://localhost:8081`
 
@@ -58,7 +93,7 @@ docker compose ps
 
 - Use Container Manager > Project and point it to this `docker-compose.yml`.
 - Put the `.env` file next to `docker-compose.yml` before starting the project.
-- If port `80` is already used, change `docker-compose.yml` to another host port, for example `8088:80`, and set `ALLOWED_ORIGINS=http://localhost:8088`.
+- If port `8082` is already used, change `docker-compose.yml` to another host port, for example `8088:80`, and set `ALLOWED_ORIGINS=http://localhost:8088`.
 - First start can take a few minutes while images are pulled.
 
 ## Troubleshooting
@@ -66,6 +101,7 @@ docker compose ps
 - `.env not found`: create `.env` in repository root (same folder as `docker-compose.yml`).
 - Frontend not loading: run `docker compose logs typetype`.
 - Backend API not responding: run `docker compose logs typetype-server`.
+- Downloader artifact issues: run `./scripts/bootstrap-garage.sh` again, then restart downloader with `docker compose up -d typetype-downloader`.
 - Port already in use: change host ports in `docker-compose.yml` and restart with `docker compose up -d`.
 - After updating `nginx.conf`: restart frontend with `docker compose up -d typetype`.
 
