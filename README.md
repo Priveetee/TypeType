@@ -88,6 +88,8 @@ The frontend container mounts local `nginx.conf` by default, so proxy and upload
 - Frontend: `http://localhost:8082`
 - Server API: `http://localhost:8080`
 - Token service: `http://localhost:8081`
+- Downloader service (internal Docker network): `http://typetype-downloader:18093`
+- Downloader API from frontend/server flow: `/api/downloader/*`
 
 ## Synology notes
 
