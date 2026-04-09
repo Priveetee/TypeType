@@ -27,6 +27,7 @@ type Props = { video: PlaylistVideoItem; onRemove: () => void };
 
 export function PlaylistVideoRow({ video, onRemove }: Props) {
   const prefetch = useWatchPrefetch(video.url);
+  const thumbnail = video.thumbnail.trim().length > 0 ? video.thumbnail : null;
 
   return (
     <div className="flex flex-col gap-2 group relative">
@@ -38,13 +39,15 @@ export function PlaylistVideoRow({ video, onRemove }: Props) {
         onMouseLeave={prefetch.onMouseLeave}
       >
         <div className="relative aspect-video rounded-xl overflow-hidden bg-zinc-800">
-          <img
-            src={video.thumbnail}
-            alt={video.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-            loading="lazy"
-            decoding="async"
-          />
+          {thumbnail && (
+            <img
+              src={thumbnail}
+              alt={video.title}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+              loading="lazy"
+              decoding="async"
+            />
+          )}
           <button
             type="button"
             onClick={(e) => {
