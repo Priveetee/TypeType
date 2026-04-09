@@ -12,6 +12,7 @@ export type DownloadOption = {
   recommended: boolean;
   videoItag?: string;
   audioItag?: string;
+  width?: number;
   height?: number;
   fps?: number;
   videoCodec?: string;
@@ -40,9 +41,16 @@ function parseContainer(mimeType: string): string {
   return container.toUpperCase();
 }
 
-function pickVideoQuality(height: number): string {
-  if (height >= 1080) return "best";
-  if (height >= 720) return "balanced";
+function effectiveVideoHeight(height?: number, width?: number): number {
+  if (typeof height !== "number" || height <= 0) return 0;
+  if (typeof width !== "number" || width <= 0) return height;
+  return Math.min(height, width);
+}
+
+function pickVideoQuality(height: number, width?: number): string {
+  const effective = effectiveVideoHeight(height, width);
+  if (effective >= 1080) return "best";
+  if (effective >= 720) return "balanced";
   return "small";
 }
 
@@ -50,6 +58,20 @@ function pickAudioQuality(bitrate: number): string {
   if (bitrate >= 192_000) return "best";
   if (bitrate >= 128_000) return "balanced";
   return "small";
+}
+
+function pickRecommendedVideoIndex(videos: DownloadOption[]): number {
+  const fullHd = videos.findIndex(
+    (video) => effectiveVideoHeight(video.height, video.width) === 1080,
+  );
+  if (fullHd >= 0) return fullHd;
+  const hd = videos.findIndex((video) => effectiveVideoHeight(video.height, video.width) === 720);
+  if (hd >= 0) return hd;
+  const belowFullHd = videos.findIndex(
+    (video) => effectiveVideoHeight(video.height, video.width) < 1080,
+  );
+  if (belowFullHd >= 0) return belowFullHd;
+  return videos.length - 1;
 }
 
 export function buildDownloadOptions(stream: VideoStream): DownloadOption[] {
@@ -66,13 +88,14 @@ export function buildDownloadOptions(stream: VideoStream): DownloadOption[] {
         label: `${resolution}${fps} ${container}`,
         detail: `${codec} · itag ${item.itag}`,
         size: formatBytes(item.contentLength),
-        recommended: item.height === 720,
+        recommended: false,
         videoItag: String(item.itag),
+        width: item.width,
         height: item.height,
         fps: item.fps,
         videoCodec: item.codec ?? undefined,
         format: container.toLowerCase(),
-        qualityHint: pickVideoQuality(item.height),
+        qualityHint: pickVideoQuality(item.height, item.width),
       };
     });
 
@@ -89,7 +112,7 @@ export function buildDownloadOptions(stream: VideoStream): DownloadOption[] {
         label: `${item.bitrate ? `${Math.round(item.bitrate / 1000)} kbps` : "Audio"} ${container}`,
         detail: `${locale} · ${codec} · itag ${item.itag}`,
         size: formatBytes(item.contentLength),
-        recommended: bitrate >= 160_000 && bitrate < 256_000,
+        recommended: false,
         audioItag: String(item.itag),
         bitrate,
         audioCodec: item.codec ?? undefined,
@@ -98,11 +121,21 @@ export function buildDownloadOptions(stream: VideoStream): DownloadOption[] {
       };
     });
 
+  if (videos.length > 0) {
+    const recommendedIndex = pickRecommendedVideoIndex(videos);
+    videos[recommendedIndex] = { ...videos[recommendedIndex], recommended: true };
+  }
+
+  if (audios.length > 0) {
+    const recommendedAudio = audios.findIndex(
+      (audio) => (audio.bitrate ?? 0) >= 160_000 && (audio.bitrate ?? 0) < 256_000,
+    );
+    const index = recommendedAudio >= 0 ? recommendedAudio : 0;
+    audios[index] = { ...audios[index], recommended: true };
+  }
+
   const merged = [...videos, ...audios];
-  if (merged.some((option) => option.recommended)) return merged;
-  if (videos.length > 0) videos[0] = { ...videos[0], recommended: true };
-  else if (audios.length > 0) audios[0] = { ...audios[0], recommended: true };
-  return [...videos, ...audios];
+  return merged;
 }
 
 export function buildDownloaderCreatePayload(
