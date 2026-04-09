@@ -6,14 +6,9 @@ type Props = {
   resolved: DownloaderResolvedSelection | null;
   errorCode: string | null;
   errorText: string | null;
+  immersive?: boolean;
+  forceWaiting?: boolean;
 };
-
-function stageLabel(stage: DownloaderJobStage | null): string {
-  if (stage === "queued") return "Queued";
-  if (stage === "downloading") return "Downloading";
-  if (stage === "finalizing") return "Finalizing";
-  return "Preparing";
-}
 
 function formatResolved(resolved: DownloaderResolvedSelection | null): string | null {
   if (!resolved) return null;
@@ -44,29 +39,41 @@ export function DownloaderJobFeedback({
   resolved,
   errorCode,
   errorText,
+  immersive = false,
+  forceWaiting = false,
 }: Props) {
   const hasProgress = typeof progressPercent === "number";
-  const percent = hasProgress ? Math.max(0, Math.min(100, Math.round(progressPercent))) : 0;
   const resolvedLabel = formatResolved(resolved);
   const visibleError =
     errorCode === "exact_selection_unavailable"
       ? exactUnavailableMessage(resolved)
       : (errorText ?? null);
+  const showWaiting =
+    (forceWaiting || stage === "queued" || stage === "downloading" || stage === "finalizing") &&
+    hasProgress &&
+    !visibleError;
 
   return (
     <>
-      {hasProgress && !visibleError && (
-        <div className="mt-2 rounded-md border border-zinc-800 bg-zinc-900/60 px-2 py-1.5">
-          <div className="flex items-center justify-between text-[11px] text-zinc-400">
-            <span>{stageLabel(stage)}</span>
-            <span>{percent}%</span>
-          </div>
-          <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-zinc-800">
-            <div className="h-full rounded-full bg-zinc-300" style={{ width: `${percent}%` }} />
+      {showWaiting && (
+        <div
+          className={
+            immersive
+              ? "h-[min(52svh,24rem)] min-h-52 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950/80 p-1.5"
+              : "mt-2 rounded-md border border-zinc-800 bg-zinc-900/60 p-1.5"
+          }
+        >
+          <div className="h-full overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950/70">
+            <img
+              src="/downloader-waiting.gif"
+              alt="Download in progress"
+              className="h-full w-full object-contain"
+              loading="lazy"
+            />
           </div>
         </div>
       )}
-      {resolvedLabel && !visibleError && (
+      {resolvedLabel && !showWaiting && !visibleError && (
         <p className="mt-2 text-xs text-zinc-400">Selected: {resolvedLabel}</p>
       )}
       {visibleError && (
