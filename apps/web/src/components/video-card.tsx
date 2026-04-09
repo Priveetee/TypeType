@@ -1,6 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useClientLocale } from "../hooks/use-client-locale";
 import { isMemberOnlyApiError, streamQueryOptions } from "../hooks/use-stream";
 import { useWatchPrefetch } from "../hooks/use-watch-prefetch";
 import { formatDuration, formatPublishedDate, formatViews } from "../lib/format";
@@ -17,6 +18,7 @@ type Props = {
 };
 
 export function VideoCard({ stream, onOpen, onImpression }: Props) {
+  const locale = useClientLocale();
   const queryClient = useQueryClient();
   const rootRef = useRef<HTMLElement | null>(null);
   const previewTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -24,7 +26,7 @@ export function VideoCard({ stream, onOpen, onImpression }: Props) {
   const [showPreview, setShowPreview] = useState(false);
   const [memberOnly, setMemberOnly] = useState(false);
   const prefetch = useWatchPrefetch(stream.id);
-  const publishedText = formatPublishedDate(stream.uploaded, stream.uploadDate);
+  const publishedText = formatPublishedDate(stream.publishedAt, undefined, locale);
 
   useEffect(() => {
     if (!onImpression || typeof IntersectionObserver === "undefined") return;

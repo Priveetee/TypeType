@@ -7,6 +7,7 @@ export type Comment = {
   likeCount: number;
   textualLikeCount: string;
   publishedTime: string;
+  publishedAt?: number | null;
   isHeartedByUploader: boolean;
   isPinned: boolean;
   uploaderVerified: boolean;

@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useClientLocale } from "../hooks/use-client-locale";
 import { useSubscriptions } from "../hooks/use-subscriptions";
 import { formatPublishedDate, formatSubscribers, formatViews } from "../lib/format";
 import type { VideoStream } from "../types/stream";
@@ -12,10 +13,11 @@ type Props = {
 };
 
 export function WatchInfo({ stream }: Props) {
+  const locale = useClientLocale();
   const { add, remove, isSubscribed } = useSubscriptions();
   const subscribed = stream.channelUrl ? isSubscribed(stream.channelUrl) : false;
   const [toastMsg, setToastMsg] = useState<string | null>(null);
-  const publishedText = formatPublishedDate(stream.uploaded, stream.uploadDate);
+  const publishedText = formatPublishedDate(stream.publishedAt, undefined, locale);
 
   useEffect(() => {
     if (!toastMsg) return;

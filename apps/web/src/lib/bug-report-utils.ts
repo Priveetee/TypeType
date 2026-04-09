@@ -19,18 +19,3 @@ export const CATEGORY_OPTIONS: { value: BugReportCategory; label: string }[] = [
 export function formatTimestamp(ts: number): string {
   return new Date(ts).toLocaleString();
 }
-
-export function statusColor(status: BugReportStatus): string {
-  switch (status) {
-    case "new":
-      return "bg-blue-600";
-    case "triaged":
-      return "bg-yellow-600";
-    case "in_progress":
-      return "bg-orange-600";
-    case "fixed":
-      return "bg-green-600";
-    case "closed":
-      return "bg-zinc-600";
-  }
-}

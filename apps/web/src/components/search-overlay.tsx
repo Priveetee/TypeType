@@ -1,8 +1,7 @@
-import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useDebouncedValue } from "../hooks/use-debounced-value";
 import { useSearchHistory } from "../hooks/use-search-history";
-import { useSettings } from "../hooks/use-settings";
+import { useSearchOverlayNavigation } from "../hooks/use-search-overlay-navigation";
 import { fetchSuggestions } from "../lib/api";
 import { ConfirmModal } from "./confirm-modal";
 import type { SearchOverlayItem } from "./search-overlay-list";
@@ -19,10 +18,8 @@ export function SearchOverlay({ onClose }: Props) {
   const [confirmClearOpen, setConfirmClearOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
-  const navigate = useNavigate();
-  const { settings } = useSettings();
-  const service = settings.defaultService;
-  const { visibleItems, canLoadMore, loadMore, add, clear } = useSearchHistory();
+  const { service, navigateAndClose } = useSearchOverlayNavigation({ onClose });
+  const { visibleItems, canLoadMore, loadMore, clear } = useSearchHistory();
   const debouncedQuery = useDebouncedValue(query, 300);
 
   useEffect(() => {
@@ -69,12 +66,6 @@ export function SearchOverlay({ onClose }: Props) {
     : showSuggestions
       ? suggestions.slice(0, 8).map((term) => ({ key: term, label: term }))
       : [];
-
-  function navigateAndClose(term: string) {
-    add.mutate(term);
-    navigate({ to: "/search", search: { q: term, service } });
-    onClose();
-  }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

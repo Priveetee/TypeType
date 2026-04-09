@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { useAdminBugReportDetail, useAdminBugReports } from "../hooks/use-admin-bug-reports";
+import { filterBugReports } from "../lib/admin-bug-report-filter";
 import type { BugReportCategory, BugReportStatus } from "../types/bug-report";
 import { AdminBugReportDetailPanel } from "./admin-bug-report-detail";
 import { AdminBugReportFilters } from "./admin-bug-report-filters";
 import { AdminBugReportList } from "./admin-bug-report-list";
+import { AdminBugReportPager } from "./admin-bug-report-pager";
 
 const PAGE_SIZE = 20;
 
@@ -17,25 +19,23 @@ export function AdminBugReportsSection({ enabled, isAdmin, onToast }: Props) {
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState<BugReportStatus | undefined>();
   const [categoryFilter, setCategoryFilter] = useState<BugReportCategory | undefined>();
+  const [searchText, setSearchText] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
-
   const { query, updateStatus, createIssue } = useAdminBugReports(enabled, {
     page,
     limit: PAGE_SIZE,
+  });
+  const reports = filterBugReports(query.data?.items ?? [], {
     status: statusFilter,
     category: categoryFilter,
+    query: searchText,
   });
-
-  const reports = query.data?.items ?? [];
   const total = query.data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-
   const { query: detailQuery } = useAdminBugReportDetail(enabled && !!selectedId, selectedId ?? "");
 
   useEffect(() => {
-    if (reports.length > 0 && !selectedId) {
-      setSelectedId(reports[0].id);
-    }
+    if (reports.length > 0 && !selectedId) setSelectedId(reports[0].id);
   }, [reports, selectedId]);
 
   const busy = updateStatus.isPending || createIssue.isPending;
@@ -45,6 +45,7 @@ export function AdminBugReportsSection({ enabled, isAdmin, onToast }: Props) {
       <AdminBugReportFilters
         statusFilter={statusFilter}
         categoryFilter={categoryFilter}
+        searchText={searchText}
         onStatusChange={(v) => {
           setStatusFilter(v);
           setPage(1);
@@ -53,49 +54,24 @@ export function AdminBugReportsSection({ enabled, isAdmin, onToast }: Props) {
           setCategoryFilter(v);
           setPage(1);
         }}
+        onSearchChange={(value) => {
+          setSearchText(value);
+          setSelectedId(null);
+        }}
+      />
+      <AdminBugReportPager
+        page={page}
+        totalPages={totalPages}
+        total={total}
+        onPrev={() => setPage((p) => p - 1)}
+        onNext={() => setPage((p) => p + 1)}
       />
 
-      <div className="flex items-center justify-between text-xs text-zinc-500">
-        <span>
-          {total} report{total !== 1 ? "s" : ""}
-        </span>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            disabled={page <= 1}
-            onClick={() => setPage((p) => p - 1)}
-            className="px-2 py-1 rounded bg-zinc-800 disabled:opacity-50"
-          >
-            Prev
-          </button>
-          <span>
-            Page {page} of {totalPages}
-          </span>
-          <button
-            type="button"
-            disabled={page >= totalPages}
-            onClick={() => setPage((p) => p + 1)}
-            className="px-2 py-1 rounded bg-zinc-800 disabled:opacity-50"
-          >
-            Next
-          </button>
-        </div>
-      </div>
-
-      {query.isPending && (
-        <div className="rounded-lg border border-zinc-800 bg-zinc-900/70 p-6 text-center text-sm text-zinc-400">
-          Loading bug reports...
-        </div>
-      )}
-
-      {query.isError && (
-        <div className="rounded-lg border border-red-900 bg-red-950/30 p-6 text-center text-sm text-red-300">
-          Unable to load bug reports.
-        </div>
-      )}
+      {query.isPending && <p className="text-sm text-zinc-400">Loading bug reports...</p>}
+      {query.isError && <p className="text-sm text-red-300">Unable to load bug reports.</p>}
 
       {!query.isPending && !query.isError && (
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_380px]">
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-start">
           <AdminBugReportList reports={reports} selectedId={selectedId} onSelect={setSelectedId} />
           {detailQuery.data ? (
             <AdminBugReportDetailPanel
@@ -120,7 +96,7 @@ export function AdminBugReportsSection({ enabled, isAdmin, onToast }: Props) {
               }}
             />
           ) : (
-            <div className="hidden lg:block" />
+            <p className="text-sm text-zinc-500">Select a report to inspect details.</p>
           )}
         </div>
       )}

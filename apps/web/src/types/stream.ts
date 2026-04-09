@@ -21,8 +21,7 @@ export type VideoStream = {
   uploaderSubscriberCount?: number;
   views: number;
   duration: number;
-  uploadDate?: string;
-  uploaded?: number;
+  publishedAt?: number;
   likes?: number;
   dislikes?: number;
   streamType?: string;

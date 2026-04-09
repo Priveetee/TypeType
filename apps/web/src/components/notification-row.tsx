@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { useClientLocale } from "../hooks/use-client-locale";
 import { useWatchPrefetch } from "../hooks/use-watch-prefetch";
 import { formatPublishedDate } from "../lib/format";
 import { proxyImage } from "../lib/proxy";
@@ -10,8 +11,13 @@ type Props = {
 };
 
 export function NotificationRow({ item, onOpen }: Props) {
+  const locale = useClientLocale();
   const videoId = item.video.url.trim().length > 0 ? item.video.url : item.video.id;
-  const createdText = formatPublishedDate(item.createdAt) || "recent";
+  const publishedAt =
+    typeof item.publishedAt === "number" && item.publishedAt > 0
+      ? item.publishedAt
+      : item.video.publishedAt;
+  const createdText = formatPublishedDate(publishedAt ?? undefined, undefined, locale) || "recent";
   const prefetch = useWatchPrefetch(videoId);
 
   return (

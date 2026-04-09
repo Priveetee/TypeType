@@ -42,15 +42,6 @@ export function ListPlusIcon() {
   );
 }
 
-export function ClockIcon() {
-  return (
-    <SvgIcon label="Watch Later">
-      <circle cx="12" cy="12" r="10" />
-      <polyline points="12 6 12 12 16 14" />
-    </SvgIcon>
-  );
-}
-
 export function StarIcon({ filled }: { filled?: boolean }) {
   return (
     <SvgIcon label="Favorite">
@@ -78,6 +69,16 @@ export function MoreIcon() {
       <circle cx="5" cy="12" r="1.5" fill="currentColor" />
       <circle cx="12" cy="12" r="1.5" fill="currentColor" />
       <circle cx="19" cy="12" r="1.5" fill="currentColor" />
+    </SvgIcon>
+  );
+}
+
+export function DownloadIcon() {
+  return (
+    <SvgIcon label="Download">
+      <path d="M12 3v12" />
+      <polyline points="7 10 12 15 17 10" />
+      <path d="M5 21h14" />
     </SvgIcon>
   );
 }

@@ -103,6 +103,39 @@ body {
   }
 }
 
+@keyframes download-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes download-pop-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(10px) scale(0.975);
+  }
+}
+
+@keyframes download-item-pop {
+  from {
+    opacity: 0;
+    transform: translateY(5px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--color-zinc-600) var(--color-zinc-950);

@@ -13,6 +13,12 @@ function normalizeDescription(raw: string): string {
 
 export function mapVideoItem(item: VideoItem): VideoStream {
   const canonicalUrl = item.url.trim().length > 0 ? item.url : item.id;
+  const publishedAt =
+    typeof item.publishedAt === "number" && item.publishedAt > 0
+      ? item.publishedAt
+      : item.uploaded > 0
+        ? item.uploaded
+        : undefined;
   return {
     id: canonicalUrl,
     title: item.title,
@@ -25,7 +31,7 @@ export function mapVideoItem(item: VideoItem): VideoStream {
     uploaderVerified: item.uploaderVerified,
     views: item.viewCount,
     duration: item.duration,
-    uploadDate: item.uploadDate || undefined,
+    publishedAt,
     streamType: item.streamType || undefined,
     isShortFormContent: item.isShortFormContent,
     shortDescription: item.shortDescription ?? undefined,
@@ -42,6 +48,7 @@ export function mapCommentItem(item: CommentItem): Comment {
     likeCount: item.likeCount,
     textualLikeCount: item.textualLikeCount,
     publishedTime: item.publishedTime,
+    publishedAt: item.publishedAt ?? null,
     isHeartedByUploader: item.isHeartedByUploader,
     isPinned: item.isPinned,
     uploaderVerified: item.uploaderVerified,
@@ -53,6 +60,12 @@ export function mapCommentItem(item: CommentItem): Comment {
 export function mapStreamResponse(response: StreamResponse, url: string): VideoStream {
   const rawDescription = response.description || undefined;
   const description = rawDescription ? normalizeDescription(rawDescription) : undefined;
+  const publishedAt =
+    typeof response.publishedAt === "number" && response.publishedAt > 0
+      ? response.publishedAt
+      : response.uploaded > 0
+        ? response.uploaded
+        : undefined;
 
   return {
     id: url,
@@ -68,8 +81,7 @@ export function mapStreamResponse(response: StreamResponse, url: string): VideoS
       response.uploaderSubscriberCount >= 0 ? response.uploaderSubscriberCount : undefined,
     views: response.viewCount,
     duration: response.duration,
-    uploadDate: response.uploadDate || undefined,
-    uploaded: response.uploaded <= 0 ? undefined : response.uploaded,
+    publishedAt,
     description,
     likes: response.likeCount,
     dislikes: response.dislikeCount === -1 ? undefined : response.dislikeCount,

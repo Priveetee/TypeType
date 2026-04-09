@@ -27,6 +27,7 @@ export type VideoItem = {
   uploaderVerified: boolean;
   duration: number;
   viewCount: number;
+  publishedAt?: number | null;
   uploadDate: string;
   uploaded: number;
   streamType: string;
@@ -46,6 +47,7 @@ export type StreamResponse = {
   viewCount: number;
   likeCount: number;
   dislikeCount: number;
+  publishedAt?: number | null;
   uploadDate: string;
   uploaded: number;
   uploaderSubscriberCount: number;
@@ -115,6 +117,7 @@ export type CommentItem = {
   likeCount: number;
   textualLikeCount: string;
   publishedTime: string;
+  publishedAt?: number | null;
   isHeartedByUploader: boolean;
   isPinned: boolean;
   uploaderVerified: boolean;
