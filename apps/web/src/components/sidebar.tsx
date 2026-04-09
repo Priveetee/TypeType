@@ -65,6 +65,8 @@ export function Sidebar() {
     navigate({ to: "/search", search: { q, service: id } });
   }
 
+  const adminSearch = { section: "issues" as const };
+
   const baseClasses = isMobile
     ? `fixed top-14 left-0 bottom-0 z-50 w-72 max-w-[85vw] bg-zinc-950 flex flex-col py-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] transition-transform duration-200 ${
         mobileOpen ? "translate-x-0" : "-translate-x-full"
@@ -97,6 +99,7 @@ export function Sidebar() {
             <Link
               key={item.label}
               to={item.to}
+              search={item.to === "/admin-console" ? adminSearch : undefined}
               activeOptions={item.to === "/" ? { exact: true } : undefined}
               className={`${BTN_BASE} ${itemLayout}`}
               onClick={isMobile ? closeMobileSidebar : undefined}

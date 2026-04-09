@@ -1,16 +1,39 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AdminBugReportsSection } from "../components/admin-bug-reports-section";
+import { AdminConsoleHeader } from "../components/admin-console-header";
+import { AdminConsoleNav } from "../components/admin-console-nav";
 import { AdminSettingsSection } from "../components/admin-settings-section";
 import { AdminUsersSection } from "../components/admin-users-section";
 import { Toast } from "../components/toast";
 import { useAuth } from "../hooks/use-auth";
 import { goto } from "../lib/route-redirect";
 
+type AdminSection = "settings" | "users" | "issues";
+
+function isSection(value: unknown): value is AdminSection {
+  return value === "settings" || value === "users" || value === "issues";
+}
+
+function availableSections(isAdmin: boolean, isModerator: boolean): AdminSection[] {
+  if (isAdmin) return ["settings", "users", "issues"];
+  if (isModerator) return ["issues"];
+  return [];
+}
+
 function AdminConsolePage() {
   const { isAdmin, isModerator, me } = useAuth();
+  const { section } = Route.useSearch();
+  const navigate = useNavigate({ from: "/admin-console" });
   const [toast, setToast] = useState<string | null>(null);
   const canAccessAdmin = isAdmin || isModerator;
+  const sections = availableSections(isAdmin, isModerator);
+  const activeSection = sections.includes(section) ? section : (sections[0] ?? "issues");
+
+  useEffect(() => {
+    if (!canAccessAdmin || section === activeSection) return;
+    navigate({ search: { section: activeSection }, replace: true });
+  }, [activeSection, canAccessAdmin, navigate, section]);
 
   useEffect(() => {
     if (!toast) return;
@@ -24,18 +47,33 @@ function AdminConsolePage() {
   }
 
   return (
-    <div className="flex flex-col gap-5 [animation:page-fade-in_0.2s_ease-out]">
-      {isAdmin && <AdminSettingsSection enabled={isAdmin} onToast={setToast} />}
-      {isAdmin && (
+    <div className="flex flex-col gap-5 pt-2 [animation:page-fade-in_0.2s_ease-out]">
+      <AdminConsoleNav
+        items={sections.map((key) => ({
+          key,
+          label: key === "issues" ? "Issues" : key === "users" ? "Users" : "Settings",
+        }))}
+        active={activeSection}
+        onSelect={(next) => navigate({ search: { section: next } })}
+      />
+      <AdminConsoleHeader section={activeSection} />
+      {activeSection === "settings" && isAdmin && (
+        <AdminSettingsSection enabled={isAdmin} onToast={setToast} />
+      )}
+      {activeSection === "users" && isAdmin && (
         <AdminUsersSection enabled={isAdmin} currentUserId={me?.id ?? null} onToast={setToast} />
       )}
-      <section className="flex flex-col gap-3">
-        <h2 className="text-base font-semibold text-zinc-100">Bug Reports</h2>
+      {activeSection === "issues" && (
         <AdminBugReportsSection enabled={canAccessAdmin} isAdmin={isAdmin} onToast={setToast} />
-      </section>
+      )}
       <Toast message={toast} />
     </div>
   );
 }
 
-export const Route = createFileRoute("/admin-console")({ component: AdminConsolePage });
+export const Route = createFileRoute("/admin-console")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    section: isSection(search.section) ? search.section : "issues",
+  }),
+  component: AdminConsolePage,
+});
