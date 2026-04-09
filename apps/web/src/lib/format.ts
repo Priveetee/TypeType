@@ -29,25 +29,32 @@ export function formatLikes(n: number): string {
   return String(n);
 }
 
-export function formatPublishedDate(uploaded?: number, uploadDate?: string): string {
+function relativeLabel(unit: Intl.RelativeTimeFormatUnit, value: number, locale?: string): string {
+  const effective = locale && locale.trim().length > 0 ? locale : "en";
+  const formatter = new Intl.RelativeTimeFormat(effective, { numeric: "auto" });
+  return formatter.format(value, unit);
+}
+
+export function formatPublishedDate(
+  uploaded?: number,
+  uploadDate?: string,
+  locale?: string,
+): string {
   if (uploaded && uploaded > 0) {
-    const diffMs = Date.now() - uploaded;
+    const diffMs = uploaded - Date.now();
     const dayMs = 24 * 60 * 60 * 1000;
-    const days = Math.floor(diffMs / dayMs);
-    if (days < 1) return "today";
-    if (days < 7) return `${days} day${days === 1 ? "" : "s"} ago`;
-    const weeks = Math.floor(days / 7);
-    if (weeks < 5) return `${weeks} week${weeks === 1 ? "" : "s"} ago`;
-    const months = Math.floor(days / 30);
-    if (months < 12) return `${months} month${months === 1 ? "" : "s"} ago`;
-    const years = Math.floor(days / 365);
-    return `${years} year${years === 1 ? "" : "s"} ago`;
+    const abs = Math.abs(diffMs);
+    if (abs < dayMs) return relativeLabel("hour", Math.round(diffMs / (60 * 60 * 1000)), locale);
+    if (abs < 7 * dayMs) return relativeLabel("day", Math.round(diffMs / dayMs), locale);
+    if (abs < 30 * dayMs) return relativeLabel("week", Math.round(diffMs / (7 * dayMs)), locale);
+    if (abs < 365 * dayMs) return relativeLabel("month", Math.round(diffMs / (30 * dayMs)), locale);
+    return relativeLabel("year", Math.round(diffMs / (365 * dayMs)), locale);
   }
 
   if (uploadDate) {
     const parsed = new Date(uploadDate);
     if (Number.isNaN(parsed.getTime())) return uploadDate;
-    return parsed.toLocaleDateString(undefined, {
+    return parsed.toLocaleDateString(locale, {
       year: "numeric",
       month: "short",
       day: "numeric",

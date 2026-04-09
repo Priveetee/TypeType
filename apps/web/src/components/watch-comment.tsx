@@ -1,4 +1,6 @@
 import { useLayoutEffect, useRef, useState } from "react";
+import { useClientLocale } from "../hooks/use-client-locale";
+import { formatCommentPublishedTime } from "../lib/comment-time";
 import { formatLikes } from "../lib/format";
 import type { Comment } from "../types/comment";
 import { RichText } from "./rich-text";
@@ -10,10 +12,16 @@ type Props = {
 };
 
 export function WatchComment({ comment, videoUrl }: Props) {
+  const locale = useClientLocale();
   const [showReplies, setShowReplies] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [overflows, setOverflows] = useState(false);
   const textRef = useRef<HTMLParagraphElement>(null);
+  const publishedTime = formatCommentPublishedTime(
+    comment.publishedAt,
+    comment.publishedTime,
+    locale,
+  );
 
   useLayoutEffect(() => {
     const el = textRef.current;
@@ -52,9 +60,7 @@ export function WatchComment({ comment, videoUrl }: Props) {
               pinned
             </span>
           )}
-          {comment.publishedTime && (
-            <span className="text-xs text-zinc-500">{comment.publishedTime}</span>
-          )}
+          {publishedTime && <span className="text-xs text-zinc-500">{publishedTime}</span>}
         </div>
         <p
           ref={textRef}
@@ -84,7 +90,11 @@ export function WatchComment({ comment, videoUrl }: Props) {
           </button>
         )}
         {showReplies && comment.repliesPage !== null && (
-          <WatchCommentReplies videoUrl={videoUrl} repliesPage={comment.repliesPage} />
+          <WatchCommentReplies
+            videoUrl={videoUrl}
+            repliesPage={comment.repliesPage}
+            locale={locale}
+          />
         )}
       </div>
     </div>

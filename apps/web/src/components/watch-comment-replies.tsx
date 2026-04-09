@@ -8,9 +8,10 @@ const SKELETON_KEYS = Array.from({ length: 3 }, (_, i) => `rs-${i}`);
 type Props = {
   videoUrl: string;
   repliesPage: string;
+  locale?: string;
 };
 
-export function WatchCommentReplies({ videoUrl, repliesPage }: Props) {
+export function WatchCommentReplies({ videoUrl, repliesPage, locale }: Props) {
   const { data, isFetchingNextPage, hasNextPage, fetchNextPage, isLoading } = useCommentReplies(
     videoUrl,
     repliesPage,
@@ -30,7 +31,7 @@ export function WatchCommentReplies({ videoUrl, repliesPage }: Props) {
           className="animate-card-pop-in"
           style={{ animationDelay: `${Math.min(i * 25, 150)}ms` }}
         >
-          <WatchReply reply={reply} />
+          <WatchReply reply={reply} locale={locale} />
         </div>
       ))}
       {(isLoading || isFetchingNextPage) &&
