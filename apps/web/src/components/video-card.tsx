@@ -26,7 +26,7 @@ export function VideoCard({ stream, onOpen, onImpression }: Props) {
   const [showPreview, setShowPreview] = useState(false);
   const [memberOnly, setMemberOnly] = useState(false);
   const prefetch = useWatchPrefetch(stream.id);
-  const publishedText = formatPublishedDate(stream.uploaded, stream.uploadDate, locale);
+  const publishedText = formatPublishedDate(stream.publishedAt, undefined, locale);
 
   useEffect(() => {
     if (!onImpression || typeof IntersectionObserver === "undefined") return;

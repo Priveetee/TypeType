@@ -36,12 +36,12 @@ function relativeLabel(unit: Intl.RelativeTimeFormatUnit, value: number, locale?
 }
 
 export function formatPublishedDate(
-  uploaded?: number,
+  publishedAt?: number,
   uploadDate?: string,
   locale?: string,
 ): string {
-  if (uploaded && uploaded > 0) {
-    const diffMs = uploaded - Date.now();
+  if (publishedAt && publishedAt > 0) {
+    const diffMs = publishedAt - Date.now();
     const dayMs = 24 * 60 * 60 * 1000;
     const abs = Math.abs(diffMs);
     if (abs < dayMs) return relativeLabel("hour", Math.round(diffMs / (60 * 60 * 1000)), locale);

@@ -17,7 +17,7 @@ export function WatchInfo({ stream }: Props) {
   const { add, remove, isSubscribed } = useSubscriptions();
   const subscribed = stream.channelUrl ? isSubscribed(stream.channelUrl) : false;
   const [toastMsg, setToastMsg] = useState<string | null>(null);
-  const publishedText = formatPublishedDate(stream.uploaded, stream.uploadDate, locale);
+  const publishedText = formatPublishedDate(stream.publishedAt, undefined, locale);
 
   useEffect(() => {
     if (!toastMsg) return;
