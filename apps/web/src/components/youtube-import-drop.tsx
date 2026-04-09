@@ -1,6 +1,9 @@
 import { YoutubeImportDropzone } from "../settings/youtube-import-dropzone";
 import { YoutubeImportQueueList } from "./youtube-import-queue-list";
 
+const TAKEOUT_URL =
+  "https://takeout.google.com/settings/takeout/custom/youtube,my_activity?dest=mail&frequency=once";
+
 type Props = {
   queue: File[];
   currentIndex: number;
@@ -90,7 +93,7 @@ function TakeoutGuide() {
         <li>
           Go to{" "}
           <a
-            href="https://takeout.google.com"
+            href={TAKEOUT_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="text-zinc-300 underline"
