@@ -34,6 +34,9 @@ curl -fsSL https://raw.githubusercontent.com/Priveetee/TypeType/main/scripts/ins
 
 By default, this installs to `~/typetype-stack` and starts the stack.
 
+When `.env` is created, downloader S3 credentials are generated uniquely (random) for this host.
+No hardcoded shared downloader secret is used at install time.
+
 Requirements before running this command:
 
 - Docker installed
