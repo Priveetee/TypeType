@@ -59,8 +59,15 @@ done
 need_cmd() {
   if ! command -v "$1" >/dev/null 2>&1; then
     echo "[install] Missing required command: $1" >&2
-    echo "[install] Please install Docker + Docker Compose first." >&2
-    echo "[install] Docs: https://docs.docker.com/get-docker/" >&2
+    if [[ "$1" == "docker" ]]; then
+      echo "[install] Please install Docker + Docker Compose first." >&2
+      echo "[install] Quick install (Debian/Ubuntu):" >&2
+      echo "[install]   curl -fsSL https://get.docker.com -o get-docker.sh" >&2
+      echo "[install]   sudo sh get-docker.sh" >&2
+      echo "[install]   sudo usermod -aG docker \$USER" >&2
+      echo "[install]   newgrp docker" >&2
+      echo "[install] Docs: https://docs.docker.com/get-docker/" >&2
+    fi
     exit 1
   fi
 }
@@ -132,6 +139,11 @@ require_tty
 if ! docker compose version >/dev/null 2>&1; then
   echo "[install] docker compose is required (Docker Compose v2)." >&2
   echo "[install] Please install Docker Desktop / Docker Engine with Compose plugin." >&2
+  echo "[install] Quick install (Debian/Ubuntu):" >&2
+  echo "[install]   curl -fsSL https://get.docker.com -o get-docker.sh" >&2
+  echo "[install]   sudo sh get-docker.sh" >&2
+  echo "[install]   sudo usermod -aG docker \$USER" >&2
+  echo "[install]   newgrp docker" >&2
   echo "[install] Docs: https://docs.docker.com/compose/install/" >&2
   exit 1
 fi
