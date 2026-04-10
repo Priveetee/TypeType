@@ -33,7 +33,12 @@ export function useDownloaderJob() {
     return subscribeDownloaderEvents(jobId, {
       onMessage: (next) =>
         setEventJob((current) => (current?.id === next.id ? { ...current, ...next } : next)),
-      onError: () => setSseUnavailable(true),
+      onError: (status) => {
+        if (status === 404) {
+          setSseUnavailable(true);
+          return;
+        }
+      },
     });
   }, [jobId]);
 
