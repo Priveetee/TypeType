@@ -79,15 +79,13 @@ export async function downloadDownloaderArtifact(jobId: string): Promise<void> {
     const fileName =
       filenameFromHeader(res.headers.get("content-disposition")) ??
       `typetype-download-${jobId}.${extensionFromType(res.headers.get("content-type"))}`;
-    const share = navigator.share;
-    const canShare = navigator.canShare;
-    if (share && canShare) {
+    if (typeof navigator.share === "function" && typeof navigator.canShare === "function") {
       const file = new File([blob], fileName, {
         type: blob.type || "application/octet-stream",
         lastModified: Date.now(),
       });
-      if (canShare({ files: [file] })) {
-        await share({ files: [file], title: fileName });
+      if (navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: fileName });
         return;
       }
     }
