@@ -78,6 +78,9 @@ function isFirefoxBrowser(): boolean {
 }
 
 function resolvePreviewSrc(stream: VideoStream): PreviewSrc {
+  if (typeof window !== "undefined" && window.matchMedia("(hover: none)").matches) {
+    return null;
+  }
   if (stream.hlsUrl) {
     return {
       url: proxyDashManifest(

@@ -5,6 +5,7 @@ import type {
 } from "../types/downloader";
 import { ApiError } from "./api";
 import { API_BASE as BASE } from "./env";
+import { isMobileDownloadDevice } from "./ios-device";
 
 type ErrorBody = {
   error?: string;
@@ -68,6 +69,10 @@ function filenameFromHeader(contentDisposition: string | null): string | null {
 
 export async function downloadDownloaderArtifact(jobId: string): Promise<void> {
   const endpoint = `${BASE}/downloader/jobs/${encodeURIComponent(jobId)}/artifact`;
+  if (isMobileDownloadDevice()) {
+    window.location.assign(endpoint);
+    return;
+  }
   const res = await fetch(endpoint);
   if (!res.ok) {
     const body = await readJson(res);
@@ -81,6 +86,10 @@ export async function downloadDownloaderArtifact(jobId: string): Promise<void> {
   const a = document.createElement("a");
   a.href = objectUrl;
   a.download = fileName;
+  a.rel = "noopener";
+  a.target = "_blank";
+  document.body.appendChild(a);
   a.click();
+  document.body.removeChild(a);
   setTimeout(() => URL.revokeObjectURL(objectUrl), 10_000);
 }

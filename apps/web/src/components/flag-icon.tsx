@@ -1,9 +1,11 @@
-import * as Flags from "country-flag-icons/react/3x2";
-
-type FlagCode = keyof typeof Flags;
-
-function isFlagCode(code: string): code is FlagCode {
-  return code in Flags;
+function toFlagEmoji(code: string): string | null {
+  const normalized = code.trim().toUpperCase();
+  if (!/^[A-Z]{2}$/.test(normalized)) return null;
+  const first = normalized.codePointAt(0);
+  const second = normalized.codePointAt(1);
+  if (first === undefined || second === undefined) return null;
+  const base = 127397;
+  return String.fromCodePoint(first + base, second + base);
 }
 
 type FlagIconProps = {
@@ -12,7 +14,11 @@ type FlagIconProps = {
 };
 
 export function FlagIcon({ code, className }: FlagIconProps) {
-  if (!isFlagCode(code)) return null;
-  const Flag = Flags[code];
-  return <Flag className={className} />;
+  const flag = toFlagEmoji(code);
+  if (!flag) return null;
+  return (
+    <span role="img" aria-label={`${code.toUpperCase()} flag`} className={className}>
+      {flag}
+    </span>
+  );
 }

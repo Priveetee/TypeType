@@ -1,13 +1,11 @@
 import { useRef, useState } from "react";
 import { useAuth } from "../hooks/use-auth";
 import { useFavoritesPlaylist } from "../hooks/use-favorites-playlist";
-import { useMobile } from "../hooks/use-mobile";
 import { useShareUrl } from "../hooks/use-share-url";
 import { detectProvider } from "../lib/provider";
 import { goto } from "../lib/route-redirect";
 import type { VideoStream } from "../types/stream";
 import { DanmakuControls } from "./danmaku-controls";
-import { DownloadDropdown } from "./download-dropdown";
 import { DownloadSheet } from "./download-sheet";
 import { PlaylistAddDropdown } from "./playlist-add-dropdown";
 import { ReportBugModal } from "./report-bug-modal";
@@ -21,13 +19,11 @@ type Props = {
 };
 export function WatchActions({ stream }: Props) {
   const { copied, share } = useShareUrl();
-  const isMobile = useMobile();
   const [playlistOpen, setPlaylistOpen] = useState(false);
   const [downloadOpen, setDownloadOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [toastLabel, setToastLabel] = useState<string | null>(null);
   const saveAnchorRef = useRef<HTMLButtonElement>(null);
-  const downloadAnchorRef = useRef<HTMLButtonElement>(null);
   const { isAuthed } = useAuth();
   const {
     add: addFavorite,
@@ -65,9 +61,9 @@ export function WatchActions({ stream }: Props) {
     setDownloadOpen(true);
   }
 
-  const showSave = !isMobile;
-  const showReport = !isMobile;
-  const showDanmaku = !isMobile && isNicoNico;
+  const showSave = true;
+  const showReport = true;
+  const showDanmaku = isNicoNico;
 
   return (
     <div className="flex items-center gap-1 flex-wrap">
@@ -80,7 +76,7 @@ export function WatchActions({ stream }: Props) {
         <StarIcon filled={favorited} />
         {favPending ? "Saving..." : favorited ? "Favorited" : "Favorite"}
       </WatchActionButton>
-      <WatchActionButton buttonRef={downloadAnchorRef} onClick={handleDownloadMock}>
+      <WatchActionButton onClick={handleDownloadMock}>
         <DownloadIcon />
         Download
       </WatchActionButton>
@@ -126,21 +122,13 @@ export function WatchActions({ stream }: Props) {
           onSaved={handleSaved}
         />
       )}
-      {downloadOpen &&
-        (isMobile ? (
-          <DownloadSheet
-            stream={stream}
-            onClose={() => setDownloadOpen(false)}
-            onDone={(message) => handleSaved(message)}
-          />
-        ) : (
-          <DownloadDropdown
-            stream={stream}
-            anchorEl={downloadAnchorRef.current}
-            onClose={() => setDownloadOpen(false)}
-            onDone={(message) => handleSaved(message)}
-          />
-        ))}
+      {downloadOpen && (
+        <DownloadSheet
+          stream={stream}
+          onClose={() => setDownloadOpen(false)}
+          onDone={(message) => handleSaved(message)}
+        />
+      )}
       {reportOpen && <ReportBugModal videoUrl={stream.id} onClose={() => setReportOpen(false)} />}
     </div>
   );

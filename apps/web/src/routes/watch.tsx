@@ -52,7 +52,7 @@ function WatchPage() {
     });
   }, [stream]);
 
-  if (isLoading || progressFetch.isPending) return <PlayerOnlyLoader />;
+  if (isLoading) return <PlayerOnlyLoader />;
 
   if (isError || !stream) {
     const genericExtractorError =
@@ -60,17 +60,17 @@ function WatchPage() {
       error.status === 422 &&
       error.message ===
         "Error occurs when fetching the page. Try increase the loading timeout in Settings.";
-    const message = genericExtractorError
-      ? "This video may be members-only or temporarily unavailable"
+    const isMemberOnlyError = isMemberOnlyApiError(error) || genericExtractorError;
+    const message = isMemberOnlyError
+      ? MEMBER_ONLY_MESSAGE
       : error instanceof ApiError && (error.status === 400 || error.status === 422)
         ? error.message
         : isStreamUnavailableError(error)
           ? "This video is currently unavailable"
           : "Failed to load stream.";
-    const isMemberOnlyError = isMemberOnlyApiError(error);
     return (
       <StreamError
-        message={isMemberOnlyError ? MEMBER_ONLY_MESSAGE : message}
+        message={message}
         onRetry={() => {
           void refetch();
         }}

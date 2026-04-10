@@ -2,7 +2,15 @@ export type DownloaderMode = "video" | "audio";
 
 export type DownloaderJobStatus = "queued" | "running" | "done" | "failed";
 
-export type DownloaderJobStage = "queued" | "downloading" | "finalizing" | "failed";
+export type DownloaderJobStage =
+  | "queued"
+  | "running"
+  | "downloading"
+  | "finalizing"
+  | "done"
+  | "cached"
+  | "cancelled"
+  | "failed";
 
 export type DownloaderJobOptions = {
   mode: DownloaderMode;
@@ -62,4 +70,8 @@ export type DownloaderJobResponse = {
   artifactUrl?: string | null;
   errorCode?: string | null;
   error?: string | null;
+  tokenFetchMs?: number | null;
+  ytdlpMs?: number | null;
+  uploadMs?: number | null;
+  totalMs?: number | null;
 };

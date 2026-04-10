@@ -1,0 +1,122 @@
+services:
+  typetype:
+    image: ghcr.io/priveetee/typetype-beta:latest
+    ports:
+      - "18082:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - typetype-server
+    restart: unless-stopped
+
+  typetype-server:
+    image: ghcr.io/priveetee/typetype-server-beta:latest
+    ports:
+      - "18080:8080"
+    env_file: .env
+    environment:
+      DOWNLOADER_SERVICE_URL: http://typetype-downloader:18093
+    depends_on:
+      postgres-init:
+        condition: service_completed_successfully
+      dragonfly:
+        condition: service_started
+      typetype-token:
+        condition: service_started
+      typetype-downloader:
+        condition: service_started
+    restart: unless-stopped
+
+  typetype-downloader:
+    image: ghcr.io/priveetee/typetype-downloader-beta:latest
+    ports:
+      - "19093:18093"
+    environment:
+      HTTP_PORT: "18093"
+      DB_URL: jdbc:postgresql://postgres:5432/typetype_downloader
+      DB_USER: typetype
+      DB_PASSWORD: typetype
+      REDIS_HOST: dragonfly
+      REDIS_PORT: "6379"
+      REDIS_QUEUE_KEY: downloader:queue
+      MAX_CONCURRENT_WORKERS: "2"
+      UPLOAD_CONCURRENCY: "2"
+      MAX_QUEUE_SIZE: "100"
+      JOB_TTL_SECONDS: "600"
+      YTDLP_BIN: yt-dlp
+      YTDLP_TIMEOUT_SECONDS: "120"
+      ENABLE_TRANSCODE: "false"
+      S3_ENDPOINT: http://garage:3900
+      S3_REGION: garage
+      S3_BUCKET: typetype-downloads
+      S3_ACCESS_KEY: ${DOWNLOADER_S3_ACCESS_KEY}
+      S3_SECRET_KEY: ${DOWNLOADER_S3_SECRET_KEY}
+      S3_ARTIFACT_TTL_SECONDS: "7200"
+      TOKEN_SERVICE_URL: http://typetype-token:8081
+    depends_on:
+      postgres-init:
+        condition: service_completed_successfully
+      dragonfly:
+        condition: service_started
+      garage:
+        condition: service_started
+      typetype-token:
+        condition: service_started
+    restart: unless-stopped
+
+  typetype-token:
+    image: ghcr.io/priveetee/typetype-token:latest
+    ports:
+      - "18081:8081"
+    init: true
+    ipc: host
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: typetype
+      POSTGRES_USER: typetype
+      POSTGRES_PASSWORD: typetype
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  postgres-init:
+    image: postgres:17
+    depends_on:
+      postgres:
+        condition: service_started
+    environment:
+      PGPASSWORD: typetype
+    command:
+      - /bin/sh
+      - -ec
+      - |
+        until pg_isready -h postgres -U typetype -d typetype; do sleep 1; done
+        EXISTS=$$(psql -h postgres -U typetype -d typetype -tAc "SELECT 1 FROM pg_database WHERE datname='typetype_downloader'")
+        if [ "$$EXISTS" != "1" ]; then
+          psql -h postgres -U typetype -d typetype -c "CREATE DATABASE typetype_downloader"
+        fi
+    restart: "no"
+
+  dragonfly:
+    image: docker.dragonflydb.io/dragonflydb/dragonfly:latest
+    ulimits:
+      memlock: -1
+    restart: unless-stopped
+
+  garage:
+    image: dxflrs/garage:v2.2.0
+    volumes:
+      - ./garage.toml:/etc/garage.toml:ro
+      - garage_meta:/var/lib/garage/meta
+      - garage_data:/var/lib/garage/data
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  garage_meta:
+  garage_data:

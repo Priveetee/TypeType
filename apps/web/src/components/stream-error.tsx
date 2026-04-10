@@ -1,5 +1,6 @@
 import { useRouter } from "@tanstack/react-router";
 import { parseGeoRestriction } from "../lib/geo-restriction";
+import { isMemberOnlyMessage } from "../lib/member-only";
 import { FlagIcon } from "./flag-icon";
 
 type Props = {
@@ -10,7 +11,7 @@ type Props = {
 export function StreamError({ message, onRetry }: Props) {
   const router = useRouter();
   const countryCode = parseGeoRestriction(message);
-  const isMemberOnly = message === "This video is only available for members";
+  const isMemberOnly = isMemberOnlyMessage(message);
 
   return (
     <div className="fixed inset-0 bg-zinc-950 flex flex-col items-center justify-center gap-5">

@@ -55,8 +55,8 @@ function pickVideoQuality(height: number, width?: number): string {
 }
 
 function pickAudioQuality(bitrate: number): string {
-  if (bitrate >= 192_000) return "best";
-  if (bitrate >= 128_000) return "balanced";
+  if (bitrate >= 192) return "best";
+  if (bitrate >= 128) return "balanced";
   return "small";
 }
 
@@ -109,7 +109,7 @@ export function buildDownloadOptions(stream: VideoStream): DownloadOption[] {
       return {
         id: `audio-${item.itag}-${index}`,
         mode: "audio" as const,
-        label: `${item.bitrate ? `${Math.round(item.bitrate / 1000)} kbps` : "Audio"} ${container}`,
+        label: `${item.bitrate ? `${Math.round(item.bitrate)} kbps` : "Audio"} ${container}`,
         detail: `${locale} · ${codec} · itag ${item.itag}`,
         size: formatBytes(item.contentLength),
         recommended: false,
@@ -128,7 +128,7 @@ export function buildDownloadOptions(stream: VideoStream): DownloadOption[] {
 
   if (audios.length > 0) {
     const recommendedAudio = audios.findIndex(
-      (audio) => (audio.bitrate ?? 0) >= 160_000 && (audio.bitrate ?? 0) < 256_000,
+      (audio) => (audio.bitrate ?? 0) >= 160 && (audio.bitrate ?? 0) < 256,
     );
     const index = recommendedAudio >= 0 ? recommendedAudio : 0;
     audios[index] = { ...audios[index], recommended: true };

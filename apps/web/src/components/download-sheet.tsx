@@ -64,50 +64,56 @@ export function DownloadSheet({ stream, onClose, onDone }: Props) {
         onClick={dismiss}
         className={`absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${isClosing ? "opacity-0" : "opacity-100"}`}
       />
-      <div
-        className={`absolute inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+0.5rem)] z-10 rounded-2xl border border-zinc-700 bg-zinc-950 p-3 shadow-2xl ${isClosing ? "[animation:download-pop-out_0.34s_cubic-bezier(0.22,1,0.36,1)]" : "[animation:download-pop-in_0.22s_cubic-bezier(0.16,1,0.3,1)]"} md:inset-auto md:right-4 md:top-20 md:w-[30rem] md:p-4`}
-      >
-        <div className="mb-3 flex items-center justify-between">
-          <div>
-            <p className="text-sm font-semibold text-zinc-100">Download</p>
-            <p className="max-w-72 truncate text-xs text-zinc-400">{stream.title}</p>
-          </div>
-          <button
-            type="button"
-            onClick={dismiss}
-            className="rounded-md px-2 py-1 text-xs text-zinc-300 hover:bg-zinc-800"
-          >
-            Close
-          </button>
-        </div>
-        {!showWorkingState && (
-          <>
-            <DownloadSheetPicker
-              mode={mode}
-              options={options}
-              selectedId={selectedId}
-              onSelect={setSelectedId}
-              onMode={selectMode}
-            />
+      <div className="absolute inset-0 z-10 flex items-end justify-center px-3 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] pt-12 md:items-center md:px-4 md:pb-4">
+        <div
+          className={`w-[min(46rem,100%)] rounded-2xl border border-zinc-700 bg-zinc-950 p-3 shadow-2xl ${isClosing ? "[animation:download-pop-out_0.34s_cubic-bezier(0.22,1,0.36,1)]" : "[animation:download-pop-in_0.22s_cubic-bezier(0.16,1,0.3,1)]"} md:p-4`}
+        >
+          <div className="mb-3 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-semibold text-zinc-100">Download</p>
+              <p className="max-w-72 truncate text-xs text-zinc-400">{stream.title}</p>
+            </div>
             <button
               type="button"
-              onClick={startDownload}
-              disabled={!selected}
-              className="mt-4 w-full rounded-lg bg-zinc-100 px-3 py-2 text-sm font-medium text-zinc-900 transition-colors hover:bg-white disabled:cursor-not-allowed disabled:bg-zinc-700 disabled:text-zinc-300"
+              onClick={dismiss}
+              className="rounded-md px-2 py-1 text-xs text-zinc-300 hover:bg-zinc-800"
             >
-              Start download
+              Close
             </button>
-          </>
-        )}
-        <DownloaderJobFeedback
-          stage={downloader.stage}
-          progressPercent={downloader.progressPercent}
-          resolved={downloader.resolved}
-          errorCode={downloader.errorCode}
-          errorText={artifactError ?? errorText}
-          immersive={showWorkingState}
-          forceWaiting={completion.isCompleting}
-        />
+          </div>
+          {!showWorkingState && (
+            <>
+              <DownloadSheetPicker
+                mode={mode}
+                options={options}
+                selectedId={selectedId}
+                onSelect={setSelectedId}
+                onMode={selectMode}
+              />
+              <button
+                type="button"
+                onClick={startDownload}
+                disabled={!selected}
+                className="mt-4 w-full rounded-lg bg-zinc-100 px-3 py-2 text-sm font-medium text-zinc-900 transition-colors hover:bg-white disabled:cursor-not-allowed disabled:bg-zinc-700 disabled:text-zinc-300"
+              >
+                Start download
+              </button>
+            </>
+          )}
+          <DownloaderJobFeedback
+            stage={downloader.stage}
+            progressPercent={downloader.progressPercent}
+            resolved={downloader.resolved}
+            errorCode={downloader.errorCode}
+            errorText={artifactError ?? errorText}
+            tokenFetchMs={downloader.tokenFetchMs}
+            ytdlpMs={downloader.ytdlpMs}
+            uploadMs={downloader.uploadMs}
+            totalMs={downloader.totalMs}
+            immersive={showWorkingState}
+            forceWaiting={completion.isCompleting}
+          />
+        </div>
       </div>
     </div>
   );
