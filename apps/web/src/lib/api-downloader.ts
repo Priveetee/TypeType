@@ -5,7 +5,7 @@ import type {
 } from "../types/downloader";
 import { ApiError } from "./api";
 import { API_BASE as BASE } from "./env";
-import { isIosDevice, isMobileDownloadDevice } from "./ios-device";
+import { isMobileDownloadDevice } from "./ios-device";
 
 type ErrorBody = {
   error?: string;
@@ -69,38 +69,6 @@ function filenameFromHeader(contentDisposition: string | null): string | null {
 
 export async function downloadDownloaderArtifact(jobId: string): Promise<void> {
   const endpoint = `${BASE}/downloader/jobs/${encodeURIComponent(jobId)}/artifact`;
-  if (isIosDevice()) {
-    const res = await fetch(endpoint);
-    if (!res.ok) {
-      const body = await readJson(res);
-      throw new ApiError(readErrorMessage(body, "Failed to download artifact"), res.status);
-    }
-    const blob = await res.blob();
-    const fileName =
-      filenameFromHeader(res.headers.get("content-disposition")) ??
-      `typetype-download-${jobId}.${extensionFromType(res.headers.get("content-type"))}`;
-    if (typeof navigator.share === "function" && typeof navigator.canShare === "function") {
-      const file = new File([blob], fileName, {
-        type: blob.type || "application/octet-stream",
-        lastModified: Date.now(),
-      });
-      if (navigator.canShare({ files: [file] })) {
-        await navigator.share({ files: [file], title: fileName });
-        return;
-      }
-    }
-    const objectUrl = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = objectUrl;
-    a.download = fileName;
-    a.rel = "noopener";
-    a.target = "_blank";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(() => URL.revokeObjectURL(objectUrl), 10_000);
-    return;
-  }
   if (isMobileDownloadDevice()) {
     window.location.assign(endpoint);
     return;
