@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { isMobileDownloadDevice } from "../lib/ios-device";
 
 type Params = {
   isDone: boolean;
@@ -21,7 +22,9 @@ export function useArtifactDownloadOnDone({
   reset,
   onArtifactError,
 }: Params) {
+  const isMobile = isMobileDownloadDevice();
   const [isCompleting, setIsCompleting] = useState(false);
+  const [awaitingUserAction, setAwaitingUserAction] = useState(false);
   const handledJobIdRef = useRef<string | null>(null);
 
   const completeDownload = useCallback(
@@ -39,17 +42,35 @@ export function useArtifactDownloadOnDone({
   useEffect(() => {
     if (isDone) return;
     setIsCompleting(false);
+    setAwaitingUserAction(false);
   }, [isDone]);
 
   useEffect(() => {
     if (jobId) return;
     handledJobIdRef.current = null;
+    setAwaitingUserAction(false);
   }, [jobId]);
+
+  const triggerArtifactOpen = useCallback(async () => {
+    setIsCompleting(true);
+    setAwaitingUserAction(false);
+    try {
+      await completeDownload(selectedLabel);
+    } catch (error) {
+      setIsCompleting(false);
+      setAwaitingUserAction(true);
+      onArtifactError(error instanceof Error ? error.message : "Download failed");
+    }
+  }, [completeDownload, onArtifactError, selectedLabel]);
 
   useEffect(() => {
     if (!isDone || !jobId) return;
     if (handledJobIdRef.current === jobId) return;
     handledJobIdRef.current = jobId;
+    if (isMobile) {
+      setAwaitingUserAction(true);
+      return;
+    }
     setIsCompleting(true);
     let cancelled = false;
     const run = async () => {
@@ -66,7 +87,7 @@ export function useArtifactDownloadOnDone({
     return () => {
       cancelled = true;
     };
-  }, [completeDownload, isDone, jobId, onArtifactError, selectedLabel]);
+  }, [completeDownload, isDone, isMobile, jobId, onArtifactError, selectedLabel]);
 
-  return { isCompleting };
+  return { isCompleting, awaitingUserAction, triggerArtifactOpen };
 }
