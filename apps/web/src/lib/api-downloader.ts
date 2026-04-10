@@ -5,9 +5,7 @@ import type {
 } from "../types/downloader";
 import { ApiError } from "./api";
 import { API_BASE as BASE } from "./env";
-import { isIosDevice, isMobileDownloadDevice } from "./ios-device";
-
-let preparedIosWindow: Window | null = null;
+import { isMobileDownloadDevice } from "./ios-device";
 
 type ErrorBody = {
   error?: string;
@@ -52,41 +50,6 @@ export async function fetchDownloaderJob(jobId: string): Promise<DownloaderJobRe
   return body as DownloaderJobResponse;
 }
 
-export function prepareIosArtifactWindow() {
-  if (!isIosDevice()) return;
-  if (preparedIosWindow && !preparedIosWindow.closed) return;
-  const opened = window.open("about:blank", "_blank");
-  if (!opened) return;
-  opened.document.title = "Preparing download";
-  preparedIosWindow = opened;
-}
-
-export function cancelPreparedIosArtifactWindow() {
-  if (!preparedIosWindow || preparedIosWindow.closed) {
-    preparedIosWindow = null;
-    return;
-  }
-  preparedIosWindow.close();
-  preparedIosWindow = null;
-}
-
-function consumePreparedIosArtifactWindow(): Window | null {
-  const target = preparedIosWindow;
-  preparedIosWindow = null;
-  if (!target || target.closed) return null;
-  return target;
-}
-
-function clickDownloadAnchor(doc: Document, href: string) {
-  const a = doc.createElement("a");
-  a.href = href;
-  a.download = "";
-  a.rel = "noopener";
-  doc.body.appendChild(a);
-  a.click();
-  doc.body.removeChild(a);
-}
-
 function extensionFromType(contentType: string | null): string {
   const value = contentType ?? "";
   if (value.includes("video/mp4")) return "mp4";
@@ -106,33 +69,8 @@ function filenameFromHeader(contentDisposition: string | null): string | null {
 
 export async function downloadDownloaderArtifact(jobId: string): Promise<void> {
   const endpoint = `${BASE}/downloader/jobs/${encodeURIComponent(jobId)}/artifact`;
-  if (isIosDevice()) {
-    const target = consumePreparedIosArtifactWindow();
-    if (target) {
-      try {
-        const doc = target.document;
-        doc.open();
-        doc.write(
-          "<!doctype html><html><head><title>Preparing download</title></head><body></body></html>",
-        );
-        doc.close();
-        clickDownloadAnchor(doc, endpoint);
-        return;
-      } catch {
-        target.location.assign(endpoint);
-        return;
-      }
-    }
-    try {
-      clickDownloadAnchor(document, endpoint);
-      return;
-    } catch {
-      window.location.assign(endpoint);
-      return;
-    }
-  }
   if (isMobileDownloadDevice()) {
-    clickDownloadAnchor(document, endpoint);
+    window.location.assign(endpoint);
     return;
   }
   const res = await fetch(endpoint);
