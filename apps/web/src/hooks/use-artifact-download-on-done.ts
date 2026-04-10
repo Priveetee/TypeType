@@ -1,6 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { isMobileDownloadDevice } from "../lib/ios-device";
 
+function isAbortError(error: unknown): boolean {
+  if (error instanceof DOMException) return error.name === "AbortError";
+  if (error instanceof Error) return error.name === "AbortError";
+  return false;
+}
+
 type Params = {
   isDone: boolean;
   jobId: string | undefined;
@@ -54,9 +60,15 @@ export function useArtifactDownloadOnDone({
   const triggerArtifactOpen = useCallback(async () => {
     setIsCompleting(true);
     setAwaitingUserAction(false);
+    onArtifactError(null);
     try {
       await completeDownload(selectedLabel);
     } catch (error) {
+      if (isAbortError(error)) {
+        setIsCompleting(false);
+        setAwaitingUserAction(true);
+        return;
+      }
       setIsCompleting(false);
       setAwaitingUserAction(true);
       onArtifactError(error instanceof Error ? error.message : "Download failed");

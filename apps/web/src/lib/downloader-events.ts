@@ -83,11 +83,11 @@ export function subscribeDownloaderEvents(
   jobId: string,
   handlers: {
     onMessage: (next: DownloaderJobResponse) => void;
-    onError: () => void;
+    onError: (status: number | null) => void;
   },
 ): () => void {
   if (eventsDisabledForSession) {
-    handlers.onError();
+    handlers.onError(404);
     return () => {};
   }
   let closed = false;
@@ -104,10 +104,19 @@ export function subscribeDownloaderEvents(
     }
   };
   eventSource.addEventListener("progress", onProgress);
+  eventSource.addEventListener("open", () => {
+    if (!closed) {
+      eventsDisabledForSession = false;
+    }
+  });
   eventSource.onerror = () => {
     if (closed) return;
-    eventsDisabledForSession = true;
-    handlers.onError();
+    const readyState = eventSource.readyState;
+    const isHardFailure = readyState === EventSource.CLOSED;
+    if (isHardFailure) {
+      eventsDisabledForSession = true;
+    }
+    handlers.onError(isHardFailure ? 404 : null);
     closed = true;
     eventSource.close();
   };
