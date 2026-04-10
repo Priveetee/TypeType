@@ -1,8 +1,9 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useArtifactDownloadOnDone } from "../hooks/use-artifact-download-on-done";
 import { useDownloaderJob } from "../hooks/use-downloader-job";
 import { useOverlayLock } from "../hooks/use-overlay-lock";
 import { useSmoothDismiss } from "../hooks/use-smooth-dismiss";
+import { cancelPreparedIosArtifactWindow, prepareIosArtifactWindow } from "../lib/api-downloader";
 import type { VideoStream } from "../types/stream";
 import {
   buildDownloaderCreatePayload,
@@ -22,7 +23,8 @@ export function DownloadSheet({ stream, onClose, onDone }: Props) {
   useOverlayLock(true);
   const { isClosing, dismiss } = useSmoothDismiss({ onClose });
   const downloader = useDownloaderJob();
-  const { isDone, jobId, isQueued, isRunning, errorText, openArtifact, reset, start } = downloader;
+  const { isDone, jobId, isQueued, isRunning, isFailed, errorText, openArtifact, reset, start } =
+    downloader;
   const isBusy = isQueued || isRunning;
   const [artifactError, setArtifactError] = useState<string | null>(null);
   const options = useMemo(() => buildDownloadOptions(stream), [stream]);
@@ -44,6 +46,17 @@ export function DownloadSheet({ stream, onClose, onDone }: Props) {
   });
   const showWorkingState = isBusy || completion.isCompleting;
 
+  useEffect(() => {
+    if (!isFailed) return;
+    cancelPreparedIosArtifactWindow();
+  }, [isFailed]);
+
+  useEffect(() => {
+    return () => {
+      cancelPreparedIosArtifactWindow();
+    };
+  }, []);
+
   function selectMode(next: DownloadMode) {
     setMode(next);
     const modeOptions = options.filter((option) => option.mode === next);
@@ -53,6 +66,7 @@ export function DownloadSheet({ stream, onClose, onDone }: Props) {
   function startDownload() {
     if (!selected) return;
     setArtifactError(null);
+    prepareIosArtifactWindow();
     start(buildDownloaderCreatePayload(stream.id, selected));
   }
 
