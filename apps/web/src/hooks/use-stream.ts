@@ -1,8 +1,12 @@
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { ApiError, fetchStream } from "../lib/api";
 import { mapStreamResponse } from "../lib/mappers";
+import {
+  isMemberOnlyApiError as isMemberOnlyApiResponse,
+  MEMBER_ONLY_MESSAGE,
+} from "../lib/member-only";
 
-export const MEMBER_ONLY_MESSAGE = "This video is only available for members";
+export { MEMBER_ONLY_MESSAGE };
 
 export function streamQueryOptions(url: string) {
   return queryOptions({
@@ -34,7 +38,7 @@ export function isStreamUnavailableError(error: unknown): boolean {
 }
 
 export function isMemberOnlyApiError(error: unknown): boolean {
-  return error instanceof ApiError && error.status === 400 && error.message === MEMBER_ONLY_MESSAGE;
+  return isMemberOnlyApiResponse(error);
 }
 
 export function useStream(url: string) {
