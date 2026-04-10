@@ -77,6 +77,16 @@ function consumePreparedIosArtifactWindow(): Window | null {
   return target;
 }
 
+function clickDownloadAnchor(doc: Document, href: string) {
+  const a = doc.createElement("a");
+  a.href = href;
+  a.download = "";
+  a.rel = "noopener";
+  doc.body.appendChild(a);
+  a.click();
+  doc.body.removeChild(a);
+}
+
 function extensionFromType(contentType: string | null): string {
   const value = contentType ?? "";
   if (value.includes("video/mp4")) return "mp4";
@@ -99,18 +109,30 @@ export async function downloadDownloaderArtifact(jobId: string): Promise<void> {
   if (isIosDevice()) {
     const target = consumePreparedIosArtifactWindow();
     if (target) {
-      target.location.assign(endpoint);
+      try {
+        const doc = target.document;
+        doc.open();
+        doc.write(
+          "<!doctype html><html><head><title>Preparing download</title></head><body></body></html>",
+        );
+        doc.close();
+        clickDownloadAnchor(doc, endpoint);
+        return;
+      } catch {
+        target.location.assign(endpoint);
+        return;
+      }
+    }
+    try {
+      clickDownloadAnchor(document, endpoint);
+      return;
+    } catch {
+      window.location.assign(endpoint);
       return;
     }
   }
   if (isMobileDownloadDevice()) {
-    const a = document.createElement("a");
-    a.href = endpoint;
-    a.download = "";
-    a.rel = "noopener";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    clickDownloadAnchor(document, endpoint);
     return;
   }
   const res = await fetch(endpoint);
