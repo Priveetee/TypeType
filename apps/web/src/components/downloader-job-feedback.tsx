@@ -22,7 +22,7 @@ function formatResolved(resolved: DownloaderResolvedSelection | null): string | 
     typeof resolved.height === "number"
       ? `${resolved.height}p`
       : typeof resolved.bitrate === "number"
-        ? `${Math.round(resolved.bitrate / 1000)} kbps`
+        ? `${Math.round(resolved.bitrate)} kbps`
         : null;
   const container =
     typeof resolved.container === "string" && resolved.container.length > 0

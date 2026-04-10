@@ -5,7 +5,7 @@ import {
   downloadDownloaderArtifact,
   fetchDownloaderJob,
 } from "../lib/api-downloader";
-import { subscribeDownloaderEvents } from "../lib/downloader-events";
+import { canUseDownloaderEvents, subscribeDownloaderEvents } from "../lib/downloader-events";
 import type {
   DownloaderCreateJobRequest,
   DownloaderJobResponse,
@@ -25,6 +25,10 @@ export function useDownloaderJob() {
 
   useEffect(() => {
     if (!jobId) return;
+    if (!canUseDownloaderEvents()) {
+      setSseUnavailable(true);
+      return;
+    }
     setSseUnavailable(false);
     return subscribeDownloaderEvents(jobId, {
       onMessage: (next) =>

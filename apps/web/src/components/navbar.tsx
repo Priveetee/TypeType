@@ -1,6 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Search } from "lucide-react";
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { useAuth } from "../hooks/use-auth";
 import { useAuthToasts } from "../hooks/use-auth-toasts";
 import { useMobile } from "../hooks/use-mobile";
@@ -10,8 +10,13 @@ import { useUiStore } from "../stores/ui-store";
 import { NavbarAccountControls } from "./navbar-account-controls";
 import { NavbarLeadingControl } from "./navbar-leading-control";
 import { NavbarNotifications } from "./navbar-notifications";
-import { SearchOverlay } from "./search-overlay";
 import { Toast } from "./toast";
+
+const SearchOverlay = lazy(() =>
+  import("./search-overlay").then((module) => ({
+    default: module.SearchOverlay,
+  })),
+);
 
 export function Navbar() {
   const [searchOpen, setSearchOpen] = useState(false);
@@ -99,7 +104,11 @@ export function Navbar() {
           />
         </div>
       </nav>
-      {searchOpen && canOpenSearch && <SearchOverlay onClose={() => setSearchOpen(false)} />}
+      {searchOpen && canOpenSearch && (
+        <Suspense fallback={null}>
+          <SearchOverlay onClose={() => setSearchOpen(false)} />
+        </Suspense>
+      )}
       <Toast message={toast} />
     </>
   );
