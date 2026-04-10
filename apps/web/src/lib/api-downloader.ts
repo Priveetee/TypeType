@@ -70,7 +70,13 @@ function filenameFromHeader(contentDisposition: string | null): string | null {
 export async function downloadDownloaderArtifact(jobId: string): Promise<void> {
   const endpoint = `${BASE}/downloader/jobs/${encodeURIComponent(jobId)}/artifact`;
   if (isMobileDownloadDevice()) {
-    window.location.assign(endpoint);
+    const a = document.createElement("a");
+    a.href = endpoint;
+    a.download = "";
+    a.rel = "noopener";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
     return;
   }
   const res = await fetch(endpoint);
