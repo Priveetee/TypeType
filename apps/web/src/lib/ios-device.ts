@@ -1,6 +1,8 @@
 function isTouchMac(): boolean {
   if (typeof navigator === "undefined") return false;
-  return navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
+  const ua = navigator.userAgent;
+  const desktopModeIpad = /Macintosh/.test(ua) && /Mobile\//.test(ua);
+  return desktopModeIpad || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 }
 
 function isAndroidDevice(): boolean {
