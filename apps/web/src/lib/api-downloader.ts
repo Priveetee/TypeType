@@ -5,7 +5,9 @@ import type {
 } from "../types/downloader";
 import { ApiError } from "./api";
 import { API_BASE as BASE } from "./env";
-import { isMobileDownloadDevice } from "./ios-device";
+import { isIosDevice, isMobileDownloadDevice } from "./ios-device";
+
+let preparedIosWindow: Window | null = null;
 
 type ErrorBody = {
   error?: string;
@@ -50,6 +52,31 @@ export async function fetchDownloaderJob(jobId: string): Promise<DownloaderJobRe
   return body as DownloaderJobResponse;
 }
 
+export function prepareIosArtifactWindow() {
+  if (!isIosDevice()) return;
+  if (preparedIosWindow && !preparedIosWindow.closed) return;
+  const opened = window.open("about:blank", "_blank");
+  if (!opened) return;
+  opened.document.title = "Preparing download";
+  preparedIosWindow = opened;
+}
+
+export function cancelPreparedIosArtifactWindow() {
+  if (!preparedIosWindow || preparedIosWindow.closed) {
+    preparedIosWindow = null;
+    return;
+  }
+  preparedIosWindow.close();
+  preparedIosWindow = null;
+}
+
+function consumePreparedIosArtifactWindow(): Window | null {
+  const target = preparedIosWindow;
+  preparedIosWindow = null;
+  if (!target || target.closed) return null;
+  return target;
+}
+
 function extensionFromType(contentType: string | null): string {
   const value = contentType ?? "";
   if (value.includes("video/mp4")) return "mp4";
@@ -69,6 +96,13 @@ function filenameFromHeader(contentDisposition: string | null): string | null {
 
 export async function downloadDownloaderArtifact(jobId: string): Promise<void> {
   const endpoint = `${BASE}/downloader/jobs/${encodeURIComponent(jobId)}/artifact`;
+  if (isIosDevice()) {
+    const target = consumePreparedIosArtifactWindow();
+    if (target) {
+      target.location.assign(endpoint);
+      return;
+    }
+  }
   if (isMobileDownloadDevice()) {
     const a = document.createElement("a");
     a.href = endpoint;

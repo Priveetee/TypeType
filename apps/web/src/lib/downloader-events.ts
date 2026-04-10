@@ -1,12 +1,6 @@
 import type { DownloaderJobResponse } from "../types/downloader";
 import { API_BASE as BASE } from "./env";
 
-let eventsDisabledForSession = false;
-
-export function canUseDownloaderEvents(): boolean {
-  return !eventsDisabledForSession;
-}
-
 function toFiniteNumber(value: unknown): number | null {
   if (typeof value !== "number" || !Number.isFinite(value)) return null;
   return value;
@@ -83,13 +77,9 @@ export function subscribeDownloaderEvents(
   jobId: string,
   handlers: {
     onMessage: (next: DownloaderJobResponse) => void;
-    onError: (status: number | null) => void;
+    onError: () => void;
   },
 ): () => void {
-  if (eventsDisabledForSession) {
-    handlers.onError(404);
-    return () => {};
-  }
   let closed = false;
   const url = `${BASE}/downloader/jobs/${encodeURIComponent(jobId)}/events`;
   const eventSource = new EventSource(url, { withCredentials: false });
@@ -104,19 +94,9 @@ export function subscribeDownloaderEvents(
     }
   };
   eventSource.addEventListener("progress", onProgress);
-  eventSource.addEventListener("open", () => {
-    if (!closed) {
-      eventsDisabledForSession = false;
-    }
-  });
   eventSource.onerror = () => {
     if (closed) return;
-    const readyState = eventSource.readyState;
-    const isHardFailure = readyState === EventSource.CLOSED;
-    if (isHardFailure) {
-      eventsDisabledForSession = true;
-    }
-    handlers.onError(isHardFailure ? 404 : null);
+    handlers.onError();
     closed = true;
     eventSource.close();
   };
