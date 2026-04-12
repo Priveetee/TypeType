@@ -87,7 +87,6 @@ export function VideoPlayer({
     "--media-user-font-family":
       "system-ui, -apple-system, 'Segoe UI', 'Noto Sans', 'Noto Sans CJK JP', 'Noto Sans Arabic', 'Hiragino Sans', 'Yu Gothic', 'Microsoft YaHei', 'WenQuanYi Micro Hei', sans-serif",
   };
-
   return (
     <MediaPlayer
       className={className ? `w-full h-full dark ${className}` : "w-full h-full dark"}
@@ -133,6 +132,7 @@ export function VideoPlayer({
       <DefaultVideoLayout
         icons={defaultLayoutIcons}
         thumbnails={thumbnailVtt}
+        smallLayoutWhen={false}
         translations={{ Captions: "Subtitles" }}
         slots={{
           settingsMenuItemsStart: (

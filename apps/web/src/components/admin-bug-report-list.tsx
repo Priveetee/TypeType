@@ -13,7 +13,7 @@ function trimDescription(value: string): string {
 }
 
 export function AdminBugReportList({ reports, selectedId, onSelect }: Props) {
-  if (reports.length === 0) return <p className="text-sm text-zinc-500">No bug reports found.</p>;
+  if (reports.length === 0) return <p className="text-sm text-fg-soft">No bug reports found.</p>;
 
   return (
     <div className="max-h-[68svh] space-y-2 overflow-y-auto pr-1">
@@ -24,13 +24,13 @@ export function AdminBugReportList({ reports, selectedId, onSelect }: Props) {
             key={report.id}
             type="button"
             onClick={() => onSelect(report.id)}
-            className={`w-full border-l-2 px-3 py-2 text-left ${selected ? "border-zinc-200 bg-zinc-900/70" : "border-zinc-700 hover:border-zinc-400"}`}
+            className={`w-full border-l-2 px-3 py-2 text-left ${selected ? "border-border bg-surface/70" : "border-border-strong hover:border-border-strong"}`}
           >
-            <p className="text-sm text-zinc-100">{trimDescription(report.description)}</p>
-            <p className="mt-1 text-xs text-zinc-500">
+            <p className="text-sm text-fg">{trimDescription(report.description)}</p>
+            <p className="mt-1 text-xs text-fg-soft">
               {report.category.replace("_", " ")} · {report.userEmail}
             </p>
-            <p className="text-xs text-zinc-600">{formatTimestamp(report.createdAt)}</p>
+            <p className="text-xs text-fg-soft">{formatTimestamp(report.createdAt)}</p>
           </button>
         );
       })}

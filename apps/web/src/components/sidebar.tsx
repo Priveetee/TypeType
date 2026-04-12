@@ -22,8 +22,8 @@ const SERVICES: Service[] = [
 ];
 
 const BTN_BASE = "flex items-center h-10 rounded-lg transition-colors w-full";
-const BTN_ACTIVE = "text-zinc-100 bg-zinc-800";
-const BTN_INACTIVE = "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800";
+const BTN_ACTIVE = "text-fg bg-surface-strong";
+const BTN_INACTIVE = "text-fg-muted hover:text-fg hover:bg-surface-strong";
 
 function NavIcon({ children, label }: { children: React.ReactNode; label: string }) {
   return (
@@ -68,10 +68,10 @@ export function Sidebar() {
   const adminSearch = { section: "issues" as const };
 
   const baseClasses = isMobile
-    ? `fixed top-14 left-0 bottom-0 z-50 w-72 max-w-[85vw] bg-zinc-950 flex flex-col py-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] transition-transform duration-200 ${
+    ? `fixed top-14 left-0 bottom-0 z-50 w-72 max-w-[85vw] bg-app flex flex-col py-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] transition-transform duration-200 ${
         mobileOpen ? "translate-x-0" : "-translate-x-full"
       }`
-    : `fixed top-14 left-0 bottom-0 z-40 bg-zinc-950 flex flex-col py-4 transition-all duration-200 ${
+    : `fixed top-14 left-0 bottom-0 z-40 bg-app flex flex-col py-4 transition-all duration-200 ${
         collapsed ? "w-14" : "w-48"
       }`;
   const sectionPadding = isMobile ? "px-3" : "px-2";
@@ -114,9 +114,9 @@ export function Sidebar() {
           ))}
         </div>
 
-        <div className={`mt-4 ${sectionPadding} border-t border-zinc-800 pt-4 flex flex-col gap-1`}>
+        <div className={`mt-4 ${sectionPadding} border-t border-border pt-4 flex flex-col gap-1`}>
           {(!collapsed || isMobile) && (
-            <p className="text-xs text-zinc-600 px-2 mb-1 uppercase tracking-wider">Services</p>
+            <p className="text-xs text-fg-soft px-2 mb-1 uppercase tracking-wider">Services</p>
           )}
           {SERVICES.map((svc) => (
             <button
@@ -144,7 +144,7 @@ export function Sidebar() {
                 signOut();
                 closeMobileSidebar();
               }}
-              className="inline-flex h-10 w-full items-center justify-center rounded-lg border border-zinc-700 bg-zinc-900 text-sm font-medium text-zinc-200 hover:bg-zinc-800"
+              className="inline-flex h-10 w-full items-center justify-center rounded-lg border border-border-strong bg-surface text-sm font-medium text-fg hover:bg-surface-strong"
             >
               Sign out
             </button>

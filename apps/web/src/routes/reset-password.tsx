@@ -42,7 +42,7 @@ function ResetPasswordPage() {
             value={resetToken}
             onChange={(e) => setResetToken(e.target.value)}
             placeholder="Reset token"
-            className="h-10 rounded-lg border border-zinc-700 bg-zinc-950 px-3 text-sm text-zinc-100"
+            className="h-10 rounded-lg border border-border-strong bg-app px-3 text-sm text-fg"
             required
           />
           <input
@@ -50,19 +50,19 @@ function ResetPasswordPage() {
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             placeholder="New password"
-            className="h-10 rounded-lg border border-zinc-700 bg-zinc-950 px-3 text-sm text-zinc-100"
+            className="h-10 rounded-lg border border-border-strong bg-app px-3 text-sm text-fg"
             required
           />
           <button
             type="submit"
             disabled={pending}
-            className="h-10 rounded-lg bg-zinc-100 text-zinc-900 text-sm font-medium disabled:opacity-60"
+            className="h-10 rounded-lg bg-fg text-app text-sm font-medium disabled:opacity-60"
           >
             {pending ? "Updating..." : "Update password"}
           </button>
         </form>
-        <div className="mt-4 text-xs text-zinc-500">
-          <Link to="/login" search={{ redirect: undefined }} className="hover:text-zinc-300">
+        <div className="mt-4 text-xs text-fg-soft">
+          <Link to="/login" search={{ redirect: undefined }} className="hover:text-fg-muted">
             Back to login
           </Link>
         </div>

@@ -35,12 +35,12 @@ export function OnboardingChannelsStep({
 
   return (
     <section className="flex flex-col gap-5">
-      <div className="border-b border-zinc-800 pb-4">
-        <p className="font-mono text-xs uppercase tracking-[0.16em] text-zinc-500">
+      <div className="border-b border-border pb-4">
+        <p className="font-mono text-xs uppercase tracking-[0.16em] text-fg-soft">
           Step 2 - Favorite channels
         </p>
-        <h2 className="mt-2 text-xl font-semibold text-zinc-100">Add channels you trust</h2>
-        <p className="mt-2 text-sm text-zinc-400">
+        <h2 className="mt-2 text-xl font-semibold text-fg">Add channels you trust</h2>
+        <p className="mt-2 text-sm text-fg-muted">
           We use this to stabilize your first recommendations before history takes over.
         </p>
       </div>

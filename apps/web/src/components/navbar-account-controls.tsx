@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { goto } from "../lib/route-redirect";
 import type { AuthMe, AuthStatus } from "../types/auth";
 import { ProfileAvatar } from "./profile-avatar";
+import { ThemeToggleButton } from "./theme-toggle-button";
 
 type Props = {
   status: AuthStatus;
@@ -41,25 +42,31 @@ export function NavbarAccountControls({
   if (isMobile) {
     if (!isAuthed || isGuest || !me) {
       return (
-        <a
-          href={loginHref()}
-          className="h-8 px-3 inline-flex items-center text-xs rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-200"
-        >
-          Sign in
-        </a>
+        <div className="inline-flex items-center gap-2">
+          <ThemeToggleButton />
+          <a
+            href={loginHref()}
+            className="h-8 px-3 inline-flex items-center text-xs rounded-full bg-surface-strong hover:bg-surface-soft text-fg"
+          >
+            Sign in
+          </a>
+        </div>
       );
     }
     return (
-      <Link to="/profile" className="inline-flex h-9 w-9 items-center justify-center">
-        <ProfileAvatar me={me} className="h-8 w-8" plain />
-      </Link>
+      <div className="inline-flex items-center gap-2">
+        <ThemeToggleButton />
+        <Link to="/profile" className="inline-flex h-9 w-9 items-center justify-center">
+          <ProfileAvatar me={me} className="h-8 w-8" plain />
+        </Link>
+      </div>
     );
   }
 
   return (
     <>
       {!isAuthed || isGuest || !me ? (
-        <span className="hidden sm:inline text-[11px] uppercase tracking-wider text-zinc-500 px-2">
+        <span className="hidden sm:inline text-[11px] uppercase tracking-wider text-fg-soft px-2">
           {statusLabel(status)}
         </span>
       ) : (
@@ -67,10 +74,11 @@ export function NavbarAccountControls({
           <Link to="/profile" className="inline-flex h-8 w-8 items-center justify-center">
             <ProfileAvatar me={me} className="h-7 w-7" plain />
           </Link>
+          <ThemeToggleButton />
           {profileName && (
             <Link
               to="/profile"
-              className="max-w-28 truncate text-sm font-medium text-zinc-100 hover:text-white"
+              className="max-w-28 truncate text-sm font-medium text-fg hover:text-accent"
             >
               {profileName}
             </Link>
@@ -79,17 +87,18 @@ export function NavbarAccountControls({
       )}
       {!isAuthed && (
         <div className="flex items-center gap-2">
+          <ThemeToggleButton />
           <Link
             to="/login"
             search={{ redirect: `${window.location.pathname}${window.location.search}` }}
-            className="h-8 px-3 inline-flex items-center text-xs rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-200"
+            className="h-8 px-3 inline-flex items-center text-xs rounded-full bg-surface-strong hover:bg-surface-soft text-fg"
           >
             Sign in
           </Link>
           <button
             type="button"
             onClick={() => goto("/")}
-            className="hidden sm:inline-flex h-8 px-3 text-xs rounded-full bg-zinc-900 hover:bg-zinc-800 text-zinc-400"
+            className="hidden sm:inline-flex h-8 px-3 text-xs rounded-full bg-surface hover:bg-surface-strong text-fg-muted"
           >
             Browse
           </button>
@@ -97,6 +106,7 @@ export function NavbarAccountControls({
       )}
       {isAuthed && (
         <div className="flex items-center gap-2">
+          {(isGuest || !me) && <ThemeToggleButton />}
           {!isGuest && me && (
             <Link
               to="/profile"
@@ -110,14 +120,14 @@ export function NavbarAccountControls({
               <Link
                 to="/login"
                 search={{ redirect: `${window.location.pathname}${window.location.search}` }}
-                className="h-8 px-3 inline-flex items-center text-xs rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-200"
+                className="h-8 px-3 inline-flex items-center text-xs rounded-full bg-surface-strong hover:bg-surface-soft text-fg"
               >
                 Login
               </Link>
               <Link
                 to="/register"
                 search={{ redirect: undefined }}
-                className="h-8 px-3 inline-flex items-center text-xs rounded-full bg-zinc-100 text-zinc-900 hover:bg-white"
+                className="h-8 px-3 inline-flex items-center text-xs rounded-full bg-fg text-app hover:bg-fg/90"
               >
                 Register
               </Link>
@@ -126,7 +136,7 @@ export function NavbarAccountControls({
           {!isGuest && !isAdmin && (
             <Link
               to="/settings"
-              className="hidden sm:inline-flex h-8 px-3 items-center text-xs rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-200"
+              className="hidden sm:inline-flex h-8 px-3 items-center text-xs rounded-full bg-surface-strong hover:bg-surface-soft text-fg"
             >
               Account
             </Link>
@@ -135,7 +145,7 @@ export function NavbarAccountControls({
             <Link
               to="/admin-console"
               search={{ section: "issues" }}
-              className="h-8 px-3 inline-flex items-center text-xs rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-200"
+              className="h-8 px-3 inline-flex items-center text-xs rounded-full bg-surface-strong hover:bg-surface-soft text-fg"
             >
               Admin
             </Link>
@@ -143,7 +153,7 @@ export function NavbarAccountControls({
           <button
             type="button"
             onClick={signOut}
-            className="h-8 px-3 text-xs rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-200"
+            className="h-8 px-3 text-xs rounded-full bg-surface-strong hover:bg-surface-soft text-fg"
           >
             Sign out
           </button>

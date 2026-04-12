@@ -15,7 +15,7 @@ export function NavbarLeadingControl({ authPage, showBackButton, onBack, onToggl
       <button
         type="button"
         onClick={onBack}
-        className="text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors p-2 rounded-lg"
+        className="text-fg-muted hover:text-fg hover:bg-surface-strong transition-colors p-2 rounded-lg"
         aria-label="Go back"
       >
         <ChevronLeft size={18} />
@@ -27,7 +27,7 @@ export function NavbarLeadingControl({ authPage, showBackButton, onBack, onToggl
     <button
       type="button"
       onClick={onToggleSidebar}
-      className="text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors p-2 rounded-lg"
+      className="text-fg-muted hover:text-fg hover:bg-surface-strong transition-colors p-2 rounded-lg"
       aria-label="Toggle sidebar"
     >
       <Menu size={18} />

@@ -9,8 +9,8 @@ import { usePlaylists } from "../hooks/use-playlists";
 function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center py-32 gap-2 text-center">
-      <p className="text-zinc-400 text-sm">No playlists yet.</p>
-      <p className="text-zinc-600 text-xs">Use the New playlist button to get started.</p>
+      <p className="text-fg-muted text-sm">No playlists yet.</p>
+      <p className="text-fg-soft text-xs">Use the New playlist button to get started.</p>
     </div>
   );
 }
@@ -63,15 +63,15 @@ function PlaylistsPage() {
   return (
     <div className="flex flex-col gap-6 [animation:page-fade-in_0.2s_ease-out]">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h1 className="text-lg font-semibold text-zinc-100">Playlists</h1>
+        <h1 className="text-lg font-semibold text-fg">Playlists</h1>
         <div className="flex items-center gap-2">
           {selectionMode ? (
             <>
-              <span className="text-xs text-zinc-500">{selectedIds.size} selected</span>
+              <span className="text-xs text-fg-soft">{selectedIds.size} selected</span>
               <button
                 type="button"
                 onClick={exitSelection}
-                className="px-3 py-2 text-sm text-zinc-300 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"
+                className="px-3 py-2 text-sm text-fg-muted bg-surface-strong hover:bg-surface-soft rounded-lg transition-colors"
               >
                 Cancel
               </button>
@@ -79,7 +79,7 @@ function PlaylistsPage() {
                 type="button"
                 disabled={selectedIds.size === 0}
                 onClick={() => setConfirmIds([...selectedIds])}
-                className="px-3 py-2 text-sm text-white bg-red-700 hover:bg-red-600 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg transition-colors"
+                className="px-3 py-2 text-sm text-white bg-danger hover:bg-danger disabled:opacity-40 disabled:cursor-not-allowed rounded-lg transition-colors"
               >
                 Delete ({selectedIds.size})
               </button>
@@ -90,7 +90,7 @@ function PlaylistsPage() {
                 <button
                   type="button"
                   onClick={() => setSelectionMode(true)}
-                  className="px-3 py-2 text-sm text-zinc-400 hover:text-zinc-200 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"
+                  className="px-3 py-2 text-sm text-fg-muted hover:text-fg bg-surface-strong hover:bg-surface-soft rounded-lg transition-colors"
                 >
                   Select
                 </button>
@@ -98,7 +98,7 @@ function PlaylistsPage() {
               <button
                 type="button"
                 onClick={() => setCreating(true)}
-                className="px-3 py-2 text-sm text-zinc-100 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"
+                className="px-3 py-2 text-sm text-fg bg-surface-strong hover:bg-surface-soft rounded-lg transition-colors"
               >
                 New playlist
               </button>

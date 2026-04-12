@@ -32,7 +32,7 @@ export function YoutubeImportCooking({ job, preview, report, queueLength, curren
 
   return (
     <div className="space-y-4">
-      <div className="relative overflow-hidden rounded-2xl border border-red-700/35 bg-gradient-to-br from-zinc-900 via-zinc-900 to-red-950/40 p-4">
+      <div className="relative overflow-hidden rounded-2xl border border-danger/35 bg-gradient-to-br from-surface via-surface to-danger/40 p-4">
         <CardLiquidFill progress={progress} />
         <div className="relative z-10 grid grid-cols-1 gap-4 sm:grid-cols-[180px_minmax(0,1fr)] sm:items-center">
           <ImportMascotLoop
@@ -41,11 +41,11 @@ export function YoutubeImportCooking({ job, preview, report, queueLength, curren
             className="h-32 w-full rounded-xl object-cover sm:h-28"
           />
           <div>
-            <p className="text-base font-medium text-zinc-100">Cooking your import</p>
-            <p className="mt-1 text-sm text-zinc-300/80">
+            <p className="text-base font-medium text-fg">Cooking your import</p>
+            <p className="mt-1 text-sm text-fg-muted/80">
               Unpacking and syncing your data. This may take a moment.
             </p>
-            <p className="mt-2 text-xs text-zinc-300/75">estimated sync in progress...</p>
+            <p className="mt-2 text-xs text-fg-muted/75">estimated sync in progress...</p>
           </div>
         </div>
       </div>

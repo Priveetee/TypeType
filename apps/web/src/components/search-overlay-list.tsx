@@ -30,15 +30,15 @@ export function SearchOverlayList({
     <ul
       ref={listRef}
       onScroll={onScroll}
-      className="mt-1 max-h-[22rem] overflow-y-auto scroll-smooth bg-zinc-900 border border-zinc-700 rounded-lg"
+      className="mt-1 max-h-[22rem] overflow-y-auto scroll-smooth bg-surface border border-border-strong rounded-lg"
     >
       {showHistory && (
         <li className="px-4 py-2 flex items-center justify-between">
-          <span className="text-xs text-zinc-500 uppercase tracking-wider">Recent searches</span>
+          <span className="text-xs text-fg-soft uppercase tracking-wider">Recent searches</span>
           <button
             type="button"
             onClick={onClearAll}
-            className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors"
+            className="text-xs text-fg-soft hover:text-fg-muted transition-colors"
           >
             Clear all
           </button>
@@ -55,8 +55,8 @@ export function SearchOverlayList({
             data-item-index={index}
             className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
               index === selectedIndex
-                ? "bg-zinc-700 text-zinc-100"
-                : "text-zinc-300 hover:bg-zinc-800"
+                ? "bg-surface-soft text-fg"
+                : "text-fg-muted hover:bg-surface-strong"
             }`}
             onClick={() => onSelect(item.label)}
           >

@@ -42,11 +42,11 @@ export function WatchInfo({ stream }: Props) {
 
   const channelMeta = (
     <div className="flex flex-col min-w-0">
-      <p className="text-sm font-medium text-zinc-100 truncate flex items-center gap-1">
+      <p className="text-sm font-medium text-fg truncate flex items-center gap-1">
         {stream.channelName}
         {stream.uploaderVerified && <VerifiedBadgeIcon />}
       </p>
-      <p className="text-xs text-zinc-500">
+      <p className="text-xs text-fg-soft">
         {formatSubscribers(stream.uploaderSubscriberCount)}
         {publishedText && ` · ${publishedText}`}
       </p>
@@ -56,8 +56,8 @@ export function WatchInfo({ stream }: Props) {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-start justify-between gap-4">
-        <h1 className="text-base font-semibold text-zinc-100 leading-snug">{stream.title}</h1>
-        <span className="text-sm text-zinc-400 flex-shrink-0 mt-0.5">
+        <h1 className="text-base font-semibold text-fg leading-snug">{stream.title}</h1>
+        <span className="text-sm text-fg-muted flex-shrink-0 mt-0.5">
           {formatViews(stream.views)}
         </span>
       </div>
@@ -75,11 +75,11 @@ export function WatchInfo({ stream }: Props) {
                 className="w-9 h-9"
               />
               <div className="flex flex-col min-w-0">
-                <p className="text-sm font-medium text-zinc-100 truncate group-hover:underline flex items-center gap-1">
+                <p className="text-sm font-medium text-fg truncate group-hover:underline flex items-center gap-1">
                   {stream.channelName}
                   {stream.uploaderVerified && <VerifiedBadgeIcon />}
                 </p>
-                <p className="text-xs text-zinc-500">
+                <p className="text-xs text-fg-soft">
                   {formatSubscribers(stream.uploaderSubscriberCount)}
                   {publishedText && ` · ${publishedText}`}
                 </p>
@@ -102,17 +102,17 @@ export function WatchInfo({ stream }: Props) {
             onClick={handleSubscribe}
             disabled={add.isPending || remove.isPending}
             aria-pressed={subscribed}
-            className={`flex-shrink-0 px-4 py-1.5 text-sm font-medium rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 focus-visible:ring-zinc-400 disabled:opacity-50 disabled:cursor-not-allowed ${
+            className={`flex-shrink-0 px-4 py-1.5 text-sm font-medium rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 focus-visible:ring-border disabled:opacity-50 disabled:cursor-not-allowed ${
               subscribed
-                ? "ring-1 ring-zinc-600 bg-zinc-800 text-zinc-100 hover:bg-zinc-700"
-                : "bg-zinc-100 text-zinc-900 hover:bg-white"
+                ? "ring-1 ring-border-strong bg-surface-strong text-fg hover:bg-surface-soft"
+                : "bg-fg text-app hover:bg-white"
             }`}
           >
             {subscribed ? "Subscribed" : "Subscribe"}
           </button>
         )}
       </div>
-      <div className="h-px bg-zinc-800" />
+      <div className="h-px bg-surface-strong" />
       <Toast message={toastMsg} />
     </div>
   );

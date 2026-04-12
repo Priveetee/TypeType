@@ -38,7 +38,7 @@ export function PlaylistVideoRow({ video, onRemove }: Props) {
         onMouseEnter={prefetch.onMouseEnter}
         onMouseLeave={prefetch.onMouseLeave}
       >
-        <div className="relative aspect-video rounded-xl overflow-hidden bg-zinc-800">
+        <div className="relative aspect-video rounded-xl overflow-hidden bg-surface-strong">
           {thumbnail && (
             <img
               src={thumbnail}
@@ -67,7 +67,7 @@ export function PlaylistVideoRow({ video, onRemove }: Props) {
         onMouseEnter={prefetch.onMouseEnter}
         onMouseLeave={prefetch.onMouseLeave}
       >
-        <p className="text-sm font-medium text-zinc-100 line-clamp-2 leading-snug group-hover:text-white transition-colors">
+        <p className="text-sm font-medium text-fg line-clamp-2 leading-snug group-hover:text-white transition-colors">
           {video.title}
         </p>
       </Link>

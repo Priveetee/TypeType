@@ -44,9 +44,9 @@ export function PlaylistRenameModal({ currentName, onConfirm, onCancel }: Props)
         role="dialog"
         aria-modal="true"
         aria-labelledby="rename-playlist-title"
-        className="fixed z-50 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-80 bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl p-5 flex flex-col gap-4"
+        className="fixed z-50 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-80 bg-surface border border-border-strong rounded-xl shadow-2xl p-5 flex flex-col gap-4"
       >
-        <p id="rename-playlist-title" className="text-sm font-semibold text-zinc-100">
+        <p id="rename-playlist-title" className="text-sm font-semibold text-fg">
           Rename playlist
         </p>
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
@@ -56,20 +56,20 @@ export function PlaylistRenameModal({ currentName, onConfirm, onCancel }: Props)
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Playlist name..."
-            className="bg-zinc-800 text-zinc-100 placeholder-zinc-500 rounded-lg px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-zinc-600 w-full"
+            className="bg-surface-strong text-fg placeholder-zinc-500 rounded-lg px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-border-strong w-full"
           />
           <div className="flex justify-end gap-2">
             <button
               type="button"
               onClick={onCancel}
-              className="px-3.5 py-1.5 text-sm text-zinc-300 hover:text-zinc-100 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"
+              className="px-3.5 py-1.5 text-sm text-fg-muted hover:text-fg bg-surface-strong hover:bg-surface-soft rounded-lg transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={!name.trim() || name.trim() === currentName}
-              className="px-3.5 py-1.5 text-sm text-zinc-900 bg-zinc-100 hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed rounded-lg transition-colors"
+              className="px-3.5 py-1.5 text-sm text-app bg-fg hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed rounded-lg transition-colors"
             >
               Save
             </button>

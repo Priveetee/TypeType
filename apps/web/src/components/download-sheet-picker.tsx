@@ -41,20 +41,20 @@ export function DownloadSheetPicker({ mode, options, selectedId, onSelect, onMod
               onClick={() => onSelect(choice.id)}
               className={`w-full rounded-lg border px-3 py-2 text-left transition-colors ${
                 selected?.id === choice.id
-                  ? "border-zinc-100 bg-zinc-800 text-zinc-100"
-                  : "border-zinc-700 bg-zinc-900 text-zinc-300 hover:border-zinc-500"
+                  ? "border-fg bg-surface-strong text-fg"
+                  : "border-border-strong bg-surface text-fg-muted hover:border-border-strong"
               }`}
             >
               <p className="text-sm font-medium">{choice.title}</p>
-              <p className="text-xs text-zinc-400">{choice.option.label}</p>
-              <p className="text-xs text-zinc-500">{choice.option.size}</p>
+              <p className="text-xs text-fg-muted">{choice.option.label}</p>
+              <p className="text-xs text-fg-soft">{choice.option.size}</p>
             </button>
           ))}
         </div>
       )}
       {showAllFormats && (
         <div
-          className="max-h-[44svh] space-y-1.5 overflow-y-auto overscroll-y-contain pr-1 [scrollbar-width:thin] [scrollbar-color:var(--color-zinc-600)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-zinc-600/80 [&::-webkit-scrollbar-track]:bg-transparent md:max-h-[52svh]"
+          className="max-h-[44svh] space-y-1.5 overflow-y-auto overscroll-y-contain pr-1 [scrollbar-width:thin] [scrollbar-color:var(--color-zinc-600)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-surface-soft/80 [&::-webkit-scrollbar-track]:bg-transparent md:max-h-[52svh]"
           style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}
         >
           {modeOptions.map((option, index) => (
@@ -73,7 +73,7 @@ export function DownloadSheetPicker({ mode, options, selectedId, onSelect, onMod
         <button
           type="button"
           onClick={() => setShowAllFormats((open) => !open)}
-          className="mt-2 w-full rounded-md border border-zinc-700 px-2.5 py-1.5 text-xs text-zinc-300 transition-colors hover:border-zinc-500 hover:bg-zinc-800"
+          className="mt-2 w-full rounded-md border border-border-strong px-2.5 py-1.5 text-xs text-fg-muted transition-colors hover:border-border-strong hover:bg-surface-strong"
         >
           {showAllFormats ? "Simple view" : `All formats (${modeOptions.length})`}
         </button>

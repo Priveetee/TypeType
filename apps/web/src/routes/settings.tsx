@@ -12,39 +12,39 @@ function SettingsPage() {
 
   return (
     <div className="flex flex-col gap-6 sm:gap-8 [animation:page-fade-in_0.2s_ease-out]">
-      <h1 className="text-lg font-semibold text-zinc-100">Settings</h1>
+      <h1 className="text-lg font-semibold text-fg">Settings</h1>
       <SettingsPlayback />
       {settings.defaultService === 0 && <SettingsLanguage />}
       <SettingsService />
       <section className="flex flex-col gap-3">
-        <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider px-1">
+        <p className="text-xs font-medium text-fg-soft uppercase tracking-wider px-1">
           Recommendations
         </p>
-        <div className="bg-zinc-900 rounded-xl border border-zinc-800 px-4 py-4 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="bg-surface rounded-xl border border-border px-4 py-4 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-col gap-1">
-            <span className="text-sm text-zinc-100">Tune recommendation profile</span>
-            <span className="text-xs text-zinc-500">Adjust interests and favorite channels.</span>
+            <span className="text-sm text-fg">Tune recommendation profile</span>
+            <span className="text-xs text-fg-soft">Adjust interests and favorite channels.</span>
           </div>
           <button
             type="button"
             onClick={() => goto("/settings/recommendations")}
-            className="h-9 w-full rounded-md bg-zinc-900 px-2.5 text-xs text-zinc-300 transition-colors hover:text-zinc-100 sm:h-8 sm:w-auto"
+            className="h-9 w-full rounded-md bg-surface px-2.5 text-xs text-fg-muted transition-colors hover:text-fg sm:h-8 sm:w-auto"
           >
             Open
           </button>
         </div>
       </section>
       <section className="flex flex-col gap-3">
-        <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider px-1">Migration</p>
-        <div className="bg-zinc-900 rounded-xl border border-zinc-800 px-4 py-4 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-xs font-medium text-fg-soft uppercase tracking-wider px-1">Migration</p>
+        <div className="bg-surface rounded-xl border border-border px-4 py-4 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-col gap-1">
-            <span className="text-sm text-zinc-100">Import from YouTube or PipePipe</span>
-            <span className="text-xs text-zinc-500">Open the dedicated import page.</span>
+            <span className="text-sm text-fg">Import from YouTube or PipePipe</span>
+            <span className="text-xs text-fg-soft">Open the dedicated import page.</span>
           </div>
           <button
             type="button"
             onClick={() => goto("/import")}
-            className="h-9 w-full rounded-md bg-zinc-900 px-2.5 text-xs text-zinc-300 transition-colors hover:text-zinc-100 sm:h-8 sm:w-auto"
+            className="h-9 w-full rounded-md bg-surface px-2.5 text-xs text-fg-muted transition-colors hover:text-fg sm:h-8 sm:w-auto"
           >
             Open import
           </button>

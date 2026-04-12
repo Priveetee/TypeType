@@ -17,7 +17,7 @@ export function RelatedCard({ stream }: Props) {
       <Link
         to="/watch"
         search={{ v: stream.id }}
-        className="relative w-40 aspect-video rounded-md overflow-hidden bg-zinc-800 flex-shrink-0"
+        className="relative w-40 aspect-video rounded-md overflow-hidden bg-surface-strong flex-shrink-0"
         onMouseEnter={prefetch.onMouseEnter}
         onMouseLeave={prefetch.onMouseLeave}
       >
@@ -43,7 +43,7 @@ export function RelatedCard({ stream }: Props) {
         <Link
           to="/watch"
           search={{ v: stream.id }}
-          className="text-xs font-medium text-zinc-100 line-clamp-2 leading-snug hover:text-white"
+          className="text-xs font-medium text-fg line-clamp-2 leading-snug hover:text-white"
           onMouseEnter={prefetch.onMouseEnter}
           onMouseLeave={prefetch.onMouseLeave}
         >
@@ -60,7 +60,7 @@ export function RelatedCard({ stream }: Props) {
               name={stream.channelName}
               className="w-4 h-4"
             />
-            <span className="text-xs text-zinc-400 group-hover/channel:text-zinc-200 truncate flex items-center gap-1">
+            <span className="text-xs text-fg-muted group-hover/channel:text-fg truncate flex items-center gap-1">
               {stream.channelName}
               {stream.uploaderVerified && <VerifiedBadgeIcon />}
             </span>
@@ -72,13 +72,13 @@ export function RelatedCard({ stream }: Props) {
               name={stream.channelName}
               className="w-4 h-4"
             />
-            <span className="text-xs text-zinc-400 truncate flex items-center gap-1">
+            <span className="text-xs text-fg-muted truncate flex items-center gap-1">
               {stream.channelName}
               {stream.uploaderVerified && <VerifiedBadgeIcon />}
             </span>
           </div>
         )}
-        <p className="text-xs text-zinc-500">{formatViews(stream.views)}</p>
+        <p className="text-xs text-fg-soft">{formatViews(stream.views)}</p>
       </div>
     </div>
   );

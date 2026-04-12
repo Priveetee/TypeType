@@ -77,7 +77,7 @@ function RegisterPage() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Name"
-            className="h-10 rounded-lg border border-zinc-700 bg-zinc-950 px-3 text-sm text-zinc-100"
+            className="h-10 rounded-lg border border-border-strong bg-app px-3 text-sm text-fg"
             required
           />
           <input
@@ -86,7 +86,7 @@ function RegisterPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Email"
-            className="h-10 rounded-lg border border-zinc-700 bg-zinc-950 px-3 text-sm text-zinc-100"
+            className="h-10 rounded-lg border border-border-strong bg-app px-3 text-sm text-fg"
             required
           />
           <input
@@ -95,19 +95,19 @@ function RegisterPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Password"
-            className="h-10 rounded-lg border border-zinc-700 bg-zinc-950 px-3 text-sm text-zinc-100"
+            className="h-10 rounded-lg border border-border-strong bg-app px-3 text-sm text-fg"
             required
           />
           <button
             type="submit"
             disabled={pending || closedByPolicy}
-            className="h-10 rounded-lg bg-zinc-100 text-zinc-900 text-sm font-medium disabled:opacity-60"
+            className="h-10 rounded-lg bg-fg text-app text-sm font-medium disabled:opacity-60"
           >
             {closedByPolicy ? "Registrations closed" : pending ? "Creating account..." : "Register"}
           </button>
         </form>
-        <div className="mt-4 text-xs text-zinc-500">
-          <Link to="/login" search={{ redirect }} className="hover:text-zinc-300">
+        <div className="mt-4 text-xs text-fg-soft">
+          <Link to="/login" search={{ redirect }} className="hover:text-fg-muted">
             Already have an account? Sign in
           </Link>
         </div>

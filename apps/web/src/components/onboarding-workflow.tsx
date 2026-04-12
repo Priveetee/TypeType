@@ -55,7 +55,7 @@ export function OnboardingWorkflow({ state, topics, actions, mode = "onboarding"
         </div>
       )}
 
-      {flow.error && <p className="text-sm text-red-400">{flow.error}</p>}
+      {flow.error && <p className="text-sm text-danger">{flow.error}</p>}
 
       <OnboardingActions
         currentStep={flow.step}

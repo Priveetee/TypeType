@@ -16,7 +16,7 @@ type Props = {
 export function YoutubeImportDone({ job, preview, report }: Props) {
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-emerald-700/35 bg-gradient-to-br from-zinc-900 via-zinc-900 to-emerald-950/45 p-4">
+      <div className="rounded-2xl border border-emerald-700/35 bg-gradient-to-br from-surface via-surface to-emerald-950/45 p-4">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-[180px_minmax(0,1fr)] sm:items-center">
           <ImportMascotLoop
             primarySrc="/import-dudu-cooking.webm"
@@ -25,8 +25,8 @@ export function YoutubeImportDone({ job, preview, report }: Props) {
             intervalMs={2500}
           />
           <div>
-            <p className="text-base font-medium text-zinc-100">Import complete</p>
-            <p className="mt-1 text-sm text-zinc-300/80">
+            <p className="text-base font-medium text-fg">Import complete</p>
+            <p className="mt-1 text-sm text-fg-muted/80">
               Your data has been plated. Check your subscriptions and playlists.
             </p>
             <Link

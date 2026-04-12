@@ -25,8 +25,8 @@ export function AdminConsoleNav({ items, active, onSelect }: Props) {
               onClick={() => onSelect(item.key)}
               className={`border-b px-1 py-2 text-left font-mono text-xs uppercase tracking-[0.16em] transition-colors ${
                 isActive
-                  ? "border-zinc-200 text-zinc-100"
-                  : "border-zinc-800 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300"
+                  ? "border-border text-fg"
+                  : "border-border text-fg-soft hover:border-border-strong hover:text-fg-muted"
               }`}
             >
               {item.label}

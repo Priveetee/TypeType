@@ -18,7 +18,7 @@ export function ContinueWatching() {
 
   return (
     <section className="flex flex-col gap-3">
-      <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider px-1">
+      <p className="text-xs font-medium text-fg-soft uppercase tracking-wider px-1">
         Continue watching
       </p>
       <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-none">

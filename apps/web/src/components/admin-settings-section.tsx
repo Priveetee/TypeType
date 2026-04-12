@@ -23,7 +23,7 @@ export function AdminSettingsSection({ enabled, onToast }: Props) {
 
   if (adminSettings.query.isPending) {
     return (
-      <section className="rounded-lg border border-zinc-800 bg-zinc-900/70 p-3 text-sm text-zinc-400">
+      <section className="rounded-lg border border-border bg-surface/70 p-3 text-sm text-fg-muted">
         Loading admin settings...
       </section>
     );
@@ -31,7 +31,7 @@ export function AdminSettingsSection({ enabled, onToast }: Props) {
 
   if (adminSettings.query.isError) {
     return (
-      <section className="rounded-lg border border-red-900 bg-red-950/30 p-3 text-sm text-red-300">
+      <section className="rounded-lg border border-danger bg-danger/30 p-3 text-sm text-danger-strong">
         Unable to load admin settings.
       </section>
     );

@@ -41,12 +41,12 @@ function ChannelPage() {
   if (isError) {
     const message = error instanceof ApiError ? error.message : "Unable to load channel right now.";
     return (
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-6 flex flex-col gap-3 max-w-xl">
-        <p className="text-sm text-zinc-100">{message}</p>
+      <div className="rounded-xl border border-border bg-surface p-6 flex flex-col gap-3 max-w-xl">
+        <p className="text-sm text-fg">{message}</p>
         <button
           type="button"
           onClick={() => refetch()}
-          className="h-9 w-fit rounded-md bg-zinc-100 px-3 text-xs font-medium text-zinc-900 hover:bg-white"
+          className="h-9 w-fit rounded-md bg-fg px-3 text-xs font-medium text-app hover:bg-white"
         >
           Retry
         </button>
@@ -65,11 +65,11 @@ function ChannelPage() {
             <div className="flex items-center gap-4">
               <ChannelAvatar src={meta.avatarUrl} name={meta.name} className="w-14 h-14" />
               <div className="flex flex-col">
-                <h1 className="text-lg font-semibold text-zinc-100 flex items-center gap-1.5">
+                <h1 className="text-lg font-semibold text-fg flex items-center gap-1.5">
                   {meta.name}
                   {meta.isVerified && <VerifiedBadgeIcon />}
                 </h1>
-                <p className="text-sm text-zinc-500">
+                <p className="text-sm text-fg-soft">
                   {formatViews(meta.subscriberCount)} subscribers
                 </p>
               </div>
@@ -80,8 +80,8 @@ function ChannelPage() {
               aria-pressed={subscribed}
               className={`px-4 py-1.5 text-sm font-medium rounded-full transition-colors ${
                 subscribed
-                  ? "ring-1 ring-zinc-600 bg-zinc-800 text-zinc-100 hover:bg-zinc-700"
-                  : "bg-zinc-100 text-zinc-900 hover:bg-white"
+                  ? "ring-1 ring-border-strong bg-surface-strong text-fg hover:bg-surface-soft"
+                  : "bg-fg text-app hover:bg-white"
               }`}
             >
               {subscribed ? "Subscribed" : "Subscribe"}

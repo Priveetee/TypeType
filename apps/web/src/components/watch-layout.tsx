@@ -1,7 +1,6 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useRef } from "react";
 import { useBulletComments } from "../hooks/use-bullet-comments";
-import { useMobile } from "../hooks/use-mobile";
 import { usePlayerError } from "../hooks/use-player-error";
 import { useSaveProgress } from "../hooks/use-progress";
 import { useSettings } from "../hooks/use-settings";
@@ -20,7 +19,6 @@ import { PlayerError } from "./player-error";
 import { PlayerDefaults, PlayerFocuser } from "./player-internals";
 import { RelatedVideos } from "./related-videos";
 import { VideoPlayer } from "./video-player";
-import { WatchComments } from "./watch-comments";
 import { WatchMeta } from "./watch-meta";
 
 type Props = {
@@ -35,7 +33,6 @@ export function WatchLayout({ stream, startTime }: Props) {
   const settingsReady =
     (settingsQuery.isSuccess && !settingsQuery.isPlaceholderData) || settingsQuery.isError;
   const isLive = stream.streamType === "live_stream" || stream.streamType === "audio_live_stream";
-  const isMobile = useMobile();
   const { manifestSrc, playerFailed, qualityFailed, handleError, reset, retryKey } = usePlayerError(
     stream,
     isLive,
@@ -127,12 +124,11 @@ export function WatchLayout({ stream, startTime }: Props) {
           />
           {playerFailed && <PlayerError onRetry={reset} />}
         </div>
-        {!cinemaMode && <WatchMeta stream={stream} showComments={!isMobile} />}
+        {!cinemaMode && <WatchMeta stream={stream} />}
       </div>
       {!cinemaMode && (
         <div className="w-full lg:flex-1 lg:min-w-64 flex flex-col gap-6">
           <RelatedVideos streams={relatedStreams} />
-          {isMobile && <WatchComments key={stream.id} videoUrl={stream.id} />}
         </div>
       )}
       {cinemaMode && (

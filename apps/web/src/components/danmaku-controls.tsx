@@ -2,8 +2,8 @@ import { useDanmakuStore } from "../stores/danmaku-store";
 import { DanmakuIcon } from "./watch-icons";
 
 const BTN = "flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors";
-const BTN_IDLE = "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800";
-const BTN_ON = "text-zinc-100 bg-zinc-800";
+const BTN_IDLE = "text-fg-muted hover:text-fg hover:bg-surface-strong";
+const BTN_ON = "text-fg bg-surface-strong";
 const SLIDER = "w-20 accent-zinc-400 cursor-pointer";
 
 export function DanmakuControls() {
@@ -20,7 +20,7 @@ export function DanmakuControls() {
         {on ? "Danmaku on" : "Danmaku"}
       </button>
       {on && (
-        <div className="flex items-center gap-4 text-xs text-zinc-400">
+        <div className="flex items-center gap-4 text-xs text-fg-muted">
           <label className="flex items-center gap-1.5">
             Speed
             <input

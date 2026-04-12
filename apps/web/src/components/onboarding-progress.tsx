@@ -13,11 +13,9 @@ export function OnboardingProgress({ currentStep }: Props) {
         return (
           <div key={label} className="flex items-center gap-2">
             <div
-              className={`h-1.5 w-14 rounded-full ${
-                active || done ? "bg-zinc-200" : "bg-zinc-700"
-              }`}
+              className={`h-1.5 w-14 rounded-full ${active || done ? "bg-fg" : "bg-surface-soft"}`}
             />
-            <span className={`text-xs ${active || done ? "text-zinc-300" : "text-zinc-500"}`}>
+            <span className={`text-xs ${active || done ? "text-fg-muted" : "text-fg-soft"}`}>
               {label}
             </span>
           </div>

@@ -29,7 +29,7 @@ function NavButton({ icon: Icon, onClick, disabled, label }: NavButtonProps) {
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-800/80 text-white/90 hover:bg-zinc-700/80 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+      className="flex h-12 w-12 items-center justify-center rounded-full bg-surface-strong/80 text-white/90 hover:bg-surface-soft/80 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
       aria-label={label}
     >
       <Icon className="h-6 w-6" />

@@ -38,7 +38,7 @@ function SubscriptionsPage() {
   if (subscriptions.length === 0) {
     return (
       <div className="flex items-center justify-center pt-32">
-        <p className="text-zinc-400 text-sm">No subscriptions yet.</p>
+        <p className="text-fg-muted text-sm">No subscriptions yet.</p>
       </div>
     );
   }

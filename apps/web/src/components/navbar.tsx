@@ -30,8 +30,8 @@ export function Navbar() {
   const canOpenSearch = !authPage;
   const showBackButton = isMobile && canOpenSearch && pathname !== "/";
   const navClass = isMobile
-    ? "fixed top-0 left-0 right-0 z-50 h-14 bg-zinc-950/95 backdrop-blur border-b border-zinc-900 flex items-center px-2 gap-2"
-    : "fixed top-0 left-0 right-0 z-50 h-14 bg-zinc-950/95 backdrop-blur border-b border-zinc-900 flex items-center px-4 gap-4";
+    ? "fixed top-0 left-0 right-0 z-50 h-14 bg-app/95 backdrop-blur border-b border-border flex items-center px-2 gap-2"
+    : "fixed top-0 left-0 right-0 z-50 h-14 bg-app/95 backdrop-blur border-b border-border flex items-center px-4 gap-4";
 
   function handleBack() {
     if (window.history.length > 1) {
@@ -55,7 +55,7 @@ export function Navbar() {
           />
           <Link to="/" className="flex min-w-0 shrink items-center gap-2">
             <img src="/logo.svg" alt="TypeType" width={28} height={28} />
-            <span className="max-w-28 truncate text-zinc-100 text-sm font-semibold tracking-widest sm:max-w-none">
+            <span className="max-w-28 truncate text-fg text-sm font-semibold tracking-widest sm:max-w-none">
               TYPETYPE
             </span>
           </Link>
@@ -65,7 +65,7 @@ export function Navbar() {
           <button
             type="button"
             onClick={() => setSearchOpen(true)}
-            className="ml-auto inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-700 bg-zinc-800 text-zinc-200 hover:bg-zinc-700"
+            className="ml-auto inline-flex h-9 w-9 items-center justify-center rounded-full border border-border-strong bg-surface-strong text-fg hover:bg-surface-soft"
             aria-label="Search"
           >
             <Search size={18} />
@@ -77,14 +77,14 @@ export function Navbar() {
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
-              className="hidden h-10 w-full max-w-xl items-center justify-between rounded-full border border-zinc-700 bg-zinc-900 px-4 text-sm text-zinc-300 hover:border-zinc-600 hover:bg-zinc-800 sm:inline-flex"
+              className="hidden h-10 w-full max-w-xl items-center justify-between rounded-full border border-border-strong bg-surface px-4 text-sm text-fg-muted hover:border-border-strong hover:bg-surface-strong sm:inline-flex"
               aria-label="Search"
             >
               <span className="inline-flex items-center gap-2">
                 <Search size={18} />
                 <span>Search videos, channels...</span>
               </span>
-              <span className="rounded-md border border-zinc-700 px-2 py-0.5 text-xs text-zinc-400">
+              <span className="rounded-md border border-border-strong px-2 py-0.5 text-xs text-fg-muted">
                 /
               </span>
             </button>

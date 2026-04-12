@@ -42,18 +42,18 @@ export function ResetTokenModal({ email, token, onClose, onCopied }: ResetTokenM
       }}
     >
       <div
-        className="rounded-xl border border-zinc-700 bg-zinc-900 p-6 shadow-2xl max-w-sm w-full mx-4 [animation:modal-fade-in_0.2s_ease-out]"
+        className="rounded-xl border border-border-strong bg-surface p-6 shadow-2xl max-w-sm w-full mx-4 [animation:modal-fade-in_0.2s_ease-out]"
         role="document"
         onClick={(e) => e.stopPropagation()}
         onKeyDown={() => {}}
       >
         <div className="mb-4">
-          <h2 className="text-lg font-semibold text-zinc-100">Password Reset Token</h2>
-          <p className="text-sm text-zinc-400 mt-1">{email}</p>
+          <h2 className="text-lg font-semibold text-fg">Password Reset Token</h2>
+          <p className="text-sm text-fg-muted mt-1">{email}</p>
         </div>
 
-        <div className="mb-4 p-3 rounded-lg bg-zinc-950 border border-zinc-800">
-          <p className="text-xs font-mono text-zinc-200 break-all">{token}</p>
+        <div className="mb-4 p-3 rounded-lg bg-app border border-border">
+          <p className="text-xs font-mono text-fg break-all">{token}</p>
         </div>
 
         <div className="mb-3 text-xs text-emerald-200 bg-emerald-950/30 border border-emerald-800/50 p-2 rounded">
@@ -64,14 +64,14 @@ export function ResetTokenModal({ email, token, onClose, onCopied }: ResetTokenM
           <button
             type="button"
             onClick={handleCopy}
-            className="flex-1 h-9 rounded-md border border-zinc-600 bg-zinc-800 px-3 text-sm font-medium text-zinc-100 hover:border-zinc-500 hover:bg-zinc-700 transition-colors"
+            className="flex-1 h-9 rounded-md border border-border-strong bg-surface-strong px-3 text-sm font-medium text-fg hover:border-border-strong hover:bg-surface-soft transition-colors"
           >
             Copy token
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 h-9 rounded-md border border-zinc-600 bg-zinc-900 px-3 text-sm font-medium text-zinc-200 hover:border-zinc-500 hover:bg-zinc-800 transition-colors"
+            className="flex-1 h-9 rounded-md border border-border-strong bg-surface px-3 text-sm font-medium text-fg hover:border-border-strong hover:bg-surface-strong transition-colors"
           >
             Close
           </button>

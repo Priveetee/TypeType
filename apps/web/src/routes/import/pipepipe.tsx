@@ -39,16 +39,16 @@ function PipePipeImportPage() {
   }
 
   const zoneTone = restore.isPending
-    ? "cursor-not-allowed border-zinc-800 bg-zinc-900 text-zinc-600"
+    ? "cursor-not-allowed border-border bg-surface text-fg-soft"
     : over
-      ? "border-red-400 bg-zinc-800 text-zinc-100"
-      : "border-zinc-700 bg-zinc-900 text-zinc-400 hover:border-red-500";
+      ? "border-danger-strong bg-surface-strong text-fg"
+      : "border-border-strong bg-surface text-fg-muted hover:border-danger";
 
   return (
     <div className="flex flex-col gap-6 pt-8 sm:pt-12 [animation:page-fade-in_0.2s_ease-out]">
       <Link
         to="/import"
-        className="inline-flex w-fit items-center gap-1 text-xs text-zinc-500 hover:text-zinc-300"
+        className="inline-flex w-fit items-center gap-1 text-xs text-fg-soft hover:text-fg-muted"
       >
         <span>←</span> Back to import sources
       </Link>
@@ -57,7 +57,7 @@ function PipePipeImportPage() {
         label="PipePipe Backup"
         title="Import from PipePipe"
         description="Restore history, subscriptions, playlists, and watch progress from a backup ZIP."
-        labelClassName="text-red-200/75"
+        labelClassName="text-danger-strong/75"
       />
 
       {summary ? (

@@ -24,20 +24,20 @@ export function AdminBugReportFilters({
         value={searchText}
         onChange={(e) => onSearchChange(e.target.value)}
         placeholder="Search id, email, text..."
-        className="rounded border border-zinc-700 bg-transparent px-2 py-1.5 text-sm text-zinc-100 placeholder:text-zinc-500"
+        className="rounded border border-border-strong bg-transparent px-2 py-1.5 text-sm text-fg placeholder:text-fg-soft"
       />
       <select
         value={statusFilter ?? ""}
         onChange={(e) =>
           onStatusChange(e.target.value ? (e.target.value as BugReportStatus) : undefined)
         }
-        className="rounded border border-zinc-700 bg-transparent px-2 py-1.5 text-sm text-zinc-100"
+        className="rounded border border-border-strong bg-transparent px-2 py-1.5 text-sm text-fg"
       >
-        <option value="" className="bg-zinc-100 text-zinc-900">
+        <option value="" className="bg-fg text-app">
           All Statuses
         </option>
         {STATUS_OPTIONS.map((opt) => (
-          <option key={opt.value} value={opt.value} className="bg-zinc-100 text-zinc-900">
+          <option key={opt.value} value={opt.value} className="bg-fg text-app">
             {opt.label}
           </option>
         ))}
@@ -47,13 +47,13 @@ export function AdminBugReportFilters({
         onChange={(e) =>
           onCategoryChange(e.target.value ? (e.target.value as BugReportCategory) : undefined)
         }
-        className="rounded border border-zinc-700 bg-transparent px-2 py-1.5 text-sm text-zinc-100"
+        className="rounded border border-border-strong bg-transparent px-2 py-1.5 text-sm text-fg"
       >
-        <option value="" className="bg-zinc-100 text-zinc-900">
+        <option value="" className="bg-fg text-app">
           All Categories
         </option>
         {CATEGORY_OPTIONS.map((opt) => (
-          <option key={opt.value} value={opt.value} className="bg-zinc-100 text-zinc-900">
+          <option key={opt.value} value={opt.value} className="bg-fg text-app">
             {opt.label}
           </option>
         ))}

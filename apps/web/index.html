@@ -12,6 +12,33 @@
     <meta name="apple-mobile-web-app-title" content="TypeType" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="preload" as="image" href="/loader.gif" />
+    <script>
+      (() => {
+        const STORAGE_KEY = "typed-theme";
+        const DARK = "dark";
+        const LIGHT = "light";
+
+        function readStoredTheme() {
+          try {
+            const raw = window.localStorage.getItem(STORAGE_KEY);
+            if (!raw) return DARK;
+            const parsed = JSON.parse(raw);
+            if (!parsed || typeof parsed !== "object") return DARK;
+            const state = parsed.state;
+            if (!state || typeof state !== "object") return DARK;
+            const theme = state.theme;
+            return theme === LIGHT || theme === DARK ? theme : DARK;
+          } catch (_error) {
+            return DARK;
+          }
+        }
+
+        const theme = readStoredTheme();
+        const root = document.documentElement;
+        root.dataset.theme = theme;
+        root.style.colorScheme = DARK;
+      })();
+    </script>
     <title>TypeType</title>
     <style>
       .vds-quality-menu > .vds-menu-item,
@@ -36,7 +63,6 @@
         align-items: center;
         justify-content: center;
         z-index: 9999;
-        transition: opacity 0.3s ease-out;
       }
     </style>
   </head>

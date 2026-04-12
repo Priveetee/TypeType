@@ -22,7 +22,7 @@ export function ProfileAvatar({ me, className, plain = false }: ProfileAvatarPro
       className={
         plain
           ? `${className} overflow-hidden rounded-full`
-          : `${className} overflow-hidden rounded-xl border border-zinc-700 bg-zinc-800`
+          : `${className} overflow-hidden rounded-xl border border-border-strong bg-surface-strong`
       }
     >
       <img

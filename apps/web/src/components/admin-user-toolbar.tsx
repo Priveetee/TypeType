@@ -27,13 +27,13 @@ export function AdminUserToolbar({
           value={search}
           onChange={(event) => onSearchChange(event.target.value)}
           placeholder="Search name, email or id"
-          className="h-9 w-full rounded-md border border-zinc-700 bg-zinc-900 px-3 text-sm text-zinc-100 outline-none transition-colors focus:border-zinc-500"
+          className="h-9 w-full rounded-md border border-border-strong bg-surface px-3 text-sm text-fg outline-none transition-colors focus:border-border-strong"
         />
       </div>
       <select
         value={filter}
         onChange={handleFilter}
-        className="h-9 rounded-md border border-zinc-700 bg-zinc-900 px-2 text-xs text-zinc-300"
+        className="h-9 rounded-md border border-border-strong bg-surface px-2 text-xs text-fg-muted"
       >
         {ADMIN_FILTERS.map((item) => (
           <option key={item.value} value={item.value}>

@@ -2,6 +2,7 @@ import type { SubscriptionFeedPage } from "../types/api";
 import type { HistoryItem, SearchHistoryItem, SettingsItem, SubscriptionItem } from "../types/user";
 import { ApiError } from "./api";
 import { authed, authedJson } from "./authed";
+import { channelUrlVariants, normalizeChannelUrl } from "./channel-url";
 import { API_BASE as BASE } from "./env";
 import { normalizeApiPayload } from "./text-normalize";
 
@@ -61,10 +62,14 @@ export function fetchSubscriptions(): Promise<SubscriptionItem[]> {
 }
 
 export async function subscribe(item: Omit<SubscriptionItem, "subscribedAt">): Promise<void> {
+  const normalizedItem = {
+    ...item,
+    channelUrl: normalizeChannelUrl(item.channelUrl),
+  };
   const res = await authed(`${BASE}/subscriptions`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(item),
+    body: JSON.stringify(normalizedItem),
   });
   if (!res.ok) {
     const body = await res.json().catch(() => ({ error: "subscribe failed" }));
@@ -73,10 +78,16 @@ export async function subscribe(item: Omit<SubscriptionItem, "subscribedAt">): P
 }
 
 export async function unsubscribe(channelUrl: string): Promise<void> {
-  const res = await authed(`${BASE}/subscriptions/${encodeURIComponent(channelUrl)}`, {
-    method: "DELETE",
-  });
-  if (!res.ok && res.status !== 404) {
+  const variants = channelUrlVariants(channelUrl);
+  const responses = await Promise.all(
+    variants.map((variant) =>
+      authed(`${BASE}/subscriptions/${encodeURIComponent(variant)}`, {
+        method: "DELETE",
+      }),
+    ),
+  );
+  for (const res of responses) {
+    if (res.ok || res.status === 404) continue;
     const body = await res.json().catch(() => ({ error: "unsubscribe failed" }));
     throw new ApiError((body as { error: string }).error, res.status);
   }

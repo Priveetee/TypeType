@@ -44,7 +44,7 @@ function EmptyIcon() {
       strokeLinejoin="round"
       role="img"
       aria-label="Empty playlist"
-      className="text-zinc-700"
+      className="text-fg-soft"
     >
       <path d="M3 5h15" />
       <path d="M3 9h15" />
@@ -59,7 +59,7 @@ function ThumbnailContent({ playlist }: { playlist: PlaylistItem }) {
   const count = playlist.videos.length;
   const label = `${count} video${count !== 1 ? "s" : ""}`;
   return (
-    <div className="relative aspect-video rounded-xl overflow-hidden bg-zinc-800">
+    <div className="relative aspect-video rounded-xl overflow-hidden bg-surface-strong">
       {thumbnail ? (
         <img
           src={thumbnail}
@@ -102,10 +102,10 @@ export function PlaylistCard({
           >
             <ThumbnailContent playlist={playlist} />
             <div
-              className={`absolute inset-0 rounded-xl border-2 transition-colors ${selected ? "border-zinc-100 bg-zinc-100/10" : "border-transparent"}`}
+              className={`absolute inset-0 rounded-xl border-2 transition-colors ${selected ? "border-fg bg-fg/10" : "border-transparent"}`}
             />
             <div
-              className={`absolute top-2 left-2 w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${selected ? "bg-zinc-100 border-zinc-100" : "bg-black/50 border-zinc-400"}`}
+              className={`absolute top-2 left-2 w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${selected ? "bg-fg border-fg" : "bg-black/50 border-border-strong"}`}
             >
               {selected && (
                 <svg
@@ -119,7 +119,7 @@ export function PlaylistCard({
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   aria-hidden="true"
-                  className="text-zinc-900"
+                  className="text-app"
                 >
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
@@ -139,17 +139,17 @@ export function PlaylistCard({
           className="min-w-0"
           onClick={(e) => selectionMode && e.preventDefault()}
         >
-          <p className="text-sm font-medium text-zinc-100 truncate group-hover:text-white transition-colors">
+          <p className="text-sm font-medium text-fg truncate group-hover:text-white transition-colors">
             {playlist.name}
           </p>
-          <p className="text-xs text-zinc-500">{label}</p>
+          <p className="text-xs text-fg-soft">{label}</p>
         </Link>
         {!selectionMode && (
           <button
             type="button"
             onClick={onDeleteRequest}
             aria-label="Delete playlist"
-            className="text-zinc-600 hover:text-red-400 transition-colors flex-shrink-0 mt-0.5"
+            className="text-fg-soft hover:text-danger transition-colors flex-shrink-0 mt-0.5"
           >
             <TrashIcon />
           </button>

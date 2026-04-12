@@ -33,8 +33,8 @@ export function ShortsActionButton({
       <div
         className={`flex ${sizeClass} items-center justify-center rounded-full border transition-colors ${
           active
-            ? "border-zinc-200/80 bg-zinc-100 text-zinc-900"
-            : "border-zinc-700/80 bg-zinc-900/80 hover:border-zinc-500 hover:bg-zinc-800"
+            ? "border-border/80 bg-fg text-app"
+            : "border-border-strong/80 bg-surface/80 hover:border-border-strong hover:bg-surface-strong"
         }`}
       >
         <Icon className={iconClass} />

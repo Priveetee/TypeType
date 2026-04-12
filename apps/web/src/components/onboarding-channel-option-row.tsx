@@ -27,8 +27,8 @@ export function OnboardingChannelOptionRow({
       onClick={onClick}
       className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 sm:py-2 text-left transition-colors ${
         active
-          ? "border-zinc-200 bg-zinc-100/90 text-zinc-900"
-          : "border-zinc-700 text-zinc-200 hover:border-zinc-500"
+          ? "border-border bg-fg/90 text-app"
+          : "border-border-strong text-fg hover:border-border-strong"
       }`}
     >
       {avatarUrl ? (
@@ -36,16 +36,16 @@ export function OnboardingChannelOptionRow({
           src={avatarUrl}
           alt={name}
           loading="lazy"
-          className="h-8 w-8 rounded-full border border-zinc-700 object-cover"
+          className="h-8 w-8 rounded-full border border-border-strong object-cover"
         />
       ) : (
-        <div className="h-8 w-8 rounded-full border border-zinc-700 bg-zinc-900 text-[11px] font-semibold text-zinc-300 grid place-items-center">
+        <div className="h-8 w-8 rounded-full border border-border-strong bg-surface text-[11px] font-semibold text-fg-muted grid place-items-center">
           {initialFromLabel(fallbackLabel)}
         </div>
       )}
       <div className="flex min-w-0 flex-col">
         <span className="truncate text-sm">{name}</span>
-        {subtitle && <span className="truncate text-xs text-zinc-500">{subtitle}</span>}
+        {subtitle && <span className="truncate text-xs text-fg-soft">{subtitle}</span>}
       </div>
     </button>
   );

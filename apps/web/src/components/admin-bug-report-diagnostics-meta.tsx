@@ -12,7 +12,7 @@ function shorten(value: string, max: number): string {
 
 export function AdminBugReportDiagnosticsMeta({ report }: Props) {
   return (
-    <div className="space-y-1 text-xs text-zinc-500">
+    <div className="space-y-1 text-xs text-fg-soft">
       <p>Route: {report.context.route || "unknown"}</p>
       <p>Language: {report.context.browserLanguage || "unknown"}</p>
       <p title={report.context.userAgent || ""}>

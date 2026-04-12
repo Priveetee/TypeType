@@ -22,7 +22,7 @@ export function VideoCardFeedbackMenu({ stream }: Props) {
         ref={menuRef}
         type="button"
         onClick={() => setMenuOpen((open) => !open)}
-        className="rounded-md p-1 text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100"
+        className="rounded-md p-1 text-fg-muted transition-colors hover:bg-surface-strong hover:text-fg"
         aria-label="Recommendation options"
       >
         <MoreIcon />

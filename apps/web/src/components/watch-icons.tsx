@@ -87,7 +87,7 @@ export function VerifiedBadgeIcon() {
   return (
     <svg
       viewBox="0 0 16 16"
-      className="w-3 h-3 text-zinc-400 flex-shrink-0"
+      className="w-3 h-3 text-fg-muted flex-shrink-0"
       fill="currentColor"
       aria-label="Verified"
     >

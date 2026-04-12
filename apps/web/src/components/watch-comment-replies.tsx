@@ -24,7 +24,7 @@ export function WatchCommentReplies({ videoUrl, repliesPage, locale }: Props) {
   const replies = data?.pages.flatMap((p) => p.comments) ?? [];
 
   return (
-    <div className="border-l border-zinc-800 pl-11 flex flex-col gap-4 mt-3">
+    <div className="border-l border-border pl-11 flex flex-col gap-4 mt-3">
       {replies.map((reply, i) => (
         <div
           key={reply.id}
@@ -40,7 +40,7 @@ export function WatchCommentReplies({ videoUrl, repliesPage, locale }: Props) {
         <button
           type="button"
           onClick={loadMore}
-          className="text-xs text-blue-400 hover:text-blue-300 text-left w-fit"
+          className="text-xs text-accent hover:text-accent-strong text-left w-fit"
         >
           Load more replies
         </button>

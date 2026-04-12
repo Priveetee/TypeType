@@ -67,8 +67,8 @@ export function AdminBugReportsSection({ enabled, isAdmin, onToast }: Props) {
         onNext={() => setPage((p) => p + 1)}
       />
 
-      {query.isPending && <p className="text-sm text-zinc-400">Loading bug reports...</p>}
-      {query.isError && <p className="text-sm text-red-300">Unable to load bug reports.</p>}
+      {query.isPending && <p className="text-sm text-fg-muted">Loading bug reports...</p>}
+      {query.isError && <p className="text-sm text-danger-strong">Unable to load bug reports.</p>}
 
       {!query.isPending && !query.isError && (
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-start">
@@ -96,7 +96,7 @@ export function AdminBugReportsSection({ enabled, isAdmin, onToast }: Props) {
               }}
             />
           ) : (
-            <p className="text-sm text-zinc-500">Select a report to inspect details.</p>
+            <p className="text-sm text-fg-soft">Select a report to inspect details.</p>
           )}
         </div>
       )}

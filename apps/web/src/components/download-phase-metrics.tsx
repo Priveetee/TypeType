@@ -32,9 +32,9 @@ export function DownloadPhaseMetrics({ tokenFetchMs, ytdlpMs, uploadMs, totalMs 
   return (
     <div className="mt-2 grid grid-cols-2 gap-1.5">
       {rows.map((row) => (
-        <div key={row.key} className="rounded-md border border-zinc-800 bg-zinc-950/70 px-2 py-1.5">
-          <p className="text-[10px] uppercase tracking-wide text-zinc-500">{row.label}</p>
-          <p className="text-xs text-zinc-200">{formatMs(row.value)}</p>
+        <div key={row.key} className="rounded-md border border-border bg-app/70 px-2 py-1.5">
+          <p className="text-[10px] uppercase tracking-wide text-fg-soft">{row.label}</p>
+          <p className="text-xs text-fg">{formatMs(row.value)}</p>
         </div>
       ))}
     </div>

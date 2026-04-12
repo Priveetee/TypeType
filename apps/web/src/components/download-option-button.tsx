@@ -24,8 +24,8 @@ export function DownloadOptionButton({
         compact ? "py-1.5" : "py-2"
       } ${
         selected
-          ? "border-zinc-100 bg-zinc-800 text-zinc-100"
-          : "border-zinc-700 bg-zinc-900 text-zinc-300 hover:border-zinc-500"
+          ? "border-fg bg-surface-strong text-fg"
+          : "border-border-strong bg-surface text-fg-muted hover:border-border-strong"
       }`}
     >
       <div className="flex items-center justify-between gap-2">
@@ -36,9 +36,9 @@ export function DownloadOptionButton({
           </span>
         )}
       </div>
-      <p className="text-[11px] text-zinc-500">{option.size}</p>
+      <p className="text-[11px] text-fg-soft">{option.size}</p>
       {(!compact || selected) && (
-        <p className="truncate text-[11px] text-zinc-400">{option.detail}</p>
+        <p className="truncate text-[11px] text-fg-muted">{option.detail}</p>
       )}
     </button>
   );

@@ -26,7 +26,7 @@ export function ChannelAvatar({ src, name, className = "w-8 h-8" }: Props) {
   if (!src || failed) {
     return (
       <div
-        className={`${className} rounded-full flex-shrink-0 bg-zinc-700 flex items-center justify-center text-zinc-300 font-medium select-none`}
+        className={`${className} rounded-full flex-shrink-0 bg-surface-soft flex items-center justify-center text-fg-muted font-medium select-none`}
         style={{ fontSize: "40%" }}
         title={name}
       >

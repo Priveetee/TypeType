@@ -108,7 +108,7 @@ function YoutubeImportPage() {
     <div className="flex flex-col gap-6 pt-8 sm:pt-12 [animation:page-fade-in_0.2s_ease-out]">
       <Link
         to="/import"
-        className="inline-flex w-fit items-center gap-1 text-xs text-zinc-500 hover:text-zinc-300"
+        className="inline-flex w-fit items-center gap-1 text-xs text-fg-soft hover:text-fg-muted"
       >
         <span>←</span> Back to import sources
       </Link>
