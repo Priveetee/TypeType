@@ -1,19 +1,48 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchSubscriptions, subscribe, unsubscribe } from "../lib/api-user";
+import { normalizeChannelUrl } from "../lib/channel-url";
 import type { SubscriptionItem } from "../types/user";
 import { useAuth } from "./use-auth";
 
 const KEY = ["subscriptions"];
 
+function hasSubscription(data: SubscriptionItem[] | undefined, channelUrl: string): boolean {
+  const target = normalizeChannelUrl(channelUrl);
+  return (data ?? []).some((item) => normalizeChannelUrl(item.channelUrl) === target);
+}
+
+function dedupeSubscriptions(data: SubscriptionItem[]): SubscriptionItem[] {
+  const kept = new Set<string>();
+  const output: SubscriptionItem[] = [];
+  for (const item of data) {
+    const normalized = normalizeChannelUrl(item.channelUrl);
+    if (kept.has(normalized)) continue;
+    kept.add(normalized);
+    output.push(item);
+  }
+  return output;
+}
+
 export function useSubscriptions() {
   const qc = useQueryClient();
   const { isAuthed } = useAuth();
 
-  const query = useQuery({ queryKey: KEY, queryFn: fetchSubscriptions, enabled: isAuthed });
+  const query = useQuery({
+    queryKey: KEY,
+    queryFn: fetchSubscriptions,
+    enabled: isAuthed,
+    select: dedupeSubscriptions,
+  });
 
   const add = useMutation({
-    mutationFn: (item: Omit<SubscriptionItem, "subscribedAt">) =>
-      isAuthed ? subscribe(item) : Promise.resolve(),
+    mutationFn: (item: Omit<SubscriptionItem, "subscribedAt">) => {
+      if (!isAuthed) return Promise.resolve();
+      if (hasSubscription(query.data, item.channelUrl)) return Promise.resolve();
+      return subscribe({
+        ...item,
+        channelUrl: normalizeChannelUrl(item.channelUrl),
+      });
+    },
     onSuccess: () => qc.invalidateQueries({ queryKey: KEY }),
   });
 
@@ -23,7 +52,7 @@ export function useSubscriptions() {
   });
 
   function isSubscribed(channelUrl: string): boolean {
-    return (query.data ?? []).some((s) => s.channelUrl === channelUrl);
+    return hasSubscription(query.data, channelUrl);
   }
 
   return { query, add, remove, isSubscribed };
