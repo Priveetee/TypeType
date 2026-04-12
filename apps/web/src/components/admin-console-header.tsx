@@ -19,11 +19,11 @@ const DESCRIPTIONS: Record<AdminSection, string> = {
 export function AdminConsoleHeader({ section }: Props) {
   return (
     <header className="px-1 pb-1">
-      <p className="font-mono text-xs uppercase tracking-[0.2em] text-zinc-500">Admin Console</p>
-      <h1 className="mt-2 font-mono text-2xl font-semibold tracking-tight text-zinc-100">
+      <p className="font-mono text-xs uppercase tracking-[0.2em] text-fg-soft">Admin Console</p>
+      <h1 className="mt-2 font-mono text-2xl font-semibold tracking-tight text-fg">
         {TITLES[section]}
       </h1>
-      <p className="mt-1 text-sm text-zinc-400">{DESCRIPTIONS[section]}</p>
+      <p className="mt-1 text-sm text-fg-muted">{DESCRIPTIONS[section]}</p>
     </header>
   );
 }

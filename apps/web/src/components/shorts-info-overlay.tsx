@@ -46,20 +46,20 @@ export function ShortsInfoOverlay({ stream, variant = "overlay", className }: Pr
 
   const panelButtonClass = `rounded-full px-4 py-1.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
     subscribed
-      ? "border border-zinc-500 bg-zinc-800 text-zinc-100 hover:bg-zinc-700"
-      : "bg-zinc-100 text-zinc-900 hover:bg-white"
+      ? "border border-border-strong bg-surface-strong text-fg hover:bg-surface-soft"
+      : "bg-fg text-app hover:bg-white"
   }`;
 
   const overlayButtonClass = `ml-1 rounded-full px-3 py-1 text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
     subscribed
-      ? "border border-zinc-500 bg-zinc-800 text-zinc-100 hover:bg-zinc-700"
-      : "bg-zinc-100 text-zinc-900 hover:bg-white"
+      ? "border border-border-strong bg-surface-strong text-fg hover:bg-surface-soft"
+      : "bg-fg text-app hover:bg-white"
   }`;
 
   if (variant === "panel") {
     return (
       <div className={`w-[min(34rem,36vw)] max-w-[34rem] ${className ?? ""}`}>
-        <p className="line-clamp-3 break-words text-xl font-semibold leading-tight text-zinc-100 lg:text-2xl">
+        <p className="line-clamp-3 break-words text-xl font-semibold leading-tight text-fg lg:text-2xl">
           {stream.title}
         </p>
         <div className="mt-4 flex items-center gap-3">
@@ -73,7 +73,7 @@ export function ShortsInfoOverlay({ stream, variant = "overlay", className }: Pr
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <ChannelLink url={stream.channelUrl}>
-                <p className="line-clamp-2 break-words text-base font-medium text-zinc-100 lg:text-lg">
+                <p className="line-clamp-2 break-words text-base font-medium text-fg lg:text-lg">
                   {stream.channelName}
                 </p>
               </ChannelLink>

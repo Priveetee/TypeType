@@ -93,8 +93,8 @@ export function WatchActions({ stream }: Props) {
           disabled={!isAuthed}
           className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
             playlistOpen
-              ? "text-zinc-100 bg-zinc-800"
-              : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
+              ? "text-fg bg-surface-strong"
+              : "text-fg-muted hover:text-fg hover:bg-surface-strong"
           }`}
         >
           <ListPlusIcon />
@@ -105,7 +105,7 @@ export function WatchActions({ stream }: Props) {
         stream={stream}
         isAuthed={isAuthed}
         onSaved={handleSaved}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
+        className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors text-fg-muted hover:text-fg hover:bg-surface-strong"
       />
       {showDanmaku && <DanmakuControls />}
       {showReport && isAuthed && (

@@ -20,7 +20,7 @@ export function AdminBugReportDetailPanel({
   onCreateIssue,
 }: Props) {
   return (
-    <div className="space-y-5 border-t border-zinc-800 pt-3 lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
+    <div className="space-y-5 border-t border-border pt-3 lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
       <AdminBugReportOverview report={report} />
       <AdminBugReportStatusControl report={report} busy={busy} onStatusChange={onStatusChange} />
       <AdminBugReportGitHubAction

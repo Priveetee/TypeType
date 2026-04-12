@@ -8,7 +8,7 @@ type Props = {
 
 export function AdminBugReportPager({ page, totalPages, total, onPrev, onNext }: Props) {
   return (
-    <div className="flex items-center justify-between text-xs text-zinc-500">
+    <div className="flex items-center justify-between text-xs text-fg-soft">
       <span>
         {total} report{total !== 1 ? "s" : ""}
       </span>
@@ -17,7 +17,7 @@ export function AdminBugReportPager({ page, totalPages, total, onPrev, onNext }:
           type="button"
           disabled={page <= 1}
           onClick={onPrev}
-          className="rounded border border-zinc-700 px-2 py-1 disabled:opacity-50"
+          className="rounded border border-border-strong px-2 py-1 disabled:opacity-50"
         >
           Prev
         </button>
@@ -28,7 +28,7 @@ export function AdminBugReportPager({ page, totalPages, total, onPrev, onNext }:
           type="button"
           disabled={page >= totalPages}
           onClick={onNext}
-          className="rounded border border-zinc-700 px-2 py-1 disabled:opacity-50"
+          className="rounded border border-border-strong px-2 py-1 disabled:opacity-50"
         >
           Next
         </button>

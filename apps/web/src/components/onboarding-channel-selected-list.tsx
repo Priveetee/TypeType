@@ -8,14 +8,14 @@ export function OnboardingChannelSelectedList({ channels, onRemove }: Props) {
 
   return (
     <div>
-      <p className="text-xs uppercase tracking-[0.12em] text-zinc-500">Selected channels</p>
+      <p className="text-xs uppercase tracking-[0.12em] text-fg-soft">Selected channels</p>
       <div className="mt-2 flex flex-col gap-2 text-xs">
         {channels.map((channel) => (
           <button
             key={channel}
             type="button"
             onClick={() => onRemove(channel)}
-            className="rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2.5 sm:py-2 text-left text-zinc-300 hover:border-zinc-600"
+            className="rounded-lg border border-border bg-app px-3 py-2.5 sm:py-2 text-left text-fg-muted hover:border-border-strong"
           >
             {channel}
           </button>

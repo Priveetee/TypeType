@@ -22,15 +22,15 @@ export function OnboardingChannelSearchBlock({
 }: Props) {
   return (
     <div>
-      <p className="text-xs uppercase tracking-[0.12em] text-zinc-500">Find channels quickly</p>
+      <p className="text-xs uppercase tracking-[0.12em] text-fg-soft">Find channels quickly</p>
       <input
         type="text"
         value={query}
         onChange={(e) => onChangeQuery(e.target.value)}
         placeholder="Search a YouTube channel"
-        className="mt-2 h-11 sm:h-10 w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 text-sm text-zinc-100"
+        className="mt-2 h-11 sm:h-10 w-full rounded-lg border border-border-strong bg-app px-3 text-sm text-fg"
       />
-      {loading && <p className="mt-2 text-xs text-zinc-500">Searching channels...</p>}
+      {loading && <p className="mt-2 text-xs text-fg-soft">Searching channels...</p>}
       {channels.length > 0 && (
         <div className="mt-3 grid gap-2">
           {channels.map((channel, index) => (
@@ -51,7 +51,7 @@ export function OnboardingChannelSearchBlock({
           ))}
         </div>
       )}
-      {resolving && <p className="mt-2 text-xs text-zinc-500">Resolving avatars...</p>}
+      {resolving && <p className="mt-2 text-xs text-fg-soft">Resolving avatars...</p>}
     </div>
   );
 }

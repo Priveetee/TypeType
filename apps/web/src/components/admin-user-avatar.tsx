@@ -17,7 +17,9 @@ export function AdminUserAvatar({ user, className }: AdminUserAvatarProps) {
         : getOpenMojiUrl(pickOpenMojiCode(seed));
 
   return (
-    <div className={`${className} overflow-hidden rounded-xl border border-zinc-700 bg-zinc-800`}>
+    <div
+      className={`${className} overflow-hidden rounded-xl border border-border-strong bg-surface-strong`}
+    >
       <img
         src={avatarUrl}
         alt={user.name || user.email}

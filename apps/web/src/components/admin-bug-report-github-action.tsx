@@ -16,7 +16,7 @@ export function AdminBugReportGitHubAction({ report, busy, isAdmin, onCreateIssu
         href={report.githubIssueUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-2 rounded border border-zinc-700 px-3 py-1.5 text-sm text-zinc-200 hover:border-zinc-500"
+        className="inline-flex items-center gap-2 rounded border border-border-strong px-3 py-1.5 text-sm text-fg hover:border-border-strong"
       >
         <ExternalLink className="h-4 w-4" />
         View GitHub Issue
@@ -29,7 +29,7 @@ export function AdminBugReportGitHubAction({ report, busy, isAdmin, onCreateIssu
       type="button"
       disabled={busy}
       onClick={onCreateIssue}
-      className="rounded bg-zinc-100 px-3 py-1.5 text-sm font-medium text-zinc-900 hover:bg-white disabled:opacity-50"
+      className="rounded bg-fg px-3 py-1.5 text-sm font-medium text-app hover:bg-white disabled:opacity-50"
     >
       Create GitHub Issue
     </button>

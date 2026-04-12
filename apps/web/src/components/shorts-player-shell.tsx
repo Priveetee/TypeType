@@ -102,7 +102,7 @@ export function ShortsPlayerShell({ targetUrl }: Props) {
   if (!active) {
     return (
       <div className="flex items-center justify-center pt-24">
-        <p className="text-sm text-zinc-400">No shorts available right now.</p>
+        <p className="text-sm text-fg-muted">No shorts available right now.</p>
       </div>
     );
   }

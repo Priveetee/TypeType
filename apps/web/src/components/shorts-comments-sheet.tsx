@@ -97,7 +97,7 @@ export function ShortsCommentsSheet({ videoUrl, anchorEl, open, onClose }: Props
         onClick={onClose}
       />
       <section
-        className="fixed inset-x-3 bottom-3 z-[80] h-[82svh] rounded-2xl border border-zinc-700/80 bg-zinc-950/92 p-4 shadow-2xl backdrop-blur transition-all duration-300 ease-out md:inset-x-auto md:h-auto"
+        className="fixed inset-x-3 bottom-3 z-[80] h-[82svh] rounded-2xl border border-border-strong/80 bg-app/92 p-4 shadow-2xl backdrop-blur transition-all duration-300 ease-out md:inset-x-auto md:h-auto"
         style={{
           top: window.innerWidth >= 768 ? desktopStyle.top : undefined,
           left: window.innerWidth >= 768 ? desktopStyle.left : undefined,
@@ -108,23 +108,23 @@ export function ShortsCommentsSheet({ videoUrl, anchorEl, open, onClose }: Props
         }}
       >
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-zinc-100">Comments</h2>
+          <h2 className="text-sm font-semibold text-fg">Comments</h2>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md px-2 py-1 text-xs text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100"
+            className="rounded-md px-2 py-1 text-xs text-fg-muted hover:bg-surface-strong hover:text-fg"
           >
             Close
           </button>
         </div>
-        <div className="h-px bg-zinc-800" />
+        <div className="h-px bg-surface-strong" />
         <div
           ref={scrollRef}
           className="mt-3 h-[calc(100%-3rem)] space-y-5 overflow-y-auto overscroll-y-contain pr-1"
           style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}
         >
           {commentsDisabled ? (
-            <p className="text-sm text-zinc-500">Comments are disabled for this video.</p>
+            <p className="text-sm text-fg-soft">Comments are disabled for this video.</p>
           ) : (
             <>
               {visibleComments.map((comment, i) => (

@@ -22,20 +22,20 @@ export function OnboardingInterestsStep({
 
   return (
     <section className="flex flex-col gap-5">
-      <div className="border-b border-zinc-800 pb-4">
-        <p className="font-mono text-xs uppercase tracking-[0.16em] text-zinc-500">
+      <div className="border-b border-border pb-4">
+        <p className="font-mono text-xs uppercase tracking-[0.16em] text-fg-soft">
           Step 1 - Interests
         </p>
-        <h2 className="mt-2 text-xl font-semibold text-zinc-100">What should we prioritize?</h2>
-        <p className="mt-2 text-sm text-zinc-400">
+        <h2 className="mt-2 text-xl font-semibold text-fg">What should we prioritize?</h2>
+        <p className="mt-2 text-sm text-fg-muted">
           Pick at least {minTopics} topics. You can change this later in settings.
         </p>
       </div>
 
       <div className="flex items-center justify-between">
-        <p className="text-xs uppercase tracking-[0.12em] text-zinc-500">Selected topics</p>
-        <p className="text-xs text-zinc-400">
-          <span className="font-semibold text-zinc-100">{selectedTopics.length}</span>
+        <p className="text-xs uppercase tracking-[0.12em] text-fg-soft">Selected topics</p>
+        <p className="text-xs text-fg-muted">
+          <span className="font-semibold text-fg">{selectedTopics.length}</span>
           {` / ${minTopics} minimum`}
         </p>
       </div>
@@ -50,8 +50,8 @@ export function OnboardingInterestsStep({
               onClick={() => onSelectGroup(group.id)}
               className={`rounded-full border px-2.5 sm:px-3 py-1 text-xs transition-colors ${
                 selected
-                  ? "border-zinc-200 bg-zinc-100 text-zinc-900"
-                  : "border-zinc-700 text-zinc-300 hover:border-zinc-500"
+                  ? "border-border bg-fg text-app"
+                  : "border-border-strong text-fg-muted hover:border-border-strong"
               }`}
             >
               {group.label}
@@ -71,8 +71,8 @@ export function OnboardingInterestsStep({
                 onClick={() => onToggleTopic(topic)}
                 className={`rounded-full border px-2.5 sm:px-3 py-1 text-xs transition-colors ${
                   selected
-                    ? "border-zinc-200 bg-zinc-100 text-zinc-900"
-                    : "border-zinc-700 text-zinc-200 hover:border-zinc-500"
+                    ? "border-border bg-fg text-app"
+                    : "border-border-strong text-fg hover:border-border-strong"
                 }`}
               >
                 {topic}

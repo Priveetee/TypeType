@@ -8,8 +8,8 @@ type Props = {
 };
 
 const BTN = "flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors";
-const BTN_IDLE = "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800";
-const BTN_ON = "text-zinc-100 bg-zinc-800";
+const BTN_IDLE = "text-fg-muted hover:text-fg hover:bg-surface-strong";
+const BTN_ON = "text-fg bg-surface-strong";
 
 export function WatchActionButton({
   buttonRef,

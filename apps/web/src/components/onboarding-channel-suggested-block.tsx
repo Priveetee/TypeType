@@ -18,12 +18,12 @@ export function OnboardingChannelSuggestedBlock({
 }: Props) {
   return (
     <div>
-      <p className="text-xs uppercase tracking-[0.12em] text-zinc-500">
+      <p className="text-xs uppercase tracking-[0.12em] text-fg-soft">
         Suggested from subscriptions
       </p>
-      {loading && <p className="mt-2 text-xs text-zinc-500">Loading suggestions...</p>}
+      {loading && <p className="mt-2 text-xs text-fg-soft">Loading suggestions...</p>}
       {!loading && channels.length === 0 && (
-        <p className="mt-2 text-xs text-zinc-500">No subscriptions available yet.</p>
+        <p className="mt-2 text-xs text-fg-soft">No subscriptions available yet.</p>
       )}
       {channels.length > 0 && (
         <div className="mt-3 grid gap-2">
@@ -44,7 +44,7 @@ export function OnboardingChannelSuggestedBlock({
           ))}
         </div>
       )}
-      {resolving && <p className="mt-2 text-xs text-zinc-500">Resolving avatars...</p>}
+      {resolving && <p className="mt-2 text-xs text-fg-soft">Resolving avatars...</p>}
     </div>
   );
 }

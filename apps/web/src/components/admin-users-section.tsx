@@ -87,17 +87,17 @@ export function AdminUsersSection({ enabled, currentUserId, onToast }: Props) {
         onNext={() => setPage((value) => Math.min(totalPages, value + 1))}
       />
       {query.isPending && (
-        <section className="rounded-lg border border-zinc-800 bg-zinc-900/70 p-6 text-center text-sm text-zinc-400">
+        <section className="rounded-lg border border-border bg-surface/70 p-6 text-center text-sm text-fg-muted">
           Loading users...
         </section>
       )}
       {query.isError && (
-        <section className="rounded-lg border border-red-900 bg-red-950/30 p-6 text-center text-sm text-red-300">
+        <section className="rounded-lg border border-danger bg-danger/30 p-6 text-center text-sm text-danger-strong">
           Unable to load users right now.
         </section>
       )}
       {!query.isPending && !query.isError && filtered.length === 0 && (
-        <section className="rounded-lg border border-zinc-800 bg-zinc-900/70 p-6 text-center text-sm text-zinc-400">
+        <section className="rounded-lg border border-border bg-surface/70 p-6 text-center text-sm text-fg-muted">
           No user matches this view.
         </section>
       )}

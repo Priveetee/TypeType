@@ -23,13 +23,13 @@ export function AdminBugReportDiagnostics({ report }: Props) {
   }
 
   return (
-    <section className="space-y-3 border-t border-zinc-800 pt-3">
+    <section className="space-y-3 border-t border-border pt-3">
       <div className="flex items-center justify-between">
-        <p className="font-mono text-xs uppercase tracking-[0.16em] text-zinc-500">Diagnostics</p>
+        <p className="font-mono text-xs uppercase tracking-[0.16em] text-fg-soft">Diagnostics</p>
         <button
           type="button"
           onClick={copyDiagnostics}
-          className="rounded border border-zinc-700 px-2 py-1 text-xs text-zinc-300 hover:border-zinc-500 hover:text-zinc-100"
+          className="rounded border border-border-strong px-2 py-1 text-xs text-fg-muted hover:border-border-strong hover:text-fg"
         >
           {copied ? "Copied" : "Copy JSON"}
         </button>

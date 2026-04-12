@@ -20,7 +20,7 @@ export function AdminUsersPagination({
   onNext,
 }: AdminUsersPaginationProps) {
   return (
-    <section className="flex items-center justify-between gap-2 rounded-lg border border-zinc-800 bg-zinc-900/70 px-3 py-2 text-xs text-zinc-400">
+    <section className="flex items-center justify-between gap-2 rounded-lg border border-border bg-surface/70 px-3 py-2 text-xs text-fg-muted">
       <p>
         {pageStart}-{pageEnd} of {total}
       </p>
@@ -29,7 +29,7 @@ export function AdminUsersPagination({
           type="button"
           disabled={pending || page <= 1}
           onClick={onPrev}
-          className="h-8 rounded-md border border-zinc-700 bg-zinc-900 px-2.5 text-zinc-200 transition-colors hover:border-zinc-500 disabled:opacity-50"
+          className="h-8 rounded-md border border-border-strong bg-surface px-2.5 text-fg transition-colors hover:border-border-strong disabled:opacity-50"
         >
           Prev
         </button>
@@ -40,7 +40,7 @@ export function AdminUsersPagination({
           type="button"
           disabled={pending || page >= totalPages}
           onClick={onNext}
-          className="h-8 rounded-md border border-zinc-700 bg-zinc-900 px-2.5 text-zinc-200 transition-colors hover:border-zinc-500 disabled:opacity-50"
+          className="h-8 rounded-md border border-border-strong bg-surface px-2.5 text-fg transition-colors hover:border-border-strong disabled:opacity-50"
         >
           Next
         </button>

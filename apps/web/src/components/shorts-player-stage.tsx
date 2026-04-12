@@ -108,7 +108,7 @@ export function ShortsPlayerStage({
             }
           >
             {!streamError && streamLoading && (
-              <div className="absolute inset-0 z-20 flex items-center justify-center bg-zinc-950/80">
+              <div className="absolute inset-0 z-20 flex items-center justify-center bg-app/80">
                 <PageSpinner fullScreen={false} />
               </div>
             )}
