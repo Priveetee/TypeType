@@ -39,14 +39,17 @@ export function RichText({ text }: Props) {
         seg.type === "text" ? (
           <span key={seg.id}>{seg.value}</span>
         ) : (
-          <button
+          <a
             key={seg.id}
-            type="button"
-            onClick={() => setPendingUrl(seg.value)}
-            className="text-blue-400 hover:text-blue-300 underline underline-offset-2 transition-colors break-all"
+            href={seg.value}
+            onClick={(event) => {
+              event.preventDefault();
+              setPendingUrl(seg.value);
+            }}
+            className="text-accent hover:text-accent-strong underline underline-offset-2 transition-colors break-all text-left align-baseline"
           >
             {seg.value}
-          </button>
+          </a>
         ),
       )}
       {pendingUrl && (

@@ -42,7 +42,7 @@
   display: none;
 }
 
-.vds-captions [data-part="cue-display"] {
+.shorts-shell .vds-captions [data-part="cue-display"] {
   left: 50%;
   right: auto;
   transform: translateX(-50%);
