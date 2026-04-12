@@ -14,7 +14,7 @@ export function StreamError({ message, onRetry }: Props) {
   const isMemberOnly = isMemberOnlyMessage(message);
 
   return (
-    <div className="fixed inset-0 bg-zinc-950 flex flex-col items-center justify-center gap-5">
+    <div className="fixed inset-0 bg-app flex flex-col items-center justify-center gap-5">
       <img
         src={isMemberOnly ? "/member-only-source.gif" : "/error-cat.gif"}
         width="220"
@@ -28,7 +28,7 @@ export function StreamError({ message, onRetry }: Props) {
         </p>
         <div className="flex items-center gap-2">
           {countryCode && <FlagIcon code={countryCode} className="w-5 h-4 rounded-sm shrink-0" />}
-          <p className="text-zinc-400 text-sm max-w-xs text-center">{message}</p>
+          <p className="text-fg-muted text-sm max-w-xs text-center">{message}</p>
         </div>
       </div>
       <div className="flex gap-3">
@@ -36,7 +36,7 @@ export function StreamError({ message, onRetry }: Props) {
           <button
             type="button"
             onClick={onRetry}
-            className="px-5 py-2 rounded-full bg-white hover:bg-zinc-200 text-zinc-900 text-sm font-medium transition-colors cursor-pointer"
+            className="px-5 py-2 rounded-full bg-white hover:bg-fg text-app text-sm font-medium transition-colors cursor-pointer"
           >
             Retry
           </button>
@@ -44,7 +44,7 @@ export function StreamError({ message, onRetry }: Props) {
         <button
           type="button"
           onClick={() => router.history.back()}
-          className="px-5 py-2 rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-sm font-medium transition-colors cursor-pointer"
+          className="px-5 py-2 rounded-full bg-surface-strong hover:bg-surface-soft text-fg text-sm font-medium transition-colors cursor-pointer"
         >
           Go back
         </button>

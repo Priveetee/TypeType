@@ -99,7 +99,7 @@ export function VideoCard({ stream, onOpen, onImpression }: Props) {
         onTouchStart={onOpen}
         onClick={onOpen}
       >
-        <div className="relative aspect-video overflow-hidden rounded-xl bg-zinc-800 sm:rounded-lg">
+        <div className="relative aspect-video overflow-hidden rounded-xl bg-surface-strong sm:rounded-lg">
           <img
             src={stream.thumbnail}
             alt={stream.title}
@@ -136,7 +136,7 @@ export function VideoCard({ stream, onOpen, onImpression }: Props) {
           <Link
             to="/watch"
             search={{ v: stream.id }}
-            className="text-sm font-medium text-zinc-100 line-clamp-2 leading-snug hover:text-white"
+            className="text-sm font-medium text-fg line-clamp-2 leading-snug hover:text-white"
             onMouseDown={onOpen}
             onTouchStart={onOpen}
             onClick={onOpen}
@@ -147,18 +147,18 @@ export function VideoCard({ stream, onOpen, onImpression }: Props) {
             <Link
               to="/channel"
               search={{ url: stream.channelUrl }}
-              className="text-xs text-zinc-400 hover:text-zinc-200 transition-colors w-fit flex items-center gap-1"
+              className="text-xs text-fg-muted hover:text-fg transition-colors w-fit flex items-center gap-1"
             >
               {stream.channelName}
               {stream.uploaderVerified && <VerifiedBadgeIcon />}
             </Link>
           ) : (
-            <p className="text-xs text-zinc-400 flex items-center gap-1">
+            <p className="text-xs text-fg-muted flex items-center gap-1">
               {stream.channelName}
               {stream.uploaderVerified && <VerifiedBadgeIcon />}
             </p>
           )}
-          <p className="text-xs text-zinc-500">
+          <p className="text-xs text-fg-soft">
             {formatViews(stream.views)}
             {publishedText && ` · ${publishedText}`}
           </p>

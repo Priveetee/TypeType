@@ -70,7 +70,7 @@ export function HistoryCalendar({ selected, onSelect }: Props) {
 
       <div className="grid grid-cols-7 gap-y-0.5">
         {DAY_LABELS.map((d) => (
-          <div key={d} className="text-center text-[10px] text-zinc-600 py-0.5">
+          <div key={d} className="text-center text-[10px] text-fg-soft py-0.5">
             {d}
           </div>
         ))}
@@ -93,12 +93,12 @@ export function HistoryCalendar({ selected, onSelect }: Props) {
               onClick={() => onSelect(cellDate)}
               className={`h-7 w-full rounded text-xs transition-colors ${
                 isSelected
-                  ? "bg-zinc-100 text-zinc-950 font-medium"
+                  ? "bg-fg text-app font-medium"
                   : isToday
-                    ? "text-zinc-100 ring-1 ring-zinc-600 hover:bg-zinc-800"
+                    ? "text-fg ring-1 ring-border-strong hover:bg-surface-strong"
                     : isFuture
-                      ? "text-zinc-700 cursor-not-allowed"
-                      : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
+                      ? "text-fg-soft cursor-not-allowed"
+                      : "text-fg-muted hover:text-fg hover:bg-surface-strong"
               }`}
             >
               {day}

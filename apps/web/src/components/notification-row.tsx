@@ -24,7 +24,7 @@ export function NotificationRow({ item, onOpen }: Props) {
     <Link
       to="/watch"
       search={{ v: videoId }}
-      className="grid grid-cols-[96px_1fr] gap-3 rounded-lg px-2 py-2 hover:bg-zinc-800 [animation:card-pop-in_0.24s_ease-out]"
+      className="grid grid-cols-[96px_1fr] gap-3 rounded-lg px-2 py-2 hover:bg-surface-strong [animation:card-pop-in_0.24s_ease-out]"
       onClick={onOpen}
       onMouseEnter={prefetch.onMouseEnter}
       onMouseLeave={prefetch.onMouseLeave}
@@ -36,9 +36,7 @@ export function NotificationRow({ item, onOpen }: Props) {
         loading="lazy"
       />
       <div className="min-w-0">
-        <p className="line-clamp-2 text-sm font-medium leading-tight text-zinc-100">
-          {item.video.title}
-        </p>
+        <p className="line-clamp-2 text-sm font-medium leading-tight text-fg">{item.video.title}</p>
         <div className="mt-1 flex items-center gap-1.5">
           <img
             src={proxyImage(item.channelAvatarUrl)}
@@ -46,8 +44,8 @@ export function NotificationRow({ item, onOpen }: Props) {
             className="h-4 w-4 rounded-full"
             loading="lazy"
           />
-          <span className="truncate text-xs text-zinc-300">{item.channelName}</span>
-          <span className="text-xs text-zinc-500">{createdText}</span>
+          <span className="truncate text-xs text-fg-muted">{item.channelName}</span>
+          <span className="text-xs text-fg-soft">{createdText}</span>
         </div>
       </div>
     </Link>

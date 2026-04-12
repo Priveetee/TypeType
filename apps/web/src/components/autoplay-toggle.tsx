@@ -4,20 +4,20 @@ export function AutoplayToggle() {
   const { settings, update } = useSettings();
 
   return (
-    <div className="flex items-center justify-between border-b border-zinc-800 pb-3 pt-3">
-      <span className="text-sm text-zinc-300">Autoplay</span>
+    <div className="flex items-center justify-between border-b border-border pb-3 pt-3">
+      <span className="text-sm text-fg-muted">Autoplay</span>
       <button
         type="button"
         role="switch"
         aria-checked={settings.autoplay}
         onClick={() => update.mutate({ autoplay: !settings.autoplay })}
         className={`relative h-5 w-10 rounded-full transition-colors duration-200 flex-shrink-0 ${
-          settings.autoplay ? "bg-zinc-100" : "bg-zinc-700"
+          settings.autoplay ? "bg-fg" : "bg-surface-soft"
         }`}
       >
         <span
           className={`absolute left-0.5 top-0.5 h-4 w-4 rounded-full transition-all duration-200 ${
-            settings.autoplay ? "translate-x-5 bg-zinc-900" : "translate-x-0 bg-zinc-300"
+            settings.autoplay ? "translate-x-5 bg-surface" : "translate-x-0 bg-surface-soft"
           }`}
         />
       </button>

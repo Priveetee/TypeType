@@ -19,7 +19,7 @@ export function ContinueCard({ item }: ContinueCardProps) {
       onMouseEnter={prefetch.onMouseEnter}
       onMouseLeave={prefetch.onMouseLeave}
     >
-      <div className="relative aspect-video rounded-lg overflow-hidden bg-zinc-800">
+      <div className="relative aspect-video rounded-lg overflow-hidden bg-surface-strong">
         <img
           src={item.thumbnail}
           alt={item.title}
@@ -30,15 +30,15 @@ export function ContinueCard({ item }: ContinueCardProps) {
         <span className="absolute bottom-1 right-1 bg-black/80 text-white text-[10px] font-medium px-1 py-0.5 rounded">
           {formatDuration(item.duration)}
         </span>
-        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-zinc-700">
-          <div className="h-full bg-red-500" style={{ width: `${pct}%` }} />
+        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-surface-soft">
+          <div className="h-full bg-danger-strong" style={{ width: `${pct}%` }} />
         </div>
       </div>
       <div className="flex flex-col gap-0.5">
-        <span className="text-xs text-zinc-100 line-clamp-2 leading-snug group-hover:text-white">
+        <span className="text-xs text-fg line-clamp-2 leading-snug group-hover:text-white">
           {item.title}
         </span>
-        <span className="text-[10px] text-zinc-500 truncate">{item.channelName}</span>
+        <span className="text-[10px] text-fg-soft truncate">{item.channelName}</span>
       </div>
     </Link>
   );

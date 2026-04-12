@@ -126,7 +126,7 @@ export function SearchOverlay({ onClose }: Props) {
             }}
             onKeyDown={handleKeyDown}
             placeholder="Search videos, channels..."
-            className="w-full h-14 bg-zinc-900 border border-zinc-700 rounded-xl px-5 text-lg text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-400"
+            className="w-full h-14 bg-surface border border-border-strong rounded-xl px-5 text-lg text-fg placeholder-zinc-500 focus:outline-none focus:border-border-strong"
           />
         </form>
         <SearchOverlayList

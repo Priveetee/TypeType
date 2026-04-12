@@ -89,11 +89,11 @@ export function HistoryFilter({
   return (
     <aside className="w-full lg:w-52 flex-shrink-0 flex flex-col gap-4 lg:gap-5 lg:sticky lg:top-20 lg:self-start">
       <div>
-        <p className="text-[11px] text-zinc-600 uppercase tracking-wider mb-2.5">
+        <p className="text-[11px] text-fg-soft uppercase tracking-wider mb-2.5">
           {resultCount} {resultCount === 1 ? "video" : "videos"}
         </p>
         <div className="relative">
-          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none">
+          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-fg-soft pointer-events-none">
             <SearchIcon />
           </span>
           <input
@@ -101,13 +101,13 @@ export function HistoryFilter({
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Search history..."
-            className="w-full h-9 bg-zinc-900 border border-zinc-800 rounded-lg pl-8 pr-3 text-xs text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-zinc-700 transition-colors"
+            className="w-full h-9 bg-surface border border-border rounded-lg pl-8 pr-3 text-xs text-fg placeholder-zinc-600 focus:outline-none focus:border-border-strong transition-colors"
           />
         </div>
       </div>
 
       <div>
-        <p className="text-[11px] text-zinc-600 uppercase tracking-wider mb-2">Date</p>
+        <p className="text-[11px] text-fg-soft uppercase tracking-wider mb-2">Date</p>
         <div className="grid grid-cols-2 gap-1 lg:flex lg:flex-col lg:gap-0.5">
           {PRESET_OPTIONS.map((opt) => (
             <button
@@ -116,8 +116,8 @@ export function HistoryFilter({
               onClick={() => handlePreset(opt.value)}
               className={`h-8 px-2.5 rounded-lg text-xs text-left transition-colors ${
                 isPresetActive(opt.value)
-                  ? "bg-zinc-100 text-zinc-950 font-medium"
-                  : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
+                  ? "bg-fg text-app font-medium"
+                  : "text-fg-muted hover:text-fg hover:bg-surface-strong"
               }`}
             >
               {opt.label}
@@ -129,8 +129,8 @@ export function HistoryFilter({
             onClick={handleOlderToggle}
             className={`col-span-2 h-8 px-2.5 rounded-lg text-xs text-left transition-colors ${
               olderActive
-                ? "bg-zinc-100 text-zinc-950 font-medium"
-                : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
+                ? "bg-fg text-app font-medium"
+                : "text-fg-muted hover:text-fg hover:bg-surface-strong"
             }`}
           >
             {selectedDate ? formatDate(selectedDate) : "Older"}
@@ -144,7 +144,7 @@ export function HistoryFilter({
         <button
           type="button"
           onClick={handleClear}
-          className="text-[11px] text-zinc-500 hover:text-zinc-300 transition-colors text-left"
+          className="text-[11px] text-fg-soft hover:text-fg-muted transition-colors text-left"
         >
           Clear filters
         </button>

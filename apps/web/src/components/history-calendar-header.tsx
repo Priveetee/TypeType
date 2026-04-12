@@ -68,7 +68,7 @@ export function CalendarHeader({
       <button
         type="button"
         onClick={onPrevMonth}
-        className="relative z-20 p-1 rounded text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors"
+        className="relative z-20 p-1 rounded text-fg-muted hover:text-fg hover:bg-surface-strong transition-colors"
       >
         <ChevronLeft />
       </button>
@@ -78,12 +78,12 @@ export function CalendarHeader({
           <button
             type="button"
             onClick={() => toggle("month")}
-            className="text-xs font-medium text-zinc-300 hover:text-zinc-100 px-1 py-0.5 rounded transition-colors"
+            className="text-xs font-medium text-fg-muted hover:text-fg px-1 py-0.5 rounded transition-colors"
           >
             {MONTH_NAMES[month]}
           </button>
           {dropdown === "month" && (
-            <div className="absolute z-10 top-full left-1/2 -translate-x-1/2 mt-1 w-44 bg-zinc-950 border border-zinc-800 rounded-lg p-1.5 grid grid-cols-3 gap-0.5 shadow-xl">
+            <div className="absolute z-10 top-full left-1/2 -translate-x-1/2 mt-1 w-44 bg-app border border-border rounded-lg p-1.5 grid grid-cols-3 gap-0.5 shadow-xl">
               {MONTH_NAMES.map((name, m) => (
                 <button
                   key={name}
@@ -91,8 +91,8 @@ export function CalendarHeader({
                   onClick={() => handleMonthSelect(m)}
                   className={`text-[11px] px-1 py-1.5 rounded transition-colors ${
                     m === month
-                      ? "bg-zinc-100 text-zinc-950 font-medium"
-                      : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
+                      ? "bg-fg text-app font-medium"
+                      : "text-fg-muted hover:text-fg hover:bg-surface-strong"
                   }`}
                 >
                   {name.slice(0, 3)}
@@ -106,12 +106,12 @@ export function CalendarHeader({
           <button
             type="button"
             onClick={() => toggle("year")}
-            className="text-xs font-medium text-zinc-300 hover:text-zinc-100 px-1 py-0.5 rounded transition-colors"
+            className="text-xs font-medium text-fg-muted hover:text-fg px-1 py-0.5 rounded transition-colors"
           >
             {year}
           </button>
           {dropdown === "year" && (
-            <div className="absolute z-10 top-full left-1/2 -translate-x-1/2 mt-1 w-20 max-h-36 overflow-y-auto bg-zinc-950 border border-zinc-800 rounded-lg p-1 shadow-xl">
+            <div className="absolute z-10 top-full left-1/2 -translate-x-1/2 mt-1 w-20 max-h-36 overflow-y-auto bg-app border border-border rounded-lg p-1 shadow-xl">
               {YEARS.map((y) => (
                 <button
                   key={y}
@@ -119,8 +119,8 @@ export function CalendarHeader({
                   onClick={() => handleYearSelect(y)}
                   className={`w-full text-[11px] px-2 py-1 rounded transition-colors text-left ${
                     y === year
-                      ? "bg-zinc-100 text-zinc-950 font-medium"
-                      : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
+                      ? "bg-fg text-app font-medium"
+                      : "text-fg-muted hover:text-fg hover:bg-surface-strong"
                   }`}
                 >
                   {y}
@@ -137,8 +137,8 @@ export function CalendarHeader({
         disabled={!canGoNext}
         className={`relative z-20 p-1 rounded transition-colors ${
           canGoNext
-            ? "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
-            : "text-zinc-700 cursor-not-allowed"
+            ? "text-fg-muted hover:text-fg hover:bg-surface-strong"
+            : "text-fg-soft cursor-not-allowed"
         }`}
       >
         <ChevronRight />

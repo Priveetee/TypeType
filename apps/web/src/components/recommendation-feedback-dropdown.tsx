@@ -71,7 +71,7 @@ export function RecommendationFeedbackDropdown({
     <div
       ref={panelRef}
       style={panelStyle}
-      className="fixed z-50 w-56 overflow-hidden rounded-lg border border-zinc-700 bg-zinc-900 shadow-2xl"
+      className="fixed z-50 w-56 overflow-hidden rounded-lg border border-border-strong bg-surface shadow-2xl"
     >
       <button
         type="button"
@@ -79,7 +79,7 @@ export function RecommendationFeedbackDropdown({
           onNotInterested();
           onClose();
         }}
-        className="w-full px-3 py-2 text-left text-sm text-zinc-200 transition-colors hover:bg-zinc-800"
+        className="w-full px-3 py-2 text-left text-sm text-fg transition-colors hover:bg-surface-strong"
       >
         Not interested
       </button>
@@ -90,7 +90,7 @@ export function RecommendationFeedbackDropdown({
           onClose();
         }}
         disabled={!onLessFromChannel}
-        className="w-full px-3 py-2 text-left text-sm text-zinc-200 transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:text-zinc-500"
+        className="w-full px-3 py-2 text-left text-sm text-fg transition-colors hover:bg-surface-strong disabled:cursor-not-allowed disabled:text-fg-soft"
       >
         Less from {stream.channelName}
       </button>
@@ -101,7 +101,7 @@ export function RecommendationFeedbackDropdown({
             onToggleVideoBlock();
             onClose();
           }}
-          className="w-full px-3 py-2 text-left text-sm text-zinc-200 transition-colors hover:bg-zinc-800"
+          className="w-full px-3 py-2 text-left text-sm text-fg transition-colors hover:bg-surface-strong"
         >
           {videoBlocked ? "Unblock video" : "Block video"}
         </button>
@@ -113,7 +113,7 @@ export function RecommendationFeedbackDropdown({
             onToggleChannelBlock();
             onClose();
           }}
-          className="w-full px-3 py-2 text-left text-sm text-zinc-200 transition-colors hover:bg-zinc-800"
+          className="w-full px-3 py-2 text-left text-sm text-fg transition-colors hover:bg-surface-strong"
         >
           {channelBlocked ? "Unblock channel" : "Block channel"}
         </button>

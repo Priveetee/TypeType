@@ -5,8 +5,7 @@ import { getOpenMojiUrl } from "../lib/openmoji";
 import { OPENMOJI_CATALOG } from "../lib/openmoji-catalog";
 import { Toast } from "./toast";
 
-const CARD =
-  "bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden divide-y divide-zinc-800";
+const CARD = "bg-surface rounded-xl border border-border overflow-hidden divide-y divide-border";
 const SCROLL_STEP = 220;
 
 function normalizeTerm(value: string): string {
@@ -47,17 +46,17 @@ export function ProfileAvatarSettings() {
 
   return (
     <section className="flex flex-col gap-3">
-      <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider px-1">Avatar</p>
+      <p className="text-xs font-medium text-fg-soft uppercase tracking-wider px-1">Avatar</p>
       <div className={CARD}>
         <div className="px-4 py-4 flex flex-col gap-3">
           <div className="flex items-center justify-between gap-2">
-            <p className="text-sm text-zinc-100">
+            <p className="text-sm text-fg">
               Emojis from{" "}
               <a
                 href="https://openmoji.org"
                 target="_blank"
                 rel="noreferrer"
-                className="text-zinc-300 underline underline-offset-2 hover:text-zinc-100"
+                className="text-fg-muted underline underline-offset-2 hover:text-fg"
               >
                 OpenMoji
               </a>
@@ -66,16 +65,16 @@ export function ProfileAvatarSettings() {
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search emojis"
-              className="h-8 w-40 rounded-md border border-zinc-700 bg-zinc-950 px-2 text-xs text-zinc-100"
+              className="h-8 w-40 rounded-md border border-border-strong bg-app px-2 text-xs text-fg"
             />
           </div>
-          <div className="flex items-center gap-2 overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950/70 p-2">
+          <div className="flex items-center gap-2 overflow-hidden rounded-lg border border-border bg-app/70 p-2">
             <button
               type="button"
               aria-label="Scroll emoji list left"
               disabled={busy}
               onClick={() => scroll("left")}
-              className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md border border-zinc-700 bg-zinc-900 text-zinc-300 transition-colors hover:border-zinc-500 hover:text-zinc-100 disabled:opacity-50"
+              className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md border border-border-strong bg-surface text-fg-muted transition-colors hover:border-border-strong hover:text-fg disabled:opacity-50"
             >
               <ArrowIcon right={false} />
             </button>
@@ -101,8 +100,8 @@ export function ProfileAvatarSettings() {
                       }}
                       className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border p-1.5 transition-transform hover:scale-105 active:scale-95 disabled:opacity-50 ${
                         selected
-                          ? "border-zinc-300 bg-zinc-100/20 ring-1 ring-zinc-300"
-                          : "border-zinc-700 bg-zinc-900 hover:border-zinc-500"
+                          ? "border-border bg-fg/20 ring-1 ring-border"
+                          : "border-border-strong bg-surface hover:border-border-strong"
                       }`}
                     >
                       <img src={getOpenMojiUrl(item.code)} alt={item.label} className="h-7 w-7" />
@@ -116,7 +115,7 @@ export function ProfileAvatarSettings() {
               aria-label="Scroll emoji list right"
               disabled={busy}
               onClick={() => scroll("right")}
-              className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md border border-zinc-700 bg-zinc-900 text-zinc-300 transition-colors hover:border-zinc-500 hover:text-zinc-100 disabled:opacity-50"
+              className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md border border-border-strong bg-surface text-fg-muted transition-colors hover:border-border-strong hover:text-fg disabled:opacity-50"
             >
               <ArrowIcon right={true} />
             </button>
@@ -132,7 +131,7 @@ export function ProfileAvatarSettings() {
                 onError: () => setToast("Unable to clear avatar"),
               });
             }}
-            className="h-9 rounded-md border border-zinc-700 bg-zinc-900 px-3 text-xs text-zinc-200 disabled:opacity-50"
+            className="h-9 rounded-md border border-border-strong bg-surface px-3 text-xs text-fg disabled:opacity-50"
           >
             Clear
           </button>

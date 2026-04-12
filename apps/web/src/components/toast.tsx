@@ -5,7 +5,7 @@ export function Toast({ message }: Props) {
   const success = /completed|success|restored|finished/i.test(message);
   const shell = success
     ? "border-emerald-500/40 bg-gradient-to-r from-emerald-600/90 to-emerald-500/80 text-white"
-    : "border-zinc-600 bg-zinc-800/95 text-zinc-100";
+    : "border-border-strong bg-surface-strong/95 text-fg";
   return (
     <div className="fixed bottom-6 left-0 right-0 flex justify-center z-[9999] pointer-events-none">
       <div

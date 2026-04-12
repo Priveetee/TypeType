@@ -32,8 +32,8 @@ export function PipePipeImportDropZone({ zoneTone, disabled, fileRef, onOver, on
         if (file?.name.toLowerCase().endsWith(".zip")) onFile(file);
       }}
     >
-      <span className="text-sm text-zinc-200">Drop your PipePipe backup ZIP here</span>
-      <span className="mt-1 text-xs text-zinc-500">or click to select</span>
+      <span className="text-sm text-fg">Drop your PipePipe backup ZIP here</span>
+      <span className="mt-1 text-xs text-fg-soft">or click to select</span>
       <input
         ref={fileRef}
         type="file"

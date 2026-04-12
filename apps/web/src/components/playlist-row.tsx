@@ -29,11 +29,11 @@ export function PlaylistRow({ label, checked, onToggle }: RowProps) {
     <button
       type="button"
       onClick={onToggle}
-      className="flex items-center gap-2.5 w-full px-3 py-2.5 text-sm text-zinc-200 hover:bg-zinc-800 hover:text-zinc-100 transition-colors"
+      className="flex items-center gap-2.5 w-full px-3 py-2.5 text-sm text-fg hover:bg-surface-strong hover:text-fg transition-colors"
     >
       <span
         className={`w-4 h-4 flex items-center justify-center rounded border flex-shrink-0 transition-colors ${
-          checked ? "bg-zinc-100 border-zinc-100 text-zinc-900" : "border-zinc-500"
+          checked ? "bg-fg border-fg text-app" : "border-border-strong"
         }`}
       >
         {checked && <CheckIcon />}

@@ -97,15 +97,15 @@ export function PlaylistAddDropdown({ stream, anchorEl, onClose, onSaved }: Prop
   return createPortal(
     <div
       ref={panelRef}
-      className="fixed z-50 flex flex-col w-60 max-h-80 overflow-hidden rounded-xl bg-zinc-900 border border-zinc-700 shadow-2xl [animation:dropdown-fade-in_0.15s_ease-out]"
+      className="fixed z-50 flex flex-col w-60 max-h-80 overflow-hidden rounded-xl bg-surface border border-border-strong shadow-2xl [animation:dropdown-fade-in_0.15s_ease-out]"
       style={panelStyle}
     >
-      <p className="flex-shrink-0 text-xs text-zinc-400 px-3 pt-3 pb-1 uppercase tracking-wider font-medium">
+      <p className="flex-shrink-0 text-xs text-fg-muted px-3 pt-3 pb-1 uppercase tracking-wider font-medium">
         Save to playlist
       </p>
       <div className="flex-1 min-h-0 overflow-y-auto">
         {playlists.length === 0 && (
-          <p className="text-xs text-zinc-500 px-3 py-3">No playlists yet.</p>
+          <p className="text-xs text-fg-soft px-3 py-3">No playlists yet.</p>
         )}
         {playlists.map((playlist) => (
           <PlaylistRow
@@ -116,19 +116,19 @@ export function PlaylistAddDropdown({ stream, anchorEl, onClose, onSaved }: Prop
           />
         ))}
       </div>
-      <div className="flex-shrink-0 border-t border-zinc-800 p-2 flex gap-1.5">
+      <div className="flex-shrink-0 border-t border-border p-2 flex gap-1.5">
         <input
           type="text"
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleCreate()}
           placeholder="New playlist..."
-          className="min-w-0 flex-1 text-xs bg-zinc-800 text-zinc-100 placeholder-zinc-500 rounded-lg px-2.5 py-1.5 outline-none focus:ring-1 focus:ring-zinc-600"
+          className="min-w-0 flex-1 text-xs bg-surface-strong text-fg placeholder-zinc-500 rounded-lg px-2.5 py-1.5 outline-none focus:ring-1 focus:ring-border-strong"
         />
         <button
           type="button"
           onClick={handleCreate}
-          className="flex-shrink-0 text-xs px-2.5 py-1.5 bg-zinc-700 hover:bg-zinc-600 text-zinc-100 rounded-lg transition-colors"
+          className="flex-shrink-0 text-xs px-2.5 py-1.5 bg-surface-soft hover:bg-surface-soft text-fg rounded-lg transition-colors"
         >
           Create
         </button>

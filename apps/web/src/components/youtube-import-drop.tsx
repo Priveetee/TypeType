@@ -48,7 +48,7 @@ export function YoutubeImportDrop(props: Props) {
       />
 
       {inlineError && (
-        <div className="rounded-lg border border-red-900 bg-red-950/50 px-4 py-3 text-sm text-red-300">
+        <div className="rounded-lg border border-danger bg-danger/50 px-4 py-3 text-sm text-danger-strong">
           {inlineError}
         </div>
       )}
@@ -59,7 +59,7 @@ export function YoutubeImportDrop(props: Props) {
             type="button"
             onClick={onStart}
             disabled={busy || queueStarted}
-            className="h-9 rounded-lg bg-red-600 px-4 text-sm font-medium text-white hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-50"
+            className="h-9 rounded-lg bg-danger px-4 text-sm font-medium text-white hover:bg-danger-strong disabled:cursor-not-allowed disabled:opacity-50"
           >
             Start import
           </button>
@@ -67,14 +67,14 @@ export function YoutubeImportDrop(props: Props) {
         <button
           type="button"
           onClick={onToggleGuide}
-          className="h-9 rounded-lg border border-zinc-700 bg-zinc-900 px-4 text-sm text-zinc-300 hover:bg-zinc-800"
+          className="h-9 rounded-lg border border-border-strong bg-surface px-4 text-sm text-fg-muted hover:bg-surface-strong"
         >
           {guideOpen ? "Hide guide" : "Need help?"}
         </button>
         <button
           type="button"
           onClick={onOpenTakeout}
-          className="h-9 rounded-lg border border-zinc-700 bg-zinc-900 px-4 text-sm text-zinc-300 hover:bg-zinc-800"
+          className="h-9 rounded-lg border border-border-strong bg-surface px-4 text-sm text-fg-muted hover:bg-surface-strong"
         >
           Open Google Takeout
         </button>
@@ -87,16 +87,16 @@ export function YoutubeImportDrop(props: Props) {
 
 function TakeoutGuide() {
   return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4 text-sm">
-      <p className="font-medium text-zinc-200">How to export from YouTube</p>
-      <ol className="mt-3 list-inside list-decimal space-y-2 text-zinc-400">
+    <div className="rounded-xl border border-border bg-surface p-4 text-sm">
+      <p className="font-medium text-fg">How to export from YouTube</p>
+      <ol className="mt-3 list-inside list-decimal space-y-2 text-fg-muted">
         <li>
           Go to{" "}
           <a
             href={TAKEOUT_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-zinc-300 underline"
+            className="text-fg-muted underline"
           >
             takeout.google.com
           </a>
@@ -106,7 +106,7 @@ function TakeoutGuide() {
         <li>Create export and wait for the email</li>
         <li>Download the ZIP and drop it here</li>
       </ol>
-      <p className="mt-3 text-xs text-zinc-500">
+      <p className="mt-3 text-xs text-fg-soft">
         We import subscriptions, playlists, and watch history (if available).
       </p>
     </div>

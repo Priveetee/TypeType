@@ -54,7 +54,7 @@ export function HistoryCard({ item, onRemove, index }: HistoryCardProps) {
         onMouseEnter={prefetch.onMouseEnter}
         onMouseLeave={prefetch.onMouseLeave}
       >
-        <div className="relative aspect-video rounded-lg overflow-hidden bg-zinc-800">
+        <div className="relative aspect-video rounded-lg overflow-hidden bg-surface-strong">
           <img
             src={proxyImage(item.thumbnail)}
             alt={item.title}
@@ -95,22 +95,20 @@ export function HistoryCard({ item, onRemove, index }: HistoryCardProps) {
             onMouseEnter={prefetch.onMouseEnter}
             onMouseLeave={prefetch.onMouseLeave}
           >
-            <p className="text-sm font-medium text-zinc-100 line-clamp-2 leading-snug">
-              {item.title}
-            </p>
+            <p className="text-sm font-medium text-fg line-clamp-2 leading-snug">{item.title}</p>
           </Link>
           {item.channelUrl ? (
             <Link
               to="/channel"
               search={{ url: item.channelUrl }}
-              className="text-xs text-zinc-400 hover:text-zinc-200 transition-colors w-fit"
+              className="text-xs text-fg-muted hover:text-fg transition-colors w-fit"
             >
               {item.channelName}
             </Link>
           ) : (
-            <p className="text-xs text-zinc-400">{item.channelName}</p>
+            <p className="text-xs text-fg-muted">{item.channelName}</p>
           )}
-          <p className="text-[11px] text-zinc-500">Watched {formatWatchedAt(item.watchedAt)}</p>
+          <p className="text-[11px] text-fg-soft">Watched {formatWatchedAt(item.watchedAt)}</p>
         </div>
       </div>
     </div>

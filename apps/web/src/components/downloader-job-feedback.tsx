@@ -86,11 +86,11 @@ export function DownloaderJobFeedback({
         <div
           className={
             immersive
-              ? "h-[min(52svh,24rem)] min-h-52 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950/80 p-1.5"
-              : "mt-2 rounded-md border border-zinc-800 bg-zinc-900/60 p-1.5"
+              ? "h-[min(52svh,24rem)] min-h-52 overflow-hidden rounded-xl border border-border bg-app/80 p-1.5"
+              : "mt-2 rounded-md border border-border bg-surface/60 p-1.5"
           }
         >
-          <div className="h-full overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950/70">
+          <div className="h-full overflow-hidden rounded-lg border border-border bg-app/70">
             <img
               src="/downloader-waiting.gif"
               alt="Download in progress"
@@ -101,21 +101,21 @@ export function DownloaderJobFeedback({
         </div>
       )}
       {showWaiting && (
-        <div className="mt-2 rounded-lg border border-zinc-800 bg-zinc-900/70 p-2">
-          <div className="relative h-11 overflow-hidden rounded-md border border-zinc-700 bg-zinc-950/80">
+        <div className="mt-2 rounded-lg border border-border bg-surface/70 p-2">
+          <div className="relative h-11 overflow-hidden rounded-md border border-border-strong bg-app/80">
             <CardLiquidFill progress={normalizedProgress} />
             <div className="absolute inset-0 flex items-center justify-between px-2 text-xs">
-              <span className="text-zinc-200">{stageLabel(stage)}</span>
-              <span className="font-medium text-zinc-100">{normalizedProgress}%</span>
+              <span className="text-fg">{stageLabel(stage)}</span>
+              <span className="font-medium text-fg">{normalizedProgress}%</span>
             </div>
           </div>
         </div>
       )}
       {resolvedLabel && !showWaiting && !visibleError && (
-        <p className="mt-2 text-xs text-zinc-400">Selected: {resolvedLabel}</p>
+        <p className="mt-2 text-xs text-fg-muted">Selected: {resolvedLabel}</p>
       )}
       {visibleError && (
-        <p className="mt-2 text-xs text-red-300" role="alert">
+        <p className="mt-2 text-xs text-danger-strong" role="alert">
           {visibleError}
         </p>
       )}
