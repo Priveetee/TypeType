@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "@vidstack/react/player/styles/default/theme.css";
 @import "@vidstack/react/player/styles/default/layouts/video.css";
+@import "./styles/theme.css";
 @import "./styles/shorts-overrides.css";
 
 @keyframes card-pop-in {

@@ -7,12 +7,14 @@ import { useMobile } from "../hooks/use-mobile";
 import { useRecommendationOnboardingState } from "../hooks/use-recommendation-onboarding";
 import { isAdminRoute, isAuthPage, requiresAuth } from "../lib/auth-routes";
 import { bootstrapSession } from "../lib/auth-session";
+import { applyTheme } from "../lib/theme";
+import { useThemeStore } from "../stores/theme-store";
 import { useUiStore } from "../stores/ui-store";
 import { useWatchLayoutStore } from "../stores/watch-layout-store";
 
 function AuthShell() {
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 text-zinc-100">
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-app via-surface to-app text-fg">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute -top-24 -left-16 h-80 w-80 rounded-full bg-sky-700/15 blur-3xl" />
         <div className="absolute bottom-0 right-0 h-96 w-96 rounded-full bg-cyan-500/10 blur-3xl" />
@@ -28,6 +30,7 @@ function RootLayout() {
   const isMobile = useMobile();
   const collapsed = useUiStore((s) => s.sidebarCollapsed);
   const closeMobileSidebar = useUiStore((s) => s.closeMobileSidebar);
+  const theme = useThemeStore((s) => s.theme);
   const cinemaMode = useWatchLayoutStore((s) => s.cinemaMode);
   const { isAuthed, isAdmin, status } = useAuth();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
@@ -42,11 +45,13 @@ function RootLayout() {
   }, []);
 
   useEffect(() => {
+    applyTheme(theme);
+  }, [theme]);
+
+  useEffect(() => {
     const loader = document.getElementById("app-loader");
     if (!loader) return;
-    loader.style.opacity = "0";
-    const timer = setTimeout(() => loader.remove(), 300);
-    return () => clearTimeout(timer);
+    loader.remove();
   }, []);
 
   useEffect(() => {
@@ -87,16 +92,16 @@ function RootLayout() {
 
   if (status === "loading" && (requiresAuth(pathname) || isAdminRoute(pathname))) {
     return (
-      <div className="min-h-screen bg-zinc-950 text-zinc-100 flex items-center justify-center">
-        <p className="text-sm text-zinc-400">Loading session...</p>
+      <div className="min-h-screen bg-app text-fg flex items-center justify-center">
+        <p className="text-sm text-fg-muted">Loading session...</p>
       </div>
     );
   }
 
   if (status === "authenticated" && !onboardingPage && onboardingState.isPending) {
     return (
-      <div className="min-h-screen bg-zinc-950 text-zinc-100 flex items-center justify-center">
-        <p className="text-sm text-zinc-400">Loading recommendations...</p>
+      <div className="min-h-screen bg-app text-fg flex items-center justify-center">
+        <p className="text-sm text-fg-muted">Loading recommendations...</p>
       </div>
     );
   }
@@ -109,7 +114,7 @@ function RootLayout() {
 
   if (shortsPage) {
     return (
-      <div className="min-h-screen bg-zinc-950 text-zinc-100">
+      <div className="min-h-screen bg-app text-fg">
         <Navbar />
         <Sidebar />
         <main style={{ paddingTop: "calc(3.5rem + env(safe-area-inset-top, 0px))" }}>
@@ -127,7 +132,7 @@ function RootLayout() {
       }`;
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100">
+    <div className="min-h-screen bg-app text-fg">
       <Navbar />
       <Sidebar />
       <main className={mainClasses} style={topPadding}>
