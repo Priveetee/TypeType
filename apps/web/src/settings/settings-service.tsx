@@ -16,18 +16,17 @@ const SERVICES: ServiceOption[] = [
   { id: 5, label: "BiliBili", path: siBilibili.path, color: "#00A1D6" },
 ];
 
-const SECTION_LABEL = "text-xs font-medium text-zinc-500 uppercase tracking-wider px-1";
-const CARD =
-  "bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden divide-y divide-zinc-800";
+const SECTION_LABEL = "text-xs font-medium text-fg-soft uppercase tracking-wider px-1";
+const CARD = "bg-surface rounded-xl border border-border overflow-hidden divide-y divide-border";
 
 function RadioDot({ selected }: { selected: boolean }) {
   return (
     <span
       className={`w-4 h-4 rounded-full border flex-shrink-0 flex items-center justify-center transition-colors ${
-        selected ? "border-zinc-100 bg-zinc-100" : "border-zinc-600"
+        selected ? "border-fg bg-fg" : "border-border-strong"
       }`}
     >
-      {selected && <span className="w-2 h-2 rounded-full bg-zinc-900" />}
+      {selected && <span className="w-2 h-2 rounded-full bg-surface" />}
     </span>
   );
 }
@@ -45,11 +44,13 @@ export function SettingsService() {
             type="button"
             onClick={() => update.mutate({ defaultService: svc.id })}
             className={`flex items-center gap-3 px-4 py-3.5 w-full text-left transition-colors ${
-              settings.defaultService === svc.id ? "bg-zinc-800/60" : "hover:bg-zinc-800/30"
+              settings.defaultService === svc.id
+                ? "bg-surface-strong/60"
+                : "hover:bg-surface-strong/30"
             }`}
           >
             <ServiceIcon path={svc.path} color={svc.color} label={svc.label} />
-            <span className="flex-1 text-sm text-zinc-100">{svc.label}</span>
+            <span className="flex-1 text-sm text-fg">{svc.label}</span>
             <RadioDot selected={settings.defaultService === svc.id} />
           </button>
         ))}

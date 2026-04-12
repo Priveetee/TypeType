@@ -55,7 +55,7 @@ function LoginPage() {
             value={identifier}
             onChange={(e) => setIdentifier(e.target.value)}
             placeholder="Email or username"
-            className="h-10 rounded-lg border border-zinc-700 bg-zinc-950 px-3 text-sm text-zinc-100"
+            className="h-10 rounded-lg border border-border-strong bg-app px-3 text-sm text-fg"
             required
           />
           <input
@@ -64,28 +64,28 @@ function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Password"
-            className="h-10 rounded-lg border border-zinc-700 bg-zinc-950 px-3 text-sm text-zinc-100"
+            className="h-10 rounded-lg border border-border-strong bg-app px-3 text-sm text-fg"
             required
           />
           <button
             type="submit"
             disabled={pending}
-            className="h-10 rounded-lg bg-zinc-100 text-zinc-900 text-sm font-medium disabled:opacity-60"
+            className="h-10 rounded-lg bg-fg text-app text-sm font-medium disabled:opacity-60"
           >
             {pending ? "Signing in..." : "Sign in"}
           </button>
         </form>
-        <div className="mt-4 text-xs text-zinc-500 flex items-center justify-between">
+        <div className="mt-4 text-xs text-fg-soft flex items-center justify-between">
           <Link
             to="/register"
             search={{ redirect }}
-            className="text-zinc-300 hover:text-zinc-100 underline underline-offset-2"
+            className="text-fg-muted hover:text-fg underline underline-offset-2"
           >
             Create account
           </Link>
           <Link
             to="/reset-password"
-            className="text-zinc-300 hover:text-zinc-100 underline underline-offset-2"
+            className="text-fg-muted hover:text-fg underline underline-offset-2"
           >
             Reset password
           </Link>

@@ -28,29 +28,29 @@ export function YoutubeImportJobSummary({ job, preview, report }: Props) {
   if (!job) return null;
 
   return (
-    <div className="rounded-xl border border-zinc-800/70 bg-zinc-900/90">
-      <div className="px-4 py-4 text-xs text-zinc-400">
+    <div className="rounded-xl border border-border/70 bg-surface/90">
+      <div className="px-4 py-4 text-xs text-fg-muted">
         <p>
-          <span className="text-zinc-500">Import ID:</span> {job.jobId}
+          <span className="text-fg-soft">Import ID:</span> {job.jobId}
         </p>
         <p>
-          <span className="text-zinc-500">Status:</span> {statusLabel(job.status)}
+          <span className="text-fg-soft">Status:</span> {statusLabel(job.status)}
         </p>
         {job.phase && (
           <p>
-            <span className="text-zinc-500">Phase:</span> {job.phase}
+            <span className="text-fg-soft">Phase:</span> {job.phase}
           </p>
         )}
         {preview && (
           <p>
-            <span className="text-zinc-500">Preview:</span> {preview.counts.subscriptions}{" "}
+            <span className="text-fg-soft">Preview:</span> {preview.counts.subscriptions}{" "}
             subscriptions, {preview.counts.playlists} playlists, {preview.counts.playlistItems}{" "}
             playlist videos
           </p>
         )}
         {report && (
           <p>
-            <span className="text-zinc-500">Imported:</span> {reportText(report)}
+            <span className="text-fg-soft">Imported:</span> {reportText(report)}
           </p>
         )}
       </div>

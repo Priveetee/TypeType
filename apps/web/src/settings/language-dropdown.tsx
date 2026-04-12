@@ -57,7 +57,7 @@ export function LanguageDropdown({ value, onChange, disabled = false }: Props) {
         type="button"
         disabled={disabled}
         onClick={() => setOpen((current) => !current)}
-        className={`flex items-center gap-2 bg-zinc-800 border border-zinc-700 text-xs rounded-lg px-3 py-1.5 transition-colors ${disabled ? "text-zinc-600 cursor-not-allowed" : "text-zinc-100 hover:bg-zinc-700"}`}
+        className={`flex items-center gap-2 bg-surface-strong border border-border-strong text-xs rounded-lg px-3 py-1.5 transition-colors ${disabled ? "text-fg-soft cursor-not-allowed" : "text-fg hover:bg-surface-soft"}`}
       >
         {selected?.flag && (
           <FlagIcon code={selected.flag} className="w-4 h-3 rounded-sm flex-shrink-0" />
@@ -66,14 +66,14 @@ export function LanguageDropdown({ value, onChange, disabled = false }: Props) {
         {CHEVRON}
       </button>
       {open && !disabled && (
-        <div className="absolute right-0 top-full mt-1 bg-zinc-800 border border-zinc-700 rounded-lg overflow-hidden z-10 w-56 shadow-lg flex flex-col">
+        <div className="absolute right-0 top-full mt-1 bg-surface-strong border border-border-strong rounded-lg overflow-hidden z-10 w-56 shadow-lg flex flex-col">
           <input
             ref={inputRef}
             type="text"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search language..."
-            className="px-3 py-2 text-xs bg-zinc-800 text-zinc-100 placeholder:text-zinc-500 border-b border-zinc-700 focus:outline-none"
+            className="px-3 py-2 text-xs bg-surface-strong text-fg placeholder:text-fg-soft border-b border-border-strong focus:outline-none"
           />
           <div className="overflow-y-auto max-h-52">
             <button
@@ -82,7 +82,7 @@ export function LanguageDropdown({ value, onChange, disabled = false }: Props) {
                 onChange("");
                 setOpen(false);
               }}
-              className={`block w-full text-left px-3 py-2 text-xs transition-colors ${value === "" ? "text-zinc-100 bg-zinc-700" : "text-zinc-400 hover:bg-zinc-700 hover:text-zinc-100"}`}
+              className={`block w-full text-left px-3 py-2 text-xs transition-colors ${value === "" ? "text-fg bg-surface-soft" : "text-fg-muted hover:bg-surface-soft hover:text-fg"}`}
             >
               No preference
             </button>
@@ -94,7 +94,7 @@ export function LanguageDropdown({ value, onChange, disabled = false }: Props) {
                   onChange(language.code);
                   setOpen(false);
                 }}
-                className={`flex items-center gap-2 w-full text-left px-3 py-2 text-xs transition-colors ${language.code === value ? "text-zinc-100 bg-zinc-700" : "text-zinc-400 hover:bg-zinc-700 hover:text-zinc-100"}`}
+                className={`flex items-center gap-2 w-full text-left px-3 py-2 text-xs transition-colors ${language.code === value ? "text-fg bg-surface-soft" : "text-fg-muted hover:bg-surface-soft hover:text-fg"}`}
               >
                 {language.flag && (
                   <FlagIcon code={language.flag} className="w-4 h-3 rounded-sm flex-shrink-0" />

@@ -3,7 +3,7 @@ import { ChannelAvatar } from "../components/channel-avatar";
 import { useBlocked } from "../hooks/use-blocked";
 import type { BlockedItem } from "../types/user";
 
-const SECTION_LABEL = "text-xs font-medium text-zinc-500 uppercase tracking-wider px-1";
+const SECTION_LABEL = "text-xs font-medium text-fg-soft uppercase tracking-wider px-1";
 
 function XIcon() {
   return (
@@ -39,7 +39,7 @@ function ChannelBubble({ item, onClick, onRemove }: ChannelBubbleProps) {
         type="button"
         onClick={onClick}
         title={label}
-        className="block rounded-full focus:outline-none focus:ring-2 focus:ring-zinc-500"
+        className="block rounded-full focus:outline-none focus:ring-2 focus:ring-border-strong"
       >
         <ChannelAvatar
           src={item.thumbnailUrl ?? ""}
@@ -51,7 +51,7 @@ function ChannelBubble({ item, onClick, onRemove }: ChannelBubbleProps) {
         type="button"
         onClick={onRemove}
         aria-label={`Unblock ${label}`}
-        className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-zinc-800 hover:bg-red-900 border border-zinc-600 text-zinc-300 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+        className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-surface-strong hover:bg-danger border border-border-strong text-fg-muted flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
       >
         <XIcon />
       </button>
@@ -79,21 +79,21 @@ function BlockedChannelModal({ item, onUnblock, onClose }: ModalProps) {
         className="absolute inset-0 bg-black/60"
         onClick={onClose}
       />
-      <div className="relative bg-zinc-900 border border-zinc-800 rounded-2xl p-6 flex flex-col items-center gap-4 w-64">
+      <div className="relative bg-surface border border-border rounded-2xl p-6 flex flex-col items-center gap-4 w-64">
         <ChannelAvatar src={item.thumbnailUrl ?? ""} name={label} className="w-16 h-16" />
-        <p className="text-sm text-zinc-100 font-medium text-center break-all">{label}</p>
+        <p className="text-sm text-fg font-medium text-center break-all">{label}</p>
         <div className="flex gap-2 w-full">
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 h-9 rounded-lg text-xs text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors"
+            className="flex-1 h-9 rounded-lg text-xs text-fg-muted hover:text-fg hover:bg-surface-strong transition-colors"
           >
             Cancel
           </button>
           <button
             type="button"
             onClick={onUnblock}
-            className="flex-1 h-9 rounded-lg text-xs text-red-400 hover:text-red-300 hover:bg-zinc-800 transition-colors"
+            className="flex-1 h-9 rounded-lg text-xs text-danger hover:text-danger-strong hover:bg-surface-strong transition-colors"
           >
             Unblock
           </button>
@@ -132,15 +132,15 @@ export function SettingsBlocked() {
       {videoList.length > 0 && (
         <section className="flex flex-col gap-3">
           <p className={SECTION_LABEL}>Blocked videos</p>
-          <div className="bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden divide-y divide-zinc-800">
+          <div className="bg-surface rounded-xl border border-border overflow-hidden divide-y divide-border">
             {videoList.map((item) => (
               <div key={item.url} className="flex items-center gap-3 px-4 py-2.5">
-                <span className="text-xs text-zinc-400 truncate flex-1 min-w-0">{item.url}</span>
+                <span className="text-xs text-fg-muted truncate flex-1 min-w-0">{item.url}</span>
                 <button
                   type="button"
                   onClick={() => removeVideo.mutate(item.url)}
                   aria-label={`Unblock ${item.url}`}
-                  className="flex-shrink-0 text-zinc-500 hover:text-zinc-100 transition-colors p-1 rounded hover:bg-zinc-800"
+                  className="flex-shrink-0 text-fg-soft hover:text-fg transition-colors p-1 rounded hover:bg-surface-strong"
                 >
                   <XIcon />
                 </button>

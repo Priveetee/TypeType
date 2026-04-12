@@ -41,24 +41,24 @@ function SearchPage() {
   return (
     <div>
       {isCorrected && suggestion && (
-        <p className="text-sm text-zinc-400 mb-4">
-          Showing results for <span className="text-zinc-100 font-medium">{suggestion}</span>.{" "}
+        <p className="text-sm text-fg-muted mb-4">
+          Showing results for <span className="text-fg font-medium">{suggestion}</span>.{" "}
           <button
             type="button"
             onClick={handleSuggestion}
-            className="text-blue-400 hover:text-blue-300 underline"
+            className="text-accent hover:text-accent-strong underline"
           >
             Search instead for &ldquo;{q}&rdquo;
           </button>
         </p>
       )}
       {!isCorrected && suggestion && (
-        <p className="text-sm text-zinc-400 mb-4">
+        <p className="text-sm text-fg-muted mb-4">
           Did you mean{" "}
           <button
             type="button"
             onClick={handleSuggestion}
-            className="text-blue-400 hover:text-blue-300 underline"
+            className="text-accent hover:text-accent-strong underline"
           >
             {suggestion}
           </button>
@@ -66,7 +66,7 @@ function SearchPage() {
         </p>
       )}
       {streams.length === 0 ? (
-        <p className="text-zinc-400 text-sm">No results for &ldquo;{q}&rdquo;</p>
+        <p className="text-fg-muted text-sm">No results for &ldquo;{q}&rdquo;</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-3 sm:gap-x-4 gap-y-6 sm:gap-y-8">
           {streams.map((stream, index) => (

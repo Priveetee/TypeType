@@ -13,10 +13,10 @@ function pickZipFiles(list: FileList | null): File[] {
 export function YoutubeImportDropzone({ disabled, onSelectFiles }: Props) {
   const [over, setOver] = useState(false);
   const zoneTone = disabled
-    ? "cursor-not-allowed border-zinc-800 bg-zinc-900 text-zinc-600"
+    ? "cursor-not-allowed border-border bg-surface text-fg-soft"
     : over
-      ? "border-zinc-300 bg-zinc-800 text-zinc-100"
-      : "border-zinc-700 bg-zinc-900 text-zinc-400 hover:border-zinc-500";
+      ? "border-border bg-surface-strong text-fg"
+      : "border-border-strong bg-surface text-fg-muted hover:border-border-strong";
 
   return (
     <label
@@ -42,8 +42,8 @@ export function YoutubeImportDropzone({ disabled, onSelectFiles }: Props) {
         onSelectFiles(files);
       }}
     >
-      <span className="text-sm text-zinc-200">Drop one or more Takeout ZIP files here</span>
-      <span className="mt-1 text-xs text-zinc-500">or click to select multiple ZIP files</span>
+      <span className="text-sm text-fg">Drop one or more Takeout ZIP files here</span>
+      <span className="mt-1 text-xs text-fg-soft">or click to select multiple ZIP files</span>
       <input
         type="file"
         multiple

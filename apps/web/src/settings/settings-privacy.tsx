@@ -5,9 +5,8 @@ import { useHistory } from "../hooks/use-history";
 import { useSearchHistory } from "../hooks/use-search-history";
 import { useSubscriptions } from "../hooks/use-subscriptions";
 
-const SECTION_LABEL = "text-xs font-medium text-zinc-500 uppercase tracking-wider px-1";
-const CARD =
-  "bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden divide-y divide-zinc-800";
+const SECTION_LABEL = "text-xs font-medium text-fg-soft uppercase tracking-wider px-1";
+const CARD = "bg-surface rounded-xl border border-border overflow-hidden divide-y divide-border";
 const ROW = "flex items-center justify-between px-4 py-4";
 
 type ActiveModal = "history" | "subscriptions" | "search-history" | null;
@@ -63,42 +62,42 @@ export function SettingsPrivacy() {
       <div className={CARD}>
         <div className={ROW}>
           <div className="flex flex-col gap-1">
-            <span className="text-sm text-zinc-100">Watch history</span>
-            <span className="text-xs text-zinc-500">{historyLabel}</span>
+            <span className="text-sm text-fg">Watch history</span>
+            <span className="text-xs text-fg-soft">{historyLabel}</span>
           </div>
           <button
             type="button"
             disabled={historyTotal === 0}
             onClick={() => setModal("history")}
-            className="text-xs text-red-400 hover:text-red-300 disabled:text-zinc-600 disabled:cursor-not-allowed transition-colors ml-6 flex-shrink-0"
+            className="text-xs text-danger hover:text-danger-strong disabled:text-fg-soft disabled:cursor-not-allowed transition-colors ml-6 flex-shrink-0"
           >
             Clear
           </button>
         </div>
         <div className={ROW}>
           <div className="flex flex-col gap-1">
-            <span className="text-sm text-zinc-100">Search history</span>
-            <span className="text-xs text-zinc-500">{searchLabel}</span>
+            <span className="text-sm text-fg">Search history</span>
+            <span className="text-xs text-fg-soft">{searchLabel}</span>
           </div>
           <button
             type="button"
             disabled={searchHistoryTotal === 0}
             onClick={() => setModal("search-history")}
-            className="text-xs text-red-400 hover:text-red-300 disabled:text-zinc-600 disabled:cursor-not-allowed transition-colors ml-6 flex-shrink-0"
+            className="text-xs text-danger hover:text-danger-strong disabled:text-fg-soft disabled:cursor-not-allowed transition-colors ml-6 flex-shrink-0"
           >
             Clear
           </button>
         </div>
         <div className={ROW}>
           <div className="flex flex-col gap-1">
-            <span className="text-sm text-zinc-100">Subscriptions</span>
-            <span className="text-xs text-zinc-500">{subsLabel}</span>
+            <span className="text-sm text-fg">Subscriptions</span>
+            <span className="text-xs text-fg-soft">{subsLabel}</span>
           </div>
           <button
             type="button"
             disabled={subscriptions.length === 0}
             onClick={() => setModal("subscriptions")}
-            className="text-xs text-red-400 hover:text-red-300 disabled:text-zinc-600 disabled:cursor-not-allowed transition-colors ml-6 flex-shrink-0"
+            className="text-xs text-danger hover:text-danger-strong disabled:text-fg-soft disabled:cursor-not-allowed transition-colors ml-6 flex-shrink-0"
           >
             Unsubscribe all
           </button>

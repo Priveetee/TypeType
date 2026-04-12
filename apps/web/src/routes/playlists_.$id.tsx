@@ -59,7 +59,7 @@ function PlaylistDetailPage() {
   if (isPending) {
     return (
       <div className="flex items-center justify-center py-32">
-        <p className="text-zinc-500 text-sm">Loading...</p>
+        <p className="text-fg-soft text-sm">Loading...</p>
       </div>
     );
   }
@@ -67,10 +67,10 @@ function PlaylistDetailPage() {
   if (!playlist) {
     return (
       <div className="flex flex-col items-center justify-center py-32 gap-2 text-center">
-        <p className="text-zinc-400 text-sm">Playlist not found.</p>
+        <p className="text-fg-muted text-sm">Playlist not found.</p>
         <Link
           to="/playlists"
-          className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors"
+          className="text-xs text-fg-soft hover:text-fg-muted transition-colors"
         >
           Back to playlists
         </Link>
@@ -91,24 +91,24 @@ function PlaylistDetailPage() {
         <div className="flex items-center gap-3">
           <Link
             to="/playlists"
-            className="text-zinc-500 hover:text-zinc-100 transition-colors"
+            className="text-fg-soft hover:text-fg transition-colors"
             aria-label="Back to playlists"
           >
             <BackIcon />
           </Link>
           <div>
             <div className="flex items-center gap-1.5">
-              <h1 className="text-lg font-semibold text-zinc-100">{playlist.name}</h1>
+              <h1 className="text-lg font-semibold text-fg">{playlist.name}</h1>
               <button
                 type="button"
                 onClick={() => setRenaming(true)}
-                className="text-zinc-600 hover:text-zinc-300 transition-colors"
+                className="text-fg-soft hover:text-fg-muted transition-colors"
                 aria-label="Rename playlist"
               >
                 <PencilIcon />
               </button>
             </div>
-            <p className="text-xs text-zinc-500">
+            <p className="text-xs text-fg-soft">
               {count} video{count !== 1 ? "s" : ""}
             </p>
           </div>
@@ -116,15 +116,15 @@ function PlaylistDetailPage() {
         <button
           type="button"
           onClick={handleDelete}
-          className="text-xs px-3 py-1.5 rounded-lg text-red-400 hover:bg-red-400/10 transition-colors"
+          className="text-xs px-3 py-1.5 rounded-lg text-danger hover:bg-danger/10 transition-colors"
         >
           Delete playlist
         </button>
       </div>
       {count === 0 ? (
         <div className="flex flex-col items-center justify-center py-32 gap-2 text-center">
-          <p className="text-zinc-400 text-sm">No videos in this playlist yet.</p>
-          <p className="text-zinc-600 text-xs">
+          <p className="text-fg-muted text-sm">No videos in this playlist yet.</p>
+          <p className="text-fg-soft text-xs">
             Save videos from the watch page using the Save button.
           </p>
         </div>

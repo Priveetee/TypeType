@@ -8,62 +8,60 @@ function PrivacyPage() {
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6 pt-12">
       <div className="px-1">
-        <p className="font-mono text-xs uppercase tracking-[0.2em] text-zinc-500">
+        <p className="font-mono text-xs uppercase tracking-[0.2em] text-fg-soft">
           Recommendation privacy
         </p>
-        <h1 className="mt-2 font-mono text-2xl font-semibold tracking-tight text-zinc-100">
+        <h1 className="mt-2 font-mono text-2xl font-semibold tracking-tight text-fg">
           Control personalization signals
         </h1>
-        <p className="mt-2 text-sm leading-relaxed text-zinc-300">
+        <p className="mt-2 text-sm leading-relaxed text-fg-muted">
           Control whether TypeType uses your recommendation interactions to personalize your Home
           feed.
         </p>
       </div>
 
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-5">
-        <p className="font-mono text-xs uppercase tracking-[0.2em] text-zinc-500">
+      <div className="rounded-xl border border-border bg-surface/40 p-5">
+        <p className="font-mono text-xs uppercase tracking-[0.2em] text-fg-soft">
           Recommendation personalization
         </p>
-        <p className="mt-3 text-sm text-zinc-300">Personalization: ON</p>
-        <p className="mt-1 text-sm text-zinc-400">
+        <p className="mt-3 text-sm text-fg-muted">Personalization: ON</p>
+        <p className="mt-1 text-sm text-fg-muted">
           TypeType uses recommendation interactions (impressions, clicks, watches, short skips, and
           recommendation feedback) to tune what appears in Home recommendations.
         </p>
-        <p className="mt-3 text-sm text-zinc-300">Personalization: OFF</p>
-        <p className="mt-1 text-sm text-zinc-400">
+        <p className="mt-3 text-sm text-fg-muted">Personalization: OFF</p>
+        <p className="mt-1 text-sm text-fg-muted">
           TypeType stops using recommendation interactions for personalization.
         </p>
-        <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-zinc-400">
+        <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-fg-muted">
           <li>POST /recommendations/events becomes a no-op (id = "disabled").</li>
           <li>Recommendation feedback is disabled.</li>
           <li>Home recommendations still work, but in non-personalized mode.</li>
         </ul>
         <div className="mt-5 inline-flex items-center gap-2">
-          <span className="text-xs text-zinc-500">Disabled</span>
+          <span className="text-xs text-fg-soft">Disabled</span>
           <button
             type="button"
             role="switch"
             aria-checked={enabled}
             onClick={() => update.mutate({ recommendationPersonalizationEnabled: !enabled })}
             className={`relative inline-flex h-7 w-14 items-center rounded-full border transition-colors ${
-              enabled ? "border-zinc-300 bg-zinc-100" : "border-zinc-700 bg-zinc-800"
+              enabled ? "border-border bg-fg" : "border-border-strong bg-surface-strong"
             }`}
           >
             <span
               className={`inline-block h-5 w-5 rounded-full transition-transform ${
-                enabled ? "translate-x-8 bg-zinc-900" : "translate-x-1 bg-zinc-300"
+                enabled ? "translate-x-8 bg-surface" : "translate-x-1 bg-surface-soft"
               }`}
             />
           </button>
-          <span className="text-xs text-zinc-500">Enabled</span>
+          <span className="text-xs text-fg-soft">Enabled</span>
         </div>
       </div>
 
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-5">
-        <p className="font-mono text-xs uppercase tracking-[0.2em] text-zinc-500">
-          What is tracked
-        </p>
-        <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-zinc-300">
+      <div className="rounded-xl border border-border bg-surface/40 p-5">
+        <p className="font-mono text-xs uppercase tracking-[0.2em] text-fg-soft">What is tracked</p>
+        <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-fg-muted">
           <li>Event type: impression, click, watch, short_skip.</li>
           <li>Video metadata: videoUrl, uploaderUrl, title.</li>
           <li>Optional watch details: watchRatio, watchDurationMs.</li>
@@ -72,9 +70,9 @@ function PrivacyPage() {
         </ul>
       </div>
 
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-5">
-        <p className="font-mono text-xs uppercase tracking-[0.2em] text-zinc-500">What is sent</p>
-        <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-zinc-300">
+      <div className="rounded-xl border border-border bg-surface/40 p-5">
+        <p className="font-mono text-xs uppercase tracking-[0.2em] text-fg-soft">What is sent</p>
+        <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-fg-muted">
           <li>eventType</li>
           <li>videoUrl, uploaderUrl, title</li>
           <li>Optional: watchRatio, watchDurationMs</li>

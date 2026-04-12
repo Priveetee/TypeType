@@ -4,13 +4,13 @@ function ImportPage() {
   return (
     <div className="flex flex-col gap-6 pt-8 sm:pt-10 [animation:page-fade-in_0.2s_ease-out]">
       <div className="px-1 pt-1">
-        <p className="font-mono text-xs uppercase tracking-[0.2em] text-zinc-500">
+        <p className="font-mono text-xs uppercase tracking-[0.2em] text-fg-soft">
           Migration assistant
         </p>
-        <h1 className="mt-2 font-mono text-xl sm:text-2xl font-semibold tracking-tight text-zinc-100">
+        <h1 className="mt-2 font-mono text-xl sm:text-2xl font-semibold tracking-tight text-fg">
           Import your data in minutes
         </h1>
-        <p className="mt-2 max-w-2xl text-sm text-zinc-400">
+        <p className="mt-2 max-w-2xl text-sm text-fg-muted">
           Pick one source below and we guide you through every step, with clear feedback and
           progress.
         </p>
@@ -65,8 +65,8 @@ type LinkProps = {
 function ImportSourceLink({ to, title, description, cta, icon, tone }: LinkProps) {
   const accent =
     tone === "youtube"
-      ? "from-red-600/30 to-red-950 border-red-700/40"
-      : "from-red-600/25 via-zinc-950 to-zinc-950 border-red-700/40";
+      ? "from-danger/30 to-danger border-danger/40"
+      : "from-danger/25 via-app to-app border-danger/40";
 
   return (
     <Link
@@ -74,14 +74,14 @@ function ImportSourceLink({ to, title, description, cta, icon, tone }: LinkProps
       className={`group flex h-full w-full flex-col justify-between rounded-2xl border bg-gradient-to-b p-5 text-left transition-all hover:-translate-y-0.5 ${accent}`}
     >
       <div>
-        <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl border border-white/20 bg-black/45 text-zinc-100">
+        <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl border border-white/20 bg-black/45 text-fg">
           {icon}
         </div>
-        <p className="text-base font-semibold text-zinc-100">{title}</p>
-        <p className="mt-1 text-sm text-zinc-300/80">{description}</p>
+        <p className="text-base font-semibold text-fg">{title}</p>
+        <p className="mt-1 text-sm text-fg-muted/80">{description}</p>
       </div>
-      <div className="mt-5 inline-flex items-center gap-2 text-xs text-zinc-200">
-        <span className="inline-flex h-8 items-center rounded-md bg-black/40 px-3 transition-colors group-hover:text-zinc-100">
+      <div className="mt-5 inline-flex items-center gap-2 text-xs text-fg">
+        <span className="inline-flex h-8 items-center rounded-md bg-black/40 px-3 transition-colors group-hover:text-fg">
           {cta}
         </span>
         <span className="transition-transform group-hover:translate-x-1">→</span>

@@ -12,7 +12,7 @@ function HomePage() {
     <div className="flex flex-col gap-6 sm:gap-8">
       <ContinueWatching />
       <section className="flex flex-col gap-3">
-        <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">{title}</p>
+        <p className="text-xs font-medium uppercase tracking-wider text-fg-soft">{title}</p>
         {isAuthed ? <HomeRecommendationsSection /> : <HomeFallbackSection />}
       </section>
     </div>
