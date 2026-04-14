@@ -5,11 +5,15 @@ import type {
 } from "../types/downloader";
 import { ApiError } from "./api";
 import { API_BASE as BASE } from "./env";
-import { isMobileDownloadDevice } from "./ios-device";
+import { isIosWebKitBrowser, isMobileDownloadDevice } from "./ios-device";
 
 type ErrorBody = {
   error?: string;
   message?: string;
+};
+
+type DownloadArtifactOptions = {
+  preferShare?: boolean;
 };
 
 async function readJson(res: Response): Promise<unknown> {
@@ -67,10 +71,60 @@ function filenameFromHeader(contentDisposition: string | null): string | null {
   return classic?.[1] ?? null;
 }
 
-export async function downloadDownloaderArtifact(jobId: string): Promise<void> {
+function canUseShareApi(): boolean {
+  if (typeof navigator === "undefined") return false;
+  return typeof navigator.share === "function";
+}
+
+function supportsFileShare(data: ShareData): boolean {
+  if (typeof navigator === "undefined") return false;
+  if (typeof navigator.canShare !== "function") return false;
+  return navigator.canShare(data);
+}
+
+function fallbackFileName(jobId: string, headers: Headers): string {
+  return (
+    filenameFromHeader(headers.get("content-disposition")) ??
+    `typetype-download-${jobId}.${extensionFromType(headers.get("content-type"))}`
+  );
+}
+
+async function shareDownloaderArtifact(endpoint: string, jobId: string): Promise<void> {
+  const res = await fetch(endpoint);
+  if (!res.ok) {
+    const body = await readJson(res);
+    throw new ApiError(readErrorMessage(body, "Failed to download artifact"), res.status);
+  }
+  const blob = await res.blob();
+  const fileName = fallbackFileName(jobId, res.headers);
+  const fileType = blob.type.length > 0 ? blob.type : "application/octet-stream";
+  const file = new File([blob], fileName, { type: fileType });
+  const shareData: ShareData = { files: [file], title: fileName };
+  if (!supportsFileShare(shareData)) {
+    throw new ApiError("Native iOS share is unavailable for this file", 422);
+  }
+  await navigator.share(shareData);
+}
+
+function openArtifactLocation(endpoint: string): void {
+  window.location.assign(endpoint);
+}
+
+export function canUseIosShareFlow(): boolean {
+  return isIosWebKitBrowser() && canUseShareApi();
+}
+
+export async function downloadDownloaderArtifact(
+  jobId: string,
+  options: DownloadArtifactOptions = {},
+): Promise<void> {
   const endpoint = `${BASE}/downloader/jobs/${encodeURIComponent(jobId)}/artifact`;
+  if (options.preferShare && canUseIosShareFlow()) {
+    await shareDownloaderArtifact(endpoint, jobId);
+    return;
+  }
   if (isMobileDownloadDevice()) {
-    window.location.assign(endpoint);
+    openArtifactLocation(endpoint);
     return;
   }
   const res = await fetch(endpoint);
@@ -79,9 +133,7 @@ export async function downloadDownloaderArtifact(jobId: string): Promise<void> {
     throw new ApiError(readErrorMessage(body, "Failed to download artifact"), res.status);
   }
   const blob = await res.blob();
-  const fileName =
-    filenameFromHeader(res.headers.get("content-disposition")) ??
-    `typetype-download-${jobId}.${extensionFromType(res.headers.get("content-type"))}`;
+  const fileName = fallbackFileName(jobId, res.headers);
   const objectUrl = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = objectUrl;

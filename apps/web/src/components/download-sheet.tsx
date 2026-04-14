@@ -22,7 +22,17 @@ export function DownloadSheet({ stream, onClose, onDone }: Props) {
   useOverlayLock(true);
   const { isClosing, dismiss } = useSmoothDismiss({ onClose });
   const downloader = useDownloaderJob();
-  const { isDone, jobId, isQueued, isRunning, errorText, openArtifact, reset, start } = downloader;
+  const {
+    isDone,
+    jobId,
+    isQueued,
+    isRunning,
+    errorText,
+    openArtifact,
+    reset,
+    start,
+    canUseIosShareFlow,
+  } = downloader;
   const isBusy = isQueued || isRunning;
   const [artifactError, setArtifactError] = useState<string | null>(null);
   const options = useMemo(() => buildDownloadOptions(stream), [stream]);
@@ -37,11 +47,14 @@ export function DownloadSheet({ stream, onClose, onDone }: Props) {
     jobId,
     selectedLabel: selected?.label ?? "file",
     openArtifact,
+    autoStart: !canUseIosShareFlow,
+    preferShare: canUseIosShareFlow,
     onDone,
     onDismiss: dismiss,
     reset,
     onArtifactError: setArtifactError,
   });
+  const requiresManualArtifactTap = isDone && canUseIosShareFlow;
   const showWorkingState = isBusy || completion.isCompleting;
 
   function selectMode(next: DownloadMode) {
@@ -81,7 +94,7 @@ export function DownloadSheet({ stream, onClose, onDone }: Props) {
               Close
             </button>
           </div>
-          {!showWorkingState && (
+          {!showWorkingState && !requiresManualArtifactTap && (
             <>
               <DownloadSheetPicker
                 mode={mode}
@@ -99,6 +112,21 @@ export function DownloadSheet({ stream, onClose, onDone }: Props) {
                 Start download
               </button>
             </>
+          )}
+          {requiresManualArtifactTap && (
+            <div className="mt-2 flex flex-col gap-3 rounded-lg border border-border bg-surface/60 p-3">
+              <p className="text-xs text-fg-muted">
+                File is ready. Tap below to open the iOS share sheet and save to Files.
+              </p>
+              <button
+                type="button"
+                onClick={() => void completion.completeNow()}
+                disabled={completion.isCompleting}
+                className="w-full rounded-lg bg-fg px-3 py-2 text-sm font-medium text-app transition-colors hover:bg-white disabled:cursor-not-allowed disabled:bg-surface-soft disabled:text-fg-muted"
+              >
+                {completion.isCompleting ? "Opening..." : "Open iOS share sheet"}
+              </button>
+            </div>
           )}
           <DownloaderJobFeedback
             stage={downloader.stage}

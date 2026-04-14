@@ -4,7 +4,9 @@ type Params = {
   isDone: boolean;
   jobId: string | undefined;
   selectedLabel: string;
-  openArtifact: () => Promise<void> | undefined;
+  openArtifact: (options?: { preferShare?: boolean }) => Promise<void> | undefined;
+  autoStart?: boolean;
+  preferShare?: boolean;
   onDone: (message: string) => void;
   onDismiss: () => void;
   reset: () => void;
@@ -16,6 +18,8 @@ export function useArtifactDownloadOnDone({
   jobId,
   selectedLabel,
   openArtifact,
+  autoStart = true,
+  preferShare = false,
   onDone,
   onDismiss,
   reset,
@@ -25,8 +29,8 @@ export function useArtifactDownloadOnDone({
   const handledJobIdRef = useRef<string | null>(null);
 
   const completeDownload = useCallback(
-    async (selected: string) => {
-      const run = openArtifact();
+    async (selected: string, options?: { preferShare?: boolean }) => {
+      const run = openArtifact(options);
       if (!run) throw new Error("Download is not ready");
       await run;
       onDone(`Download started: ${selected}`);
@@ -35,6 +39,20 @@ export function useArtifactDownloadOnDone({
     },
     [onDismiss, onDone, openArtifact, reset],
   );
+
+  const completeNow = useCallback(async () => {
+    if (!isDone || !jobId) return;
+    if (handledJobIdRef.current === jobId) return;
+    handledJobIdRef.current = jobId;
+    setIsCompleting(true);
+    try {
+      await completeDownload(selectedLabel, { preferShare });
+    } catch (error) {
+      handledJobIdRef.current = null;
+      setIsCompleting(false);
+      onArtifactError(error instanceof Error ? error.message : "Download failed");
+    }
+  }, [completeDownload, isDone, jobId, onArtifactError, preferShare, selectedLabel]);
 
   useEffect(() => {
     if (isDone) return;
@@ -47,6 +65,7 @@ export function useArtifactDownloadOnDone({
   }, [jobId]);
 
   useEffect(() => {
+    if (!autoStart) return;
     if (!isDone || !jobId) return;
     if (handledJobIdRef.current === jobId) return;
     handledJobIdRef.current = jobId;
@@ -54,10 +73,11 @@ export function useArtifactDownloadOnDone({
     let cancelled = false;
     const run = async () => {
       try {
-        await completeDownload(selectedLabel);
+        await completeDownload(selectedLabel, { preferShare });
         if (cancelled) return;
       } catch (error) {
         if (cancelled) return;
+        handledJobIdRef.current = null;
         setIsCompleting(false);
         onArtifactError(error instanceof Error ? error.message : "Download failed");
       }
@@ -66,7 +86,7 @@ export function useArtifactDownloadOnDone({
     return () => {
       cancelled = true;
     };
-  }, [completeDownload, isDone, jobId, onArtifactError, selectedLabel]);
+  }, [autoStart, completeDownload, isDone, jobId, onArtifactError, preferShare, selectedLabel]);
 
-  return { isCompleting };
+  return { isCompleting, completeNow };
 }
