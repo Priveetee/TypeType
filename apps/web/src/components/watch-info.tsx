@@ -25,18 +25,22 @@ export function WatchInfo({ stream }: Props) {
     return () => clearTimeout(t);
   }, [toastMsg]);
 
-  function handleSubscribe() {
+  async function handleSubscribe() {
     if (!stream.channelUrl) return;
-    if (subscribed) {
-      remove.mutate(stream.channelUrl);
-      setToastMsg(`Unsubscribed from ${stream.channelName}`);
-    } else {
-      add.mutate({
-        channelUrl: stream.channelUrl,
-        name: stream.channelName,
-        avatarUrl: stream.channelAvatar,
-      });
-      setToastMsg(`Subscribed to ${stream.channelName}`);
+    try {
+      if (subscribed) {
+        await remove.mutateAsync(stream.channelUrl);
+        setToastMsg(`Unsubscribed from ${stream.channelName}`);
+      } else {
+        await add.mutateAsync({
+          channelUrl: stream.channelUrl,
+          name: stream.channelName,
+          avatarUrl: stream.channelAvatar,
+        });
+        setToastMsg(`Subscribed to ${stream.channelName}`);
+      }
+    } catch {
+      setToastMsg("Subscription update failed");
     }
   }
 

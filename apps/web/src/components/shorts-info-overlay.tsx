@@ -24,24 +24,28 @@ export function ShortsInfoOverlay({ stream, variant = "overlay", className }: Pr
     return () => clearTimeout(timer);
   }, [toastMsg]);
 
-  function handleSubscribe() {
+  async function handleSubscribe() {
     if (!stream.channelUrl) return;
     if (!isAuthed) {
       const redirect = `/shorts?v=${encodeURIComponent(stream.id)}`;
       window.location.assign(`/login?redirect=${encodeURIComponent(redirect)}`);
       return;
     }
-    if (subscribed) {
-      remove.mutate(stream.channelUrl);
-      setToastMsg(`Unsubscribed from ${stream.channelName}`);
-      return;
+    try {
+      if (subscribed) {
+        await remove.mutateAsync(stream.channelUrl);
+        setToastMsg(`Unsubscribed from ${stream.channelName}`);
+        return;
+      }
+      await add.mutateAsync({
+        channelUrl: stream.channelUrl,
+        name: stream.channelName,
+        avatarUrl: stream.channelAvatar,
+      });
+      setToastMsg(`Subscribed to ${stream.channelName}`);
+    } catch {
+      setToastMsg("Subscription update failed");
     }
-    add.mutate({
-      channelUrl: stream.channelUrl,
-      name: stream.channelName,
-      avatarUrl: stream.channelAvatar,
-    });
-    setToastMsg(`Subscribed to ${stream.channelName}`);
   }
 
   const panelButtonClass = `rounded-full px-4 py-1.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
