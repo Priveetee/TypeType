@@ -1,6 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import {
+  canUseIosShareFlow,
   createDownloaderJob,
   downloadDownloaderArtifact,
   fetchDownloaderJob,
@@ -97,9 +98,9 @@ export function useDownloaderJob() {
     create.mutate(payload);
   }
 
-  function openArtifact() {
+  function openArtifact(options?: { preferShare?: boolean }) {
     if (!jobId) return;
-    return downloadDownloaderArtifact(jobId);
+    return downloadDownloaderArtifact(jobId, options);
   }
 
   function reset() {
@@ -121,6 +122,7 @@ export function useDownloaderJob() {
     uploadMs,
     totalMs,
     errorCode,
+    canUseIosShareFlow: canUseIosShareFlow(),
     isQueued,
     isRunning,
     isDone,
