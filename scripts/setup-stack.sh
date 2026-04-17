@@ -5,6 +5,9 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ENV_FILE="${ROOT_DIR}/.env"
 
 DEFAULT_ALLOWED_ORIGINS="http://localhost:8082,http://localhost:5173"
+DEFAULT_HOST_PORT_WEB="8082"
+DEFAULT_HOST_PORT_SERVER="8080"
+DEFAULT_HOST_PORT_TOKEN="8081"
 DEFAULT_DATABASE_URL="jdbc:postgresql://postgres:5432/typetype"
 DEFAULT_DATABASE_USER="typetype"
 DEFAULT_DATABASE_PASSWORD="typetype"
@@ -62,6 +65,72 @@ sys.exit(0)
 PY
 }
 
+set_env_var() {
+  local env_file="$1"
+  local key="$2"
+  local value="$3"
+  if grep -q "^${key}=" "${env_file}"; then
+    sed -i "s|^${key}=.*$|${key}=${value}|" "${env_file}"
+  else
+    printf '%s=%s\n' "${key}" "${value}" >> "${env_file}"
+  fi
+}
+
+get_env_var() {
+  local env_file="$1"
+  local key="$2"
+  grep "^${key}=" "${env_file}" | cut -d= -f2- || true
+}
+
+is_valid_port() {
+  local port="$1"
+  [[ "${port}" =~ ^[0-9]+$ ]] || return 1
+  ((port >= 1 && port <= 65535))
+}
+
+find_random_free_port() {
+  python3 - <<'PY'
+import random
+import socket
+
+for _ in range(500):
+    port = random.randint(20000, 60999)
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        s.bind(("0.0.0.0", port))
+    except OSError:
+        continue
+    finally:
+        s.close()
+    print(port)
+    break
+else:
+    raise SystemExit("no free port found")
+PY
+}
+
+choose_stack_port() {
+  local env_file="$1"
+  local key="$2"
+  local fallback="$3"
+  local label="$4"
+  local configured
+  configured="$(get_env_var "${env_file}" "${key}")"
+  if ! is_valid_port "${configured}"; then
+    configured="${fallback}"
+  fi
+  if require_free_port "${configured}"; then
+    set_env_var "${env_file}" "${key}" "${configured}"
+    echo "${configured}"
+    return
+  fi
+  local random_port
+  random_port="$(find_random_free_port)"
+  set_env_var "${env_file}" "${key}" "${random_port}"
+  echo "[setup] ${label} port ${configured} is in use, using ${random_port} instead." >&2
+  echo "${random_port}"
+}
+
 prompt_value() {
   local out_var="$1"
   local label="$2"
@@ -87,6 +156,9 @@ if [[ -f "${ENV_FILE}" ]]; then
   else
     echo "Rebuilding .env with prompted values..."
     prompt_value ALLOWED_ORIGINS "ALLOWED_ORIGINS" "${DEFAULT_ALLOWED_ORIGINS}"
+    prompt_value HOST_PORT_WEB "HOST_PORT_WEB" "${DEFAULT_HOST_PORT_WEB}"
+    prompt_value HOST_PORT_SERVER "HOST_PORT_SERVER" "${DEFAULT_HOST_PORT_SERVER}"
+    prompt_value HOST_PORT_TOKEN "HOST_PORT_TOKEN" "${DEFAULT_HOST_PORT_TOKEN}"
     prompt_value DATABASE_URL "DATABASE_URL" "${DEFAULT_DATABASE_URL}"
     prompt_value DATABASE_USER "DATABASE_USER" "${DEFAULT_DATABASE_USER}"
     prompt_value DATABASE_PASSWORD "DATABASE_PASSWORD" "${DEFAULT_DATABASE_PASSWORD}"
@@ -98,6 +170,9 @@ if [[ -f "${ENV_FILE}" ]]; then
 
     cat > "${ENV_FILE}" <<EOF
 ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+HOST_PORT_WEB=${HOST_PORT_WEB}
+HOST_PORT_SERVER=${HOST_PORT_SERVER}
+HOST_PORT_TOKEN=${HOST_PORT_TOKEN}
 DATABASE_URL=${DATABASE_URL}
 DATABASE_USER=${DATABASE_USER}
 DATABASE_PASSWORD=${DATABASE_PASSWORD}
@@ -111,6 +186,9 @@ EOF
 else
   echo "No .env found. Let's create one."
   prompt_value ALLOWED_ORIGINS "ALLOWED_ORIGINS" "${DEFAULT_ALLOWED_ORIGINS}"
+  prompt_value HOST_PORT_WEB "HOST_PORT_WEB" "${DEFAULT_HOST_PORT_WEB}"
+  prompt_value HOST_PORT_SERVER "HOST_PORT_SERVER" "${DEFAULT_HOST_PORT_SERVER}"
+  prompt_value HOST_PORT_TOKEN "HOST_PORT_TOKEN" "${DEFAULT_HOST_PORT_TOKEN}"
   prompt_value DATABASE_URL "DATABASE_URL" "${DEFAULT_DATABASE_URL}"
   prompt_value DATABASE_USER "DATABASE_USER" "${DEFAULT_DATABASE_USER}"
   prompt_value DATABASE_PASSWORD "DATABASE_PASSWORD" "${DEFAULT_DATABASE_PASSWORD}"
@@ -122,6 +200,9 @@ else
 
   cat > "${ENV_FILE}" <<EOF
 ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+HOST_PORT_WEB=${HOST_PORT_WEB}
+HOST_PORT_SERVER=${HOST_PORT_SERVER}
+HOST_PORT_TOKEN=${HOST_PORT_TOKEN}
 DATABASE_URL=${DATABASE_URL}
 DATABASE_USER=${DATABASE_USER}
 DATABASE_PASSWORD=${DATABASE_PASSWORD}
@@ -135,16 +216,13 @@ fi
 
 cd "${ROOT_DIR}"
 
-if [[ "${SKIP_PORT_CHECK:-0}" != "1" ]]; then
-  echo "[setup] Checking required ports..."
-  for port in 8080 8081 8082; do
-    if ! require_free_port "${port}"; then
-      echo "[setup] Port ${port} is already in use."
-      echo "[setup] Stop the conflicting container/service, or edit docker-compose.yml ports, then re-run."
-      echo "[setup] Tip: set SKIP_PORT_CHECK=1 to bypass this check."
-      exit 1
-    fi
-  done
+HOST_PORT_SERVER_RESOLVED="$(choose_stack_port "${ENV_FILE}" "HOST_PORT_SERVER" "${DEFAULT_HOST_PORT_SERVER}" "API")"
+HOST_PORT_TOKEN_RESOLVED="$(choose_stack_port "${ENV_FILE}" "HOST_PORT_TOKEN" "${DEFAULT_HOST_PORT_TOKEN}" "token")"
+HOST_PORT_WEB_RESOLVED="$(choose_stack_port "${ENV_FILE}" "HOST_PORT_WEB" "${DEFAULT_HOST_PORT_WEB}" "frontend")"
+
+CURRENT_ALLOWED_ORIGINS="$(get_env_var "${ENV_FILE}" "ALLOWED_ORIGINS")"
+if [[ -z "${CURRENT_ALLOWED_ORIGINS}" || "${CURRENT_ALLOWED_ORIGINS}" == "http://localhost:8082,http://localhost:5173" ]]; then
+  set_env_var "${ENV_FILE}" "ALLOWED_ORIGINS" "http://localhost:${HOST_PORT_WEB_RESOLVED},http://localhost:5173"
 fi
 
 echo
@@ -161,4 +239,4 @@ echo "[setup] Current service status:"
 docker compose ps
 
 echo
-echo "Done. Open http://localhost:8082"
+echo "Done. Open http://localhost:${HOST_PORT_WEB_RESOLVED}"

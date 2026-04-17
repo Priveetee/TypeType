@@ -2,7 +2,7 @@ services:
   typetype:
     image: ghcr.io/priveetee/typetype:latest
     ports:
-      - "8082:80"
+      - "${HOST_PORT_WEB:-8082}:80"
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
@@ -12,7 +12,7 @@ services:
   typetype-server:
     image: ghcr.io/priveetee/typetype-server:latest
     ports:
-      - "8080:8080"
+      - "${HOST_PORT_SERVER:-8080}:8080"
     env_file: .env
     environment:
       DOWNLOADER_SERVICE_URL: http://typetype-downloader:18093
@@ -64,7 +64,7 @@ services:
   typetype-token:
     image: ghcr.io/priveetee/typetype-token:latest
     ports:
-      - "8081:8081"
+      - "${HOST_PORT_TOKEN:-8081}:8081"
     init: true
     ipc: host
     environment:
