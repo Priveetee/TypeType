@@ -11,8 +11,40 @@ DEFAULT_DATABASE_PASSWORD="typetype"
 DEFAULT_DRAGONFLY_URL="redis://dragonfly:6379"
 DEFAULT_GITHUB_REPO="Priveetee/TypeType-Server"
 DEFAULT_GITHUB_ISSUE_TEMPLATE="bug_report_backend.md"
-DEFAULT_DOWNLOADER_S3_ACCESS_KEY="GK111111111111111111111111"
-DEFAULT_DOWNLOADER_S3_SECRET_KEY="1111111111111111111111111111111111111111111111111111111111111111"
+DEFAULT_DOWNLOADER_S3_ACCESS_KEY=""
+DEFAULT_DOWNLOADER_S3_SECRET_KEY=""
+
+generate_hex() {
+  local bytes="$1"
+  if command -v openssl >/dev/null 2>&1; then
+    openssl rand -hex "${bytes}"
+    return
+  fi
+
+  python3 - "${bytes}" <<'PY'
+import secrets
+import sys
+
+print(secrets.token_hex(int(sys.argv[1])))
+PY
+}
+
+generate_downloader_access_key() {
+  printf 'GK%s' "$(generate_hex 12)"
+}
+
+generate_downloader_secret_key() {
+  generate_hex 32
+}
+
+ensure_generated_secrets() {
+  if [[ -z "${DEFAULT_DOWNLOADER_S3_ACCESS_KEY}" ]]; then
+    DEFAULT_DOWNLOADER_S3_ACCESS_KEY="$(generate_downloader_access_key)"
+  fi
+  if [[ -z "${DEFAULT_DOWNLOADER_S3_SECRET_KEY}" ]]; then
+    DEFAULT_DOWNLOADER_S3_SECRET_KEY="$(generate_downloader_secret_key)"
+  fi
+}
 
 require_free_port() {
   local port="$1"
@@ -45,6 +77,8 @@ prompt_value() {
 
 echo "TypeType interactive setup"
 echo
+
+ensure_generated_secrets
 
 if [[ -f "${ENV_FILE}" ]]; then
   read -r -p ".env already exists. Overwrite it? [y/N]: " overwrite

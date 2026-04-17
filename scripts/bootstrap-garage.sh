@@ -5,12 +5,71 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 COMPOSE_FILE="${COMPOSE_FILE:-${ROOT_DIR}/docker-compose.yml}"
 ENV_FILE="${ROOT_DIR}/.env"
 
-KEY_ID="${DOWNLOADER_S3_ACCESS_KEY:-GK111111111111111111111111}"
-SECRET_KEY="${DOWNLOADER_S3_SECRET_KEY:-1111111111111111111111111111111111111111111111111111111111111111}"
-BUCKET_NAME="${DOWNLOADER_S3_BUCKET:-typetype-downloads}"
+PLACEHOLDER_ACCESS_KEY="SET_ME_ACCESS_KEY"
+PLACEHOLDER_SECRET_KEY="SET_ME_SECRET_KEY"
 
-export DOWNLOADER_S3_ACCESS_KEY="${KEY_ID}"
-export DOWNLOADER_S3_SECRET_KEY="${SECRET_KEY}"
+generate_hex() {
+  local bytes="$1"
+  if command -v openssl >/dev/null 2>&1; then
+    openssl rand -hex "${bytes}"
+    return
+  fi
+
+  python3 - "${bytes}" <<'PY'
+import secrets
+import sys
+
+print(secrets.token_hex(int(sys.argv[1])))
+PY
+}
+
+generate_downloader_access_key() {
+  printf 'GK%s' "$(generate_hex 12)"
+}
+
+generate_downloader_secret_key() {
+  generate_hex 32
+}
+
+set_env_var() {
+  local env_file="$1"
+  local key="$2"
+  local value="$3"
+
+  if grep -q "^${key}=" "${env_file}"; then
+    sed -i "s|^${key}=.*$|${key}=${value}|" "${env_file}"
+  else
+    printf '%s=%s\n' "${key}" "${value}" >> "${env_file}"
+  fi
+}
+
+ensure_random_env_keys() {
+  local env_file="$1"
+  local current_access_key
+  local current_secret_key
+  local changed=0
+
+  current_access_key="$(grep '^DOWNLOADER_S3_ACCESS_KEY=' "${env_file}" | cut -d= -f2- || true)"
+  current_secret_key="$(grep '^DOWNLOADER_S3_SECRET_KEY=' "${env_file}" | cut -d= -f2- || true)"
+
+  if [[ -z "${current_access_key}" || "${current_access_key}" == "${PLACEHOLDER_ACCESS_KEY}" ]]; then
+    set_env_var "${env_file}" "DOWNLOADER_S3_ACCESS_KEY" "$(generate_downloader_access_key)"
+    changed=1
+  fi
+
+  if [[ -z "${current_secret_key}" || "${current_secret_key}" == "${PLACEHOLDER_SECRET_KEY}" ]]; then
+    set_env_var "${env_file}" "DOWNLOADER_S3_SECRET_KEY" "$(generate_downloader_secret_key)"
+    changed=1
+  fi
+
+  if [[ ${changed} -eq 1 ]]; then
+    echo "[garage-bootstrap] generated unique downloader S3 keys in ${env_file}"
+  fi
+}
+
+KEY_ID="${DOWNLOADER_S3_ACCESS_KEY:-}"
+SECRET_KEY="${DOWNLOADER_S3_SECRET_KEY:-}"
+BUCKET_NAME="${DOWNLOADER_S3_BUCKET:-typetype-downloads}"
 
 if [[ ! -f "${ENV_FILE}" ]]; then
   if [[ -f "${ROOT_DIR}/.env.example" ]]; then
@@ -24,6 +83,19 @@ DOWNLOADER_S3_SECRET_KEY=${SECRET_KEY}
 EOF
   fi
 fi
+
+ensure_random_env_keys "${ENV_FILE}"
+
+if [[ -z "${KEY_ID}" || "${KEY_ID}" == "${PLACEHOLDER_ACCESS_KEY}" ]]; then
+  KEY_ID="$(grep '^DOWNLOADER_S3_ACCESS_KEY=' "${ENV_FILE}" | cut -d= -f2-)"
+fi
+
+if [[ -z "${SECRET_KEY}" || "${SECRET_KEY}" == "${PLACEHOLDER_SECRET_KEY}" ]]; then
+  SECRET_KEY="$(grep '^DOWNLOADER_S3_SECRET_KEY=' "${ENV_FILE}" | cut -d= -f2-)"
+fi
+
+export DOWNLOADER_S3_ACCESS_KEY="${KEY_ID}"
+export DOWNLOADER_S3_SECRET_KEY="${SECRET_KEY}"
 
 compose() {
   docker compose -f "${COMPOSE_FILE}" "$@"

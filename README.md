@@ -34,6 +34,9 @@ curl -fsSL https://raw.githubusercontent.com/Priveetee/TypeType/main/scripts/ins
 
 By default, this installs to `~/typetype-stack` and starts the stack.
 
+When `.env` is created, downloader S3 credentials are generated uniquely (random) for this host.
+No hardcoded shared downloader secret is used at install time.
+
 Requirements before running this command:
 
 - Docker installed
@@ -88,6 +91,8 @@ The frontend container mounts local `nginx.conf` by default, so proxy and upload
 - Frontend: `http://localhost:8082`
 - Server API: `http://localhost:8080`
 - Token service: `http://localhost:8081`
+- Downloader service (internal Docker network): `http://typetype-downloader:18093`
+- Downloader API from frontend/server flow: `/api/downloader/*`
 
 ## Synology notes
 

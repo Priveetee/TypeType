@@ -7,6 +7,9 @@ INSTALL_DIR="${HOME}/typetype-stack"
 START_STACK=1
 SOURCE_DIR=""
 
+DEFAULT_DOWNLOADER_S3_ACCESS_KEY="SET_ME_ACCESS_KEY"
+DEFAULT_DOWNLOADER_S3_SECRET_KEY="SET_ME_SECRET_KEY"
+
 usage() {
   cat <<'EOF'
 TypeType one-line installer (end-user friendly)
@@ -59,8 +62,15 @@ done
 need_cmd() {
   if ! command -v "$1" >/dev/null 2>&1; then
     echo "[install] Missing required command: $1" >&2
-    echo "[install] Please install Docker + Docker Compose first." >&2
-    echo "[install] Docs: https://docs.docker.com/get-docker/" >&2
+    if [[ "$1" == "docker" ]]; then
+      echo "[install] Please install Docker + Docker Compose first." >&2
+      echo "[install] Quick install (Debian/Ubuntu):" >&2
+      echo "[install]   curl -fsSL https://get.docker.com -o get-docker.sh" >&2
+      echo "[install]   sudo sh get-docker.sh" >&2
+      echo "[install]   sudo usermod -aG docker \$USER" >&2
+      echo "[install]   newgrp docker" >&2
+      echo "[install] Docs: https://docs.docker.com/get-docker/" >&2
+    fi
     exit 1
   fi
 }
@@ -93,6 +103,65 @@ confirm_tty() {
   local answer=""
   read -r -p "${label} [y/N]: " answer < /dev/tty
   [[ "${answer}" =~ ^[Yy]$ ]]
+}
+
+generate_hex() {
+  local bytes="$1"
+  if command -v openssl >/dev/null 2>&1; then
+    openssl rand -hex "${bytes}"
+    return
+  fi
+
+  python3 - "${bytes}" <<'PY'
+import secrets
+import sys
+
+print(secrets.token_hex(int(sys.argv[1])))
+PY
+}
+
+generate_downloader_access_key() {
+  printf 'GK%s' "$(generate_hex 12)"
+}
+
+generate_downloader_secret_key() {
+  generate_hex 32
+}
+
+set_env_var() {
+  local env_file="$1"
+  local key="$2"
+  local value="$3"
+
+  if grep -q "^${key}=" "${env_file}"; then
+    sed -i "s|^${key}=.*$|${key}=${value}|" "${env_file}"
+  else
+    printf '%s=%s\n' "${key}" "${value}" >> "${env_file}"
+  fi
+}
+
+ensure_random_downloader_keys() {
+  local env_file="$1"
+  local current_access_key
+  local current_secret_key
+  local generated=0
+
+  current_access_key="$(grep '^DOWNLOADER_S3_ACCESS_KEY=' "${env_file}" | cut -d= -f2- || true)"
+  current_secret_key="$(grep '^DOWNLOADER_S3_SECRET_KEY=' "${env_file}" | cut -d= -f2- || true)"
+
+  if [[ -z "${current_access_key}" || "${current_access_key}" == "${DEFAULT_DOWNLOADER_S3_ACCESS_KEY}" ]]; then
+    set_env_var "${env_file}" "DOWNLOADER_S3_ACCESS_KEY" "$(generate_downloader_access_key)"
+    generated=1
+  fi
+
+  if [[ -z "${current_secret_key}" || "${current_secret_key}" == "${DEFAULT_DOWNLOADER_S3_SECRET_KEY}" ]]; then
+    set_env_var "${env_file}" "DOWNLOADER_S3_SECRET_KEY" "$(generate_downloader_secret_key)"
+    generated=1
+  fi
+
+  if [[ ${generated} -eq 1 ]]; then
+    echo "[install] Generated unique downloader S3 credentials in ${env_file}"
+  fi
 }
 
 require_free_port() {
@@ -132,6 +201,11 @@ require_tty
 if ! docker compose version >/dev/null 2>&1; then
   echo "[install] docker compose is required (Docker Compose v2)." >&2
   echo "[install] Please install Docker Desktop / Docker Engine with Compose plugin." >&2
+  echo "[install] Quick install (Debian/Ubuntu):" >&2
+  echo "[install]   curl -fsSL https://get.docker.com -o get-docker.sh" >&2
+  echo "[install]   sudo sh get-docker.sh" >&2
+  echo "[install]   sudo usermod -aG docker \$USER" >&2
+  echo "[install]   newgrp docker" >&2
   echo "[install] Docs: https://docs.docker.com/compose/install/" >&2
   exit 1
 fi
@@ -155,6 +229,8 @@ if [[ ! -f "${INSTALL_DIR}/.env" ]]; then
   cp "${INSTALL_DIR}/.env.example" "${INSTALL_DIR}/.env"
   echo "[install] Created ${INSTALL_DIR}/.env from .env.example"
 fi
+
+ensure_random_downloader_keys "${INSTALL_DIR}/.env"
 
 current_origins="$(grep '^ALLOWED_ORIGINS=' "${INSTALL_DIR}/.env" | cut -d= -f2- || true)"
 default_origins="${current_origins:-http://localhost:8082,http://localhost:5173}"
