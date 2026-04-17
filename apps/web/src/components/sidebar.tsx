@@ -3,6 +3,7 @@ import { siBilibili, siNiconico, siYoutube } from "simple-icons";
 import { useAuth } from "../hooks/use-auth";
 import { useMobile } from "../hooks/use-mobile";
 import { useSettings } from "../hooks/use-settings";
+import { logoutSession } from "../lib/auth-session";
 import { useUiStore } from "../stores/ui-store";
 import type { ServiceId } from "../types/user";
 import { NAV_ITEMS } from "./nav-items";
@@ -141,6 +142,7 @@ export function Sidebar() {
             <button
               type="button"
               onClick={() => {
+                void logoutSession();
                 signOut();
                 closeMobileSidebar();
               }}

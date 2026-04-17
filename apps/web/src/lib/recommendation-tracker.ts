@@ -1,6 +1,7 @@
 import { useAuthStore } from "../stores/auth-store";
 import { useRecommendationTrackingStore } from "../stores/recommendation-tracking-store";
 import type { VideoStream } from "../types/stream";
+import { refreshSession } from "./auth-session";
 import { API_BASE as BASE } from "./env";
 
 type RecommendationEventType = "impression" | "click" | "watch" | "favorite" | "watch_later_add";
@@ -34,17 +35,26 @@ function trackingEnabled(): boolean {
 function post(path: string, payload: Record<string, unknown>) {
   if (typeof window === "undefined") return;
   if (!trackingEnabled()) return;
-  const token = useAuthStore.getState().token;
-  if (!token) return;
-  void fetch(`${BASE}${path}`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-    keepalive: true,
-  }).catch(() => {
+  const send = async () => {
+    let token = useAuthStore.getState().token;
+    if (!token) {
+      try {
+        token = await refreshSession();
+      } catch {
+        return;
+      }
+    }
+    await fetch(`${BASE}${path}`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+      keepalive: true,
+    });
+  };
+  void send().catch(() => {
     return;
   });
 }

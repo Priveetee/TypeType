@@ -19,9 +19,9 @@ type RegisterPayload = {
 
 async function parseAuthResponse(res: Response): Promise<AuthResponse> {
   const body = normalizeApiPayload(
-    await res.json().catch(() => ({ token: "" })),
+    await res.json().catch(() => ({ accessToken: "" })),
   ) as Partial<AuthResponse>;
-  if (!res.ok || typeof body.token !== "string" || body.token.length === 0) {
+  if (!res.ok || typeof body.accessToken !== "string" || body.accessToken.length === 0) {
     recordApiError({
       endpoint: "/auth",
       status: res.status,
@@ -36,7 +36,7 @@ async function parseAuthResponse(res: Response): Promise<AuthResponse> {
     });
     throw new ApiError("Authentication failed", res.status);
   }
-  return { token: body.token };
+  return { accessToken: body.accessToken };
 }
 
 async function authedJson<T>(url: string, token: string): Promise<T> {
@@ -97,6 +97,7 @@ export async function registerAuth(payload: RegisterPayload): Promise<AuthRespon
   const res = await fetch(`${BASE}/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    credentials: "include",
     body: JSON.stringify(payload),
   });
   return parseAuthResponse(res);
@@ -106,18 +107,30 @@ export async function loginAuth(payload: LoginPayload): Promise<AuthResponse> {
   const res = await fetch(`${BASE}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    credentials: "include",
     body: JSON.stringify(payload),
   });
   return parseAuthResponse(res);
 }
 
-export async function refreshAuth(token: string): Promise<AuthResponse> {
+export async function refreshAuth(): Promise<AuthResponse> {
   const res = await fetch(`${BASE}/auth/refresh`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ token }),
+    credentials: "include",
+    body: JSON.stringify({}),
   });
   return parseAuthResponse(res);
+}
+
+export async function logoutAuth(): Promise<void> {
+  const res = await fetch(`${BASE}/auth/logout`, {
+    method: "POST",
+    credentials: "include",
+  });
+  if (!res.ok && res.status !== 204) {
+    throw new ApiError("Logout failed", res.status);
+  }
 }
 
 export async function resetPassword(payload: {

@@ -13,7 +13,7 @@ export type AuthMe = {
 export type AuthStatus = "loading" | "authenticated" | "guest" | "signed_out";
 
 export type AuthResponse = {
-  token: string;
+  accessToken: string;
 };
 
 export type AuthUser = {

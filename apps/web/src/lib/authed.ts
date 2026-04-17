@@ -13,18 +13,23 @@ function withBearer(init: RequestInit | undefined, token: string): RequestInit {
 }
 
 export async function authed(url: string, init?: RequestInit): Promise<Response> {
-  const token = useAuthStore.getState().token;
   const method = init?.method ?? "GET";
   const path = sanitizeRequestPath(url);
+  let token = useAuthStore.getState().token;
   if (!token) {
-    recordApiError({
-      endpoint: url,
-      status: 401,
-      code: "AUTH_REQUIRED",
-      message: "Authentication required",
-    });
-    recordClientEvent("auth.missing_token", { method, path });
-    throw new ApiError("Authentication required", 401);
+    recordClientEvent("auth.missing_token_try_refresh", { method, path });
+    try {
+      token = await refreshSession();
+    } catch {
+      useAuthStore.getState().setSignedOut();
+      recordApiError({
+        endpoint: url,
+        status: 401,
+        code: "AUTH_REQUIRED",
+        message: "Authentication required",
+      });
+      throw new ApiError("Authentication required", 401);
+    }
   }
   let res: Response;
   try {
