@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { logoutSession } from "../lib/auth-session";
 import { goto } from "../lib/route-redirect";
 import type { AuthMe, AuthStatus } from "../types/auth";
 import { ProfileAvatar } from "./profile-avatar";
@@ -38,6 +39,11 @@ export function NavbarAccountControls({
   signOut,
 }: Props) {
   const profileName = me?.publicUsername?.trim() ? me.publicUsername : null;
+
+  async function handleSignOut() {
+    await logoutSession();
+    signOut();
+  }
 
   if (isMobile) {
     if (!isAuthed || isGuest || !me) {
@@ -150,7 +156,7 @@ export function NavbarAccountControls({
           )}
           <button
             type="button"
-            onClick={signOut}
+            onClick={() => void handleSignOut()}
             className="h-8 px-3 text-xs rounded-full bg-surface-strong hover:bg-surface-soft text-fg"
           >
             Sign out
