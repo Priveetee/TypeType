@@ -1,7 +1,7 @@
 import { useAuthStore } from "../stores/auth-store";
 import type { AuthMe } from "../types/auth";
 import { ApiError } from "./api";
-import { fetchMe, loginAuth, refreshAuth, registerAuth } from "./api-auth";
+import { fetchMe, loginAuth, logoutAuth, refreshAuth, registerAuth } from "./api-auth";
 
 type Credentials = {
   identifier: string;
@@ -21,11 +21,9 @@ async function hydrateSession(token: string): Promise<AuthMe> {
 }
 
 export async function refreshSession(): Promise<string> {
-  const token = useAuthStore.getState().token;
-  if (!token) throw new ApiError("Authentication required", 401);
-  const refreshed = await refreshAuth(token);
-  await hydrateSession(refreshed.token);
-  return refreshed.token;
+  const refreshed = await refreshAuth();
+  await hydrateSession(refreshed.accessToken);
+  return refreshed.accessToken;
 }
 
 export async function bootstrapSession(): Promise<void> {
@@ -54,10 +52,20 @@ export async function bootstrapSession(): Promise<void> {
 
 export async function loginSession(payload: Credentials): Promise<void> {
   const response = await loginAuth(payload);
-  await hydrateSession(response.token);
+  await hydrateSession(response.accessToken);
 }
 
 export async function registerSession(payload: RegisterPayload): Promise<void> {
   const response = await registerAuth(payload);
-  await hydrateSession(response.token);
+  await hydrateSession(response.accessToken);
+}
+
+export async function logoutSession(): Promise<void> {
+  try {
+    await logoutAuth();
+  } catch {
+    useAuthStore.getState().setSignedOut();
+    return;
+  }
+  useAuthStore.getState().setSignedOut();
 }
