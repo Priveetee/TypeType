@@ -88,17 +88,16 @@ export function NavbarAccountControls({
       {!isAuthed && (
         <div className="flex items-center gap-2">
           <ThemeToggleButton />
-          <Link
-            to="/login"
-            search={{ redirect: `${window.location.pathname}${window.location.search}` }}
+          <a
+            href={loginHref()}
             className="h-8 px-3 inline-flex items-center text-xs rounded-full bg-surface-strong hover:bg-surface-soft text-fg"
           >
             Sign in
-          </Link>
+          </a>
           <button
             type="button"
             onClick={() => goto("/")}
-            className="hidden sm:inline-flex h-8 px-3 text-xs rounded-full bg-surface hover:bg-surface-strong text-fg-muted"
+            className="hidden sm:inline-flex h-8 items-center justify-center px-3 text-xs rounded-full bg-surface hover:bg-surface-strong text-fg-muted"
           >
             Browse
           </button>
@@ -117,13 +116,12 @@ export function NavbarAccountControls({
           )}
           {isGuest && (
             <>
-              <Link
-                to="/login"
-                search={{ redirect: `${window.location.pathname}${window.location.search}` }}
+              <a
+                href={loginHref()}
                 className="h-8 px-3 inline-flex items-center text-xs rounded-full bg-surface-strong hover:bg-surface-soft text-fg"
               >
                 Login
-              </Link>
+              </a>
               <Link
                 to="/register"
                 search={{ redirect: undefined }}

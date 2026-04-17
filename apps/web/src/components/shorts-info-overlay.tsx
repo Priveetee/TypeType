@@ -27,7 +27,7 @@ export function ShortsInfoOverlay({ stream, variant = "overlay", className }: Pr
   async function handleSubscribe() {
     if (!stream.channelUrl) return;
     if (!isAuthed) {
-      const redirect = `/shorts?v=${encodeURIComponent(stream.id)}`;
+      const redirect = `${window.location.pathname}${window.location.search}`;
       window.location.assign(`/login?redirect=${encodeURIComponent(redirect)}`);
       return;
     }
