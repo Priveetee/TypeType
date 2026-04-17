@@ -41,7 +41,7 @@ Requirements before running this command:
 
 - Docker installed
 - Docker Compose v2 available (`docker compose version`)
-- Ports `8080`, `8081`, `8082` must be free
+- If `8080/8081/8082` are busy, installer auto-picks free host ports and writes them to `.env`
 
 ---
 
@@ -60,7 +60,7 @@ This script:
 - bootstraps Garage for downloader artifacts
 - prints `docker compose ps`
 
-If you already run another stack on ports `8080/8081/8082`, stop it first or change port mappings in `docker-compose.yml`.
+If you already run another stack on `8080/8081/8082`, setup auto-picks free host ports.
 
 Manual setup (if you prefer):
 
@@ -93,6 +93,12 @@ The frontend container mounts local `nginx.conf` by default, so proxy and upload
 - Token service: `http://localhost:8081`
 - Downloader service (internal Docker network): `http://typetype-downloader:18093`
 - Downloader API from frontend/server flow: `/api/downloader/*`
+
+Host ports are configurable via `.env`:
+
+- `HOST_PORT_WEB` (default `8082`)
+- `HOST_PORT_SERVER` (default `8080`)
+- `HOST_PORT_TOKEN` (default `8081`)
 
 ## Synology notes
 

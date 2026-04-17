@@ -1,14 +1,14 @@
 {
   "name": "typetype",
   "devDependencies": {
-    "@biomejs/biome": "latest",
-    "knip": "latest",
-    "sherif": "latest"
+    "@biomejs/biome": "^2.4.12",
+    "knip": "^6.4.1",
+    "sherif": "^1.11.1"
   },
   "overrides": {
     "picomatch": "^2.3.2"
   },
-  "packageManager": "bun@1.3.11",
+  "packageManager": "bun@1.3.12",
   "private": true,
   "scripts": {
     "dev": "bun run --cwd apps/web dev",
