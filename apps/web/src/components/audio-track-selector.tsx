@@ -9,6 +9,8 @@ import {
 } from "../lib/vidstack";
 
 const languageIcon: DefaultLayoutIcon = (props) => <LanguageIcon {...props} />;
+const MENU_ITEMS_CLASS =
+  "vds-menu-items overflow-y-auto overscroll-y-contain pr-0.5 [scrollbar-width:thin] [scrollbar-color:var(--color-zinc-500)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-surface-soft/80 [&::-webkit-scrollbar-thumb:hover]:bg-surface-soft [&::-webkit-scrollbar-track]:bg-transparent";
 
 type Props = {
   originalLocale?: string | null;
@@ -49,7 +51,7 @@ export function AudioTrackSelector({ originalLocale }: Props) {
   return (
     <Menu.Root ref={menuRef} className="vds-audio-menu vds-menu">
       <DefaultMenuButton label="Language" hint={currentHint} Icon={languageIcon} />
-      <Menu.Items className="vds-menu-items">
+      <Menu.Items className={MENU_ITEMS_CLASS}>
         <DefaultMenuRadioGroup value={selectedValue} options={radioOptions} onChange={onChange} />
       </Menu.Items>
     </Menu.Root>

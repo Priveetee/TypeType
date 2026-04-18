@@ -82,6 +82,8 @@ type PlayerDefaultsProps = {
   defaultQuality?: string;
   defaultAudioLanguage?: string;
   preferOriginalLanguage?: boolean;
+  requireOriginalLanguage?: boolean;
+  onOriginalLanguageUnavailable?: () => void;
   originalAudioLocale?: string | null;
   subtitlesEnabled?: boolean;
   defaultSubtitleLanguage?: string;
@@ -91,6 +93,8 @@ export function PlayerDefaults({
   defaultQuality,
   defaultAudioLanguage,
   preferOriginalLanguage,
+  requireOriginalLanguage,
+  onOriginalLanguageUnavailable,
   originalAudioLocale,
   subtitlesEnabled,
   defaultSubtitleLanguage,
@@ -102,6 +106,7 @@ export function PlayerDefaults({
   const qualityApplied = useRef(false);
   const audioApplied = useRef(false);
   const subtitleApplied = useRef(false);
+  const originalMissingNotified = useRef(false);
 
   const preferredTag = normalizeLanguageTag(defaultAudioLanguage);
   const originalTag = normalizeLanguageTag(originalAudioLocale);
@@ -117,15 +122,36 @@ export function PlayerDefaults({
 
   useEffect(() => {
     if (!canPlay || audioApplied.current || audioOptions.length === 0) return;
-    const match = preferOriginalLanguage
+    const forceOriginal = requireOriginalLanguage || preferOriginalLanguage;
+    let match = forceOriginal
       ? (audioOptions.find((option) => includesOriginal(option.label)) ??
         audioOptions.find((option) => normalizeLanguageTag(option.track.language) === originalTag))
-      : audioOptions.find((option) => normalizeLanguageTag(option.track.language) === preferredTag);
+      : undefined;
+    if (!match && forceOriginal && !originalMissingNotified.current) {
+      originalMissingNotified.current = true;
+      onOriginalLanguageUnavailable?.();
+    }
+    if (!match) {
+      match = audioOptions.find(
+        (option) => normalizeLanguageTag(option.track.language) === preferredTag,
+      );
+    }
+    if (!match) {
+      match = audioOptions[0];
+    }
     if (match) {
       match.select();
       audioApplied.current = true;
     }
-  }, [canPlay, audioOptions, preferOriginalLanguage, originalTag, preferredTag]);
+  }, [
+    canPlay,
+    audioOptions,
+    preferOriginalLanguage,
+    requireOriginalLanguage,
+    originalTag,
+    preferredTag,
+    onOriginalLanguageUnavailable,
+  ]);
 
   useEffect(() => {
     if (!canPlay || subtitleApplied.current || !subtitlesEnabled) return;

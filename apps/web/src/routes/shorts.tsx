@@ -22,11 +22,11 @@ function ShortsBetaBanner() {
 
   return (
     <div
-      className="pointer-events-none fixed left-2 right-2 z-40 flex justify-center sm:left-4 sm:right-4"
+      className="pointer-events-none fixed right-2 z-40 sm:right-4"
       style={{ top: "calc(3.5rem + env(safe-area-inset-top, 0px) + 0.5rem)" }}
     >
-      <div className="pointer-events-auto flex w-full max-w-3xl items-center gap-3 rounded-xl border border-border-strong bg-app/95 px-3 py-2 backdrop-blur sm:px-4">
-        <p className="text-xs text-fg-muted sm:text-sm">
+      <div className="pointer-events-auto flex w-[min(22rem,calc(100vw-1rem))] items-center gap-2 rounded-lg border border-border-strong bg-app/95 px-3 py-2 shadow-lg backdrop-blur sm:w-[min(24rem,calc(100vw-2rem))]">
+        <p className="text-[11px] leading-4 text-fg-muted sm:text-xs">
           The shorts page is still beta and some bugs can happen.
         </p>
         <button
