@@ -63,6 +63,8 @@ export type StreamResponse = {
   streamSegments: StreamSegmentItem[];
   hlsUrl: string;
   dashMpdUrl: string;
+  originalAudioTrackId: string | null;
+  preferredDefaultAudioTrackId: string | null;
   videoStreams: VideoStreamItem[];
   audioStreams: AudioStreamItem[];
   videoOnlyStreams: VideoStreamItem[];

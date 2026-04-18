@@ -27,6 +27,7 @@ export type AudioStreamItem = {
   audioTrackId: string | null;
   audioTrackName: string | null;
   audioLocale: string | null;
+  isOriginal: boolean;
   itag: number;
   contentLength: number;
   initStart: number;

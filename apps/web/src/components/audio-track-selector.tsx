@@ -7,6 +7,7 @@ import {
   Menu,
   useAudioOptions,
 } from "../lib/vidstack";
+import { includesOriginal, normalizeLanguageTag } from "./player-language";
 
 const languageIcon: DefaultLayoutIcon = (props) => <LanguageIcon {...props} />;
 const MENU_ITEMS_CLASS =
@@ -23,14 +24,20 @@ export function AudioTrackSelector({ originalLocale }: Props) {
   if (options.length <= 1) return null;
 
   const selectedOption = options.find((o) => o.selected) ?? options[0];
-  const selectedIsOriginal =
-    originalLocale != null && selectedOption?.track.language === originalLocale;
+  const selectedTrackLooksOriginal = includesOriginal(selectedOption?.label);
+  const selectedMatchesOriginalLocale =
+    originalLocale != null &&
+    normalizeLanguageTag(selectedOption?.track.language) === normalizeLanguageTag(originalLocale);
+  const selectedIsOriginal = selectedTrackLooksOriginal || selectedMatchesOriginalLocale;
   const currentHint = selectedIsOriginal
     ? `${selectedOption?.label} (original)`
     : selectedOption?.label;
 
   const radioOptions = options.map((o, index) => {
-    const isOriginal = originalLocale != null && o.track.language === originalLocale;
+    const isOriginal =
+      includesOriginal(o.label) ||
+      (originalLocale != null &&
+        normalizeLanguageTag(o.track.language) === normalizeLanguageTag(originalLocale));
     return {
       label: isOriginal ? `${o.label} (original)` : o.label,
       value: `${o.label}-${o.track.language ?? "und"}-${index}`,

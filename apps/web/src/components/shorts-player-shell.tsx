@@ -8,18 +8,16 @@ import { useShortsFeed } from "../hooks/use-shorts-feed";
 import { useShortsPrefetch } from "../hooks/use-shorts-prefetch";
 import { useShortsRouteSync } from "../hooks/use-shorts-route-sync";
 import { useVolumeSync } from "../hooks/use-volume-sync";
+import {
+  getOriginalAudioLocale,
+  getOriginalAudioTrackId,
+  getPreferredDefaultAudioTrackId,
+} from "../lib/audio-track";
 import { trackRecommendationEvent } from "../lib/recommendation-tracker";
 import { useShortsNavigation } from "../lib/shorts-navigation";
 import { trackShortsAutoAdvance, trackShortsUserMove } from "../lib/shorts-tracking";
 import { useUiStore } from "../stores/ui-store";
 import type { VideoStream } from "../types/stream";
-
-function findOriginalAudioLocale(stream: VideoStream | undefined): string | null {
-  return (
-    stream?.audioStreams?.find((track) => track.audioTrackName?.toLowerCase().includes("original"))
-      ?.audioLocale ?? null
-  );
-}
 
 type Props = {
   targetUrl?: string;
@@ -76,7 +74,9 @@ export function ShortsPlayerShell({ targetUrl }: Props) {
       intent: shortsIntent,
     });
   }, [active, settings.defaultService, shortsIntent]);
-  const originalAudioLocale = findOriginalAudioLocale(stream);
+  const originalAudioTrackId = getOriginalAudioTrackId(stream);
+  const preferredDefaultAudioTrackId = getPreferredDefaultAudioTrackId(stream);
+  const originalAudioLocale = getOriginalAudioLocale(stream);
   const onVolumeChange = useVolumeSync(update.mutate);
   useShortsPrefetch(
     shorts.map((item) => item.id),
@@ -143,6 +143,8 @@ export function ShortsPlayerShell({ targetUrl }: Props) {
       initialMuted={settings.muted}
       defaultAudioLanguage={settings.defaultAudioLanguage || undefined}
       preferOriginalLanguage={settings.preferOriginalLanguage}
+      originalAudioTrackId={originalAudioTrackId}
+      preferredDefaultAudioTrackId={preferredDefaultAudioTrackId}
       originalAudioLocale={originalAudioLocale}
       defaultSubtitleLanguage={settings.defaultSubtitleLanguage || undefined}
       subtitlesEnabled={settings.subtitlesEnabled}

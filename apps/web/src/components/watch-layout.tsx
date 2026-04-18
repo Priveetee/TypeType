@@ -10,13 +10,19 @@ import {
   useWatchVttAssets,
 } from "../hooks/use-watch-layout-assets";
 import { useWatchProgressPersistence } from "../hooks/use-watch-progress-persistence";
+import {
+  getOriginalAudioLocale,
+  getOriginalAudioTrackId,
+  getPreferredDefaultAudioTrackId,
+} from "../lib/audio-track";
 import { detectProvider } from "../lib/provider";
 import { useDanmakuStore } from "../stores/danmaku-store";
 import { useWatchLayoutStore } from "../stores/watch-layout-store";
 import type { VideoStream } from "../types/stream";
 import { DanmakuOverlay } from "./danmaku-overlay";
+import { PlayerDefaults } from "./player-defaults";
 import { PlayerError } from "./player-error";
-import { PlayerDefaults, PlayerFocuser } from "./player-internals";
+import { PlayerFocuser } from "./player-internals";
 import { RelatedVideos } from "./related-videos";
 import { Toast } from "./toast";
 import { VideoPlayer } from "./video-player";
@@ -41,9 +47,9 @@ export function WatchLayout({ stream, startTime }: Props) {
   const { on: bulletCommentsOn } = useDanmakuStore();
   const isNicoNico = detectProvider(stream.id) === "nicovideo";
   const { data: bulletComments } = useBulletComments(stream.id, isNicoNico);
-  const originalLocale =
-    stream.audioStreams?.find((a) => a.audioTrackName?.toLowerCase().includes("original"))
-      ?.audioLocale ?? null;
+  const originalTrackId = getOriginalAudioTrackId(stream);
+  const preferredAudioTrackId = getPreferredDefaultAudioTrackId(stream);
+  const originalLocale = getOriginalAudioLocale(stream);
   const cinemaMode = useWatchLayoutStore((state) => state.cinemaMode);
   const seekRef = useRef<((seconds: number) => void) | null>(null);
   const [toast, setToast] = useState<string | null>(null);
@@ -84,6 +90,8 @@ export function WatchLayout({ stream, startTime }: Props) {
         onOriginalLanguageUnavailable={() => {
           setToast("Original audio unavailable, switched to English");
         }}
+        originalAudioTrackId={originalTrackId}
+        preferredDefaultAudioTrackId={preferredAudioTrackId}
         originalAudioLocale={originalLocale}
         subtitlesEnabled={settings.subtitlesEnabled}
         defaultSubtitleLanguage={settings.defaultSubtitleLanguage || undefined}

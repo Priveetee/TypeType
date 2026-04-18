@@ -1,6 +1,6 @@
-import { lazy, Suspense } from "react";
 import { PageSpinner } from "../components/page-spinner";
 import { ShortsActions } from "../components/shorts-actions";
+import { ShortsCommentsSheetSlot } from "../components/shorts-comments-sheet-slot";
 import { ShortsError } from "../components/shorts-error";
 import { ShortsInfoOverlay } from "../components/shorts-info-overlay";
 import { ShortsNavigation } from "../components/shorts-navigation";
@@ -8,11 +8,6 @@ import { ShortsVideoPlayer } from "../components/shorts-video-player";
 import { resolveManifestSrc } from "../lib/stream-src";
 import type { VideoStream } from "../types/stream";
 
-const ShortsCommentsSheet = lazy(() =>
-  import("../components/shorts-comments-sheet").then((module) => ({
-    default: module.ShortsCommentsSheet,
-  })),
-);
 type Props = {
   sectionClass: string;
   playerRef: React.RefObject<HTMLDivElement | null>;
@@ -32,6 +27,8 @@ type Props = {
   initialMuted: boolean;
   defaultAudioLanguage?: string;
   preferOriginalLanguage?: boolean;
+  originalAudioTrackId?: string | null;
+  preferredDefaultAudioTrackId?: string | null;
   originalAudioLocale?: string | null;
   defaultSubtitleLanguage?: string;
   subtitlesEnabled?: boolean;
@@ -46,7 +43,6 @@ type Props = {
   onTouchEnd: (clientY: number | null, target: EventTarget | null) => void;
   onVolumeChange: (volume: number, muted: boolean) => void;
 };
-
 export function ShortsPlayerStage({
   sectionClass,
   playerRef,
@@ -66,6 +62,8 @@ export function ShortsPlayerStage({
   initialMuted,
   defaultAudioLanguage,
   preferOriginalLanguage,
+  originalAudioTrackId,
+  preferredDefaultAudioTrackId,
   originalAudioLocale,
   defaultSubtitleLanguage,
   subtitlesEnabled,
@@ -134,6 +132,8 @@ export function ShortsPlayerStage({
                 autoplay={shouldAutoplay}
                 defaultAudioLanguage={defaultAudioLanguage}
                 preferOriginalLanguage={preferOriginalLanguage}
+                originalAudioTrackId={originalAudioTrackId}
+                preferredDefaultAudioTrackId={preferredDefaultAudioTrackId}
                 originalAudioLocale={originalAudioLocale}
                 defaultSubtitleLanguage={defaultSubtitleLanguage}
                 subtitlesEnabled={subtitlesEnabled}
@@ -158,14 +158,12 @@ export function ShortsPlayerStage({
           </div>
         </div>
       </div>
-      <Suspense fallback={null}>
-        <ShortsCommentsSheet
-          videoUrl={active.id}
-          anchorEl={playerRef.current}
-          open={commentsOpen}
-          onClose={onCloseComments}
-        />
-      </Suspense>
+      <ShortsCommentsSheetSlot
+        videoUrl={active.id}
+        anchorEl={playerRef.current}
+        open={commentsOpen}
+        onClose={onCloseComments}
+      />
     </section>
   );
 }

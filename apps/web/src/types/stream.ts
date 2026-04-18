@@ -36,6 +36,8 @@ export type VideoStream = {
   related?: VideoStream[];
   videoOnlyStreams?: VideoStreamItem[];
   audioStreams?: AudioStreamItem[];
+  originalAudioTrackId?: string | null;
+  preferredDefaultAudioTrackId?: string | null;
   subtitles?: SubtitleItem[];
   previewFrames?: PreviewFrameItem[];
   sponsorBlockSegments?: SponsorBlockSegmentItem[];
