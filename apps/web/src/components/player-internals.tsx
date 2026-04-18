@@ -8,17 +8,7 @@ import {
   useVideoQualityOptions,
 } from "../lib/vidstack";
 import type { SponsorBlockSegmentItem } from "../types/api";
-
-function normalizeLanguageTag(value: string | null | undefined): string {
-  if (!value) return "";
-  const [base] = value.toLowerCase().split("-");
-  return base ?? "";
-}
-
-function includesOriginal(value: string | undefined): boolean {
-  if (!value) return false;
-  return value.toLowerCase().includes("original");
-}
+import { includesOriginal, normalizeLanguageTag } from "./player-language";
 
 export function SeekBridge({
   onSeekReady,
@@ -104,7 +94,7 @@ export function PlayerDefaults({
   const audioOptions = useAudioOptions();
   const textTracks = useMediaState("textTracks");
   const qualityApplied = useRef(false);
-  const audioApplied = useRef(false);
+  const appliedAudioOptionsCount = useRef(0);
   const subtitleApplied = useRef(false);
   const originalMissingNotified = useRef(false);
 
@@ -121,8 +111,18 @@ export function PlayerDefaults({
   }, [canPlay, qualityOptions, defaultQuality]);
 
   useEffect(() => {
-    if (!canPlay || audioApplied.current || audioOptions.length === 0) return;
     const forceOriginal = requireOriginalLanguage || preferOriginalLanguage;
+    const canReapplyOriginalSelection =
+      forceOriginal &&
+      appliedAudioOptionsCount.current > 0 &&
+      audioOptions.length > appliedAudioOptionsCount.current;
+    if (
+      !canPlay ||
+      audioOptions.length === 0 ||
+      (appliedAudioOptionsCount.current > 0 && !canReapplyOriginalSelection)
+    ) {
+      return;
+    }
     let match = forceOriginal
       ? (audioOptions.find((option) => includesOriginal(option.label)) ??
         audioOptions.find((option) => normalizeLanguageTag(option.track.language) === originalTag))
@@ -141,7 +141,7 @@ export function PlayerDefaults({
     }
     if (match) {
       match.select();
-      audioApplied.current = true;
+      appliedAudioOptionsCount.current = audioOptions.length;
     }
   }, [
     canPlay,
