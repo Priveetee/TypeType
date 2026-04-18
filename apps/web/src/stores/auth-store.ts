@@ -56,8 +56,7 @@ const stored = readStoredAuth();
 export const useAuthStore = create<AuthStore>((set) => ({
   token: stored?.token ?? null,
   me: stored?.me ?? null,
-  status:
-    stored?.token == null ? "signed_out" : stored.me == null ? "loading" : toStatus(stored.me),
+  status: stored?.token == null ? "signed_out" : "loading",
   setBootstrapping: () =>
     set((state) => ({
       ...state,

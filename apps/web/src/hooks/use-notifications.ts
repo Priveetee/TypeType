@@ -12,8 +12,8 @@ const PAGE_SIZE = 20;
 
 export function useNotifications(open: boolean) {
   const qc = useQueryClient();
-  const { isAuthed, isGuest } = useAuth();
-  const enabled = isAuthed && !isGuest;
+  const { authReady, isAuthed, isGuest } = useAuth();
+  const enabled = authReady && isAuthed && !isGuest;
 
   const unreadQuery = useQuery({
     queryKey: UNREAD_KEY,

@@ -14,16 +14,26 @@ type RegisterPayload = {
   name: string;
 };
 
+let refreshInFlight: Promise<string> | null = null;
+
 async function hydrateSession(token: string): Promise<AuthMe> {
   const me = await fetchMe(token);
   useAuthStore.getState().setSession(token, me);
   return me;
 }
 
-export async function refreshSession(): Promise<string> {
+async function runRefreshSession(): Promise<string> {
   const refreshed = await refreshAuth();
   await hydrateSession(refreshed.accessToken);
   return refreshed.accessToken;
+}
+
+export async function refreshSession(): Promise<string> {
+  if (refreshInFlight) return refreshInFlight;
+  refreshInFlight = runRefreshSession().finally(() => {
+    refreshInFlight = null;
+  });
+  return refreshInFlight;
 }
 
 export async function bootstrapSession(): Promise<void> {

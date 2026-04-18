@@ -25,12 +25,12 @@ function dedupeSubscriptions(data: SubscriptionItem[]): SubscriptionItem[] {
 
 export function useSubscriptions() {
   const qc = useQueryClient();
-  const { isAuthed } = useAuth();
+  const { authReady, isAuthed } = useAuth();
 
   const query = useQuery({
     queryKey: KEY,
     queryFn: fetchSubscriptions,
-    enabled: isAuthed,
+    enabled: authReady && isAuthed,
     select: dedupeSubscriptions,
   });
 

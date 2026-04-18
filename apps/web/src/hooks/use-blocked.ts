@@ -26,14 +26,18 @@ type BlockVideoArgs = {
 
 export function useBlocked() {
   const qc = useQueryClient();
-  const { isAuthed } = useAuth();
+  const { authReady, isAuthed } = useAuth();
 
   const channels = useQuery({
     queryKey: CHANNELS_KEY,
     queryFn: fetchBlockedChannels,
-    enabled: isAuthed,
+    enabled: authReady && isAuthed,
   });
-  const videos = useQuery({ queryKey: VIDEOS_KEY, queryFn: fetchBlockedVideos, enabled: isAuthed });
+  const videos = useQuery({
+    queryKey: VIDEOS_KEY,
+    queryFn: fetchBlockedVideos,
+    enabled: authReady && isAuthed,
+  });
 
   const addChannel = useMutation({
     mutationFn: ({ url, name, thumbnailUrl, global }: BlockChannelArgs) =>

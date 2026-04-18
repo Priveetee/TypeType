@@ -7,7 +7,7 @@ const PAGE_SIZE = 8;
 
 export function useSearchHistory() {
   const qc = useQueryClient();
-  const { isAuthed } = useAuth();
+  const { authReady, isAuthed } = useAuth();
   const query = useInfiniteQuery({
     queryKey: KEY,
     queryFn: ({ pageParam = 1 }) => fetchSearchHistoryPage(pageParam, PAGE_SIZE),
@@ -16,7 +16,7 @@ export function useSearchHistory() {
       return loaded < lastPage.total ? lastPage.page + 1 : undefined;
     },
     initialPageParam: 1,
-    enabled: isAuthed,
+    enabled: authReady && isAuthed,
     gcTime: 0,
   });
 

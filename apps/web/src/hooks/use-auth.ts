@@ -9,6 +9,7 @@ export function useAuth() {
 
   const role = me?.role ?? null;
   const isAuthed = token !== null;
+  const authReady = status !== "loading";
   const isGuest = status === "guest";
   const publicUsername = me?.publicUsername ?? null;
   const bio = me?.bio ?? null;
@@ -23,6 +24,7 @@ export function useAuth() {
     token,
     me,
     role,
+    authReady,
     publicUsername,
     bio,
     avatarUrl,

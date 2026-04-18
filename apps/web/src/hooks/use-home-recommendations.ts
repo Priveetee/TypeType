@@ -18,7 +18,7 @@ type Result = {
 };
 
 export function useHomeRecommendations(): Result {
-  const { isAuthed } = useAuth();
+  const { authReady, isAuthed } = useAuth();
   const { settings } = useSettings();
   const intent: RecommendationIntent = "auto";
   const query = useInfiniteQuery({
@@ -32,7 +32,7 @@ export function useHomeRecommendations(): Result {
       ),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (last) => (last.hasMore ? (last.nextCursor ?? undefined) : undefined),
-    enabled: isAuthed,
+    enabled: authReady && isAuthed,
     staleTime: 90 * 1000,
   });
 
