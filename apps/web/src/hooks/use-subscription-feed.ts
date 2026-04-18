@@ -15,7 +15,7 @@ type Result = {
 };
 
 export function useSubscriptionFeed(): Result {
-  const { isAuthed } = useAuth();
+  const { authReady, isAuthed } = useAuth();
   const { query: subsQuery } = useSubscriptions();
   const avatarMap = new Map(
     (subsQuery.data ?? []).map((s) => [s.channelUrl, proxyImage(s.avatarUrl)]),
@@ -27,7 +27,7 @@ export function useSubscriptionFeed(): Result {
     initialPageParam: 0,
     getNextPageParam: (last, pages) => (last.nextpage !== null ? pages.length : undefined),
     staleTime: 5 * 60 * 1000,
-    enabled: isAuthed,
+    enabled: authReady && isAuthed,
   });
 
   const streams = (query.data?.pages ?? [])

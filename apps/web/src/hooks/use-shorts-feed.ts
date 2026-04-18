@@ -28,7 +28,7 @@ type ShortsFeed = {
 const SHORTS_QUERY = "shorts";
 
 export function useShortsFeed(): ShortsFeed {
-  const { isAuthed } = useAuth();
+  const { authReady, isAuthed } = useAuth();
   const { settings } = useSettings();
   const { filter } = useBlockedFilter();
   const hiddenVideoIds = useShortsFeedbackStore((s) => s.hiddenVideoIds);
@@ -46,7 +46,7 @@ export function useShortsFeed(): ShortsFeed {
       ),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (last) => (last.hasMore ? (last.nextCursor ?? undefined) : undefined),
-    enabled: isAuthed,
+    enabled: authReady && isAuthed,
     staleTime: 5 * 60 * 1000,
   });
 
@@ -59,7 +59,7 @@ export function useShortsFeed(): ShortsFeed {
       fetchSubscriptionShorts(pageParam as number, 30, settings.defaultService, true),
     initialPageParam: 0,
     getNextPageParam: (last) => parseNextPage(last.nextpage),
-    enabled: isAuthed && recommendations.isSuccess && !hasRecommendationShorts,
+    enabled: authReady && isAuthed && recommendations.isSuccess && !hasRecommendationShorts,
     staleTime: 5 * 60 * 1000,
   });
 
@@ -69,7 +69,7 @@ export function useShortsFeed(): ShortsFeed {
       fetchSearch(SHORTS_QUERY, settings.defaultService, pageParam as string | undefined),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (last) => last.nextpage ?? undefined,
-    enabled: !isAuthed,
+    enabled: authReady && !isAuthed,
     staleTime: 90 * 1000,
   });
 
@@ -98,7 +98,7 @@ export function useShortsFeed(): ShortsFeed {
     hiddenChannelUrls,
   ]);
 
-  const useRecommendations = isAuthed && hasRecommendationShorts;
+  const useRecommendations = authReady && isAuthed && hasRecommendationShorts;
   return {
     shorts,
     isLoading:

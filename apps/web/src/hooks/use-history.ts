@@ -10,7 +10,7 @@ const historyKey = (q: string) => ["history", q];
 
 export function useHistory(searchQuery = "") {
   const qc = useQueryClient();
-  const { isAuthed } = useAuth();
+  const { authReady, isAuthed } = useAuth();
   const debouncedQuery = useDebouncedValue(searchQuery, 300);
 
   const query = useInfiniteQuery({
@@ -26,7 +26,7 @@ export function useHistory(searchQuery = "") {
       return fetched < lastPage.total ? fetched : undefined;
     },
     initialPageParam: 0,
-    enabled: isAuthed,
+    enabled: authReady && isAuthed,
   });
 
   const add = useMutation({

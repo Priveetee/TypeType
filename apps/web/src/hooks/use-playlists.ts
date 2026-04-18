@@ -28,9 +28,13 @@ type RemoveVideoPayload = {
 
 export function usePlaylists() {
   const qc = useQueryClient();
-  const { isAuthed } = useAuth();
+  const { authReady, isAuthed } = useAuth();
 
-  const query = useQuery({ queryKey: KEY, queryFn: fetchPlaylists, enabled: isAuthed });
+  const query = useQuery({
+    queryKey: KEY,
+    queryFn: fetchPlaylists,
+    enabled: authReady && isAuthed,
+  });
 
   const create = useMutation({
     mutationFn: (name: string) =>

@@ -22,13 +22,13 @@ const DEFAULTS: SettingsItem = {
 
 export function useSettings() {
   const qc = useQueryClient();
-  const { isAuthed } = useAuth();
+  const { authReady, isAuthed } = useAuth();
   const setTrackingEnabled = useRecommendationTrackingStore((s) => s.setEnabled);
 
   const query = useQuery({
     queryKey: KEY,
     queryFn: () => fetchSettings(),
-    enabled: isAuthed,
+    enabled: authReady && isAuthed,
     placeholderData: DEFAULTS,
   });
 
