@@ -11,7 +11,7 @@ import {
 import type { SubtitleItem } from "../types/api";
 import { AudioTrackSelector } from "./audio-track-selector";
 import { MediaSessionSync } from "./media-session-sync";
-import { PlayerDefaults } from "./player-internals";
+import { PlayerDefaults } from "./player-defaults";
 import { buildSafeSubtitleTracks } from "./subtitle-track-utils";
 import { Toast } from "./toast";
 import { onProviderChange } from "./video-player-core";
@@ -28,6 +28,8 @@ type Props = {
   autoplay?: boolean;
   defaultAudioLanguage?: string;
   preferOriginalLanguage?: boolean;
+  originalAudioTrackId?: string | null;
+  preferredDefaultAudioTrackId?: string | null;
   originalAudioLocale?: string | null;
   defaultSubtitleLanguage?: string;
   subtitlesEnabled?: boolean;
@@ -47,6 +49,8 @@ export function ShortsVideoPlayer({
   autoplay = true,
   defaultAudioLanguage,
   preferOriginalLanguage,
+  originalAudioTrackId,
+  preferredDefaultAudioTrackId,
   originalAudioLocale,
   defaultSubtitleLanguage,
   subtitlesEnabled,
@@ -133,6 +137,8 @@ export function ShortsVideoPlayer({
           onOriginalLanguageUnavailable={() => {
             setToast("Original audio unavailable, switched to English");
           }}
+          originalAudioTrackId={originalAudioTrackId}
+          preferredDefaultAudioTrackId={preferredDefaultAudioTrackId}
           originalAudioLocale={originalAudioLocale}
           defaultSubtitleLanguage={defaultSubtitleLanguage}
           subtitlesEnabled={subtitlesEnabled}
