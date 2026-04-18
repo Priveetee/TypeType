@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useRef } from "react";
 import { PageSpinner } from "../components/page-spinner";
 import { StreamError } from "../components/stream-error";
+import { useAuth } from "../hooks/use-auth";
 import { useHistory } from "../hooks/use-history";
 import { useProgress } from "../hooks/use-progress";
 import {
@@ -31,6 +32,7 @@ function PlayerOnlyLoader() {
 
 function WatchPage() {
   const { v } = Route.useSearch();
+  const { authReady, isAuthed } = useAuth();
   const { data: stream, isLoading, isError, error, refetch } = useStream(v);
   const { add } = useHistory();
   const progressFetch = useProgress(v);
@@ -53,6 +55,7 @@ function WatchPage() {
   }, [stream]);
 
   if (isLoading) return <PlayerOnlyLoader />;
+  if (authReady && isAuthed && progressFetch.isPending) return <PlayerOnlyLoader />;
 
   if (isError || !stream) {
     const genericExtractorError =

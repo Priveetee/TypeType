@@ -11,17 +11,21 @@ type Args = {
 
 export function useWatchProgressPersistence({ durationSec, isLive, mutate }: Args) {
   const positionRef = useRef(0);
+  const lastSavedPositionRef = useRef(0);
   const mutateRef = useRef(mutate);
   mutateRef.current = mutate;
   const isIos = isIosDevice();
 
   const saveRef = useRef<(seeked: boolean) => void>(() => {});
   saveRef.current = (seeked: boolean) => {
-    const positionMs = positionRef.current;
+    const positionMs = Math.max(0, Math.round(positionRef.current));
     const durationMs = durationSec * 1000;
+    if (!Number.isFinite(positionMs) || positionMs <= 0) return;
     if (positionMs >= durationMs * 0.95) return;
-    if (!seeked && positionMs < 5000) return;
-    mutateRef.current(seeked && positionMs < 5000 ? 0 : positionMs);
+    if (positionMs < 5000) return;
+    if (!seeked && positionMs < lastSavedPositionRef.current) return;
+    lastSavedPositionRef.current = positionMs;
+    mutateRef.current(positionMs);
   };
 
   const handleTimeUpdate = useCallback((positionMs: number) => {
