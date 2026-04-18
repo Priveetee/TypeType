@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useBulletComments } from "../hooks/use-bullet-comments";
 import { usePlayerError } from "../hooks/use-player-error";
 import { useSaveProgress } from "../hooks/use-progress";
@@ -18,6 +18,7 @@ import { DanmakuOverlay } from "./danmaku-overlay";
 import { PlayerError } from "./player-error";
 import { PlayerDefaults, PlayerFocuser } from "./player-internals";
 import { RelatedVideos } from "./related-videos";
+import { Toast } from "./toast";
 import { VideoPlayer } from "./video-player";
 import { WatchMeta } from "./watch-meta";
 
@@ -45,6 +46,7 @@ export function WatchLayout({ stream, startTime }: Props) {
       ?.audioLocale ?? null;
   const cinemaMode = useWatchLayoutStore((state) => state.cinemaMode);
   const seekRef = useRef<((seconds: number) => void) | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
   const handleVolumeChange = useVolumeSync(update.mutate);
   const { thumbnailVtt, chaptersVtt } = useWatchVttAssets(stream);
   const { positionRef, handleTimeUpdate, handlePause, handleSeeked } = useWatchProgressPersistence({
@@ -54,6 +56,12 @@ export function WatchLayout({ stream, startTime }: Props) {
   });
 
   useWatchRecommendationTracking(stream, isLive, positionRef);
+
+  useEffect(() => {
+    if (!toast) return;
+    const timer = setTimeout(() => setToast(null), 2600);
+    return () => clearTimeout(timer);
+  }, [toast]);
 
   const handleEnded = useCallback(() => {
     if (!settingsReady || !settings.autoplay) return;
@@ -70,8 +78,12 @@ export function WatchLayout({ stream, startTime }: Props) {
       <PlayerFocuser />
       <PlayerDefaults
         defaultQuality={qualityFailed ? undefined : settings.defaultQuality}
-        defaultAudioLanguage={settings.defaultAudioLanguage || undefined}
+        defaultAudioLanguage={settings.defaultAudioLanguage || "en"}
         preferOriginalLanguage={settings.preferOriginalLanguage}
+        requireOriginalLanguage
+        onOriginalLanguageUnavailable={() => {
+          setToast("Original audio unavailable, switched to English");
+        }}
         originalAudioLocale={originalLocale}
         subtitlesEnabled={settings.subtitlesEnabled}
         defaultSubtitleLanguage={settings.defaultSubtitleLanguage || undefined}
@@ -107,7 +119,7 @@ export function WatchLayout({ stream, startTime }: Props) {
             initialVolume={settings.volume}
             initialMuted={settings.muted}
             settingsReady={settingsReady}
-            autoplay={settingsReady && settings.autoplay}
+            autoplay={settingsReady}
             originalAudioLocale={originalLocale}
             overlay={overlay}
             onVolumeChange={handleVolumeChange}
@@ -141,6 +153,7 @@ export function WatchLayout({ stream, startTime }: Props) {
           </div>
         </div>
       )}
+      <Toast message={toast} />
     </div>
   );
 }

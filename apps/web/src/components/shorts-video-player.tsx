@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { isIosDevice } from "../lib/ios-device";
 import type { MediaSrc } from "../lib/vidstack";
 import {
@@ -12,6 +13,7 @@ import { AudioTrackSelector } from "./audio-track-selector";
 import { MediaSessionSync } from "./media-session-sync";
 import { PlayerDefaults } from "./player-internals";
 import { buildSafeSubtitleTracks } from "./subtitle-track-utils";
+import { Toast } from "./toast";
 import { onProviderChange } from "./video-player-core";
 import { VolumeRestorer } from "./volume-restorer";
 
@@ -55,6 +57,14 @@ export function ShortsVideoPlayer({
   const ios = isIosDevice();
   const srcKey = typeof src === "string" ? src : String(src.src);
   const subtitleTracks = buildSafeSubtitleTracks(subtitles);
+  const shouldPreferOriginalLanguage = preferOriginalLanguage ?? true;
+  const [toast, setToast] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!toast) return;
+    const timer = setTimeout(() => setToast(null), 2600);
+    return () => clearTimeout(timer);
+  }, [toast]);
 
   return (
     <div style={{ position: "absolute", inset: 0, backgroundColor: "black" }}>
@@ -117,8 +127,12 @@ export function ShortsVideoPlayer({
           }}
         />
         <PlayerDefaults
-          defaultAudioLanguage={defaultAudioLanguage}
-          preferOriginalLanguage={preferOriginalLanguage}
+          defaultAudioLanguage={defaultAudioLanguage || "en"}
+          preferOriginalLanguage={shouldPreferOriginalLanguage}
+          requireOriginalLanguage
+          onOriginalLanguageUnavailable={() => {
+            setToast("Original audio unavailable, switched to English");
+          }}
           originalAudioLocale={originalAudioLocale}
           defaultSubtitleLanguage={defaultSubtitleLanguage}
           subtitlesEnabled={subtitlesEnabled}
@@ -132,6 +146,7 @@ export function ShortsVideoPlayer({
         />
         <MediaSessionSync title={title} artwork={poster} />
       </MediaPlayer>
+      <Toast message={toast} />
     </div>
   );
 }

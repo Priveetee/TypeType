@@ -10,6 +10,8 @@ import {
 } from "../lib/vidstack";
 
 const qualityIcon: DefaultLayoutIcon = (props) => <ClipIcon {...props} />;
+const MENU_ITEMS_CLASS =
+  "vds-menu-items overflow-y-auto overscroll-y-contain pr-0.5 [scrollbar-width:thin] [scrollbar-color:var(--color-zinc-500)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-surface-soft/80 [&::-webkit-scrollbar-thumb:hover]:bg-surface-soft [&::-webkit-scrollbar-track]:bg-transparent";
 
 export function QualitySelector() {
   const menuRef = useRef<MenuInstance>(null);
@@ -37,7 +39,7 @@ export function QualitySelector() {
   return (
     <Menu.Root ref={menuRef} className="vds-quality-menu vds-menu">
       <DefaultMenuButton label="Quality" hint={current} Icon={qualityIcon} />
-      <Menu.Items className="vds-menu-items">
+      <Menu.Items className={MENU_ITEMS_CLASS}>
         <DefaultMenuRadioGroup value={current ?? ""} options={radioOptions} onChange={onChange} />
       </Menu.Items>
     </Menu.Root>

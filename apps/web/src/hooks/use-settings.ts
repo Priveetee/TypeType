@@ -15,8 +15,8 @@ const DEFAULTS: SettingsItem = {
   muted: false,
   subtitlesEnabled: false,
   defaultSubtitleLanguage: "",
-  defaultAudioLanguage: "",
-  preferOriginalLanguage: false,
+  defaultAudioLanguage: "en",
+  preferOriginalLanguage: true,
   recommendationPersonalizationEnabled: true,
 };
 
