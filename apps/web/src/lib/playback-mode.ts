@@ -17,14 +17,10 @@ export function readPlaybackMode(): PlaybackMode {
   return isPlaybackMode(stored) ? stored : "adaptive";
 }
 
-export function writePlaybackMode(mode: PlaybackMode): void {
+export function setPlaybackMode(mode: PlaybackMode): void {
   if (!canUseStorage()) return;
   window.localStorage.setItem(STORAGE_KEY, mode);
   window.dispatchEvent(new Event(CHANGE_EVENT));
-}
-
-export function setPlaybackMode(mode: PlaybackMode): void {
-  writePlaybackMode(mode);
 }
 
 export function subscribePlaybackMode(listener: () => void): () => void {
