@@ -34,6 +34,7 @@ export type VideoStream = {
   category?: string;
   shortDescription?: string;
   related?: VideoStream[];
+  videoStreams?: VideoStreamItem[];
   videoOnlyStreams?: VideoStreamItem[];
   audioStreams?: AudioStreamItem[];
   originalAudioTrackId?: string | null;

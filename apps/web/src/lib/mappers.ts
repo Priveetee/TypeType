@@ -94,6 +94,7 @@ export function mapStreamResponse(response: StreamResponse, url: string): VideoS
     startPosition: response.startPosition > 0 ? response.startPosition : undefined,
     streamSegments: response.streamSegments.length > 0 ? response.streamSegments : undefined,
     hlsUrl: response.hlsUrl || undefined,
+    videoStreams: response.videoStreams,
     videoOnlyStreams: response.videoOnlyStreams,
     audioStreams: response.audioStreams,
     originalAudioTrackId: response.originalAudioTrackId,
