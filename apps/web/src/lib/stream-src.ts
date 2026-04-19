@@ -1,10 +1,11 @@
-import type { AudioStreamItem } from "../types/api";
 import type { VideoStream } from "../types/stream";
 import { buildDashManifest } from "./dash-manifest";
 import { API_BASE as BASE } from "./env";
 import { buildNicoMasterPlaylist } from "./nico-manifest";
+import { isCompatibilityPlaybackMode } from "./playback-mode";
 import { detectProvider } from "./provider";
 import { proxyDashManifest } from "./proxy";
+import { pickCompactAudioTracks } from "./stream-audio-compact";
 import type { MediaSrc } from "./vidstack";
 
 type ResolveManifestOptions = {
@@ -13,47 +14,12 @@ type ResolveManifestOptions = {
   preferredAudioLanguage?: string;
   preferOriginalLanguage?: boolean;
   maxCompactAudioTracks?: number;
+  compatibilityMode?: boolean;
 };
 
 function isFirefoxBrowser(): boolean {
   if (typeof navigator === "undefined") return false;
   return navigator.userAgent.includes("Firefox/");
-}
-
-function normalizeLanguageTag(value: string | null): string {
-  if (value === null || value.length === 0) return "";
-  const [base] = value.toLowerCase().split("-");
-  return base ?? "";
-}
-
-function pickCompactAudioTracks(
-  audioStreams: AudioStreamItem[],
-  preferredAudioLanguage: string | undefined,
-  maxCompactAudioTracks: number,
-): AudioStreamItem[] {
-  if (audioStreams.length <= maxCompactAudioTracks) return audioStreams;
-  const preferredTag = normalizeLanguageTag(preferredAudioLanguage ?? null);
-  const prioritized = [...audioStreams].sort((left, right) => {
-    const leftOriginal = left.audioTrackName?.toLowerCase().includes("original") ?? false;
-    const rightOriginal = right.audioTrackName?.toLowerCase().includes("original") ?? false;
-    if (leftOriginal !== rightOriginal) return leftOriginal ? -1 : 1;
-    const leftPreferred = normalizeLanguageTag(left.audioLocale) === preferredTag;
-    const rightPreferred = normalizeLanguageTag(right.audioLocale) === preferredTag;
-    if (leftPreferred !== rightPreferred) return leftPreferred ? -1 : 1;
-    return (right.bitrate ?? 0) - (left.bitrate ?? 0);
-  });
-
-  const selected: AudioStreamItem[] = [];
-  const seenLanguages = new Set<string>();
-  for (const track of prioritized) {
-    const language = normalizeLanguageTag(track.audioLocale) || `und-${track.itag}`;
-    if (seenLanguages.has(language)) continue;
-    selected.push(track);
-    seenLanguages.add(language);
-    if (selected.length >= maxCompactAudioTracks) break;
-  }
-
-  return selected.length > 0 ? selected : prioritized.slice(0, maxCompactAudioTracks);
 }
 
 function fallbackSrc(
@@ -86,6 +52,24 @@ function fallbackSrc(
   };
 }
 
+function pickCompatibleProgressiveSrc(stream: VideoStream): MediaSrc | null {
+  const progressive = [...(stream.videoStreams ?? [])]
+    .filter(
+      (candidate) =>
+        typeof candidate.codec === "string" &&
+        candidate.codec.includes("avc1") &&
+        candidate.codec.includes("mp4a") &&
+        candidate.mimeType.includes("video/mp4"),
+    )
+    .sort((left, right) => (right.bitrate ?? 0) - (left.bitrate ?? 0))[0];
+
+  if (!progressive) return null;
+  return {
+    src: proxyDashManifest(progressive.url),
+    type: "video/mp4",
+  };
+}
+
 function hasCompatibleMp4(stream: VideoStream): boolean {
   const videos = stream.videoOnlyStreams ?? [];
   const audios = stream.audioStreams ?? [];
@@ -112,7 +96,8 @@ export function resolveManifestSrc(
   options?: ResolveManifestOptions,
 ): MediaSrc {
   const isShort = Boolean(stream.isShortFormContent) || stream.id.includes("/shorts/");
-  const preferNativeManifest = options?.preferNativeManifest ?? !isShort;
+  const compatibilityMode = options?.compatibilityMode ?? isCompatibilityPlaybackMode();
+  const preferNativeManifest = (options?.preferNativeManifest ?? !isShort) && !compatibilityMode;
   const compactAudioTracks = options?.compactAudioTracks ?? isShort;
   const maxCompactAudioTracks = options?.maxCompactAudioTracks ?? (isShort ? 3 : 8);
   const provider = detectProvider(stream.id);
@@ -144,12 +129,18 @@ export function resolveManifestSrc(
     };
   }
 
+  if (!isLive && compatibilityMode) {
+    const progressiveSrc = pickCompatibleProgressiveSrc(stream);
+    if (progressiveSrc) return progressiveSrc;
+  }
+
   if (
     !isLive &&
     stream.videoOnlyStreams?.length &&
     !nativeFailed &&
     preferNativeManifest &&
-    !isFirefox
+    !isFirefox &&
+    !compatibilityMode
   ) {
     return {
       src: proxyDashManifest(
