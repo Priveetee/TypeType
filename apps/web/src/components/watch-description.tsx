@@ -3,9 +3,10 @@ import { RichText } from "./rich-text";
 
 type Props = {
   description: string;
+  onSeekTimestamp?: (seconds: number) => void;
 };
 
-export function WatchDescription({ description }: Props) {
+export function WatchDescription({ description, onSeekTimestamp }: Props) {
   const [expanded, setExpanded] = useState(false);
 
   if (!expanded) {
@@ -26,7 +27,7 @@ export function WatchDescription({ description }: Props) {
   return (
     <div className="bg-surface rounded-xl px-4 py-3">
       <p className="text-sm text-fg leading-relaxed whitespace-pre-wrap">
-        <RichText text={description} />
+        <RichText text={description} onSeekTimestamp={onSeekTimestamp} />
       </p>
       <button
         type="button"

@@ -7,14 +7,17 @@ import { WatchInfo } from "./watch-info";
 type Props = {
   stream: VideoStream;
   showComments?: boolean;
+  onSeekTimestamp?: (seconds: number) => void;
 };
 
-export function WatchMeta({ stream, showComments = true }: Props) {
+export function WatchMeta({ stream, showComments = true, onSeekTimestamp }: Props) {
   return (
     <>
       <WatchInfo stream={stream} />
       <WatchActions stream={stream} />
-      {stream.description && <WatchDescription description={stream.description} />}
+      {stream.description && (
+        <WatchDescription description={stream.description} onSeekTimestamp={onSeekTimestamp} />
+      )}
       {showComments && <WatchComments key={stream.id} videoUrl={stream.id} />}
     </>
   );
