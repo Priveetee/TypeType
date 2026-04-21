@@ -144,7 +144,9 @@ export function WatchLayout({ stream, startTime }: Props) {
           />
           {playerFailed && <PlayerError onRetry={reset} />}
         </div>
-        {!cinemaMode && <WatchMeta stream={stream} />}
+        {!cinemaMode && (
+          <WatchMeta stream={stream} onSeekTimestamp={(seconds) => seekRef.current?.(seconds)} />
+        )}
       </div>
       {!cinemaMode && (
         <div className="w-full lg:flex-1 lg:min-w-64 flex flex-col gap-6">
@@ -154,7 +156,7 @@ export function WatchLayout({ stream, startTime }: Props) {
       {cinemaMode && (
         <div className="mx-auto flex w-full max-w-[1700px] flex-col gap-6 px-4 lg:flex-row lg:items-start">
           <div className="min-w-0 flex-[2] max-w-[1200px] flex flex-col gap-4">
-            <WatchMeta stream={stream} />
+            <WatchMeta stream={stream} onSeekTimestamp={(seconds) => seekRef.current?.(seconds)} />
           </div>
           <div className="w-full lg:flex-1 lg:min-w-64">
             <RelatedVideos streams={relatedStreams} />

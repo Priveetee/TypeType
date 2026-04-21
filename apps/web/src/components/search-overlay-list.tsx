@@ -1,9 +1,5 @@
 import type { RefObject } from "react";
-
-export type SearchOverlayItem = {
-  key: string;
-  label: string;
-};
+import type { SearchOverlayItem } from "../lib/search-overlay-items";
 
 type Props = {
   items: SearchOverlayItem[];
@@ -60,7 +56,14 @@ export function SearchOverlayList({
             }`}
             onClick={() => onSelect(item.label)}
           >
-            {item.label}
+            <span className="inline-flex items-center gap-2">
+              <span>{item.label}</span>
+              {item.source === "history" && !showHistory && (
+                <span className="rounded-md border border-border px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-fg-soft">
+                  History
+                </span>
+              )}
+            </span>
           </button>
         </li>
       ))}
