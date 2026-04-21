@@ -1,10 +1,15 @@
+import { useRouterState } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useDebouncedValue } from "../hooks/use-debounced-value";
 import { useSearchHistory } from "../hooks/use-search-history";
 import { useSearchOverlayNavigation } from "../hooks/use-search-overlay-navigation";
 import { fetchSuggestions } from "../lib/api";
+import { buildSearchOverlayItems } from "../lib/search-overlay-items";
+import {
+  resolveInitialSearchOverlayQuery,
+  writeSearchOverlayQuery,
+} from "../lib/search-overlay-query";
 import { ConfirmModal } from "./confirm-modal";
-import type { SearchOverlayItem } from "./search-overlay-list";
 import { SearchOverlayList } from "./search-overlay-list";
 
 type Props = {
@@ -12,7 +17,10 @@ type Props = {
 };
 
 export function SearchOverlay({ onClose }: Props) {
-  const [query, setQuery] = useState("");
+  const location = useRouterState({ select: (state) => state.location });
+  const [query, setQuery] = useState(() =>
+    resolveInitialSearchOverlayQuery(location.pathname, location.searchStr),
+  );
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [confirmClearOpen, setConfirmClearOpen] = useState(false);
@@ -21,6 +29,7 @@ export function SearchOverlay({ onClose }: Props) {
   const { service, navigateAndClose } = useSearchOverlayNavigation({ onClose });
   const { visibleItems, canLoadMore, loadMore, clear } = useSearchHistory();
   const debouncedQuery = useDebouncedValue(query, 300);
+  const items = buildSearchOverlayItems(query, visibleItems, suggestions);
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => inputRef.current?.focus());
@@ -59,31 +68,32 @@ export function SearchOverlay({ onClose }: Props) {
     element?.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }, [selectedIndex]);
 
-  const showSuggestions = query.trim().length > 0 && suggestions.length > 0;
   const showHistory = query.trim().length === 0 && visibleItems.length > 0;
-  const items: SearchOverlayItem[] = showHistory
-    ? visibleItems.map((item) => ({ key: item.id, label: item.term }))
-    : showSuggestions
-      ? suggestions.slice(0, 8).map((term) => ({ key: term, label: term }))
-      : [];
+
+  function submitTerm(term: string) {
+    const trimmed = term.trim();
+    if (!trimmed) return;
+    writeSearchOverlayQuery(trimmed);
+    navigateAndClose(trimmed);
+  }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (selectedIndex >= 0 && items[selectedIndex]) {
-      navigateAndClose(items[selectedIndex].label);
+      submitTerm(items[selectedIndex].label);
       return;
     }
-    if (!query.trim()) return;
-    navigateAndClose(query.trim());
+    submitTerm(query);
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (items.length === 0) return;
     if (e.key === "ArrowDown") {
       e.preventDefault();
-      setSelectedIndex((i) => Math.min(i + 1, items.length - 1));
+      setSelectedIndex((index) => (index >= items.length - 1 ? 0 : index + 1));
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
-      setSelectedIndex((i) => Math.max(i - 1, -1));
+      setSelectedIndex((index) => (index <= 0 ? items.length - 1 : index - 1));
     }
   }
 
@@ -122,6 +132,7 @@ export function SearchOverlay({ onClose }: Props) {
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
+              writeSearchOverlayQuery(e.target.value);
               setSelectedIndex(-1);
             }}
             onKeyDown={handleKeyDown}
@@ -136,7 +147,7 @@ export function SearchOverlay({ onClose }: Props) {
           listRef={listRef}
           onScroll={handleHistoryScroll}
           onClearAll={() => setConfirmClearOpen(true)}
-          onSelect={navigateAndClose}
+          onSelect={submitTerm}
         />
       </div>
       {confirmClearOpen && (
