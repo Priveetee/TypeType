@@ -4,7 +4,7 @@ function canUseStorage(): boolean {
   return typeof window !== "undefined" && typeof window.localStorage !== "undefined";
 }
 
-export function readSearchOverlayQuery(): string {
+function readSearchOverlayQuery(): string {
   if (!canUseStorage()) return "";
   return window.localStorage.getItem(KEY) ?? "";
 }
