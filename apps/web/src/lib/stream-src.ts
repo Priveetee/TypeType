@@ -129,7 +129,7 @@ export function resolveManifestSrc(
     };
   }
 
-  if (!isLive && compatibilityMode) {
+  if (!isLive && (compatibilityMode || isFirefox)) {
     const progressiveSrc = pickCompatibleProgressiveSrc(stream);
     if (progressiveSrc) return progressiveSrc;
   }
