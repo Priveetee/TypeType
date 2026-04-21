@@ -39,16 +39,21 @@ export function usePlayerError(stream: VideoStream, isLive: boolean): UsePlayerE
   const nativeEnabled = !isLive && Boolean(stream.videoOnlyStreams?.length) && preferNativeManifest;
   const [nativeFailed, setNativeFailed] = useState(false);
   const [qualityFailed, setQualityFailed] = useState(false);
+  const [compatibilityFallback, setCompatibilityFallback] = useState(false);
   const [playerFailed, setPlayerFailed] = useState(false);
   const [retryKey, setRetryKey] = useState(0);
 
-  const manifestSrc = useMemo(
-    () =>
-      resolveManifestSrc(stream, isLive, nativeFailed, qualityFailed, {
+  const manifestSrc = useMemo(() => {
+    if (compatibilityFallback) {
+      return resolveManifestSrc(stream, isLive, nativeFailed, qualityFailed, {
         preferNativeManifest,
-      }),
-    [stream, isLive, nativeFailed, qualityFailed, preferNativeManifest],
-  );
+        compatibilityMode: true,
+      });
+    }
+    return resolveManifestSrc(stream, isLive, nativeFailed, qualityFailed, {
+      preferNativeManifest,
+    });
+  }, [stream, isLive, nativeFailed, qualityFailed, preferNativeManifest, compatibilityFallback]);
 
   const handleError = useCallback(() => {
     if (nativeEnabled && !nativeFailed) {
@@ -59,15 +64,20 @@ export function usePlayerError(stream: VideoStream, isLive: boolean): UsePlayerE
       recordClientEvent("player.quality_failed", { video: debugVideo });
       setQualityFailed(true);
       setRetryKey((k) => k + 1);
+    } else if (!isLive && !compatibilityFallback) {
+      recordClientEvent("player.compatibility_fallback", { video: debugVideo });
+      setCompatibilityFallback(true);
+      setRetryKey((k) => k + 1);
     } else {
       recordClientEvent("player.failed", { video: debugVideo });
       setPlayerFailed(true);
     }
-  }, [debugVideo, nativeEnabled, nativeFailed, qualityFailed]);
+  }, [debugVideo, nativeEnabled, nativeFailed, qualityFailed, compatibilityFallback, isLive]);
 
   const reset = useCallback(() => {
     setNativeFailed(false);
     setQualityFailed(false);
+    setCompatibilityFallback(false);
     setPlayerFailed(false);
     setRetryKey((k) => k + 1);
   }, []);
@@ -76,6 +86,7 @@ export function usePlayerError(stream: VideoStream, isLive: boolean): UsePlayerE
     if (streamId.length === 0) return;
     setNativeFailed(false);
     setQualityFailed(false);
+    setCompatibilityFallback(false);
     setPlayerFailed(false);
     setRetryKey(0);
   }, [streamId]);
