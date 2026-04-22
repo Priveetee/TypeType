@@ -2,7 +2,7 @@
   "name": "typetype",
   "devDependencies": {
     "@biomejs/biome": "^2.4.12",
-    "knip": "^6.4.1",
+    "knip": "^6.6.1",
     "sherif": "^1.11.1"
   },
   "overrides": {
