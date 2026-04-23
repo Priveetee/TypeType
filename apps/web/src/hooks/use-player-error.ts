@@ -32,20 +32,11 @@ function hasMultipleAudioLanguages(stream: VideoStream): boolean {
   return false;
 }
 
-function isFirefoxBrowser(): boolean {
-  if (typeof navigator === "undefined") return false;
-  return navigator.userAgent.includes("Firefox/");
-}
-
 export function usePlayerError(stream: VideoStream, isLive: boolean): UsePlayerErrorReturn {
   const streamId = stream.id;
   const debugVideo = sanitizeVideoContext(streamId) ?? "unknown";
   const preferNativeManifest = !isIosDevice() && !hasMultipleAudioLanguages(stream);
-  const nativeEnabled =
-    !isLive &&
-    !isFirefoxBrowser() &&
-    Boolean(stream.videoOnlyStreams?.length) &&
-    preferNativeManifest;
+  const nativeEnabled = !isLive && Boolean(stream.videoOnlyStreams?.length) && preferNativeManifest;
   const [nativeFailed, setNativeFailed] = useState(false);
   const [qualityFailed, setQualityFailed] = useState(false);
   const [compatibilityFallback, setCompatibilityFallback] = useState(false);
