@@ -38,33 +38,21 @@ The app focuses on a calm interface for watching videos, managing subscriptions,
 - Download jobs through a separate downloader service.
 - A Docker Compose stack for self-hosting the frontend, backend, cache, database, token service, and artifact storage.
 
-## Stack
-
-| Role | Tool |
-|---|---|
-| Language | TypeScript |
-| Runtime | Bun |
-| Build | Vite |
-| UI | React |
-| Routing | TanStack Router |
-| Server state | TanStack Query |
-| Client state | Zustand |
-| Player | Vidstack |
-| Styling | Tailwind CSS |
-| Components | shadcn/ui + Radix UI |
-| Quality | Biome, Sherif, Knip |
-| Deployment | Docker Compose |
-| License | MIT |
-
 ## Self-hosting
 
-The fastest path is the installer:
+The installer is for running the stack, not just cloning the source repositories:
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/Priveetee/TypeType/main/scripts/install-stack.sh | bash
 ```
 
 It installs to `~/typetype-stack`, generates local downloader credentials, chooses free ports when needed, starts the services, and bootstraps Garage.
+
+To download stack files without starting Docker:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/Priveetee/TypeType/main/scripts/install-stack.sh | bash -s -- --download-only
+```
 
 For an interactive setup from a cloned repository:
 
@@ -83,6 +71,32 @@ docker compose ps
 ```
 
 Default local endpoints are `http://localhost:8082` for the frontend, `http://localhost:8080` for the API, and `http://localhost:8081` for the token service. Host ports can be changed through `.env`.
+
+## Stack
+
+| Role | Tool |
+|---|---|
+| Language | <img src="https://cdn.simpleicons.org/typescript" width="18" alt="TypeScript"> TypeScript |
+| Runtime | <img src="https://cdn.simpleicons.org/bun" width="18" alt="Bun"> Bun |
+| Build | <img src="https://cdn.simpleicons.org/vite" width="18" alt="Vite"> Vite |
+| UI | <img src="https://cdn.simpleicons.org/react" width="18" alt="React"> React |
+| Routing and server state | <img src="https://cdn.simpleicons.org/tanstack" width="18" alt="TanStack"> TanStack Router + Query |
+| Styling | <img src="https://cdn.simpleicons.org/tailwindcss" width="18" alt="Tailwind CSS"> Tailwind CSS |
+| Components | <img src="https://cdn.simpleicons.org/shadcnui" width="18" alt="shadcn/ui"> shadcn/ui + <img src="https://cdn.simpleicons.org/radixui" width="18" alt="Radix UI"> Radix UI |
+| Quality | <img src="https://cdn.simpleicons.org/biome" width="18" alt="Biome"> Biome + <img src="https://cdn.simpleicons.org/knip" width="18" alt="Knip"> Knip |
+| Deployment | <img src="https://cdn.simpleicons.org/docker" width="18" alt="Docker"> Docker Compose |
+| License | MIT |
+
+## Source repositories
+
+If you only want the source code, clone the repositories directly:
+
+```sh
+git clone https://github.com/Priveetee/TypeType.git
+git clone https://github.com/Priveetee/TypeType-Server.git
+git clone https://github.com/Priveetee/TypeType-Downloader.git
+git clone https://github.com/Priveetee/TypeType-Token.git
+```
 
 ## Local development
 
@@ -121,10 +135,6 @@ bun run knip
 bun run sherif
 ```
 
-## Docker images
-
-Images are published to GitHub Container Registry: `typetype`, `typetype-server`, `typetype-downloader`, and `typetype-token`. Published tags include `latest`, `main`, branch tags, release tags, and `sha-<short-sha>`.
-
 ## Updating
 
 Update the whole stack:
@@ -141,13 +151,6 @@ Update only the frontend:
 docker compose pull typetype
 docker compose up -d --force-recreate --no-deps typetype
 ```
-
-## Related projects
-
-- [TypeType-Server](https://github.com/Priveetee/TypeType-Server) is the Kotlin backend.
-- [TypeType-Downloader](https://github.com/Priveetee/TypeType-Downloader) handles downloadable artifacts.
-- [TypeType-Token](https://github.com/Priveetee/TypeType-Token) provides proof-of-origin tokens.
-- [TypeType-Android](https://github.com/Priveetee/TypeType-Android) is the native Android client.
 
 ## Acknowledgments
 
