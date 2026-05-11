@@ -12,13 +12,13 @@
 
 </div>
 
-TypeType is a self-hosted, privacy-respecting video platform with a modern web client, private user features, and a server-side extraction boundary. It is built for people who want a clean video experience without handing watch history, subscriptions, playlists, and preferences to a public platform.
+TypeType web is the browser client for TypeType, a self-hosted, privacy-respecting video platform with private user features and a server-side extraction boundary.
 
 This project is still young. Expect active changes while watch, recommendations, imports, and mobile layouts continue to mature.
 
 ## What this is
 
-A TypeScript web application and self-hosting stack for TypeType. The frontend runs in the browser, talks to TypeType-Server over HTTP, and keeps extraction out of the web codebase.
+A TypeScript web application for TypeType. The frontend runs in the browser, talks to TypeType-Server over HTTP, and keeps extraction out of the web codebase.
 
 The app focuses on a calm interface for watching videos, managing subscriptions, importing existing data, and keeping user state on your own instance.
 
@@ -27,6 +27,7 @@ The app focuses on a calm interface for watching videos, managing subscriptions,
 - Not a YouTube frontend clone.
 - Not a fork of Piped, FreeTube, LibreTube, Invidious, or NewPipe.
 - Not a standalone extractor. TypeType needs a reachable TypeType-Server instance.
+- Not the backend source tree or native mobile client.
 - Not affiliated with YouTube or any upstream video platform.
 
 ## Highlights
@@ -36,7 +37,7 @@ The app focuses on a calm interface for watching videos, managing subscriptions,
 - Shorts-style vertical browsing for short-form videos.
 - YouTube Takeout and PipePipe backup import flows.
 - Download jobs through a separate downloader service.
-- A Docker Compose stack for self-hosting the frontend, backend, cache, database, token service, and artifact storage.
+- Local and production Compose files for running the web client with the TypeType stack.
 
 ## Self-hosting
 
@@ -87,9 +88,14 @@ Default local endpoints are `http://localhost:8082` for the frontend, `http://lo
 | Deployment | <img src="https://cdn.simpleicons.org/docker" width="18" alt="Docker"> Docker Compose |
 | License | MIT |
 
-## Source repositories
+## Related projects
 
-If you only want the source code, clone the repositories directly:
+- [TypeType](https://github.com/Priveetee/TypeType) is the deployment stack.
+- [TypeType-Server](https://github.com/Priveetee/TypeType-Server) is the Kotlin API backend.
+- [TypeType-Downloader](https://github.com/Priveetee/TypeType-Downloader) handles download artifacts.
+- [TypeType-Token](https://github.com/Priveetee/TypeType-Token) provides YouTube PO tokens.
+
+Clone the source repositories directly if you do not need the installer:
 
 ```sh
 git clone https://github.com/Priveetee/TypeType.git
