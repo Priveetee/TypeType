@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchSettings, updateSettings } from "../lib/api-user";
+import { DEFAULT_SPONSORBLOCK_CATEGORY_ACTIONS } from "../lib/sponsorblock-settings";
 import type { SettingsItem } from "../types/user";
 import { useAuth } from "./use-auth";
 
@@ -16,6 +17,19 @@ const DEFAULTS: SettingsItem = {
   defaultAudioLanguage: "",
   preferOriginalLanguage: true,
   enableHighQualityPlayback: false,
+  sponsorBlockMode: "auto_skip",
+  sponsorBlockCategoryActions: DEFAULT_SPONSORBLOCK_CATEGORY_ACTIONS,
+  sponsorBlockMinimumDuration: 0,
+  sponsorBlockShowCurrentSegment: true,
+  sponsorBlockShowChapters: false,
+  sponsorBlockShowFullVideoLabels: true,
+  sponsorBlockManualSkipOnFullVideo: true,
+  sponsorBlockSkipNonMusicOnlyOnMusicVideos: false,
+  sponsorBlockMuteInsteadOfSkip: false,
+  hideHomeRecommendations: false,
+  hideRelatedVideos: false,
+  hideComments: false,
+  hideShorts: false,
 };
 
 export function useSettings() {

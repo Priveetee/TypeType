@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { isIosDevice } from "../lib/ios-device";
-import type { MediaSrc } from "../lib/vidstack";
 import {
   DefaultVideoLayout,
   defaultLayoutIcons,
@@ -8,14 +7,15 @@ import {
   MediaProvider,
   Track,
 } from "../lib/vidstack";
-import type { SponsorBlockSegmentItem, SubtitleItem } from "../types/api";
 import { AudioTrackSelector } from "./audio-track-selector";
 import { CinemaModeControl } from "./cinema-mode-control";
 import { FormatSelector } from "./format-selector";
 import { MediaSessionSync } from "./media-session-sync";
+import { PlayerHotkeys } from "./player-hotkeys";
 import { PlayerSeeker, SeekBridge, SponsorBlockSkipper } from "./player-internals";
 import { QualitySelector } from "./quality-selector";
 import { SponsorBlockBar } from "./sponsorblock-bar";
+import { SponsorBlockCurrentSegment } from "./sponsorblock-current-segment";
 import {
   type FontSize,
   fontSizeToMultiplier,
@@ -23,34 +23,8 @@ import {
 } from "./subtitle-size-selector";
 import { buildSafeSubtitleTracks } from "./subtitle-track-utils";
 import { ChaptersTrack, onProviderChange } from "./video-player-core";
+import type { VideoPlayerProps } from "./video-player-types";
 import { VolumeRestorer } from "./volume-restorer";
-
-type Props = {
-  src: MediaSrc;
-  title?: string;
-  poster?: string;
-  streamType?: "on-demand" | "live";
-  startTime?: number;
-  subtitles?: SubtitleItem[];
-  sponsorBlockSegments?: SponsorBlockSegmentItem[];
-  thumbnailVtt?: string;
-  chaptersVtt?: string;
-  initialVolume?: number;
-  initialMuted?: boolean;
-  settingsReady?: boolean;
-  autoplay?: boolean;
-  originalAudioLocale?: string | null;
-  overlay?: React.ReactNode;
-  onVolumeChange?: (volume: number, muted: boolean) => void;
-  onTimeUpdate?: (positionMs: number) => void;
-  onPause?: () => void;
-  onSeeked?: () => void;
-  onError?: () => void;
-  onSeekReady?: (seek: (seconds: number) => void) => void;
-  onEnded?: () => void;
-  className?: string;
-  mediaClassName?: string;
-};
 
 export function VideoPlayer({
   src,
@@ -60,6 +34,11 @@ export function VideoPlayer({
   startTime = 0,
   subtitles,
   sponsorBlockSegments,
+  autoSkipSponsorBlockSegments,
+  manualSkipSponsorBlockSegments,
+  autoSkipSponsorBlock = true,
+  muteSponsorBlockInsteadOfSkip = false,
+  showCurrentSponsorBlockSegment = false,
   thumbnailVtt,
   chaptersVtt,
   initialVolume = 1,
@@ -77,7 +56,7 @@ export function VideoPlayer({
   onEnded,
   className,
   mediaClassName,
-}: Props) {
+}: VideoPlayerProps) {
   const ios = isIosDevice();
   const [subtitleSize, setSubtitleSize] = useState<FontSize>("normal");
   const subtitleTracks = buildSafeSubtitleTracks(subtitles);
@@ -162,8 +141,22 @@ export function VideoPlayer({
         canSeek={streamType !== "live"}
         isLive={streamType === "live"}
       />
-      {sponsorBlockSegments && <SponsorBlockSkipper segments={sponsorBlockSegments} />}
+      <PlayerHotkeys canSeek={streamType !== "live"} />
+      {autoSkipSponsorBlock && autoSkipSponsorBlockSegments && (
+        <SponsorBlockSkipper
+          segments={autoSkipSponsorBlockSegments}
+          muteInsteadOfSkip={muteSponsorBlockInsteadOfSkip}
+        />
+      )}
       {sponsorBlockSegments && <SponsorBlockBar segments={sponsorBlockSegments} />}
+      {showCurrentSponsorBlockSegment && sponsorBlockSegments && (
+        <SponsorBlockCurrentSegment
+          segments={sponsorBlockSegments}
+          autoSkipSegments={autoSkipSponsorBlockSegments}
+          manualSkipSegments={manualSkipSponsorBlockSegments}
+          muteInsteadOfSkip={muteSponsorBlockInsteadOfSkip}
+        />
+      )}
       {onSeekReady && <SeekBridge onSeekReady={onSeekReady} />}
     </MediaPlayer>
   );
