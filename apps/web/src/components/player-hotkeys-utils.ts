@@ -23,6 +23,7 @@ export function consumePointerEvent(event: PointerEvent) {
   event.stopImmediatePropagation();
 }
 
-export function isMobilePointer(event: PointerEvent): boolean {
+export function isFastForwardPointer(event: PointerEvent): boolean {
+  if (event.pointerType === "mouse") return event.button === 0;
   return event.pointerType === "touch" || event.pointerType === "pen";
 }

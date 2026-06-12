@@ -5,8 +5,8 @@ import {
   clampTime,
   consumeEvent,
   consumePointerEvent,
+  isFastForwardPointer,
   isInteractiveTarget,
-  isMobilePointer,
 } from "./player-hotkeys-utils";
 
 const HOLD_SPEED = 2;
@@ -127,7 +127,7 @@ export function PlayerHotkeys({ canSeek }: { canSeek: boolean }) {
     }
 
     function onPointerDown(event: PointerEvent) {
-      if (!isMobilePointer(event)) return;
+      if (!isFastForwardPointer(event)) return;
       if (event.defaultPrevented || isInteractiveTarget(event.target)) return;
       if (touchPointerIdRef.current !== null) return;
       touchPointerIdRef.current = event.pointerId;
