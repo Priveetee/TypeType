@@ -29,6 +29,10 @@ export type PlaylistVideoItem = {
   url: string;
   title: string;
   thumbnail: string;
+  channelName?: string;
+  channelUrl?: string;
+  channelAvatar?: string;
+  viewCount?: number;
   duration: number;
   position: number;
   watchPosition: number;

@@ -36,7 +36,17 @@ export async function deletePlaylist(id: string): Promise<void> {
 
 export async function addVideoToPlaylist(
   playlistId: string,
-  video: { url: string; title: string; thumbnail: string; duration: number },
+  video: Pick<
+    PlaylistVideoItem,
+    | "url"
+    | "title"
+    | "thumbnail"
+    | "channelName"
+    | "channelUrl"
+    | "channelAvatar"
+    | "viewCount"
+    | "duration"
+  >,
 ): Promise<PlaylistVideoItem> {
   return authedJson(`${BASE}/playlists/${encodeURIComponent(playlistId)}/videos`, {
     method: "POST",

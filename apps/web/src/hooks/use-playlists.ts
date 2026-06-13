@@ -18,7 +18,17 @@ type RenamePayload = { id: string; name: string; description?: string };
 
 type AddVideoPayload = {
   playlistId: string;
-  video: Pick<PlaylistVideoItem, "url" | "title" | "thumbnail" | "duration">;
+  video: Pick<
+    PlaylistVideoItem,
+    | "url"
+    | "title"
+    | "thumbnail"
+    | "channelName"
+    | "channelUrl"
+    | "channelAvatar"
+    | "viewCount"
+    | "duration"
+  >;
 };
 
 type RemoveVideoPayload = {
@@ -73,6 +83,10 @@ export function usePlaylists() {
                   {
                     id: "",
                     position: p.videos.length,
+                    channelName: "",
+                    channelUrl: "",
+                    channelAvatar: "",
+                    viewCount: 0,
                     watchPosition: 0,
                     watched: false,
                     progressUpdatedAt: 0,

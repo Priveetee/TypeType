@@ -79,6 +79,10 @@ export function PlaylistAddDropdown({ stream, anchorEl, onClose, onSaved }: Prop
           url: stream.id,
           title: stream.title,
           thumbnail: stream.thumbnail,
+          channelName: stream.channelName,
+          channelUrl: stream.channelUrl ?? "",
+          channelAvatar: stream.channelAvatar,
+          viewCount: stream.views,
           duration: stream.duration,
         },
       });
