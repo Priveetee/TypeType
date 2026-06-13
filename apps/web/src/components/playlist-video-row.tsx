@@ -1,6 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { streamQueryOptions } from "../hooks/use-stream";
 import { useWatchPrefetch } from "../hooks/use-watch-prefetch";
 import { formatDuration, formatViews } from "../lib/format";
 import { isVideoWatched } from "../lib/watch-progress";
@@ -43,15 +41,10 @@ export function PlaylistVideoRow({ video, onRemove }: Props) {
   const rawChannelUrl = video.channelUrl?.trim() ?? "";
   const rawChannelAvatar = video.channelAvatar?.trim() ?? "";
   const rawViews = video.viewCount ?? 0;
-  const needsMetadata = rawChannelName.length === 0 || rawChannelUrl.length === 0 || rawViews <= 0;
-  const { data: stream } = useQuery({
-    ...streamQueryOptions(video.url),
-    enabled: video.url.startsWith("http") && needsMetadata,
-  });
-  const channelName = rawChannelName || stream?.channelName.trim() || "";
-  const channelUrl = rawChannelUrl || stream?.channelUrl?.trim() || "";
-  const channelAvatar = rawChannelAvatar || stream?.channelAvatar || "";
-  const views = rawViews > 0 ? rawViews : (stream?.views ?? 0);
+  const channelName = rawChannelName;
+  const channelUrl = rawChannelUrl;
+  const channelAvatar = rawChannelAvatar;
+  const views = rawViews;
   const menuStream: VideoStream = {
     id: video.url,
     title: video.title,
