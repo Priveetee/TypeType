@@ -34,6 +34,7 @@ import { Route as PlaylistsIdRouteImport } from './routes/playlists_.$id'
 import { Route as ImportYoutubeRouteImport } from './routes/import/youtube'
 import { Route as ImportPipepipeRouteImport } from './routes/import/pipepipe'
 import { Route as ChannelChannelIdRouteImport } from './routes/channel_.$channelId'
+import { Route as AuthOidcCallbackRouteImport } from './routes/auth.oidc.callback'
 
 const WatchLaterRoute = WatchLaterRouteImport.update({
   id: '/watch-later',
@@ -160,6 +161,11 @@ const ChannelChannelIdRoute = ChannelChannelIdRouteImport.update({
   path: '/channel/$channelId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthOidcCallbackRoute = AuthOidcCallbackRouteImport.update({
+  id: '/auth/oidc/callback',
+  path: '/auth/oidc/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -187,6 +193,7 @@ export interface FileRoutesByFullPath {
   '/import/youtube': typeof ImportYoutubeRoute
   '/playlists/$id': typeof PlaylistsIdRoute
   '/import/': typeof ImportIndexRoute
+  '/auth/oidc/callback': typeof AuthOidcCallbackRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -213,6 +220,7 @@ export interface FileRoutesByTo {
   '/import/youtube': typeof ImportYoutubeRoute
   '/playlists/$id': typeof PlaylistsIdRoute
   '/import': typeof ImportIndexRoute
+  '/auth/oidc/callback': typeof AuthOidcCallbackRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -241,6 +249,7 @@ export interface FileRoutesById {
   '/import/youtube': typeof ImportYoutubeRoute
   '/playlists_/$id': typeof PlaylistsIdRoute
   '/import/': typeof ImportIndexRoute
+  '/auth/oidc/callback': typeof AuthOidcCallbackRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -270,6 +279,7 @@ export interface FileRouteTypes {
     | '/import/youtube'
     | '/playlists/$id'
     | '/import/'
+    | '/auth/oidc/callback'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -296,6 +306,7 @@ export interface FileRouteTypes {
     | '/import/youtube'
     | '/playlists/$id'
     | '/import'
+    | '/auth/oidc/callback'
   id:
     | '__root__'
     | '/'
@@ -323,6 +334,7 @@ export interface FileRouteTypes {
     | '/import/youtube'
     | '/playlists_/$id'
     | '/import/'
+    | '/auth/oidc/callback'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -348,6 +360,7 @@ export interface RootRouteChildren {
   WatchLaterRoute: typeof WatchLaterRoute
   ChannelChannelIdRoute: typeof ChannelChannelIdRoute
   PlaylistsIdRoute: typeof PlaylistsIdRoute
+  AuthOidcCallbackRoute: typeof AuthOidcCallbackRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -527,6 +540,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChannelChannelIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/oidc/callback': {
+      id: '/auth/oidc/callback'
+      path: '/auth/oidc/callback'
+      fullPath: '/auth/oidc/callback'
+      preLoaderRoute: typeof AuthOidcCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -568,6 +588,7 @@ const rootRouteChildren: RootRouteChildren = {
   WatchLaterRoute: WatchLaterRoute,
   ChannelChannelIdRoute: ChannelChannelIdRoute,
   PlaylistsIdRoute: PlaylistsIdRoute,
+  AuthOidcCallbackRoute: AuthOidcCallbackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
