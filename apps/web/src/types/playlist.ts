@@ -17,3 +17,8 @@ export type PublicPlaylistResponse = {
   videos: VideoItem[];
   nextpage: string | null;
 };
+
+export type ChannelPlaylistsResponse = {
+  playlists: PublicPlaylistInfo[];
+  nextpage: string | null;
+};

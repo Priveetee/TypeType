@@ -60,7 +60,7 @@ function toErrorMessage(status: number, statusText: string, body: unknown): stri
   return "Request failed";
 }
 
-async function request<T>(url: string, init?: RequestInit): Promise<T> {
+export async function request<T>(url: string, init?: RequestInit): Promise<T> {
   const method = init?.method ?? "GET";
   let res: Response;
   try {
