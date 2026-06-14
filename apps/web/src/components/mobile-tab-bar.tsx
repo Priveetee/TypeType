@@ -38,7 +38,7 @@ export function MobileTabBar() {
   return (
     <nav
       aria-label="Primary"
-      className="fixed bottom-0 left-0 right-0 z-30 flex items-stretch border-t border-border bg-app/95 backdrop-blur pb-[env(safe-area-inset-bottom)]"
+      className="fixed bottom-0 left-0 right-0 z-30 flex items-stretch border-t border-border bg-app pb-[env(safe-area-inset-bottom)]"
     >
       {items.map((item) => (
         <Link
