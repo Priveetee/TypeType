@@ -7,6 +7,7 @@ import type {
   SearchPageResponse,
   StreamResponse,
 } from "../types/api";
+import type { PublicPlaylistResponse } from "../types/playlist";
 import { recordApiError } from "./api-error-log";
 import { extractRequestId, recordClientEvent } from "./client-debug-log";
 import { sanitizeDebugText, sanitizeRequestPath } from "./debug-sanitize";
@@ -164,4 +165,13 @@ export function fetchSuggestions(query: string, service: number): Promise<string
 
 export function fetchBulletComments(url: string): Promise<BulletCommentsPageResponse> {
   return request(`${BASE}/bullet-comments?url=${encodeURIComponent(url)}`);
+}
+
+export function fetchPublicPlaylist(
+  url: string,
+  nextpage?: string,
+): Promise<PublicPlaylistResponse> {
+  const params = new URLSearchParams({ url });
+  if (nextpage) params.set("nextpage", nextpage);
+  return request(`${BASE}/playlist?${params}`);
 }
