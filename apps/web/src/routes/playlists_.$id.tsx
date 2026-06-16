@@ -1,9 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { type DragEvent, useState } from "react";
 import { ConfirmModal } from "../components/confirm-modal";
 import { PlaylistRenameModal } from "../components/playlist-rename-modal";
+import { PlaylistSortMenu } from "../components/playlist-sort-menu";
 import { PlaylistVideoRow } from "../components/playlist-video-row";
 import { usePlaylist, usePlaylists } from "../hooks/use-playlists";
+import { type PlaylistSortMode, sortPlaylistVideos } from "../lib/playlist-sort";
 import type { PlaylistVideoItem } from "../types/user";
 
 function BackIcon() {
@@ -51,10 +53,14 @@ function PencilIcon() {
 function PlaylistDetailPage() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
-  const { remove, removeVideo, rename } = usePlaylists();
+  const { remove, removeVideo, rename, reorder } = usePlaylists();
   const { data: playlist, isPending } = usePlaylist(id);
   const [renaming, setRenaming] = useState(false);
   const [pendingRemove, setPendingRemove] = useState<PlaylistVideoItem | null>(null);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [sortMode, setSortMode] = useState<PlaylistSortMode>("manual");
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [overIndex, setOverIndex] = useState<number | null>(null);
 
   if (isPending) {
     return (
@@ -84,6 +90,26 @@ function PlaylistDetailPage() {
   }
 
   const count = playlist.videos.length;
+  const sortedVideos = sortPlaylistVideos(playlist.videos, sortMode);
+  const reorderable = sortMode === "manual";
+
+  function handleDragStart(event: DragEvent, index: number) {
+    setDragIndex(index);
+    event.dataTransfer.effectAllowed = "move";
+    const card = (event.currentTarget as HTMLElement).closest("[data-pl-card]");
+    if (card instanceof HTMLElement) event.dataTransfer.setDragImage(card, 20, 20);
+  }
+
+  function handleDrop(targetIndex: number) {
+    if (dragIndex !== null && dragIndex !== targetIndex) {
+      const next = [...sortedVideos];
+      const [moved] = next.splice(dragIndex, 1);
+      next.splice(targetIndex, 0, moved);
+      reorder.mutate({ id, order: next.map((video) => video.url) });
+    }
+    setDragIndex(null);
+    setOverIndex(null);
+  }
 
   return (
     <div className="flex flex-col gap-6 [animation:page-fade-in_0.2s_ease-out]">
@@ -113,13 +139,16 @@ function PlaylistDetailPage() {
             </p>
           </div>
         </div>
-        <button
-          type="button"
-          onClick={handleDelete}
-          className="text-xs px-3 py-1.5 rounded-lg text-danger hover:bg-danger/10 transition-colors"
-        >
-          Delete playlist
-        </button>
+        <div className="flex items-center gap-2">
+          {count > 0 && <PlaylistSortMenu value={sortMode} onChange={setSortMode} />}
+          <button
+            type="button"
+            onClick={() => setConfirmingDelete(true)}
+            className="text-xs px-3 py-1.5 rounded-lg text-danger hover:bg-danger/10 transition-colors"
+          >
+            Delete playlist
+          </button>
+        </div>
       </div>
       {count === 0 ? (
         <div className="flex flex-col items-center justify-center py-32 gap-2 text-center">
@@ -129,17 +158,43 @@ function PlaylistDetailPage() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-          {playlist.videos.map((video: PlaylistVideoItem, index: number) => (
-            <div
+        <ul className="grid list-none grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+          {sortedVideos.map((video, index) => (
+            <li
               key={video.id}
-              className="animate-card-pop-in"
+              data-pl-card="true"
+              className={`animate-card-pop-in rounded-xl ${
+                reorderable && overIndex === index && dragIndex !== null ? "ring-2 ring-accent" : ""
+              } ${reorderable && dragIndex === index ? "opacity-40" : ""}`}
               style={{ animationDelay: `${Math.min(index * 45, 270)}ms` }}
+              onDragOver={
+                reorderable
+                  ? (event) => {
+                      event.preventDefault();
+                      setOverIndex(index);
+                    }
+                  : undefined
+              }
+              onDrop={reorderable ? () => handleDrop(index) : undefined}
+              onDragEnd={
+                reorderable
+                  ? () => {
+                      setDragIndex(null);
+                      setOverIndex(null);
+                    }
+                  : undefined
+              }
             >
-              <PlaylistVideoRow video={video} onRemove={() => setPendingRemove(video)} />
-            </div>
+              <PlaylistVideoRow
+                video={video}
+                onRemove={() => setPendingRemove(video)}
+                reorderable={reorderable}
+                listId={id}
+                onDragStart={(event) => handleDragStart(event, index)}
+              />
+            </li>
           ))}
-        </div>
+        </ul>
       )}
       {pendingRemove && (
         <ConfirmModal
@@ -151,6 +206,18 @@ function PlaylistDetailPage() {
             setPendingRemove(null);
           }}
           onCancel={() => setPendingRemove(null)}
+        />
+      )}
+      {confirmingDelete && (
+        <ConfirmModal
+          title="Delete playlist"
+          description={`Delete "${playlist.name}"? This cannot be undone.`}
+          confirmLabel="Delete"
+          onConfirm={() => {
+            setConfirmingDelete(false);
+            handleDelete();
+          }}
+          onCancel={() => setConfirmingDelete(false)}
         />
       )}
       {renaming && (
