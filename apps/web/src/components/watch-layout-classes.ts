@@ -1,3 +1,5 @@
+export type WatchLayoutClasses = ReturnType<typeof getWatchLayoutClasses>;
+
 export function getWatchLayoutClasses(cinemaMode: boolean) {
   const anim = "[animation:page-fade-in_0.2s_ease-out]";
   return {

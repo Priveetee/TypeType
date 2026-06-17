@@ -4,12 +4,12 @@ import { useBulletComments } from "../hooks/use-bullet-comments";
 import { useMobile } from "../hooks/use-mobile";
 import { usePlayerError } from "../hooks/use-player-error";
 import { usePlayerErrorResume } from "../hooks/use-player-error-resume";
-import { usePlaylist, usePlaylists } from "../hooks/use-playlists";
 import { useSaveProgress } from "../hooks/use-progress";
 import { useSettings } from "../hooks/use-settings";
 import { useVolumeSync } from "../hooks/use-volume-sync";
 import { useWatchVttAssets } from "../hooks/use-watch-layout-assets";
 import { useWatchPlayerEvents } from "../hooks/use-watch-player-events";
+import { useWatchPlaylist } from "../hooks/use-watch-playlist";
 import { useWatchSponsorBlock } from "../hooks/use-watch-sponsorblock";
 import {
   getOriginalAudioLocale,
@@ -17,27 +17,25 @@ import {
   getPreferredDefaultAudioTrackId,
 } from "../lib/audio-track";
 import { detectProvider } from "../lib/provider";
-import { toPublicWatchParam } from "../lib/watch-url";
 import { useDanmakuStore } from "../stores/danmaku-store";
 import { useWatchLayoutStore } from "../stores/watch-layout-store";
 import type { VideoStream } from "../types/stream";
-import { PlayerError } from "./player-error";
 import { Toast } from "./toast";
-import { VideoPlayer } from "./video-player";
 import { getWatchLayoutClasses } from "./watch-layout-classes";
-import { WatchMeta } from "./watch-meta";
 import { WatchPlayerOverlay } from "./watch-player-overlay";
-import { WatchPlaylistPanel } from "./watch-playlist-panel";
 import { WatchSecondaryContent } from "./watch-secondary-content";
+import { WatchStage } from "./watch-stage";
 
 type Props = {
   stream: VideoStream;
   startTime: number;
+  currentParam: string;
+  navigating: boolean;
   list?: string;
-  shuffle?: boolean;
+  shuffle?: string;
 };
 
-export function WatchLayout({ stream, startTime, list, shuffle }: Props) {
+export function WatchLayout({ stream, startTime, currentParam, navigating, list, shuffle }: Props) {
   const navigate = useNavigate();
   const isMobile = useMobile();
   const save = useSaveProgress(stream.id);
@@ -51,23 +49,10 @@ export function WatchLayout({ stream, startTime, list, shuffle }: Props) {
   const { on: bulletCommentsOn } = useDanmakuStore();
   const isNicoNico = detectProvider(stream.id) === "nicovideo";
   const hideComments = settings.hideComments;
-  const {
-    segments: sponsorBlockSegments,
-    autoSkipSegments,
-    manualSkipSegments,
-  } = useWatchSponsorBlock(stream, settings);
+  const sponsor = useWatchSponsorBlock(stream, settings);
   const relatedStreams = settings.hideRelatedVideos ? [] : (stream.related ?? []);
-  const playlist = usePlaylist(list ?? "");
-  const { reorder: playlistReorder } = usePlaylists();
-  const playlistVideos = playlist.data?.videos ?? [];
-  const currentParam = toPublicWatchParam(stream.id);
-  const inPlaylist = Boolean(list) && playlistVideos.length > 0;
-  const currentIdx = inPlaylist
-    ? playlistVideos.findIndex((video) => toPublicWatchParam(video.url) === currentParam)
-    : -1;
+  const playlist = useWatchPlaylist(list, shuffle, currentParam);
   const { data: bulletComments } = useBulletComments(stream.id, isNicoNico && !hideComments);
-  const originalTrackId = getOriginalAudioTrackId(stream);
-  const preferredAudioTrackId = getPreferredDefaultAudioTrackId(stream);
   const originalLocale = getOriginalAudioLocale(stream);
   const cinemaMode = useWatchLayoutStore((state) => state.cinemaMode);
   const seekRef = useRef<((seconds: number) => void) | null>(null);
@@ -75,7 +60,7 @@ export function WatchLayout({ stream, startTime, list, shuffle }: Props) {
   const handleVolumeChange = useVolumeSync(update.mutate);
   const { thumbnailVtt, chaptersVtt } = useWatchVttAssets(
     stream,
-    sponsorBlockSegments,
+    sponsor.segments,
     settings.sponsorBlockShowChapters,
   );
   const playerKey = [
@@ -94,37 +79,25 @@ export function WatchLayout({ stream, startTime, list, shuffle }: Props) {
 
   const handleEnded = useCallback(() => {
     if (!settingsReady || !settings.autoplay) return;
-    if (inPlaylist && currentIdx >= 0) {
-      const others = playlistVideos.filter((_, index) => index !== currentIdx);
-      const nextVideo = shuffle
-        ? others[Math.floor(Math.random() * others.length)]
-        : playlistVideos[currentIdx + 1];
-      if (nextVideo) {
-        navigate({
-          to: "/watch",
-          search: {
-            v: toPublicWatchParam(nextVideo.url),
-            list,
-            ...(shuffle ? { shuffle: true } : {}),
-          },
-        });
-        return;
-      }
+    if (playlist.nextParam) {
+      navigate({
+        to: "/watch",
+        search: { v: playlist.nextParam, list, ...(shuffle ? { shuffle } : {}) },
+      });
+      return;
     }
     const next = stream.related?.[0];
-    if (!next) return;
-    navigate({ to: "/watch", search: { v: next.id } });
+    if (next) navigate({ to: "/watch", search: { v: next.id } });
   }, [
     settingsReady,
     settings.autoplay,
-    inPlaylist,
-    currentIdx,
-    playlistVideos,
-    shuffle,
+    playlist.nextParam,
     list,
+    shuffle,
     stream.related,
     navigate,
   ]);
+
   const playerEvents = useWatchPlayerEvents({
     stream,
     isLive,
@@ -148,94 +121,53 @@ export function WatchLayout({ stream, startTime, list, shuffle }: Props) {
       settings={settings}
       qualityFailed={qualityFailed}
       onOriginalLanguageUnavailable={() => setToast("Original audio unavailable")}
-      originalAudioTrackId={originalTrackId}
-      preferredDefaultAudioTrackId={preferredAudioTrackId}
+      originalAudioTrackId={getOriginalAudioTrackId(stream)}
+      preferredDefaultAudioTrackId={getPreferredDefaultAudioTrackId(stream)}
       originalAudioLocale={originalLocale}
     />
   );
 
-  const { containerClass, playerWrapClass, playerBoxClass, playerClassName, mediaClassName } =
-    getWatchLayoutClasses(cinemaMode);
-
-  const playlistPanel =
-    inPlaylist && playlist.data && list ? (
-      <WatchPlaylistPanel
-        playlist={playlist.data}
-        listId={list}
-        currentParam={currentParam}
-        shuffle={Boolean(shuffle)}
-        onToggleShuffle={() =>
-          navigate({
-            to: "/watch",
-            search: { v: currentParam, list, ...(shuffle ? {} : { shuffle: true }) },
-            resetScroll: false,
-          })
-        }
-        onReorder={(order) => playlistReorder.mutate({ id: list, order })}
-      />
-    ) : null;
+  const classes = getWatchLayoutClasses(cinemaMode);
 
   return (
-    <div className={containerClass}>
-      <div className={playerWrapClass}>
-        <div className={playerBoxClass}>
-          {settingsReady ? (
-            <>
-              <VideoPlayer
-                key={playerKey}
-                src={manifestSrc}
-                title={stream.title}
-                poster={stream.thumbnail}
-                streamType={isLive ? "live" : "on-demand"}
-                startTime={retryStartTime > 0 ? retryStartTime : startTime}
-                subtitles={stream.subtitles}
-                sponsorBlockSegments={sponsorBlockSegments}
-                autoSkipSponsorBlock={Boolean(autoSkipSegments)}
-                autoSkipSponsorBlockSegments={autoSkipSegments}
-                manualSkipSponsorBlockSegments={manualSkipSegments}
-                muteSponsorBlockInsteadOfSkip={settings.sponsorBlockMuteInsteadOfSkip}
-                showCurrentSponsorBlockSegment={settings.sponsorBlockShowCurrentSegment}
-                thumbnailVtt={thumbnailVtt}
-                chaptersVtt={chaptersVtt}
-                initialVolume={settings.volume}
-                initialMuted={settings.muted}
-                settingsReady={settingsReady}
-                autoplay={settingsReady}
-                originalAudioLocale={originalLocale}
-                overlay={overlay}
-                captionStyles={settings.captionStyles}
-                onCaptionStylesChange={(captionStyles) => update.mutate({ captionStyles })}
-                onVolumeChange={handleVolumeChange}
-                onTimeUpdate={playerEvents.handleTimeUpdate}
-                onPause={playerEvents.handlePause}
-                onSeeked={playerEvents.handleSeeked}
-                onError={handlePlayerError}
-                onEnded={playerEvents.handleEnded}
-                onSeekReady={(s) => (seekRef.current = s)}
-                className={playerClassName}
-                mediaClassName={mediaClassName}
-              />
-              {playerFailed && <PlayerError onRetry={reset} />}
-            </>
-          ) : (
-            <div className="aspect-video w-full bg-black" />
-          )}
-        </div>
-        {isMobile && playlistPanel ? <div className="mt-4">{playlistPanel}</div> : null}
-        {!cinemaMode && (
-          <WatchMeta
-            stream={stream}
-            showComments={!hideComments}
-            onSeekTimestamp={(s) => seekRef.current?.(s)}
-          />
-        )}
-      </div>
+    <div className={classes.containerClass}>
+      <WatchStage
+        classes={classes}
+        stream={stream}
+        settings={settings}
+        manifestSrc={manifestSrc}
+        playerKey={playerKey}
+        startTime={retryStartTime > 0 ? retryStartTime : startTime}
+        isLive={isLive}
+        settingsReady={settingsReady}
+        navigating={navigating}
+        originalLocale={originalLocale}
+        overlay={overlay}
+        sponsorBlockSegments={sponsor.segments}
+        autoSkipSegments={sponsor.autoSkipSegments}
+        manualSkipSegments={sponsor.manualSkipSegments}
+        thumbnailVtt={thumbnailVtt}
+        chaptersVtt={chaptersVtt}
+        playerFailed={playerFailed}
+        cinemaMode={cinemaMode}
+        hideComments={hideComments}
+        mobilePanel={isMobile ? playlist.panel : null}
+        seekRef={seekRef}
+        onCaptionStylesChange={(captionStyles) => update.mutate({ captionStyles })}
+        onVolumeChange={handleVolumeChange}
+        onTimeUpdate={playerEvents.handleTimeUpdate}
+        onPause={playerEvents.handlePause}
+        onSeeked={playerEvents.handleSeeked}
+        onEnded={playerEvents.handleEnded}
+        onError={handlePlayerError}
+        onReset={reset}
+      />
       <WatchSecondaryContent
         cinemaMode={cinemaMode}
         stream={stream}
         relatedStreams={relatedStreams}
         showComments={!hideComments}
-        playlistPanel={isMobile ? null : playlistPanel}
+        playlistPanel={isMobile ? null : playlist.panel}
         onSeekTimestamp={(seconds) => seekRef.current?.(seconds)}
       />
       <Toast message={toast} />
