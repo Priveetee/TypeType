@@ -1,5 +1,4 @@
-import { useNavigate } from "@tanstack/react-router";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useBulletComments } from "../hooks/use-bullet-comments";
 import { useMobile } from "../hooks/use-mobile";
 import { usePlayerError } from "../hooks/use-player-error";
@@ -7,6 +6,7 @@ import { usePlayerErrorResume } from "../hooks/use-player-error-resume";
 import { useSaveProgress } from "../hooks/use-progress";
 import { useSettings } from "../hooks/use-settings";
 import { useVolumeSync } from "../hooks/use-volume-sync";
+import { useWatchEndedNavigation } from "../hooks/use-watch-ended-navigation";
 import { useWatchVttAssets } from "../hooks/use-watch-layout-assets";
 import { useWatchPlayerEvents } from "../hooks/use-watch-player-events";
 import { useWatchPlaylist } from "../hooks/use-watch-playlist";
@@ -36,7 +36,6 @@ type Props = {
 };
 
 export function WatchLayout({ stream, startTime, currentParam, navigating, list, shuffle }: Props) {
-  const navigate = useNavigate();
   const isMobile = useMobile();
   const save = useSaveProgress(stream.id);
   const { settings, update, settingsReady } = useSettings();
@@ -77,26 +76,15 @@ export function WatchLayout({ stream, startTime, currentParam, navigating, list,
     return () => clearTimeout(timer);
   }, [toast]);
 
-  const handleEnded = useCallback(() => {
-    if (!settingsReady || !settings.autoplay) return;
-    if (playlist.nextParam) {
-      navigate({
-        to: "/watch",
-        search: { v: playlist.nextParam, list, ...(shuffle ? { shuffle } : {}) },
-      });
-      return;
-    }
-    const next = stream.related?.[0];
-    if (next) navigate({ to: "/watch", search: { v: next.id } });
-  }, [
+  const handleEnded = useWatchEndedNavigation({
     settingsReady,
-    settings.autoplay,
-    playlist.nextParam,
+    autoplay: settings.autoplay,
+    hideRelatedVideos: settings.hideRelatedVideos,
+    nextParam: playlist.nextParam,
     list,
     shuffle,
-    stream.related,
-    navigate,
-  ]);
+    related: stream.related,
+  });
 
   const playerEvents = useWatchPlayerEvents({
     stream,
@@ -127,7 +115,8 @@ export function WatchLayout({ stream, startTime, currentParam, navigating, list,
     />
   );
 
-  const classes = getWatchLayoutClasses(cinemaMode);
+  const hasSecondaryContent = Boolean(!isMobile && (playlist.panel || relatedStreams.length > 0));
+  const classes = getWatchLayoutClasses(cinemaMode, hasSecondaryContent);
 
   return (
     <div className={classes.containerClass}>

@@ -20,11 +20,16 @@ export function WatchSecondaryContent({
   playlistPanel,
   onSeekTimestamp,
 }: Props) {
+  const hasPlaylistPanel = Boolean(playlistPanel);
+  const hasRelatedStreams = relatedStreams.length > 0;
+
   if (!cinemaMode) {
+    if (!(hasPlaylistPanel || hasRelatedStreams)) return null;
+
     return (
       <div className="w-full lg:flex-1 lg:min-w-64 flex flex-col gap-6">
         {playlistPanel}
-        <RelatedVideos streams={relatedStreams} />
+        {hasRelatedStreams && <RelatedVideos streams={relatedStreams} />}
       </div>
     );
   }
@@ -34,10 +39,12 @@ export function WatchSecondaryContent({
       <div className="min-w-0 flex-[2] max-w-[1200px] flex flex-col gap-4">
         <WatchMeta stream={stream} showComments={showComments} onSeekTimestamp={onSeekTimestamp} />
       </div>
-      <div className="w-full lg:flex-1 lg:min-w-64 flex flex-col gap-6">
-        {playlistPanel}
-        <RelatedVideos streams={relatedStreams} />
-      </div>
+      {(hasPlaylistPanel || hasRelatedStreams) && (
+        <div className="w-full lg:flex-1 lg:min-w-64 flex flex-col gap-6">
+          {playlistPanel}
+          {hasRelatedStreams && <RelatedVideos streams={relatedStreams} />}
+        </div>
+      )}
     </div>
   );
 }
