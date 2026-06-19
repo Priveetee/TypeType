@@ -26,6 +26,18 @@ export type PublicPlaylistResponse = {
   nextpage: string | null;
 };
 
+export type SavedPlaylistItem = {
+  id: string;
+  publicPlaylistId: string;
+  url: string;
+  title: string;
+  thumbnailUrl: string;
+  uploaderName: string;
+  streamCount: number;
+  playlistType: string;
+  savedAt: number;
+};
+
 export type ChannelPlaylistsResponse = {
   playlists: PublicPlaylistInfo[];
   nextpage: string | null;
