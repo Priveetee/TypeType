@@ -13,7 +13,7 @@ export function SavedPlaylistCard({ playlist, onDelete }: Props) {
 
   return (
     <div className="group flex flex-col gap-2">
-      <Link to="/playlist" search={{ url: playlist.url }} className="block">
+      <Link to="/playlist" search={{ list: undefined, url: playlist.url }} className="block">
         <div className="relative aspect-video overflow-hidden rounded-xl bg-surface-strong">
           {playlist.thumbnailUrl && (
             <img
@@ -30,7 +30,7 @@ export function SavedPlaylistCard({ playlist, onDelete }: Props) {
         </div>
       </Link>
       <div className="flex items-start justify-between gap-2 px-1">
-        <Link to="/playlist" search={{ url: playlist.url }} className="min-w-0">
+        <Link to="/playlist" search={{ list: undefined, url: playlist.url }} className="min-w-0">
           <p className="line-clamp-2 text-sm font-medium leading-snug text-fg group-hover:text-fg-strong">
             {playlist.title}
           </p>

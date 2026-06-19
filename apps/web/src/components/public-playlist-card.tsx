@@ -10,7 +10,11 @@ export function PublicPlaylistCard({ playlist }: Props) {
   const count = playlist.streamCount === 1 ? "1 video" : `${playlist.streamCount} videos`;
 
   return (
-    <Link to="/playlist" search={{ url: playlist.url }} className="group flex flex-col gap-2">
+    <Link
+      to="/playlist"
+      search={{ list: undefined, url: playlist.url }}
+      className="group flex flex-col gap-2"
+    >
       <div className="relative aspect-video overflow-hidden rounded-xl bg-surface-strong">
         <img
           src={proxyImage(playlist.thumbnailUrl)}
