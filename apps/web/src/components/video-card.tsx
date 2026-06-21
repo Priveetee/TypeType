@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useClientLocale } from "../hooks/use-client-locale";
 import { isMemberOnlyApiError, streamQueryOptions } from "../hooks/use-stream";
 import { useWatchPrefetch } from "../hooks/use-watch-prefetch";
@@ -21,7 +21,7 @@ type Props = {
   listId?: string;
 };
 
-export function VideoCard({ stream, onOpen, onImpression, listId }: Props) {
+function VideoCardComponent({ stream, onOpen, onImpression, listId }: Props) {
   const locale = useClientLocale();
   const queryClient = useQueryClient();
   const rootRef = useRef<HTMLElement | null>(null);
@@ -177,3 +177,5 @@ export function VideoCard({ stream, onOpen, onImpression, listId }: Props) {
     </article>
   );
 }
+
+export const VideoCard = memo(VideoCardComponent);
