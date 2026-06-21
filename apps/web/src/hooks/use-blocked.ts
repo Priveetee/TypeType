@@ -32,11 +32,13 @@ export function useBlocked() {
     queryKey: CHANNELS_KEY,
     queryFn: fetchBlockedChannels,
     enabled: authReady && isAuthed,
+    staleTime: 5 * 60 * 1000,
   });
   const videos = useQuery({
     queryKey: VIDEOS_KEY,
     queryFn: fetchBlockedVideos,
     enabled: authReady && isAuthed,
+    staleTime: 5 * 60 * 1000,
   });
 
   const addChannel = useMutation({
