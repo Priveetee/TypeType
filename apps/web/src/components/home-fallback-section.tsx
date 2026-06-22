@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useBlockedFilter } from "../hooks/use-blocked-filter";
 import { useSubscriptionFeed } from "../hooks/use-subscription-feed";
 import { useSubscriptions } from "../hooks/use-subscriptions";
@@ -9,10 +10,11 @@ function FeedSection() {
   const { streams, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } =
     useSubscriptionFeed();
   const { filter } = useBlockedFilter();
+  const filtered = useMemo(() => filter(streams), [filter, streams]);
   if (isLoading) return <VideoGridSkeleton idPrefix="home-feed" />;
   return (
     <>
-      <VideoGrid streams={filter(streams)} />
+      <VideoGrid streams={filtered} />
       {isFetchingNextPage && <VideoGridSkeleton idPrefix="home-feed-next" />}
       <ScrollSentinel onIntersect={fetchNextPage} enabled={hasNextPage && !isFetchingNextPage} />
     </>

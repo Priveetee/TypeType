@@ -32,6 +32,7 @@ export function useSubscriptions() {
     queryFn: fetchSubscriptions,
     enabled: authReady && isAuthed,
     select: dedupeSubscriptions,
+    staleTime: 5 * 60 * 1000,
   });
 
   const add = useMutation({

@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import type { VideoStream } from "../types/stream";
 import { VideoCard } from "./video-card";
 
@@ -9,7 +10,16 @@ type VideoGridProps = {
 };
 
 export function VideoGrid({ streams, onCardOpen, onCardImpression, listId }: VideoGridProps) {
-  const unique = streams.filter((s, i, arr) => arr.findIndex((x) => x.id === s.id) === i);
+  const unique = useMemo(() => {
+    const seen = new Set<string>();
+    const result: VideoStream[] = [];
+    for (const stream of streams) {
+      if (seen.has(stream.id)) continue;
+      seen.add(stream.id);
+      result.push(stream);
+    }
+    return result;
+  }, [streams]);
   return (
     <div className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2 sm:gap-y-8 md:grid-cols-3 lg:grid-cols-4">
       {unique.map((stream, index) => (
