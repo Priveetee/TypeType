@@ -51,7 +51,7 @@ function YoutubeImportPage() {
 
   useEffect(() => {
     const job = imp.status.data;
-    if (!job || job.status !== "completed") return;
+    if (job?.status !== "completed") return;
     if (imp.flow.report && imp.flow.jobId === job.jobId) return;
     if (reportJobRef.current === job.jobId) return;
     reportJobRef.current = job.jobId;
