@@ -15,8 +15,8 @@ import type { AllowPlaylistInput } from "../types/allow-list";
 import type { ChannelResultItem } from "../types/api";
 import type { AccessMode } from "../types/user";
 
-export const ADMIN_ALLOWED_PLAYLISTS_KEY = ["admin-allowed-playlists"];
-export const adminUserAllowListKey = (id: string) => ["admin-user-allow-list", id];
+const ADMIN_ALLOWED_PLAYLISTS_KEY = ["admin-allowed-playlists"];
+const adminUserAllowListKey = (id: string) => ["admin-user-allow-list", id];
 
 export function useAdminAllowedPlaylists(enabled: boolean) {
   return useQuery({

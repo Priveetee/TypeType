@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { allowChannel, disallowChannel, fetchAllowedChannels } from "../lib/api-collections";
 import { useAuth } from "./use-auth";
 
-export const ALLOWED_CHANNELS_KEY = ["allowed-channels"];
+const ALLOWED_CHANNELS_KEY = ["allowed-channels"];
 
 type AllowChannelArgs = {
   url: string;
