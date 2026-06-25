@@ -26,21 +26,26 @@ export function SettingsPrivacy() {
   }, [toast]);
 
   async function handleConfirm() {
-    if (modal === "history") {
-      clearHistory.mutate();
-      setToast("Watch history cleared");
-    }
-    if (modal === "subscriptions") {
-      for (const sub of subsQuery.data ?? []) {
-        removeSubscription.mutate(sub.channelUrl);
-      }
-      setToast("Unsubscribed from all channels");
-    }
-    if (modal === "search-history") {
-      clearSearchHistory.mutate();
-      setToast("Search history cleared");
-    }
+    const activeModal = modal;
     setModal(null);
+    try {
+      if (activeModal === "history") {
+        await clearHistory.mutateAsync();
+        setToast("Watch history cleared");
+      }
+      if (activeModal === "subscriptions") {
+        for (const sub of subsQuery.data ?? []) {
+          removeSubscription.mutate(sub.channelUrl);
+        }
+        setToast("Unsubscribed from all channels");
+      }
+      if (activeModal === "search-history") {
+        await clearSearchHistory.mutateAsync();
+        setToast("Search history cleared");
+      }
+    } catch (error) {
+      setToast(error instanceof Error ? error.message : "Action failed");
+    }
   }
 
   const historyLabel = historyTotal === 1 ? "1 entry" : `${historyTotal} entries`;
