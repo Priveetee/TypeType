@@ -1,11 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ConfirmModal } from "../components/confirm-modal";
 import { HistoryCard } from "../components/history-card";
 import type { FilterState } from "../components/history-filter";
 import { HistoryFilter } from "../components/history-filter";
 import { ScrollSentinel } from "../components/scroll-sentinel";
+import { Toast } from "../components/toast";
 import { useAuth } from "../hooks/use-auth";
 import { useHistory } from "../hooks/use-history";
 import { fetchHistory } from "../lib/api-user";
@@ -56,8 +57,15 @@ function HistoryPage() {
   const [filter, setFilter] = useState<FilterState | null>(null);
   const [pendingRemoveItem, setPendingRemoveItem] = useState<HistoryItem | null>(null);
   const [clearHistoryOpen, setClearHistoryOpen] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
   const { query, items, total, remove, clear } = useHistory(searchQuery);
   const dateRange = rangeFromFilter(filter);
+
+  useEffect(() => {
+    if (!toast) return;
+    const timeout = window.setTimeout(() => setToast(null), 3000);
+    return () => window.clearTimeout(timeout);
+  }, [toast]);
 
   const allItemsQuery = useQuery({
     queryKey: ["history-filtered", searchQuery, dateRange?.from ?? null, dateRange?.to ?? null],
@@ -111,7 +119,11 @@ function HistoryPage() {
           description="This removes every video from your watch history."
           confirmLabel="Clear all"
           onConfirm={() => {
-            clear.mutate();
+            clear.mutate(undefined, {
+              onSuccess: () => setToast("Watch history cleared"),
+              onError: (error) =>
+                setToast(error instanceof Error ? error.message : "Failed to clear history"),
+            });
             setClearHistoryOpen(false);
           }}
           onCancel={() => setClearHistoryOpen(false)}
@@ -129,6 +141,7 @@ function HistoryPage() {
           onCancel={() => setPendingRemoveItem(null)}
         />
       )}
+      <Toast message={toast} />
     </div>
   );
 }

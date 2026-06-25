@@ -91,7 +91,7 @@ export function HistoryFilter({
   };
 
   return (
-    <aside className="w-full lg:w-52 flex-shrink-0 flex flex-col gap-4 lg:gap-5 lg:sticky lg:top-20 lg:self-start">
+    <aside className="order-first flex w-full flex-shrink-0 flex-col gap-4 lg:order-none lg:sticky lg:top-20 lg:w-52 lg:self-start lg:gap-5">
       <div>
         <div className="mb-2.5 flex items-center justify-between gap-3">
           <p className="text-[11px] text-fg-soft uppercase tracking-wider">
