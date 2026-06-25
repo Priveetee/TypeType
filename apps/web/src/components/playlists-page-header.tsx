@@ -1,3 +1,5 @@
+import { Plus } from "lucide-react";
+
 type Props = {
   selectionMode: boolean;
   selectedCount: number;
@@ -49,7 +51,12 @@ export function PlaylistsPageHeader({
                 Select
               </button>
             )}
-            <button type="button" onClick={onCreate} className={`${base} text-fg`}>
+            <button
+              type="button"
+              onClick={onCreate}
+              className="inline-flex items-center gap-2 rounded-full bg-fg px-4 py-2 text-sm font-medium text-app transition-colors hover:bg-fg-strong"
+            >
+              <Plus className="h-4 w-4" aria-hidden="true" />
               New playlist
             </button>
           </>
