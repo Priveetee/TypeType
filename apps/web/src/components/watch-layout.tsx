@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import { useBulletComments } from "../hooks/use-bullet-comments";
 import { useMobile } from "../hooks/use-mobile";
 import { usePlayerError } from "../hooks/use-player-error";
@@ -6,11 +6,13 @@ import { usePlayerErrorResume } from "../hooks/use-player-error-resume";
 import { useSaveProgress } from "../hooks/use-progress";
 import { useSettings } from "../hooks/use-settings";
 import { useVolumeSync } from "../hooks/use-volume-sync";
+import { useWatchAudioOnlySource } from "../hooks/use-watch-audio-only-source";
 import { useWatchEndedNavigation } from "../hooks/use-watch-ended-navigation";
 import { useWatchVttAssets } from "../hooks/use-watch-layout-assets";
 import { useWatchPlayerEvents } from "../hooks/use-watch-player-events";
 import { useWatchPlaylist } from "../hooks/use-watch-playlist";
 import { useWatchSponsorBlock } from "../hooks/use-watch-sponsorblock";
+import { useWatchToast } from "../hooks/use-watch-toast";
 import { getOriginalAudioLocale } from "../lib/audio-track";
 import { detectProvider } from "../lib/provider";
 import { useDanmakuStore } from "../stores/danmaku-store";
@@ -49,9 +51,10 @@ export function WatchLayout({ stream, startTime, currentParam, navigating, list,
   const playlist = useWatchPlaylist(list, shuffle, currentParam);
   const { data: bulletComments } = useBulletComments(stream.id, isNicoNico && !hideComments);
   const originalLocale = getOriginalAudioLocale(stream);
+  const audioOnly = useWatchAudioOnlySource(stream, settings, isLive);
   const cinemaMode = useWatchLayoutStore((state) => state.cinemaMode);
   const seekRef = useRef<((seconds: number) => void) | null>(null);
-  const [toast, setToast] = useState<string | null>(null);
+  const { toast, setToast } = useWatchToast(audioOnly.unavailable);
   const handleVolumeChange = useVolumeSync(update.mutate);
   const { thumbnailVtt, chaptersVtt } = useWatchVttAssets(
     stream,
@@ -66,15 +69,10 @@ export function WatchLayout({ stream, startTime, currentParam, navigating, list,
     chaptersVtt ? "chapters" : "no-chapters",
   ].join(":");
 
-  useEffect(() => {
-    if (!toast) return;
-    const timer = setTimeout(() => setToast(null), 2600);
-    return () => clearTimeout(timer);
-  }, [toast]);
-
   const autoplay = useWatchEndedNavigation({
     settingsReady,
     autoplay: settings.autoplay,
+    countdownSeconds: settings.autoplayCountdownSeconds,
     hideRelatedVideos: settings.hideRelatedVideos,
     nextParam: playlist.nextParam,
     nextVideo: playlist.nextVideo,
@@ -122,12 +120,13 @@ export function WatchLayout({ stream, startTime, currentParam, navigating, list,
         classes={classes}
         stream={stream}
         settings={settings}
-        manifestSrc={manifestSrc}
+        manifestSrc={audioOnly.src ?? manifestSrc}
+        audioOnly={Boolean(audioOnly.src)}
         playerKey={playerKey}
         startTime={retryStartTime > 0 ? retryStartTime : startTime}
         isLive={isLive}
         settingsReady={settingsReady}
-        navigating={navigating}
+        navigating={navigating || audioOnly.loading}
         originalLocale={originalLocale}
         overlay={overlay}
         autoplayState={autoplay.autoplayState}

@@ -1,6 +1,7 @@
 import { isIosDevice } from "../lib/ios-device";
 import { MediaPlayer, MediaProvider, Track } from "../lib/vidstack";
 import { patchVidstackProviderLoaders } from "../lib/vidstack-provider-loader-patch";
+import { AudioOnlyPoster } from "./audio-only-poster";
 import { CaptionStyleRestorer } from "./caption-style-restorer";
 import { MediaProgressEvents } from "./media-progress-events";
 import { MediaSessionSync } from "./media-session-sync";
@@ -38,6 +39,7 @@ export function VideoPlayer({
   initialMuted = false,
   settingsReady = false,
   autoplay = false,
+  audioOnly = false,
   originalAudioLocale,
   overlay,
   captionStyles,
@@ -95,6 +97,7 @@ export function VideoPlayer({
         ))}
         {chaptersVtt && <ChaptersTrack src={chaptersVtt} />}
       </MediaProvider>
+      {audioOnly && <AudioOnlyPoster poster={poster} title={title} />}
       <MediaProgressEvents
         onTimeUpdate={onTimeUpdate}
         onPause={onPause}

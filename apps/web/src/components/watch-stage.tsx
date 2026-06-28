@@ -16,6 +16,7 @@ type Props = {
   stream: VideoStream;
   settings: SettingsItem;
   manifestSrc: MediaSrc;
+  audioOnly: boolean;
   playerKey: string;
   startTime: number;
   isLive: boolean;
@@ -54,6 +55,7 @@ export function WatchStage({
   stream,
   settings,
   manifestSrc,
+  audioOnly,
   playerKey,
   startTime,
   isLive,
@@ -114,6 +116,7 @@ export function WatchStage({
             <VideoPlayer
               key={playerKey}
               src={manifestSrc}
+              audioOnly={audioOnly}
               title={stream.title}
               poster={stream.thumbnail}
               streamType={isLive ? "live" : "on-demand"}

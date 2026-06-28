@@ -22,6 +22,7 @@ export type VideoPlayerProps = {
   initialMuted?: boolean;
   settingsReady?: boolean;
   autoplay?: boolean;
+  audioOnly?: boolean;
   originalAudioLocale?: string | null;
   overlay?: ReactNode;
   captionStyles?: CaptionStyles;

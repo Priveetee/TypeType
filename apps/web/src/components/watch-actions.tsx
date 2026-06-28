@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { useAuth } from "../hooks/use-auth";
 import { useFavoritesPlaylist } from "../hooks/use-favorites-playlist";
+import { useSettings } from "../hooks/use-settings";
 import { useShareUrl } from "../hooks/use-share-url";
 import { detectProvider } from "../lib/provider";
 import { goto } from "../lib/route-redirect";
@@ -12,7 +13,14 @@ import { PlaylistAddDropdown } from "./playlist-add-dropdown";
 import { ReportBugModal } from "./report-bug-modal";
 import { Toast } from "./toast";
 import { WatchActionButton } from "./watch-action-button";
-import { BugIcon, DownloadIcon, ListPlusIcon, ShareIcon, StarIcon } from "./watch-icons";
+import {
+  BugIcon,
+  DownloadIcon,
+  HeadphonesIcon,
+  ListPlusIcon,
+  ShareIcon,
+  StarIcon,
+} from "./watch-icons";
 import { WatchMoreActions } from "./watch-more-actions";
 
 type Props = {
@@ -20,6 +28,7 @@ type Props = {
 };
 export function WatchActions({ stream }: Props) {
   const { copied, share } = useShareUrl();
+  const { settings, update } = useSettings();
   const [playlistOpen, setPlaylistOpen] = useState(false);
   const [downloadOpen, setDownloadOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
@@ -34,6 +43,7 @@ export function WatchActions({ stream }: Props) {
   } = useFavoritesPlaylist();
   const favorited = isInFavorites(stream.id);
   const isNicoNico = detectProvider(stream.id) === "nicovideo";
+  const audioOnlyAvailable = (stream.audioStreams ?? []).some((track) => track.url.length > 0);
 
   function handleSaved(label: string) {
     setToastLabel(label);
@@ -81,6 +91,16 @@ export function WatchActions({ stream }: Props) {
         <DownloadIcon />
         Download
       </WatchActionButton>
+      {audioOnlyAvailable && (
+        <WatchActionButton
+          onClick={() => update.mutate({ audioOnlyPlayback: !settings.audioOnlyPlayback })}
+          pressed={settings.audioOnlyPlayback}
+          active={settings.audioOnlyPlayback}
+        >
+          <HeadphonesIcon />
+          Audio only
+        </WatchActionButton>
+      )}
       <WatchActionButton onClick={() => share(toPublicWatchUrl(stream.id, window.location.origin))}>
         <ShareIcon />
         Share
