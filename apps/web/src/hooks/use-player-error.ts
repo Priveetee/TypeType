@@ -7,6 +7,7 @@ import { detectProvider } from "../lib/provider";
 import { resolveManifestSrc } from "../lib/stream-src";
 import type { MediaSrc } from "../lib/vidstack";
 import type { VideoStream } from "../types/stream";
+import { useInstance } from "./use-instance";
 
 type UsePlayerErrorReturn = {
   manifestSrc: MediaSrc;
@@ -43,16 +44,21 @@ export function usePlayerError(
   const debugVideo = sanitizeVideoContext(streamId) ?? "unknown";
   const provider = detectProvider(stream.id);
   const iosDevice = isIosDevice();
-  const preferNativeManifest = !iosDevice && !hasMultipleAudioLanguages(stream);
+  const { data: instance } = useInstance();
+  const preferServerManifests = instance?.guestAllowed !== false;
+  const preferNativeManifest =
+    preferServerManifests && !iosDevice && !hasMultipleAudioLanguages(stream);
   const videoOnlyCount = stream.videoOnlyStreams?.length ?? 0;
   const highQualityEnabled =
     enableHighQualityPlayback &&
     !isLive &&
     !iosDevice &&
+    preferServerManifests &&
     !stream.hlsUrl &&
     videoOnlyCount > 0 &&
     provider === "youtube";
-  const nativeEnabled = !isLive && videoOnlyCount > 0 && preferNativeManifest;
+  const nativeEnabled =
+    preferServerManifests && !isLive && videoOnlyCount > 0 && preferNativeManifest;
   const [highQualityFailed, setHighQualityFailed] = useState(false);
   const [nativeFailed, setNativeFailed] = useState(false);
   const [qualityFailed, setQualityFailed] = useState(false);

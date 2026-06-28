@@ -5,6 +5,7 @@ import { StreamError } from "../components/stream-error";
 import { useAuth } from "../hooks/use-auth";
 import { useDocumentTitle } from "../hooks/use-document-title";
 import { useHistory } from "../hooks/use-history";
+import { useInstance } from "../hooks/use-instance";
 import { useProgress } from "../hooks/use-progress";
 import { useSettings } from "../hooks/use-settings";
 import {
@@ -42,8 +43,10 @@ function WatchPage() {
   const sourceUrl = toWatchSourceUrl(v);
   const publicParam = toPublicWatchParam(sourceUrl);
   const { authReady, isAuthed } = useAuth();
+  const { data: instance } = useInstance();
   const { settings, settingsReady } = useSettings();
-  const useAuthenticatedStream = isAuthed && settings.accessMode === "allow_list";
+  const useAuthenticatedStream =
+    isAuthed && (settings.accessMode === "allow_list" || instance?.guestAllowed === false);
   const streamEnabled = authReady && (!isAuthed || settingsReady);
   const {
     data: stream,

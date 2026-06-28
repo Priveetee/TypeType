@@ -43,7 +43,8 @@ export function WatchActions({ stream }: Props) {
   } = useFavoritesPlaylist();
   const favorited = isInFavorites(stream.id);
   const isNicoNico = detectProvider(stream.id) === "nicovideo";
-  const audioOnlyAvailable = (stream.audioStreams ?? []).some((track) => track.url.length > 0);
+  const isLive = stream.streamType === "live_stream" || stream.streamType === "audio_live_stream";
+  const audioOnlyAvailable = !isLive && !isNicoNico;
 
   function handleSaved(label: string) {
     setToastLabel(label);

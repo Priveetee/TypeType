@@ -82,7 +82,7 @@ export function resolveManifestSrc(
   const isFirefox = typeof navigator !== "undefined" && navigator.userAgent.includes("Firefox/");
   const safeMaxHeight = qualityFailed ? 720 : 1080;
 
-  if (stream.hlsUrl) {
+  if (stream.hlsUrl && (isLive || isSignedHlsManifestUrl(stream.hlsUrl))) {
     return {
       src: resolveHlsManifestUrl(stream),
       type: "application/x-mpegurl",
