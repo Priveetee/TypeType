@@ -86,6 +86,22 @@ export function WatchStage({
   onError,
   onReset,
 }: Props) {
+  const playerOverlay = (
+    <>
+      {overlay}
+      {autoplayState && (
+        <AutoplayCountdownOverlay
+          target={autoplayState.target}
+          totalSeconds={autoplayState.totalSeconds}
+          paused={autoplayState.paused}
+          onPlayNow={onAutoplayPlayNow}
+          onCancel={onAutoplayCancel}
+          onPauseToggle={onAutoplayPauseToggle}
+        />
+      )}
+    </>
+  );
+
   return (
     <div className={classes.playerWrapClass}>
       <div className={classes.playerBoxClass}>
@@ -116,7 +132,7 @@ export function WatchStage({
               settingsReady={settingsReady}
               autoplay={settingsReady}
               originalAudioLocale={originalLocale}
-              overlay={overlay}
+              overlay={playerOverlay}
               captionStyles={settings.captionStyles}
               onCaptionStylesChange={onCaptionStylesChange}
               onVolumeChange={onVolumeChange}
@@ -132,16 +148,6 @@ export function WatchStage({
               mediaClassName={classes.mediaClassName}
             />
             {playerFailed && <PlayerError onRetry={onReset} />}
-            {autoplayState && (
-              <AutoplayCountdownOverlay
-                target={autoplayState.target}
-                totalSeconds={autoplayState.totalSeconds}
-                paused={autoplayState.paused}
-                onPlayNow={onAutoplayPlayNow}
-                onCancel={onAutoplayCancel}
-                onPauseToggle={onAutoplayPauseToggle}
-              />
-            )}
           </>
         ) : (
           <div className="aspect-video w-full bg-black" />
