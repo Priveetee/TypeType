@@ -69,7 +69,7 @@ export function VideoPlayer({
     <MediaPlayer
       className={className ? `w-full h-full dark ${className}` : "w-full h-full dark"}
       src={src}
-      viewType="video"
+      viewType={audioOnly ? "audio" : "video"}
       streamType={streamType}
       logLevel="warn"
       crossOrigin

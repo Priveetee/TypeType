@@ -37,7 +37,7 @@ export function fetchAudioOnlyStream(
 export function toAudioOnlyMediaSrc(response: AudioOnlyResponse): MediaSrc {
   return {
     src: toApiUrl(response.src),
-    type: response.mimeType.includes("webm") ? "video/webm" : "video/mp4",
+    type: response.mimeType.includes("webm") ? "audio/webm" : "audio/mp3",
   };
 }
 
