@@ -30,9 +30,13 @@ function normalizeAudioLanguageTag(value: string | null): string {
   return value.toLowerCase().replace(/_/g, "-");
 }
 
-function videoRepresentation(stream: ValidVideoStream, id: number): string {
+function stableIdPart(value: string): string {
+  return value.replace(/[^a-zA-Z0-9_-]/g, "");
+}
+
+function videoRepresentation(stream: ValidVideoStream): string {
   return (
-    `<Representation id="v${id}" codecs="${stream.codec}"` +
+    `<Representation id="v-${stream.itag}" codecs="${stream.codec}"` +
     ` bandwidth="${stream.bitrate ?? 0}"` +
     ` width="${stream.width}" height="${stream.height}" frameRate="${stream.fps}">` +
     `<BaseURL>${proxyUrl(stream.url)}</BaseURL>` +
@@ -43,11 +47,12 @@ function videoRepresentation(stream: ValidVideoStream, id: number): string {
   );
 }
 
-function audioRepresentation(stream: ValidAudioStream, id: number): string {
+function audioRepresentation(stream: ValidAudioStream, index: number): string {
   const codec = normalizeAudioCodec(stream.codec);
   const bandwidth = (stream.bitrate ?? 0) * 1000;
+  const track = stableIdPart(stream.audioTrackId ?? stream.audioLocale ?? String(index));
   return (
-    `<Representation id="a${id}" codecs="${codec}" bandwidth="${bandwidth}">` +
+    `<Representation id="a-${stream.itag}-${track}" codecs="${codec}" bandwidth="${bandwidth}">` +
     `<AudioChannelConfiguration` +
     ` schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011"` +
     ` value="2"/>` +
@@ -101,12 +106,11 @@ export function buildDashManifest(
   });
 
   const sets: string[] = [];
-  let vi = 0;
   for (const [mime, streams] of videoGroups) {
     sets.push(
       adaptationSet(
         mime,
-        streams.map((s) => videoRepresentation(s, vi++)),
+        streams.map((s) => videoRepresentation(s)),
       ),
     );
   }

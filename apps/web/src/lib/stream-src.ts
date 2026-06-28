@@ -80,6 +80,7 @@ export function resolveManifestSrc(
   const maxCompactAudioTracks = options?.maxCompactAudioTracks ?? (isShort ? 3 : 8);
   const provider = detectProvider(stream.id);
   const isFirefox = typeof navigator !== "undefined" && navigator.userAgent.includes("Firefox/");
+  const safeMaxHeight = qualityFailed ? 720 : 1080;
 
   if (stream.hlsUrl) {
     return {
@@ -151,7 +152,7 @@ export function resolveManifestSrc(
 
   return fallbackSrc(
     stream,
-    qualityFailed ? 720 : undefined,
+    safeMaxHeight,
     compactAudioTracks,
     options?.preferredAudioLanguage,
     maxCompactAudioTracks,

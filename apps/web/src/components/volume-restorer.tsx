@@ -36,12 +36,20 @@ export function VolumeRestorer({
     retryCountRef.current = 0;
   }, []);
 
+  const getPlayerRoot = useCallback((): HTMLElement | null => {
+    const root = player?.el;
+    return root?.isConnected ? root : null;
+  }, [player]);
+
   const attemptPlay = useCallback(async () => {
     if (!mountedRef.current) return;
-    const media = player?.el?.querySelector<HTMLMediaElement>("video,audio");
+    const root = getPlayerRoot();
+    if (!root) return;
+    const media = root.querySelector<HTMLMediaElement>("video,audio");
+    if (!media) return;
     if (media && !media.paused && !media.ended) return;
     await remote.play();
-  }, [player, remote]);
+  }, [getPlayerRoot, remote]);
 
   const tryPlay = useCallback(
     (force: boolean) => {
@@ -73,10 +81,15 @@ export function VolumeRestorer({
 
   useEffect(() => {
     if (!settingsReady || !canPlay || restoredRef.current) return;
+    if (!getPlayerRoot()) return;
     restoredRef.current = true;
-    remote.changeVolume(initialVolume);
-    if (initialMuted) remote.mute();
-  }, [settingsReady, canPlay, remote, initialVolume, initialMuted]);
+    try {
+      remote.changeVolume(initialVolume);
+      if (initialMuted) remote.mute();
+    } catch {
+      restoredRef.current = false;
+    }
+  }, [settingsReady, canPlay, remote, initialVolume, initialMuted, getPlayerRoot]);
 
   useEffect(() => {
     tryPlay(false);
