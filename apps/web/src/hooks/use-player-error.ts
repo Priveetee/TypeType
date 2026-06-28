@@ -4,7 +4,7 @@ import { recordClientEvent } from "../lib/client-debug-log";
 import { sanitizeVideoContext } from "../lib/debug-sanitize";
 import { isIosDevice } from "../lib/ios-device";
 import { detectProvider } from "../lib/provider";
-import { resolveManifestSrc } from "../lib/stream-src";
+import { isSignedHlsManifestUrl, resolveManifestSrc } from "../lib/stream-src";
 import type { MediaSrc } from "../lib/vidstack";
 import type { VideoStream } from "../types/stream";
 import { useInstance } from "./use-instance";
@@ -59,6 +59,8 @@ export function usePlayerError(
     provider === "youtube";
   const nativeEnabled =
     preferServerManifests && !isLive && videoOnlyCount > 0 && preferNativeManifest;
+  const hlsEnabled = Boolean(stream.hlsUrl && (isLive || isSignedHlsManifestUrl(stream.hlsUrl)));
+  const [hlsFailed, setHlsFailed] = useState(false);
   const [highQualityFailed, setHighQualityFailed] = useState(false);
   const [nativeFailed, setNativeFailed] = useState(false);
   const [qualityFailed, setQualityFailed] = useState(false);
@@ -78,6 +80,8 @@ export function usePlayerError(
         compatibilityMode: true,
         enableHighQualityPlayback: highQualityEnabled,
         highQualityFailed,
+        hlsFailed,
+        allowServerManifests: preferServerManifests,
         bilibiliVariant,
       });
     }
@@ -85,6 +89,8 @@ export function usePlayerError(
       preferNativeManifest,
       enableHighQualityPlayback: highQualityEnabled,
       highQualityFailed,
+      hlsFailed,
+      allowServerManifests: preferServerManifests,
       bilibiliVariant,
     });
   }, [
@@ -96,11 +102,17 @@ export function usePlayerError(
     compatibilityFallback,
     highQualityEnabled,
     highQualityFailed,
+    hlsFailed,
+    preferServerManifests,
     bilibiliVariant,
   ]);
 
   const handleError = useCallback(() => {
-    if (provider === "bilibili" && bilibiliVariant < bilibiliVariants - 1) {
+    if (hlsEnabled && !hlsFailed) {
+      recordClientEvent("player.hls_failed", { video: debugVideo });
+      setHlsFailed(true);
+      setRetryKey((k) => k + 1);
+    } else if (provider === "bilibili" && bilibiliVariant < bilibiliVariants - 1) {
       recordClientEvent("player.bilibili_variant_failed", { video: debugVideo });
       setBilibiliVariant((variant) => variant + 1);
       setRetryKey((k) => k + 1);
@@ -126,6 +138,8 @@ export function usePlayerError(
     }
   }, [
     debugVideo,
+    hlsEnabled,
+    hlsFailed,
     provider,
     bilibiliVariant,
     bilibiliVariants,
@@ -139,6 +153,7 @@ export function usePlayerError(
   ]);
 
   const reset = useCallback(() => {
+    setHlsFailed(false);
     setHighQualityFailed(false);
     setNativeFailed(false);
     setQualityFailed(false);
@@ -150,6 +165,7 @@ export function usePlayerError(
 
   useEffect(() => {
     if (streamId.length === 0) return;
+    setHlsFailed(false);
     setHighQualityFailed(false);
     setNativeFailed(false);
     setQualityFailed(false);
