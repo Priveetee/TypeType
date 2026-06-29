@@ -9,14 +9,21 @@ export {
   MediaPlayer,
   MediaProvider,
   Menu,
+  MuteButton,
+  Time,
+  TimeSlider,
   Track,
   useAudioOptions,
   useMediaPlayer,
   useMediaRemote,
   useMediaState,
   useVideoQualityOptions,
+  VolumeSlider,
 } from "@vidstack/react";
-export { ClipIcon, LanguageIcon } from "@vidstack/react/icons";
+export {
+  ClipIcon,
+  LanguageIcon,
+} from "@vidstack/react/icons";
 export type { DefaultLayoutIcon } from "@vidstack/react/player/layouts/default";
 export {
   DefaultAudioLayout,
