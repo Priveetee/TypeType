@@ -1,8 +1,17 @@
-import { DefaultAudioLayout, DefaultVideoLayout, defaultLayoutIcons } from "../lib/vidstack";
+import {
+  DefaultAudioLayout,
+  DefaultVideoLayout,
+  defaultLayoutIcons,
+  Time,
+  TimeSlider,
+} from "../lib/vidstack";
+import { AudioPlayButton } from "./audio-play-button";
+import { AudioSeekButton } from "./audio-seek-button";
 import { AudioTrackSelector } from "./audio-track-selector";
 import { CinemaModeControl } from "./cinema-mode-control";
 import { FormatSelector } from "./format-selector";
 import { PlayerTrackButton } from "./player-track-button";
+import { PlayerVolumeControl } from "./player-volume-control";
 import { QualitySelector } from "./quality-selector";
 
 type Props = {
@@ -27,8 +36,29 @@ export function VideoPlayerLayout({
         smallLayoutWhen={false}
         translations={{ Captions: "Subtitles" }}
         slots={{
-          beforePlayButton: <PlayerTrackButton direction="previous" onClick={onPreviousVideo} />,
-          afterPlayButton: <PlayerTrackButton direction="next" onClick={onNextVideo} />,
+          captionButton: null,
+          endTime: (
+            <div className="typetype-audio-time-pair">
+              <Time type="current" />
+              <span>/</span>
+              <Time type="duration" />
+            </div>
+          ),
+          timeSlider: (
+            <TimeSlider.Root className="typetype-audio-time-slider">
+              <TimeSlider.Track className="typetype-audio-time-slider-track">
+                <TimeSlider.Progress className="typetype-audio-time-slider-progress" />
+                <TimeSlider.TrackFill className="typetype-audio-time-slider-fill" />
+              </TimeSlider.Track>
+              <TimeSlider.Thumb className="typetype-audio-time-slider-thumb" />
+            </TimeSlider.Root>
+          ),
+          seekBackwardButton: <AudioSeekButton direction="backward" />,
+          playButton: <AudioPlayButton />,
+          seekForwardButton: <AudioSeekButton direction="forward" />,
+          beforeCaptionButton: <PlayerTrackButton direction="previous" onClick={onPreviousVideo} />,
+          afterCaptionButton: <PlayerTrackButton direction="next" onClick={onNextVideo} />,
+          beforeSettingsMenu: <PlayerVolumeControl />,
         }}
       />
     );
@@ -50,7 +80,12 @@ export function VideoPlayerLayout({
         ),
         beforePlayButton: <PlayerTrackButton direction="previous" onClick={onPreviousVideo} />,
         afterPlayButton: <PlayerTrackButton direction="next" onClick={onNextVideo} />,
-        beforeFullscreenButton: <CinemaModeControl />,
+        beforeFullscreenButton: (
+          <>
+            <PlayerVolumeControl />
+            <CinemaModeControl />
+          </>
+        ),
       }}
     />
   );

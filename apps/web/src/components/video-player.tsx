@@ -1,11 +1,11 @@
 import { isIosDevice } from "../lib/ios-device";
 import { MediaPlayer, MediaProvider, Track } from "../lib/vidstack";
 import { patchVidstackProviderLoaders } from "../lib/vidstack-provider-loader-patch";
+import { AudioCenterToggle } from "./audio-center-toggle";
 import { AudioOnlyPoster } from "./audio-only-poster";
 import { CaptionStyleRestorer } from "./caption-style-restorer";
 import { MediaProgressEvents } from "./media-progress-events";
 import { MediaSessionSync } from "./media-session-sync";
-import { PlaybackReturnGuard } from "./playback-return-guard";
 import { PlayerHotkeys } from "./player-hotkeys";
 import { PlayerSeeker, SeekBridge, SponsorBlockSkipper } from "./player-internals";
 import { PlayerPlayPauseIndicator } from "./player-play-pause-indicator";
@@ -46,6 +46,7 @@ export function VideoPlayer({
   onCaptionStylesChange,
   onVolumeChange,
   onTimeUpdate,
+  onPlay,
   onPause,
   onSeeked,
   onError,
@@ -61,6 +62,7 @@ export function VideoPlayer({
   const mediaProps = mediaClassName ? { className: mediaClassName } : undefined;
   const playerClassName = [
     "w-full h-full dark",
+    "typetype-player-surface",
     audioOnly ? "typetype-audio-only-player" : null,
     className,
   ]
@@ -106,8 +108,10 @@ export function VideoPlayer({
         {!audioOnly && chaptersVtt && <ChaptersTrack src={chaptersVtt} />}
       </MediaProvider>
       {audioOnly && <AudioOnlyPoster poster={poster} title={title} />}
+      {audioOnly && <AudioCenterToggle />}
       <MediaProgressEvents
         onTimeUpdate={onTimeUpdate}
+        onPlay={onPlay}
         onPause={onPause}
         onSeeked={onSeeked}
         onEnded={handleEnded}
@@ -121,7 +125,6 @@ export function VideoPlayer({
         onNextVideo={onNextVideo}
       />
       <PlayerSeeker startTime={startTime} />
-      <PlaybackReturnGuard />
       <VolumeRestorer
         initialVolume={initialVolume}
         initialMuted={initialMuted}
@@ -145,8 +148,8 @@ export function VideoPlayer({
         onNextTrack={onNextVideo}
       />
       <PlayerHotkeys canSeek={streamType !== "live"} />
-      <PlayerPlayPauseIndicator />
-      {autoSkipSponsorBlock && autoSkipSponsorBlockSegments && (
+      {!audioOnly && <PlayerPlayPauseIndicator />}
+      {!audioOnly && autoSkipSponsorBlock && autoSkipSponsorBlockSegments && (
         <SponsorBlockSkipper
           segments={autoSkipSponsorBlockSegments}
           muteInsteadOfSkip={muteSponsorBlockInsteadOfSkip}
