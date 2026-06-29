@@ -10,6 +10,7 @@ import { PlayerError } from "./player-error";
 import { VideoPlayer } from "./video-player";
 import type { WatchLayoutClasses } from "./watch-layout-classes";
 import { WatchMeta } from "./watch-meta";
+import { WatchPlayerCrossfade } from "./watch-player-crossfade";
 
 type Props = {
   classes: WatchLayoutClasses;
@@ -21,6 +22,7 @@ type Props = {
   startTime: number;
   isLive: boolean;
   settingsReady: boolean;
+  autoplay: boolean;
   navigating: boolean;
   originalLocale: string | null;
   overlay: ReactNode;
@@ -38,6 +40,7 @@ type Props = {
   onCaptionStylesChange: (styles: CaptionStyles) => void;
   onVolumeChange: (volume: number, muted: boolean) => void;
   onTimeUpdate: (positionMs: number) => void;
+  onPlay: () => void;
   onPause: () => void;
   onSeeked: () => void;
   onEnded: () => void;
@@ -60,6 +63,7 @@ export function WatchStage({
   startTime,
   isLive,
   settingsReady,
+  autoplay,
   navigating,
   originalLocale,
   overlay,
@@ -77,6 +81,7 @@ export function WatchStage({
   onCaptionStylesChange,
   onVolumeChange,
   onTimeUpdate,
+  onPlay,
   onPause,
   onSeeked,
   onEnded,
@@ -112,7 +117,11 @@ export function WatchStage({
             <PageSpinner fullScreen={false} />
           </div>
         ) : settingsReady ? (
-          <>
+          <WatchPlayerCrossfade
+            audioOnly={audioOnly}
+            poster={stream.thumbnail}
+            title={stream.title}
+          >
             <VideoPlayer
               key={playerKey}
               src={manifestSrc}
@@ -133,13 +142,14 @@ export function WatchStage({
               initialVolume={settings.volume}
               initialMuted={settings.muted}
               settingsReady={settingsReady}
-              autoplay={settingsReady}
+              autoplay={autoplay}
               originalAudioLocale={originalLocale}
               overlay={playerOverlay}
               captionStyles={settings.captionStyles}
               onCaptionStylesChange={onCaptionStylesChange}
               onVolumeChange={onVolumeChange}
               onTimeUpdate={onTimeUpdate}
+              onPlay={onPlay}
               onPause={onPause}
               onSeeked={onSeeked}
               onError={onError}
@@ -151,7 +161,7 @@ export function WatchStage({
               mediaClassName={classes.mediaClassName}
             />
             {playerFailed && <PlayerError onRetry={onReset} />}
-          </>
+          </WatchPlayerCrossfade>
         ) : (
           <div className="aspect-video w-full bg-black" />
         )}

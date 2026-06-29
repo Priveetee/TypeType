@@ -29,6 +29,7 @@ export type VideoPlayerProps = {
   onCaptionStylesChange?: (styles: CaptionStyles) => void;
   onVolumeChange?: (volume: number, muted: boolean) => void;
   onTimeUpdate?: (positionMs: number) => void;
+  onPlay?: () => void;
   onPause?: () => void;
   onSeeked?: () => void;
   onError?: () => void;

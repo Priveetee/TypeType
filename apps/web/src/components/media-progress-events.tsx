@@ -3,6 +3,7 @@ import { useMediaPlayer } from "../lib/vidstack";
 
 type Props = {
   onTimeUpdate?: (positionMs: number) => void;
+  onPlay?: () => void;
   onPause?: () => void;
   onSeeked?: () => void;
   onEnded?: () => void;
@@ -12,14 +13,16 @@ function toPositionMs(media: HTMLMediaElement): number {
   return Math.max(0, Math.round(media.currentTime * 1000));
 }
 
-export function MediaProgressEvents({ onTimeUpdate, onPause, onSeeked, onEnded }: Props) {
+export function MediaProgressEvents({ onTimeUpdate, onPlay, onPause, onSeeked, onEnded }: Props) {
   const player = useMediaPlayer();
   const onTimeUpdateRef = useRef(onTimeUpdate);
+  const onPlayRef = useRef(onPlay);
   const onPauseRef = useRef(onPause);
   const onSeekedRef = useRef(onSeeked);
   const onEndedRef = useRef(onEnded);
 
   onTimeUpdateRef.current = onTimeUpdate;
+  onPlayRef.current = onPlay;
   onPauseRef.current = onPause;
   onSeekedRef.current = onSeeked;
   onEndedRef.current = onEnded;
@@ -36,6 +39,10 @@ export function MediaProgressEvents({ onTimeUpdate, onPause, onSeeked, onEnded }
       if (!media) return false;
 
       const update = () => onTimeUpdateRef.current?.(toPositionMs(media));
+      const play = () => {
+        update();
+        onPlayRef.current?.();
+      };
       const pause = () => {
         update();
         onPauseRef.current?.();
@@ -53,6 +60,7 @@ export function MediaProgressEvents({ onTimeUpdate, onPause, onSeeked, onEnded }
       };
 
       media.addEventListener("timeupdate", update);
+      media.addEventListener("play", play);
       media.addEventListener("pause", pause);
       media.addEventListener("seeking", seeking);
       media.addEventListener("seeked", seeked);
@@ -60,6 +68,7 @@ export function MediaProgressEvents({ onTimeUpdate, onPause, onSeeked, onEnded }
       cleanup = () => {
         update();
         media.removeEventListener("timeupdate", update);
+        media.removeEventListener("play", play);
         media.removeEventListener("pause", pause);
         media.removeEventListener("seeking", seeking);
         media.removeEventListener("seeked", seeked);

@@ -10,12 +10,13 @@ import { useWatchAudioOnlySource } from "../hooks/use-watch-audio-only-source";
 import { useWatchEndedNavigation } from "../hooks/use-watch-ended-navigation";
 import { useWatchVttAssets } from "../hooks/use-watch-layout-assets";
 import { useWatchPlayerEvents } from "../hooks/use-watch-player-events";
+import { useWatchPlayerSourceState } from "../hooks/use-watch-player-source-state";
 import { useWatchPlaylist } from "../hooks/use-watch-playlist";
-import { useWatchSourceStartTime } from "../hooks/use-watch-source-start-time";
 import { useWatchSponsorBlock } from "../hooks/use-watch-sponsorblock";
 import { useWatchToast } from "../hooks/use-watch-toast";
 import { getOriginalAudioLocale } from "../lib/audio-track";
 import { detectProvider } from "../lib/provider";
+import { toWatchSourceUrl } from "../lib/watch-url";
 import { useDanmakuStore } from "../stores/danmaku-store";
 import { useWatchLayoutStore } from "../stores/watch-layout-store";
 import type { VideoStream } from "../types/stream";
@@ -52,7 +53,7 @@ export function WatchLayout({ stream, startTime, currentParam, navigating, list,
   const playlist = useWatchPlaylist(list, shuffle, currentParam);
   const { data: bulletComments } = useBulletComments(stream.id, isNicoNico && !hideComments);
   const originalLocale = getOriginalAudioLocale(stream);
-  const audioOnly = useWatchAudioOnlySource(stream, settings, isLive);
+  const audioOnly = useWatchAudioOnlySource(toWatchSourceUrl(currentParam), settings, isLive);
   const cinemaMode = useWatchLayoutStore((state) => state.cinemaMode);
   const seekRef = useRef<((seconds: number) => void) | null>(null);
   const { toast, setToast } = useWatchToast(audioOnly.unavailable);
@@ -86,20 +87,21 @@ export function WatchLayout({ stream, startTime, currentParam, navigating, list,
     playerEvents.positionRef,
     handleError,
   );
-  const sourceStart = useWatchSourceStartTime({
+  const sourceState = useWatchPlayerSourceState({
     streamId: stream.id,
-    sourceKey: audioOnly.src ? "audio" : "video",
+    retryKey,
     startTime: retryStartTime > 0 ? retryStartTime : startTime,
     positionRef: playerEvents.positionRef,
+    highQuality: settings.enableHighQualityPlayback,
+    hasThumbnails: Boolean(thumbnailVtt),
+    hasChapters: Boolean(chaptersVtt),
+    audioOnlyEnabled: audioOnly.enabled,
+    audioOnlyLoading: audioOnly.loading,
+    hasAudioOnlySource: Boolean(audioOnly.src),
+    settingsReady,
+    navigating,
+    shouldAutoplay: playerEvents.shouldAutoplay,
   });
-  const playerKey = [
-    stream.id,
-    retryKey,
-    sourceStart.keyPart,
-    settings.enableHighQualityPlayback ? "hq" : "std",
-    thumbnailVtt ? "thumbs" : "no-thumbs",
-    chaptersVtt ? "chapters" : "no-chapters",
-  ].join(":");
 
   const overlay = (
     <WatchPlayerOverlay
@@ -129,11 +131,12 @@ export function WatchLayout({ stream, startTime, currentParam, navigating, list,
         settings={settings}
         manifestSrc={audioOnly.src ?? manifestSrc}
         audioOnly={Boolean(audioOnly.src)}
-        playerKey={playerKey}
-        startTime={sourceStart.startTime}
+        playerKey={sourceState.playerKey}
+        startTime={sourceState.startTime}
         isLive={isLive}
         settingsReady={settingsReady}
-        navigating={navigating || audioOnly.loading}
+        autoplay={sourceState.autoplay}
+        navigating={navigating || sourceState.waitForInitialAudioSource}
         originalLocale={originalLocale}
         overlay={overlay}
         autoplayState={autoplay.autoplayState}
@@ -150,6 +153,7 @@ export function WatchLayout({ stream, startTime, currentParam, navigating, list,
         onCaptionStylesChange={(captionStyles) => update.mutate({ captionStyles })}
         onVolumeChange={handleVolumeChange}
         onTimeUpdate={playerEvents.handleTimeUpdate}
+        onPlay={playerEvents.handlePlay}
         onPause={playerEvents.handlePause}
         onSeeked={playerEvents.handleSeeked}
         onEnded={playerEvents.handleEnded}
