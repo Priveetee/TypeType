@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { memo } from "react";
+import { useClientLocale } from "../hooks/use-client-locale";
 import { useWatchPrefetch } from "../hooks/use-watch-prefetch";
-import { formatDuration, formatViews } from "../lib/format";
+import { formatDuration, formatPublishedDate, formatViews } from "../lib/format";
 import { watchRouteSearch } from "../lib/watch-url";
 import type { VideoStream } from "../types/stream";
 import { ChannelAvatar } from "./channel-avatar";
@@ -15,7 +16,10 @@ type Props = {
 };
 
 function RelatedCardComponent({ stream }: Props) {
+  const locale = useClientLocale();
   const prefetch = useWatchPrefetch(stream.id);
+  const publishedText = formatPublishedDate(stream.publishedAt, undefined, locale);
+  const metadata = [formatViews(stream.views), publishedText].filter(Boolean).join(" · ");
 
   return (
     <div className="flex gap-2 group">
@@ -87,7 +91,7 @@ function RelatedCardComponent({ stream }: Props) {
             </span>
           </div>
         )}
-        <p className="text-xs text-fg-soft">{formatViews(stream.views)}</p>
+        <p className="text-xs text-fg-soft">{metadata}</p>
       </div>
       <VideoCardFeedbackMenu stream={stream} />
     </div>
