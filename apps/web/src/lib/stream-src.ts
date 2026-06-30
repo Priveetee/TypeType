@@ -9,6 +9,7 @@ import { proxyDashManifest } from "./proxy";
 import { pickCompactAudioTracks } from "./stream-audio-compact";
 import { hasCompatibleMp4, pickCompatibleProgressiveSrc } from "./stream-compatibility";
 import type { MediaSrc } from "./vidstack";
+import { youtubeVideoIdFromUrl } from "./watch-url";
 
 type ResolveManifestOptions = {
   preferNativeManifest?: boolean;
@@ -22,6 +23,7 @@ type ResolveManifestOptions = {
   hlsFailed?: boolean;
   allowServerManifests?: boolean;
   bilibiliVariant?: number;
+  sabrFailed?: boolean;
 };
 
 export function isSignedHlsManifestUrl(value: string): boolean {
@@ -89,6 +91,14 @@ export function resolveManifestSrc(
   const provider = detectProvider(stream.id);
   const isFirefox = typeof navigator !== "undefined" && navigator.userAgent.includes("Firefox/");
   const safeMaxHeight = qualityFailed ? 720 : 1080;
+
+  const sabrVideoId =
+    provider === "youtube" && !isLive && !isShort && !options?.sabrFailed
+      ? youtubeVideoIdFromUrl(stream.id)
+      : null;
+  if (sabrVideoId) {
+    return { src: toApiUrl(`/sabr/manifest/${sabrVideoId}`), type: "application/dash+xml" };
+  }
 
   if (stream.hlsUrl && !options?.hlsFailed && (isLive || isSignedHlsManifestUrl(stream.hlsUrl))) {
     return {

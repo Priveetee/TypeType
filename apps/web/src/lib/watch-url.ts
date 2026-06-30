@@ -14,7 +14,7 @@ function youtubeIdFromPath(pathname: string): string | null {
   return candidate && YOUTUBE_VIDEO_ID_PATTERN.test(candidate) ? candidate : null;
 }
 
-function youtubeVideoIdFromUrl(value: string): string | null {
+export function youtubeVideoIdFromUrl(value: string): string | null {
   try {
     const parsed = new URL(value);
     const host = parsed.hostname.toLowerCase();

@@ -15,6 +15,8 @@ export type VideoStreamItem = {
   initEnd: number;
   indexStart: number;
   indexEnd: number;
+  deliveryMethod?: string;
+  manifestUrl?: string | null;
 };
 
 export type AudioStreamItem = {
@@ -34,6 +36,8 @@ export type AudioStreamItem = {
   initEnd: number;
   indexStart: number;
   indexEnd: number;
+  deliveryMethod?: string;
+  manifestUrl?: string | null;
 };
 
 export type SponsorBlockSegmentItem = {
