@@ -1,5 +1,6 @@
 import { createRootRoute, Outlet, useRouterState } from "@tanstack/react-router";
 import { useEffect, useLayoutEffect, useRef } from "react";
+import { AuthBackdrop } from "../components/auth-backdrop";
 import { GuestDisabledScreen } from "../components/guest-disabled-screen";
 import { MobileTabBar } from "../components/mobile-tab-bar";
 import { Navbar } from "../components/navbar";
@@ -17,15 +18,9 @@ import { useWatchLayoutStore } from "../stores/watch-layout-store";
 
 function AuthShell() {
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-app via-surface to-app text-fg">
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute -top-24 -left-16 h-80 w-80 rounded-full bg-sky-700/15 blur-3xl" />
-        <div className="absolute bottom-0 right-0 h-96 w-96 rounded-full bg-cyan-500/10 blur-3xl" />
-      </div>
-      <main className="relative z-10 min-h-screen px-4 py-8 flex items-center justify-center">
-        <Outlet />
-      </main>
-    </div>
+    <AuthBackdrop contentClassName="flex min-h-screen items-center justify-center px-4 py-8">
+      <Outlet />
+    </AuthBackdrop>
   );
 }
 

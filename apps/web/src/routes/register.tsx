@@ -73,7 +73,7 @@ function RegisterPage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-56px)] flex items-center justify-center px-4">
+    <div className="flex w-full items-center justify-center px-4">
       <Toast message={toast} />
       <AuthCard title="Create account" subtitle={subtitle}>
         <AuthErrorBanner message={bannerMessage} />
