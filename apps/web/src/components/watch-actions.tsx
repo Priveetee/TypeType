@@ -54,8 +54,7 @@ export function WatchActions({ stream }: Props) {
   const audioOnlyDisabled =
     update.isPending ||
     !authReady ||
-    audioOnlySource.loading ||
-    (!isAuthed && !settings.audioOnlyPlayback);
+    audioOnlySource.loading;
 
   function handleSaved(label: string) {
     setToastLabel(label);

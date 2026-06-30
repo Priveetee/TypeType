@@ -4,7 +4,7 @@ import { API_BASE as BASE, toApiUrl } from "./env";
 import type { MediaSrc } from "./vidstack";
 
 export type AudioOnlyResponse = {
-  kind?: "progressive" | "hls";
+  kind?: "progressive" | "hls" | "dash";
   src: string;
   mimeType: string;
   codec: string;
@@ -42,6 +42,9 @@ export function toAudioOnlyMediaSrc(response: AudioOnlyResponse): MediaSrc {
     response.mimeType.includes("x-mpegurl")
   ) {
     return { src: toApiUrl(response.src), type: "application/x-mpegurl" };
+  }
+  if (response.kind === "dash" || response.mimeType.includes("dash+xml")) {
+    return { src: toApiUrl(response.src), type: "application/dash+xml" };
   }
   if (response.mimeType.includes("webm")) {
     return { src: toApiUrl(response.src), type: "audio/webm" };
