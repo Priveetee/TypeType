@@ -6,6 +6,8 @@ export function pickCompatibleProgressiveSrc(stream: VideoStream): MediaSrc | nu
   const progressive = [...(stream.videoStreams ?? [])]
     .filter(
       (candidate) =>
+        candidate.deliveryMethod !== "sabr" &&
+        candidate.url.length > 0 &&
         typeof candidate.codec === "string" &&
         candidate.codec.includes("avc1") &&
         candidate.codec.includes("mp4a") &&
@@ -25,12 +27,16 @@ export function hasCompatibleMp4(stream: VideoStream): boolean {
   const audios = stream.audioStreams ?? [];
   const hasMp4Video = videos.some(
     (video) =>
+      video.deliveryMethod !== "sabr" &&
+      video.url.length > 0 &&
       typeof video.codec === "string" &&
       video.codec.startsWith("avc1") &&
       (video.mimeType?.includes("video/mp4") ?? true),
   );
   const hasMp4Audio = audios.some(
     (audio) =>
+      audio.deliveryMethod !== "sabr" &&
+      audio.url.length > 0 &&
       typeof audio.codec === "string" &&
       (audio.codec.startsWith("mp4a") || audio.codec === "mp4a") &&
       (audio.mimeType?.includes("audio/mp4") ?? true),

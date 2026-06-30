@@ -35,6 +35,10 @@ function hasMultipleAudioLanguages(stream: VideoStream): boolean {
   return false;
 }
 
+function hasPlayableUrl(item: { deliveryMethod?: string; url: string }): boolean {
+  return item.deliveryMethod !== "sabr" && item.url.length > 0;
+}
+
 export function usePlayerError(
   stream: VideoStream,
   isLive: boolean,
@@ -48,22 +52,27 @@ export function usePlayerError(
   const preferServerManifests = instance?.guestAllowed !== false;
   const preferNativeManifest =
     preferServerManifests && !iosDevice && !hasMultipleAudioLanguages(stream);
-  const videoOnlyCount = stream.videoOnlyStreams?.length ?? 0;
+  const legacyVideoOnlyCount = (stream.videoOnlyStreams ?? []).filter(hasPlayableUrl).length;
+  const legacyAudioCount = (stream.audioStreams ?? []).filter(hasPlayableUrl).length;
+  const legacyProgressiveCount = (stream.videoStreams ?? []).filter(hasPlayableUrl).length;
+  const hasLegacyDashPair = legacyVideoOnlyCount > 0 && legacyAudioCount > 0;
   const highQualityEnabled =
     enableHighQualityPlayback &&
     !isLive &&
     !iosDevice &&
     preferServerManifests &&
     !stream.hlsUrl &&
-    videoOnlyCount > 0 &&
+    hasLegacyDashPair &&
     provider === "youtube";
   const nativeEnabled =
-    preferServerManifests && !isLive && videoOnlyCount > 0 && preferNativeManifest;
+    preferServerManifests && !isLive && hasLegacyDashPair && preferNativeManifest;
   const hlsEnabled = Boolean(stream.hlsUrl && (isLive || isSignedHlsManifestUrl(stream.hlsUrl)));
+  const hasYoutubeLegacyFallback = hlsEnabled || hasLegacyDashPair || legacyProgressiveCount > 0;
   const [hlsFailed, setHlsFailed] = useState(false);
   const [highQualityFailed, setHighQualityFailed] = useState(false);
   const [nativeFailed, setNativeFailed] = useState(false);
   const [qualityFailed, setQualityFailed] = useState(false);
+  const [sabrFailed, setSabrFailed] = useState(false);
   const [compatibilityFallback, setCompatibilityFallback] = useState(false);
   const [bilibiliVariant, setBilibiliVariant] = useState(0);
   const [playerFailed, setPlayerFailed] = useState(false);
@@ -83,6 +92,7 @@ export function usePlayerError(
         hlsFailed,
         allowServerManifests: preferServerManifests,
         bilibiliVariant,
+        sabrFailed,
       });
     }
     return resolveManifestSrc(stream, isLive, nativeFailed, qualityFailed, {
@@ -92,6 +102,7 @@ export function usePlayerError(
       hlsFailed,
       allowServerManifests: preferServerManifests,
       bilibiliVariant,
+      sabrFailed,
     });
   }, [
     stream,
@@ -105,6 +116,7 @@ export function usePlayerError(
     hlsFailed,
     preferServerManifests,
     bilibiliVariant,
+    sabrFailed,
   ]);
 
   const handleError = useCallback(() => {
@@ -116,6 +128,14 @@ export function usePlayerError(
       recordClientEvent("player.bilibili_variant_failed", { video: debugVideo });
       setBilibiliVariant((variant) => variant + 1);
       setRetryKey((k) => k + 1);
+    } else if (provider === "youtube" && !isLive && !sabrFailed) {
+      recordClientEvent("player.sabr_failed", { video: debugVideo });
+      setSabrFailed(true);
+      if (hasYoutubeLegacyFallback) {
+        setRetryKey((k) => k + 1);
+      } else {
+        setPlayerFailed(true);
+      }
     } else if (highQualityEnabled && !highQualityFailed) {
       recordClientEvent("player.high_quality_failed", { video: debugVideo });
       setHighQualityFailed(true);
@@ -150,6 +170,8 @@ export function usePlayerError(
     qualityFailed,
     compatibilityFallback,
     isLive,
+    sabrFailed,
+    hasYoutubeLegacyFallback,
   ]);
 
   const reset = useCallback(() => {
@@ -157,6 +179,7 @@ export function usePlayerError(
     setHighQualityFailed(false);
     setNativeFailed(false);
     setQualityFailed(false);
+    setSabrFailed(false);
     setCompatibilityFallback(false);
     setBilibiliVariant(0);
     setPlayerFailed(false);
@@ -169,6 +192,7 @@ export function usePlayerError(
     setHighQualityFailed(false);
     setNativeFailed(false);
     setQualityFailed(false);
+    setSabrFailed(false);
     setCompatibilityFallback(false);
     setBilibiliVariant(0);
     setPlayerFailed(false);

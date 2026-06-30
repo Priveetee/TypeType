@@ -8,6 +8,7 @@ type ValidAudioStream = AudioStreamItem & { codec: string };
 
 function isValidVideo(s: VideoStreamItem): s is ValidVideoStream {
   const codec = s.codec;
+  if (s.deliveryMethod === "sabr" || s.url.length === 0) return false;
   if (codec === null || codec.length === 0) return false;
   if (!s.mimeType.includes("video/mp4")) return false;
   return !EXCLUDED_VIDEO_PREFIXES.some((p) => codec.startsWith(p));
@@ -15,6 +16,7 @@ function isValidVideo(s: VideoStreamItem): s is ValidVideoStream {
 
 function isValidAudio(s: AudioStreamItem): s is ValidAudioStream {
   const codec = s.codec;
+  if (s.deliveryMethod === "sabr" || s.url.length === 0) return false;
   if (codec === null || codec.length === 0) return false;
   if (!codec.startsWith("mp4a")) return false;
   return s.mimeType.includes("audio/mp4");
