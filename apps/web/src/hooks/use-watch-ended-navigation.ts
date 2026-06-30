@@ -2,7 +2,6 @@ import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { WatchPlaylistItem } from "../types/playlist";
 import type { VideoStream } from "../types/stream";
-import { useSkipPlaylistAutoplayScreen } from "./use-skip-playlist-autoplay-screen";
 
 const DEFAULT_AUTOPLAY_DELAY_SECONDS = 10;
 
@@ -32,6 +31,7 @@ type Params = {
   settingsReady: boolean;
   autoplay: boolean;
   countdownSeconds: number;
+  skipPlaylistAutoplayScreen: boolean;
   hideRelatedVideos: boolean;
   nextParam: string | null;
   nextVideo?: WatchPlaylistItem | null;
@@ -44,6 +44,7 @@ export function useWatchEndedNavigation({
   settingsReady,
   autoplay,
   countdownSeconds,
+  skipPlaylistAutoplayScreen,
   hideRelatedVideos,
   nextParam,
   nextVideo,
@@ -52,7 +53,6 @@ export function useWatchEndedNavigation({
   related,
 }: Params) {
   const navigate = useNavigate();
-  const { skipPlaylistAutoplayScreen } = useSkipPlaylistAutoplayScreen();
   const delaySeconds = Math.min(60, Math.max(0, Math.round(countdownSeconds)));
   const delayMs = delaySeconds * 1000;
   const [target, setTarget] = useState<AutoplayTarget | null>(null);
