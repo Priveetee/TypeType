@@ -1,5 +1,6 @@
 import type { AudioStreamItem, VideoStreamItem } from "../types/api";
 import { proxyUrl } from "./proxy";
+import { hasPlayableLegacyUrl } from "./stream-delivery";
 
 const EXCLUDED_VIDEO_PREFIXES = ["av01", "vp9", "vp09"];
 
@@ -8,6 +9,7 @@ type ValidAudioStream = AudioStreamItem & { codec: string };
 
 function isValidVideo(s: VideoStreamItem): s is ValidVideoStream {
   const codec = s.codec;
+  if (!hasPlayableLegacyUrl(s)) return false;
   if (codec === null || codec.length === 0) return false;
   if (!s.mimeType.includes("video/mp4")) return false;
   return !EXCLUDED_VIDEO_PREFIXES.some((p) => codec.startsWith(p));
@@ -15,6 +17,7 @@ function isValidVideo(s: VideoStreamItem): s is ValidVideoStream {
 
 function isValidAudio(s: AudioStreamItem): s is ValidAudioStream {
   const codec = s.codec;
+  if (!hasPlayableLegacyUrl(s)) return false;
   if (codec === null || codec.length === 0) return false;
   if (!codec.startsWith("mp4a")) return false;
   return s.mimeType.includes("audio/mp4");

@@ -10,7 +10,9 @@ function hostMatches(host: string, domain: string): boolean {
 
 function youtubeIdFromPath(pathname: string): string | null {
   const segments = pathname.split("/").filter(Boolean);
-  const candidate = segments[0] === "shorts" || segments[0] === "embed" ? segments[1] : segments[0];
+  const nestedVideoPath =
+    segments[0] === "shorts" || segments[0] === "embed" || segments[0] === "live";
+  const candidate = nestedVideoPath ? segments[1] : segments[0];
   return candidate && YOUTUBE_VIDEO_ID_PATTERN.test(candidate) ? candidate : null;
 }
 

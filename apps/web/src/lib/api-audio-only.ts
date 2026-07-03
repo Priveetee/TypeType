@@ -4,10 +4,10 @@ import { API_BASE as BASE, toApiUrl } from "./env";
 import type { MediaSrc } from "./vidstack";
 
 export type AudioOnlyResponse = {
-  kind?: "progressive" | "hls";
+  kind?: "progressive" | "hls" | "dash";
   src: string;
   mimeType: string;
-  codec: string;
+  codec: string | null;
   bitrate: number | null;
   contentLength: number | null;
   duration: number | null;
@@ -43,14 +43,13 @@ export function toAudioOnlyMediaSrc(response: AudioOnlyResponse): MediaSrc {
   ) {
     return { src: toApiUrl(response.src), type: "application/x-mpegurl" };
   }
+  if (response.kind === "dash" || response.mimeType.includes("dash+xml")) {
+    return { src: toApiUrl(response.src), type: "application/dash+xml" };
+  }
   if (response.mimeType.includes("webm")) {
     return { src: toApiUrl(response.src), type: "audio/webm" };
   }
-  const mp4Source = {
-    src: toApiUrl(response.src),
-    type: "audio/mp4",
-  };
-  return mp4Source as MediaSrc;
+  return toApiUrl(response.src);
 }
 
 export function isAudioOnlyUnavailable(error: unknown): boolean {

@@ -8,11 +8,11 @@ export function useAudioOnlyStream(
   preferredLocale: string,
   enabled: boolean,
 ) {
-  const hasToken = useAuthStore((state) => Boolean(state.token));
+  const authScope = useAuthStore((state) => (state.token ? (state.me?.id ?? "auth") : "guest"));
   return useQuery({
-    queryKey: ["audio-only", url, preferOriginal, preferredLocale, hasToken],
+    queryKey: ["audio-only", url, preferOriginal, preferredLocale, authScope],
     queryFn: () => fetchAudioOnlyStream(url, preferOriginal, preferredLocale),
-    enabled: enabled && hasToken && url.trim().length > 0,
+    enabled: enabled && url.trim().length > 0,
     staleTime: 3 * 60 * 1000,
     retry: false,
   });

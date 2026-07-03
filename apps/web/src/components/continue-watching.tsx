@@ -1,5 +1,8 @@
 import { useQueries } from "@tanstack/react-query";
+import { useAuth } from "../hooks/use-auth";
 import { useHistory } from "../hooks/use-history";
+import { useInstance } from "../hooks/use-instance";
+import { useSettings } from "../hooks/use-settings";
 import { streamQueryOptions } from "../hooks/use-stream";
 import { isVideoInProgress } from "../lib/watch-progress";
 import { toWatchSourceUrl } from "../lib/watch-url";
@@ -25,7 +28,13 @@ function withStreamMetadata(item: HistoryItem, stream: VideoStream | undefined):
 }
 
 export function ContinueWatching() {
+  const { authReady, isAuthed } = useAuth();
+  const { data: instance, isPending: instancePending } = useInstance();
+  const { settings, settingsReady } = useSettings();
   const { items } = useHistory();
+  const useAuthenticatedStream =
+    isAuthed && (settings.accessMode === "allow_list" || instance?.guestAllowed === false);
+  const metadataReady = authReady && !instancePending && (!isAuthed || settingsReady);
   const displayed = items
     .filter((h) => isVideoInProgress(h.progress, h.duration))
     .sort((a, b) => b.watchedAt - a.watchedAt)
@@ -33,7 +42,8 @@ export function ContinueWatching() {
   const metadata = useQueries({
     queries: displayed.map((item) => {
       const sourceUrl = toWatchSourceUrl(item.url);
-      return streamQueryOptions(sourceUrl, false, !item.publishedAt);
+      const needsMetadata = item.publishedAt === undefined || item.viewCount === undefined;
+      return streamQueryOptions(sourceUrl, useAuthenticatedStream, metadataReady && needsMetadata);
     }),
   });
   const enriched = displayed.map((item, index) => withStreamMetadata(item, metadata[index]?.data));
