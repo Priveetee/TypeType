@@ -1,4 +1,4 @@
-import type { SabrSourceConfig } from "../types/sabr";
+import type { SabrMseControllerArgs } from "../types/sabr";
 import { appendSabrInitSegment } from "./sabr-init-segment";
 import {
   appendChunks,
@@ -30,16 +30,11 @@ export class SabrMseController {
   private failed = false;
   private requestId = 0;
   private lastWaitingReconnectMs = 0;
+  private readonly args: SabrMseControllerArgs;
 
-  constructor(
-    private readonly args: {
-      media: HTMLVideoElement;
-      config: SabrSourceConfig;
-      startTime: number;
-      autoplay: boolean;
-      onError: () => void;
-    },
-  ) {}
+  constructor(args: SabrMseControllerArgs) {
+    this.args = args;
+  }
   start(): void {
     this.args.media.src = this.objectUrl;
     this.args.media.addEventListener("waiting", this.handleWaiting);

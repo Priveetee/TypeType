@@ -35,6 +35,14 @@ export type SabrSourceConfig = {
   qualities: SabrQualityOption[];
 };
 
+export type SabrMseControllerArgs = {
+  media: HTMLVideoElement;
+  config: SabrSourceConfig;
+  startTime: number;
+  autoplay: boolean;
+  onError: () => void;
+};
+
 export type SabrQualityOption = {
   itag: number;
   label: string;
