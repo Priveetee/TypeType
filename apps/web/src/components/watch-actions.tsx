@@ -6,7 +6,6 @@ import { useShareUrl } from "../hooks/use-share-url";
 import { useWatchAudioOnlySource } from "../hooks/use-watch-audio-only-source";
 import { detectProvider } from "../lib/provider";
 import { goto } from "../lib/route-redirect";
-import { hasSabrPlayback } from "../lib/stream-delivery";
 import { toPublicWatchParam, toPublicWatchUrl, toWatchSourceUrl } from "../lib/watch-url";
 import type { VideoStream } from "../types/stream";
 import { DanmakuControls } from "./danmaku-controls";
@@ -45,9 +44,8 @@ export function WatchActions({ stream }: Props) {
   } = useFavoritesPlaylist();
   const favorited = isInFavorites(stream.id);
   const isNicoNico = detectProvider(stream.id) === "nicovideo";
-  const usesSabr = detectProvider(stream.id) === "youtube" && hasSabrPlayback(stream);
   const isLive = stream.streamType === "live_stream" || stream.streamType === "audio_live_stream";
-  const audioOnlyAvailable = !isLive && !isNicoNico && !usesSabr;
+  const audioOnlyAvailable = !isLive && !isNicoNico;
   const audioOnlySource = useWatchAudioOnlySource(
     toWatchSourceUrl(toPublicWatchParam(stream.id)),
     settings,

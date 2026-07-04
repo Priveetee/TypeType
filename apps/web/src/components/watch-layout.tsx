@@ -16,7 +16,6 @@ import { useWatchSponsorBlock } from "../hooks/use-watch-sponsorblock";
 import { useWatchToast } from "../hooks/use-watch-toast";
 import { getOriginalAudioLocale } from "../lib/audio-track";
 import { detectProvider } from "../lib/provider";
-import { hasSabrPlayback } from "../lib/stream-delivery";
 import { toWatchSourceUrl } from "../lib/watch-url";
 import { useDanmakuStore } from "../stores/danmaku-store";
 import { useWatchLayoutStore } from "../stores/watch-layout-store";
@@ -44,18 +43,13 @@ export function WatchLayout({ stream, startTime, currentParam, navigating, list,
     usePlayerError(stream, isLive, settings.enableHighQualityPlayback);
   const { on: bulletCommentsOn } = useDanmakuStore();
   const isNicoNico = detectProvider(stream.id) === "nicovideo";
-  const usesSabr = detectProvider(stream.id) === "youtube" && hasSabrPlayback(stream);
   const hideComments = settings.hideComments;
   const sponsor = useWatchSponsorBlock(stream, settings);
   const relatedStreams = settings.hideRelatedVideos ? [] : (stream.related ?? []);
   const playlist = useWatchPlaylist(list, shuffle, currentParam);
   const { data: bulletComments } = useBulletComments(stream.id, isNicoNico && !hideComments);
   const originalLocale = getOriginalAudioLocale(stream);
-  const audioOnly = useWatchAudioOnlySource(
-    toWatchSourceUrl(currentParam),
-    settings,
-    isLive || usesSabr,
-  );
+  const audioOnly = useWatchAudioOnlySource(toWatchSourceUrl(currentParam), settings, isLive);
   const cinemaMode = useWatchLayoutStore((state) => state.cinemaMode);
   const seekRef = useRef<((seconds: number) => void) | null>(null);
   const { toast, setToast } = useWatchToast(audioOnly.unavailable);

@@ -35,21 +35,23 @@ export function fetchAudioOnlyStream(
   return request<AudioOnlyResponse>(`${BASE}/streams/audio-only?${params}`, audioOnlyInit());
 }
 
-export function toAudioOnlyMediaSrc(response: AudioOnlyResponse): MediaSrc {
-  if (
-    response.kind === "hls" ||
-    response.mimeType.includes("mpegurl") ||
-    response.mimeType.includes("x-mpegurl")
-  ) {
-    return { src: toApiUrl(response.src), type: "application/x-mpegurl" };
+export function toAudioOnlyMediaSrc(response: AudioOnlyResponse): MediaSrc | null {
+  if (response.kind !== undefined && response.kind !== "progressive") {
+    return null;
   }
-  if (response.kind === "dash" || response.mimeType.includes("dash+xml")) {
-    return { src: toApiUrl(response.src), type: "application/dash+xml" };
+  if (response.mimeType.includes("mpegurl") || response.mimeType.includes("x-mpegurl")) {
+    return null;
+  }
+  if (response.mimeType.includes("dash+xml")) {
+    return null;
   }
   if (response.mimeType.includes("webm")) {
     return { src: toApiUrl(response.src), type: "audio/webm" };
   }
-  return toApiUrl(response.src);
+  if (response.mimeType.includes("audio/mp4")) {
+    return { src: toApiUrl(response.src), type: "audio/mp4" };
+  }
+  return null;
 }
 
 export function isAudioOnlyUnavailable(error: unknown): boolean {
