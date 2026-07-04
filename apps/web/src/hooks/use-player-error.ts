@@ -40,8 +40,8 @@ export function usePlayerError(
     preferServerManifests && !iosDevice && !hasMultipleAudioLanguages(stream);
   const legacyDashPair = hasLegacyDashPair(stream);
   const legacyProgressiveCount = legacyProgressiveStreams(stream).length;
-  const hasLegacyPlaybackFallback = legacyDashPair || legacyProgressiveCount > 0;
   const sabrEnabled = provider === "youtube" && !isLive && hasSabrPlayback(stream);
+  const hasLegacyPlaybackFallback = !sabrEnabled && (legacyDashPair || legacyProgressiveCount > 0);
   const highQualityEnabled =
     enableHighQualityPlayback &&
     !isLive &&
