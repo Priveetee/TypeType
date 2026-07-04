@@ -5,6 +5,10 @@ export function sabrPlayerTimeMs(media: HTMLMediaElement): number {
   return Math.max(0, Math.round(media.currentTime * 1000));
 }
 
+export function sabrInitialPlayerTimeMs(media: HTMLMediaElement, startTimeMs: number): number {
+  return Math.max(sabrPlayerTimeMs(media), Math.round(startTimeMs));
+}
+
 export function sabrBufferedPumpTimeMs(media: HTMLMediaElement): number {
   const current = media.currentTime;
   for (let i = 0; i < media.buffered.length; i += 1) {

@@ -19,12 +19,6 @@ export class SabrSourceBufferQueue {
 
   clear(): void {
     this.queue.length = 0;
-    if (!this.buffer.updating) return;
-    try {
-      this.buffer.abort();
-    } catch {
-      this.failed = true;
-    }
   }
 
   idle(): boolean {

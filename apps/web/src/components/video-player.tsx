@@ -86,7 +86,7 @@ export function VideoPlayer({
       title={title}
       poster={poster}
       onProviderChange={handleProviderChange}
-      onError={handleError}
+      onError={customSource ? undefined : handleError}
     >
       <MediaProvider
         className={mediaClassName ?? "h-full w-full"}
@@ -96,7 +96,12 @@ export function VideoPlayer({
         {!audioOnly && <VideoPlayerTracks subtitles={subtitles} chaptersVtt={chaptersVtt} />}
       </MediaProvider>
       {customSource && (
-        <PlayerSourceAttachment src={src} autoplay={autoplay} onError={handleError} />
+        <PlayerSourceAttachment
+          src={src}
+          startTime={startTime}
+          autoplay={autoplay}
+          onError={handleError}
+        />
       )}
       {audioOnly && <AudioOnlyPoster poster={poster} title={title} />}
       {audioOnly && <AudioCenterToggle />}
@@ -115,7 +120,7 @@ export function VideoPlayer({
         onPreviousVideo={onPreviousVideo}
         onNextVideo={onNextVideo}
       />
-      <PlayerSeeker startTime={startTime} />
+      {!customSource && <PlayerSeeker startTime={startTime} />}
       <VolumeRestorer
         initialVolume={initialVolume}
         initialMuted={initialMuted}

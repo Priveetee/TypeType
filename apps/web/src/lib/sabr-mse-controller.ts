@@ -1,4 +1,4 @@
-import type { SabrSessionDescriptor, SabrSourceConfig } from "../types/sabr";
+import type { SabrSourceConfig } from "../types/sabr";
 import { appendSabrInitSegment } from "./sabr-init-segment";
 import {
   appendChunks,
@@ -9,19 +9,13 @@ import {
 } from "./sabr-mse-utils";
 import {
   sabrBufferedPumpTimeMs,
+  sabrInitialPlayerTimeMs,
   sabrPlaybackMessage,
   sabrPlayerTimeMs,
 } from "./sabr-playback-message";
-import { connectSabrSession } from "./sabr-session-connection";
+import { connectActiveSabrSession } from "./sabr-session-connection";
 import { createSabrTrack } from "./sabr-track-state";
 import type { SabrWebSocketClient } from "./sabr-websocket-client";
-
-type Args = {
-  media: HTMLVideoElement;
-  config: SabrSourceConfig;
-  autoplay: boolean;
-  onError: () => void;
-};
 
 const BUFFER_TARGET_SEC = 24;
 
@@ -35,14 +29,20 @@ export class SabrMseController {
   private disposed = false;
   private failed = false;
   private requestId = 0;
-  private readonly args: Args;
+  private lastWaitingReconnectMs = 0;
 
-  constructor(args: Args) {
-    this.args = args;
-  }
+  constructor(
+    private readonly args: {
+      media: HTMLVideoElement;
+      config: SabrSourceConfig;
+      startTime: number;
+      autoplay: boolean;
+      onError: () => void;
+    },
+  ) {}
   start(): void {
     this.args.media.src = this.objectUrl;
-    this.args.media.addEventListener("seeking", this.handleSeeking);
+    this.args.media.addEventListener("waiting", this.handleWaiting);
     this.args.media.addEventListener("error", this.handleMediaError);
     void this.initialize();
   }
@@ -51,6 +51,7 @@ export class SabrMseController {
     this.generation += 1;
     this.client?.close();
     this.args.media.removeEventListener("seeking", this.handleSeeking);
+    this.args.media.removeEventListener("waiting", this.handleWaiting);
     this.args.media.removeEventListener("error", this.handleMediaError);
     this.audio?.queue.clear();
     this.video?.queue.clear();
@@ -64,7 +65,13 @@ export class SabrMseController {
       if (typeof MediaSource === "undefined") throw new Error("mse_unavailable");
       await waitForSourceOpen(this.mediaSource);
       if (!this.active(generation)) return;
-      const descriptor = await this.connectSession(generation, sabrPlayerTimeMs(this.args.media));
+      const playerTimeMs = sabrInitialPlayerTimeMs(this.args.media, this.args.startTime);
+      const { descriptor, client } = await connectActiveSabrSession(
+        this.args.config.descriptorUrl,
+        playerTimeMs,
+        () => this.active(generation),
+      );
+      this.client = client;
       this.mediaSource.duration = descriptor.durationMs / 1000;
       const video = createSabrTrack(this.mediaSource, descriptor.video);
       const audio = createSabrTrack(this.mediaSource, descriptor.audio);
@@ -76,26 +83,13 @@ export class SabrMseController {
       await appendSabrInitSegment(audio, descriptor.endpoints.audioInit, () =>
         this.active(generation),
       );
+      if (playerTimeMs > 0) this.args.media.currentTime = playerTimeMs / 1000;
+      this.args.media.addEventListener("seeking", this.handleSeeking);
       this.sendState(generation);
       void this.pump(generation);
     } catch {
       this.fail();
     }
-  }
-  private async connectSession(
-    generation: number,
-    playerTimeMs: number,
-  ): Promise<SabrSessionDescriptor> {
-    const { descriptor, client } = await connectSabrSession(
-      this.args.config.descriptorUrl,
-      playerTimeMs,
-    );
-    if (!this.active(generation)) {
-      client.close();
-      throw new Error("sabr_generation_stale");
-    }
-    this.client = client;
-    return descriptor;
   }
   private async pump(generation: number): Promise<void> {
     while (!this.disposed && generation === this.generation) {
@@ -114,7 +108,11 @@ export class SabrMseController {
         }
         await wait(20);
       } catch {
-        if (generation === this.generation) this.fail();
+        if (generation !== this.generation) return;
+        this.client?.close();
+        this.client = null;
+        if (bufferedAhead(this.args.media) <= 1) this.fail();
+        else void this.reconnect(generation);
         return;
       }
     }
@@ -142,18 +140,31 @@ export class SabrMseController {
   };
   private async reconnect(generation: number): Promise<void> {
     try {
-      await this.connectSession(generation, sabrPlayerTimeMs(this.args.media));
+      const { client } = await connectActiveSabrSession(
+        this.args.config.descriptorUrl,
+        sabrPlayerTimeMs(this.args.media),
+        () => this.active(generation),
+      );
+      this.client = client;
       this.sendState(generation);
       void this.pump(generation);
     } catch {
-      if (generation === this.generation) this.fail();
+      if (generation === this.generation && bufferedAhead(this.args.media) <= 1) this.fail();
     }
   }
   private readonly handleMediaError = (): void => this.fail();
+  private readonly handleWaiting = (): void => {
+    if (this.disposed || this.failed || !this.video?.queue.idle() || !this.audio?.queue.idle())
+      return;
+    if (bufferedAhead(this.args.media) > 0) return;
+    const now = Date.now();
+    if (now - this.lastWaitingReconnectMs < 1000) return;
+    this.lastWaitingReconnectMs = now;
+    this.handleSeeking();
+  };
   private sendState(generation: number): void {
     this.client?.send(this.message("state", generation));
   }
-
   private message(type: "state" | "pump", generation: number, playerTimeMs?: number) {
     if (!this.video || !this.audio) throw new Error("sabr_tracks_missing");
     this.requestId += 1;

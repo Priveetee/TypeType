@@ -13,11 +13,12 @@ function providerVideo(provider: MediaProviderAdapter | null): HTMLVideoElement 
 
 type Props = {
   src: MediaSrc;
+  startTime: number;
   autoplay: boolean;
   onError: () => void;
 };
 
-export function SabrMediaSource({ src, autoplay, onError }: Props) {
+export function SabrMediaSource({ src, startTime, autoplay, onError }: Props) {
   const provider = useMediaProvider();
   const media = providerVideo(provider);
   const config = sabrSessionConfig(src);
@@ -47,12 +48,23 @@ export function SabrMediaSource({ src, autoplay, onError }: Props) {
     const controller = new SabrMseController({
       media,
       config: { audioItag, descriptorUrl, durationMs, id: configId, qualities: [], videoItag },
+      startTime,
       autoplay,
       onError: () => onErrorRef.current(),
     });
     controller.start();
     return () => controller.dispose();
-  }, [audioItag, autoplay, config, configId, descriptorUrl, durationMs, media, videoItag]);
+  }, [
+    audioItag,
+    autoplay,
+    config,
+    configId,
+    descriptorUrl,
+    durationMs,
+    media,
+    startTime,
+    videoItag,
+  ]);
 
   return null;
 }

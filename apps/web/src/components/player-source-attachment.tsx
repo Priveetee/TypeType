@@ -4,13 +4,16 @@ import { SabrMediaSource } from "./sabr-media-source";
 
 type Props = {
   src: MediaSrc;
+  startTime: number;
   autoplay: boolean;
   onError: () => void;
 };
 
-export function PlayerSourceAttachment({ src, autoplay, onError }: Props) {
+export function PlayerSourceAttachment({ src, startTime, autoplay, onError }: Props) {
   if (isSabrSessionSource(src)) {
-    return <SabrMediaSource src={src} autoplay={autoplay} onError={onError} />;
+    return (
+      <SabrMediaSource src={src} startTime={startTime} autoplay={autoplay} onError={onError} />
+    );
   }
   return null;
 }

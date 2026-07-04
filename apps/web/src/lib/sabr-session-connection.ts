@@ -7,7 +7,7 @@ export type SabrSessionConnection = {
   client: SabrWebSocketClient;
 };
 
-export async function connectSabrSession(
+async function connectSabrSession(
   descriptorUrl: string,
   playerTimeMs: number,
 ): Promise<SabrSessionConnection> {
@@ -17,4 +17,15 @@ export async function connectSabrSession(
   const client = new SabrWebSocketClient(toWebSocketUrl(descriptor.endpoints.webSocket));
   await client.connect();
   return { descriptor, client };
+}
+
+export async function connectActiveSabrSession(
+  descriptorUrl: string,
+  playerTimeMs: number,
+  active: () => boolean,
+): Promise<SabrSessionConnection> {
+  const connection = await connectSabrSession(descriptorUrl, playerTimeMs);
+  if (active()) return connection;
+  connection.client.close();
+  throw new Error("sabr_generation_stale");
 }
