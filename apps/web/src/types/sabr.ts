@@ -2,13 +2,11 @@ export type SabrFormatDescriptor = {
   itag: number;
   mimeType: string;
   bitrate: number;
-  endSegment: number;
   approxDurationMs: number;
   qualityLabel: string | null;
   audioTrackId: string | null;
   audioTrackName: string | null;
   init: string;
-  segment: string;
 };
 
 export type SabrSessionDescriptor = {
@@ -16,6 +14,7 @@ export type SabrSessionDescriptor = {
   session: string;
   transport: "stateful-websocket";
   protocol: "typetype-sabr-ws-v1";
+  startTimeMs: number;
   maxBinaryFrameBytes: number;
   durationMs: number;
   audio: SabrFormatDescriptor;
@@ -24,7 +23,6 @@ export type SabrSessionDescriptor = {
     webSocket: string;
     audioInit: string;
     videoInit: string;
-    legacySegmentTemplate: string;
   };
 };
 
@@ -45,11 +43,12 @@ export type SabrQualityOption = {
 };
 
 export type SabrRequestMessage = {
-  type: "init" | "segment" | "pump";
+  type: "state" | "pump";
   requestId: string;
-  itag: number;
-  sequence?: number;
+  videoItag: number;
+  audioItag: number;
   playerTimeMs: number;
+  playbackRate: number;
   videoActive: boolean;
   audioActive: boolean;
 };
@@ -58,7 +57,6 @@ export type SabrSegmentMessage = {
   type: "segment";
   requestId?: string;
   itag: number;
-  sequence: number;
   init: boolean;
   startMs: number;
   durationMs: number;

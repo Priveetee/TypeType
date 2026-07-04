@@ -1,4 +1,5 @@
-import type { SabrSourceConfig } from "../types/sabr";
+import type { SabrSessionDescriptor, SabrSourceConfig } from "../types/sabr";
+import { appendSabrInitSegment } from "./sabr-init-segment";
 import {
   appendChunks,
   bufferedAhead,
@@ -6,15 +7,10 @@ import {
   wait,
   waitForSourceOpen,
 } from "./sabr-mse-utils";
-import { fetchSabrSessionDescriptor, toWebSocketUrl } from "./sabr-session-api";
-import {
-  createSabrTrack,
-  type SabrTrackName,
-  sabrInitRequest,
-  sabrSegmentRequest,
-  setSabrTrackSequence,
-} from "./sabr-track-state";
-import { SabrWebSocketClient } from "./sabr-websocket-client";
+import { sabrPlaybackMessage, sabrPlayerTimeMs } from "./sabr-playback-message";
+import { connectSabrSession } from "./sabr-session-connection";
+import { createSabrTrack } from "./sabr-track-state";
+import type { SabrWebSocketClient } from "./sabr-websocket-client";
 
 type Args = {
   media: HTMLVideoElement;
@@ -34,19 +30,18 @@ export class SabrMseController {
   private generation = 0;
   private disposed = false;
   private failed = false;
+  private requestId = 0;
   private readonly args: Args;
 
   constructor(args: Args) {
     this.args = args;
   }
-
   start(): void {
     this.args.media.src = this.objectUrl;
     this.args.media.addEventListener("seeking", this.handleSeeking);
     this.args.media.addEventListener("error", this.handleMediaError);
     void this.initialize();
   }
-
   dispose(): void {
     this.disposed = true;
     this.generation += 1;
@@ -59,46 +54,45 @@ export class SabrMseController {
     this.args.media.load();
     URL.revokeObjectURL(this.objectUrl);
   }
-
   private async initialize(): Promise<void> {
     const generation = this.generation;
     try {
       if (typeof MediaSource === "undefined") throw new Error("mse_unavailable");
       await waitForSourceOpen(this.mediaSource);
       if (!this.active(generation)) return;
-      const descriptor = await fetchSabrSessionDescriptor(this.args.config.descriptorUrl);
-      if (!this.active(generation)) return;
-      if (!MediaSource.isTypeSupported(descriptor.video.mimeType))
-        throw new Error("video_unsupported");
-      if (!MediaSource.isTypeSupported(descriptor.audio.mimeType))
-        throw new Error("audio_unsupported");
+      const descriptor = await this.connectSession(generation, sabrPlayerTimeMs(this.args.media));
       this.mediaSource.duration = descriptor.durationMs / 1000;
-      const currentTimeMs = this.args.media.currentTime * 1000;
-      this.video = createSabrTrack(this.mediaSource, descriptor.video, currentTimeMs);
-      this.audio = createSabrTrack(this.mediaSource, descriptor.audio, currentTimeMs);
-      this.client = new SabrWebSocketClient(toWebSocketUrl(descriptor.endpoints.webSocket));
-      await this.client.connect();
-      if (!this.active(generation)) return;
-      await this.appendInit("video", generation);
-      await this.appendInit("audio", generation);
+      const video = createSabrTrack(this.mediaSource, descriptor.video);
+      const audio = createSabrTrack(this.mediaSource, descriptor.audio);
+      this.video = video;
+      this.audio = audio;
+      await appendSabrInitSegment(video, descriptor.endpoints.videoInit, () =>
+        this.active(generation),
+      );
+      await appendSabrInitSegment(audio, descriptor.endpoints.audioInit, () =>
+        this.active(generation),
+      );
+      this.sendState(generation);
       void this.pump(generation);
     } catch {
       this.fail();
     }
   }
-
-  private async appendInit(trackName: SabrTrackName, generation: number): Promise<void> {
-    const track = this.track(trackName);
-    const client = this.client;
-    if (!track || !client) return;
-    const currentTimeMs = Math.round(this.args.media.currentTime * 1000);
-    const chunks = await client.request(
-      sabrInitRequest(trackName, track, generation, currentTimeMs),
+  private async connectSession(
+    generation: number,
+    playerTimeMs: number,
+  ): Promise<SabrSessionDescriptor> {
+    const { descriptor, client } = await connectSabrSession(
+      this.args.config.descriptorUrl,
+      playerTimeMs,
     );
-    if (!this.active(generation)) return;
-    appendChunks(track, chunks);
+    if (!this.active(generation)) {
+      client.close();
+      throw new Error("sabr_generation_stale");
+    }
+    this.client = client;
+    return descriptor;
   }
-
   private async pump(generation: number): Promise<void> {
     while (!this.disposed && generation === this.generation) {
       try {
@@ -106,8 +100,7 @@ export class SabrMseController {
           await wait(400);
           continue;
         }
-        await this.appendSegment("video", generation);
-        await this.appendSegment("audio", generation);
+        await this.appendSegments(generation);
         if (this.args.autoplay && this.args.media.paused && bufferedAhead(this.args.media) > 1) {
           await this.args.media.play().catch(() => undefined);
         }
@@ -118,56 +111,54 @@ export class SabrMseController {
       }
     }
   }
-
-  private async appendSegment(trackName: SabrTrackName, generation: number): Promise<void> {
-    const track = this.track(trackName);
+  private async appendSegments(generation: number): Promise<void> {
     const client = this.client;
-    if (!track || !client || track.nextSequence > track.format.endSegment) return;
-    const currentTimeMs = Math.round(this.args.media.currentTime * 1000);
-    const chunks = await client.request(
-      sabrSegmentRequest(trackName, track, generation, currentTimeMs),
-    );
+    if (!this.video || !this.audio || !client) return;
+    const chunks = await client.request(this.message("pump", generation));
     if (!this.active(generation)) return;
-    appendChunks(track, chunks);
-    track.queue.removeBefore(this.args.media.currentTime);
+    appendChunks(this.video, chunks);
+    appendChunks(this.audio, chunks);
+    this.video.queue.removeBefore(this.args.media.currentTime);
+    this.audio.queue.removeBefore(this.args.media.currentTime);
   }
-
   private readonly handleSeeking = (): void => {
     if (this.disposed || this.failed) return;
     this.generation += 1;
-    const timeMs = this.args.media.currentTime * 1000;
-    if (this.video) setSabrTrackSequence(this.video, timeMs);
-    if (this.audio) setSabrTrackSequence(this.audio, timeMs);
     this.video?.queue.clear();
     this.audio?.queue.clear();
     this.client?.close();
     this.client = null;
     void this.reconnect(this.generation);
   };
-
   private async reconnect(generation: number): Promise<void> {
     try {
-      const descriptor = await fetchSabrSessionDescriptor(this.args.config.descriptorUrl);
-      if (!this.active(generation)) return;
-      this.client = new SabrWebSocketClient(toWebSocketUrl(descriptor.endpoints.webSocket));
-      await this.client.connect();
-      if (!this.active(generation)) return;
+      await this.connectSession(generation, sabrPlayerTimeMs(this.args.media));
+      this.sendState(generation);
       void this.pump(generation);
     } catch {
       if (generation === this.generation) this.fail();
     }
   }
-
   private readonly handleMediaError = (): void => this.fail();
-
-  private track(name: SabrTrackName): SabrTrackState | null {
-    return name === "audio" ? this.audio : this.video;
+  private sendState(generation: number): void {
+    this.client?.send(this.message("state", generation));
   }
 
+  private message(type: "state" | "pump", generation: number, playerTimeMs?: number) {
+    if (!this.video || !this.audio) throw new Error("sabr_tracks_missing");
+    this.requestId += 1;
+    return sabrPlaybackMessage(
+      type,
+      `${type}-${generation}-${this.requestId}`,
+      this.args.media,
+      this.video,
+      this.audio,
+      playerTimeMs,
+    );
+  }
   private active(generation: number): boolean {
     return !this.disposed && generation === this.generation;
   }
-
   private fail(): void {
     if (this.disposed || this.failed) return;
     this.failed = true;

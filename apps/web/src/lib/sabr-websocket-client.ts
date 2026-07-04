@@ -29,18 +29,16 @@ function booleanField(value: Record<string, unknown>, key: string): boolean | nu
 
 function parseSegment(value: Record<string, unknown>): SabrSegmentMessage | null {
   const itag = numberField(value, "itag");
-  const sequence = numberField(value, "sequence");
   const init = booleanField(value, "init");
   const startMs = numberField(value, "startMs");
   const durationMs = numberField(value, "durationMs");
   const length = numberField(value, "length");
-  if (itag === null || sequence === null || init === null) return null;
+  if (itag === null || init === null) return null;
   if (startMs === null || durationMs === null || length === null) return null;
   return {
     type: "segment",
     requestId: stringField(value, "requestId") ?? undefined,
     itag,
-    sequence,
     init,
     startMs,
     durationMs,
@@ -76,6 +74,12 @@ export class SabrWebSocketClient {
       this.readyResolve = resolve;
       this.readyReject = reject;
     });
+  }
+
+  send(message: SabrRequestMessage): void {
+    const socket = this.socket;
+    if (!socket || socket.readyState !== WebSocket.OPEN) throw new Error("sabr_ws_not_open");
+    socket.send(JSON.stringify(message));
   }
 
   request(message: SabrRequestMessage): Promise<SabrMediaChunk[]> {

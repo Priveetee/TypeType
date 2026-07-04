@@ -4,7 +4,6 @@ import type { SabrSourceBufferQueue } from "./sabr-source-buffer-queue";
 export type SabrTrackState = {
   format: SabrFormatDescriptor;
   queue: SabrSourceBufferQueue;
-  nextSequence: number;
 };
 
 export function wait(ms: number): Promise<void> {
@@ -29,16 +28,9 @@ export function bufferedAhead(media: HTMLMediaElement): number {
   return 0;
 }
 
-export function sequenceFor(format: SabrFormatDescriptor, timeMs: number): number {
-  const segmentMs = format.approxDurationMs / Math.max(1, format.endSegment);
-  const sequence = Math.floor(Math.max(0, timeMs) / Math.max(1, segmentMs)) + 1;
-  return Math.min(format.endSegment, Math.max(1, sequence));
-}
-
 export function appendChunks(track: SabrTrackState, chunks: SabrMediaChunk[]): void {
   for (const chunk of chunks) {
     if (chunk.metadata.itag !== track.format.itag) continue;
     track.queue.append(chunk.bytes);
-    if (!chunk.metadata.init) track.nextSequence = chunk.metadata.sequence + 1;
   }
 }
