@@ -8,6 +8,8 @@ export type SabrTrackState = {
   queue: SabrSourceBufferQueue;
 };
 
+export type InitialSeekState = "missing" | "pending" | "settled";
+
 export function wait(ms: number): Promise<void> {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
 }
@@ -18,6 +20,12 @@ export function waitForSourceOpen(source: MediaSource): Promise<void> {
     source.addEventListener("sourceopen", () => resolve(), { once: true });
     source.addEventListener("error", () => reject(new Error("media_source_error")), { once: true });
   });
+}
+
+export function disposeMediaSource(media: HTMLMediaElement, objectUrl: string): void {
+  media.removeAttribute("src");
+  media.load();
+  URL.revokeObjectURL(objectUrl);
 }
 
 export function bufferedAhead(media: HTMLMediaElement): number {
@@ -48,17 +56,20 @@ function hasBufferedRange(media: HTMLMediaElement, time: number): boolean {
   return false;
 }
 
-function seekToBufferedRange(media: HTMLMediaElement, time: number): boolean {
+function seekToBufferedRange(media: HTMLMediaElement, time: number): InitialSeekState {
   if (!hasBufferedRange(media, time)) {
     media.currentTime = time;
-    return false;
+    return "missing";
   }
   media.fastSeek(time);
-  return Math.abs(media.currentTime - time) < 1.5 && media.readyState >= 2;
+  return Math.abs(media.currentTime - time) < 1.5 && media.readyState >= 2 ? "settled" : "pending";
 }
 
-export function seekToInitialRange(media: HTMLMediaElement, timeSec: number | null): boolean {
-  return timeSec !== null && seekToBufferedRange(media, timeSec);
+export function seekToInitialRange(
+  media: HTMLMediaElement,
+  timeSec: number | null,
+): InitialSeekState {
+  return timeSec === null ? "missing" : seekToBufferedRange(media, timeSec);
 }
 
 export function initialSeekPlayerTimeMs(timeSec: number | null): number | undefined {

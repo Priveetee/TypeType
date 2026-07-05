@@ -5,6 +5,7 @@ import {
   BUFFER_TARGET_SEC,
   bufferedAhead,
   canReconnectWaiting,
+  disposeMediaSource,
   initialSeekPlayerTimeMs,
   type SabrTrackState,
   seekToInitialRange,
@@ -53,9 +54,7 @@ export class SabrMseController {
     this.args.media.removeEventListener("error", this.handleMediaError);
     this.audio?.queue.clear();
     this.video?.queue.clear();
-    this.args.media.removeAttribute("src");
-    this.args.media.load();
-    URL.revokeObjectURL(this.objectUrl);
+    disposeMediaSource(this.args.media, this.objectUrl);
   }
   private async initialize(): Promise<void> {
     const generation = this.generation;
@@ -97,9 +96,10 @@ export class SabrMseController {
           await wait(20);
           continue;
         }
-        if (seekToInitialRange(this.args.media, this.initialSeekTimeSec)) {
-          this.initialSeekTimeSec = null;
-          await wait(20);
+        const initialSeek = seekToInitialRange(this.args.media, this.initialSeekTimeSec);
+        if (initialSeek !== "missing") {
+          if (initialSeek === "settled") this.initialSeekTimeSec = null;
+          await wait(initialSeek === "settled" ? 20 : 100);
           continue;
         }
         await this.appendSegments(generation);
