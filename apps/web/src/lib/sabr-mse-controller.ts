@@ -17,7 +17,7 @@ import { connectActiveSabrSession } from "./sabr-session-connection";
 import { createSabrTrack } from "./sabr-track-state";
 import type { SabrWebSocketClient } from "./sabr-websocket-client";
 
-const BUFFER_TARGET_SEC = 24;
+const BUFFER_TARGET_SEC = 12;
 
 export class SabrMseController {
   private readonly mediaSource = new MediaSource();
