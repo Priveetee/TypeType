@@ -1,6 +1,8 @@
 import type { SabrFormatDescriptor, SabrMediaChunk } from "../types/sabr";
 import type { SabrSourceBufferQueue } from "./sabr-source-buffer-queue";
 
+export const BUFFER_TARGET_SEC = 12;
+
 export type SabrTrackState = {
   format: SabrFormatDescriptor;
   queue: SabrSourceBufferQueue;

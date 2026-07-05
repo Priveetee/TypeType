@@ -2,6 +2,7 @@ import type { SabrMseControllerArgs } from "../types/sabr";
 import { appendSabrInitSegment } from "./sabr-init-segment";
 import {
   appendChunks,
+  BUFFER_TARGET_SEC,
   bufferedAhead,
   canReconnectWaiting,
   initialSeekPlayerTimeMs,
@@ -20,8 +21,6 @@ import { connectActiveSabrSession } from "./sabr-session-connection";
 import { createSabrTrack } from "./sabr-track-state";
 import type { SabrWebSocketClient } from "./sabr-websocket-client";
 
-const BUFFER_TARGET_SEC = 12;
-
 export class SabrMseController {
   private readonly mediaSource = new MediaSource();
   private readonly objectUrl = URL.createObjectURL(this.mediaSource);
@@ -34,8 +33,11 @@ export class SabrMseController {
   private requestId = 0;
   private lastWaitingReconnectMs = 0;
   private initialSeekTimeSec: number | null = null;
+  private readonly args: SabrMseControllerArgs;
 
-  constructor(private readonly args: SabrMseControllerArgs) {}
+  constructor(args: SabrMseControllerArgs) {
+    this.args = args;
+  }
   start(): void {
     this.args.media.src = this.objectUrl;
     this.args.media.addEventListener("waiting", this.handleWaiting);
