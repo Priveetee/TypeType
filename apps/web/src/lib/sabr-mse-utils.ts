@@ -72,6 +72,7 @@ function seekToBufferedRange(media: HTMLMediaElement, time: number): InitialSeek
     setMediaTime(media, time);
     return "missing";
   }
+  if (Math.abs(media.currentTime - seekTime) < 0.5 && media.readyState >= 2) return "settled";
   if (!setMediaTime(media, seekTime)) return "pending";
   return Math.abs(media.currentTime - seekTime) < 0.5 && media.readyState >= 2
     ? "settled"
