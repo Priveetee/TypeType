@@ -19,22 +19,21 @@ import { detectProvider } from "../lib/provider";
 import { toWatchSourceUrl } from "../lib/watch-url";
 import { useDanmakuStore } from "../stores/danmaku-store";
 import { useWatchLayoutStore } from "../stores/watch-layout-store";
-import type { VideoStream } from "../types/stream";
 import { Toast } from "./toast";
 import { getWatchLayoutClasses } from "./watch-layout-classes";
+import type { WatchLayoutProps } from "./watch-layout-types";
 import { WatchPlayerOverlay } from "./watch-player-overlay";
 import { WatchSecondaryContent } from "./watch-secondary-content";
 import { WatchStage } from "./watch-stage";
 
-type Props = {
-  stream: VideoStream;
-  startTime: number;
-  currentParam: string;
-  navigating: boolean;
-  list?: string;
-  shuffle?: string;
-};
-export function WatchLayout({ stream, startTime, currentParam, navigating, list, shuffle }: Props) {
+export function WatchLayout({
+  stream,
+  startTime,
+  currentParam,
+  navigating,
+  list,
+  shuffle,
+}: WatchLayoutProps) {
   const isMobile = useMobile();
   const save = useSaveProgress(stream.id);
   const { settings, update, settingsReady } = useSettings();
@@ -59,6 +58,7 @@ export function WatchLayout({ stream, startTime, currentParam, navigating, list,
   const { toast, setToast } = useWatchToast(audioOnly.unavailable);
   function handleStageError() {
     if (audioOnlySrc) {
+      clearFailed();
       setAudioOnlyFailedKey(audioOnlyFailureKey);
       update.mutate({ audioOnlyPlayback: false });
       setToast("Audio only unavailable");
