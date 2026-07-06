@@ -1,13 +1,9 @@
 import type { AudioStreamItem, VideoStreamItem } from "../types/api";
-import type { SabrSourceConfig } from "../types/sabr";
 import type { VideoStream } from "../types/stream";
 import { request } from "./api";
 import { toApiUrl } from "./env";
 import { optionalBearer } from "./optional-bearer";
-import { SABR_VIDEO_TYPE } from "./sabr-video-loader";
 import type { MediaSrc } from "./vidstack";
-
-const PREFIX = "/player-sabr-ws/";
 
 type SabrCandidate = VideoStreamItem | AudioStreamItem;
 type SabrSessionDescriptor = {
@@ -21,12 +17,6 @@ type SabrSessionDescriptor = {
 
 function isSabrCandidate(item: SabrCandidate): boolean {
   return item.deliveryMethod === "sabr" && Boolean(item.sabrSessionUrl?.trim());
-}
-
-function mediaSrcValue(src: MediaSrc): string {
-  if (typeof src === "string") return src;
-  if (!("src" in src)) return "";
-  return typeof src.src === "string" ? src.src : "";
 }
 
 function playableVideos(stream: VideoStream): VideoStreamItem[] {
@@ -82,15 +72,6 @@ export async function resolveSabrHttpSessionSrc(stream: VideoStream): Promise<Me
     optionalBearer(),
   );
   return descriptorSrc(descriptor);
-}
-
-export function isSabrSessionSource(src: MediaSrc): boolean {
-  if (typeof src !== "string" && "type" in src && src.type !== SABR_VIDEO_TYPE) return false;
-  return mediaSrcValue(src).startsWith(PREFIX);
-}
-
-export function sabrSessionConfig(_src: MediaSrc): SabrSourceConfig | null {
-  return null;
 }
 
 export function hasSabrSession(stream: VideoStream): boolean {
