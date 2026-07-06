@@ -10,6 +10,7 @@ import {
   Menu,
   useVideoQualityOptions,
 } from "../lib/vidstack";
+import { useSabrQualityStore } from "../stores/sabr-quality-store";
 
 const qualityIcon: DefaultLayoutIcon = (props) => <ClipIcon {...props} />;
 const MENU_ITEMS_CLASS =
@@ -44,6 +45,36 @@ export function QualitySelector() {
   const menuRef = useRef<MenuInstance>(null);
   const { player, selectedVideoTrack } = useDashPlayerSnapshot();
   const options = useVideoQualityOptions(QUALITY_OPTIONS);
+  const sabrStreamId = useSabrQualityStore((state) => state.streamId);
+  const sabrOptions = useSabrQualityStore((state) => state.options);
+  const sabrSelectedItag = useSabrQualityStore((state) => state.selectedItag);
+  const selectSabrQuality = useSabrQualityStore((state) => state.selectQuality);
+
+  if (sabrStreamId && sabrOptions.length > 1) {
+    const selected =
+      sabrOptions.find((option) => option.itag === sabrSelectedItag) ?? sabrOptions[0];
+    function onSabrChange(value: string) {
+      const itag = Number(value);
+      if (!Number.isInteger(itag)) return;
+      selectSabrQuality(sabrStreamId, itag);
+      menuRef.current?.close();
+    }
+    return (
+      <Menu.Root ref={menuRef} className="vds-quality-menu vds-menu">
+        <DefaultMenuButton label="Quality" hint={selected.label} Icon={qualityIcon} />
+        <Menu.Items className={MENU_ITEMS_CLASS}>
+          <DefaultMenuRadioGroup
+            value={String(selected.itag)}
+            options={sabrOptions.map((option) => ({
+              label: option.label,
+              value: String(option.itag),
+            }))}
+            onChange={onSabrChange}
+          />
+        </Menu.Items>
+      </Menu.Root>
+    );
+  }
 
   const dashTrack = player ? activeDashTrack(player, selectedVideoTrack) : null;
   if (player && dashTrack) {

@@ -1,3 +1,4 @@
+import type { SabrQualityOption } from "../stores/sabr-quality-store";
 import type { AudioStreamItem, VideoStreamItem } from "../types/api";
 import type { VideoStream } from "../types/stream";
 import { request } from "./api";
@@ -34,6 +35,24 @@ function sleep(ms: number): Promise<void> {
 function playableVideos(stream: VideoStream): VideoStreamItem[] {
   const videos = [...(stream.videoOnlyStreams ?? []), ...(stream.videoStreams ?? [])];
   return videos.filter(isSabrCandidate);
+}
+
+function qualityLabel(video: VideoStreamItem): string {
+  if (video.height > 0) return `${video.height}p`;
+  return video.resolution || `itag ${video.itag}`;
+}
+
+export function sabrQualityOptions(stream: VideoStream): SabrQualityOption[] {
+  const grouped = new Map<number, VideoStreamItem>();
+  for (const video of playableVideos(stream)) {
+    const current = grouped.get(video.height);
+    const bitrate = video.bitrate ?? 0;
+    const currentBitrate = current?.bitrate ?? 0;
+    if (!current || bitrate > currentBitrate) grouped.set(video.height, video);
+  }
+  return [...grouped.values()]
+    .sort((left, right) => right.height - left.height || right.itag - left.itag)
+    .map((video) => ({ itag: video.itag, label: qualityLabel(video), height: video.height }));
 }
 
 function pickAudio(stream: VideoStream): AudioStreamItem | null {
@@ -79,8 +98,12 @@ export function resolveSabrSessionSrc(stream: VideoStream): MediaSrc | null {
   return src ? { src, type: "application/x-mpegurl" } : null;
 }
 
-export async function resolveSabrHttpSessionSrc(stream: VideoStream): Promise<MediaSrc | null> {
-  const video = playableVideos(stream)[0] ?? null;
+export async function resolveSabrHttpSessionSrc(
+  stream: VideoStream,
+  selectedItag: number | null,
+): Promise<MediaSrc | null> {
+  const videos = playableVideos(stream);
+  const video = videos.find((item) => item.itag === selectedItag) ?? videos[0] ?? null;
   if (!video?.sabrSessionUrl) return null;
   const descriptor = await request<SabrSessionDescriptor>(
     toApiUrl(video.sabrSessionUrl),

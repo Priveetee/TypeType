@@ -68,17 +68,18 @@ export function usePlayerError(
       ? bilibiliVariantCount(stream.videoOnlyStreams ?? [], stream.audioStreams ?? [])
       : 0;
 
-  const manifestSrc =
-    sabrManifest.src ??
-    resolveManifestSrc(stream, isLive, nativeFailed, qualityFailed, {
-      preferNativeManifest,
-      compatibilityMode: compatibilityFallback,
-      enableHighQualityPlayback: highQualityEnabled,
-      highQualityFailed,
-      hlsFailed,
-      allowServerManifests: preferServerManifests,
-      bilibiliVariant,
-    });
+  const fallbackSrc = resolveManifestSrc(stream, isLive, nativeFailed, qualityFailed, {
+    preferNativeManifest,
+    compatibilityMode: compatibilityFallback,
+    enableHighQualityPlayback: highQualityEnabled,
+    highQualityFailed,
+    hlsFailed,
+    allowServerManifests: preferServerManifests,
+    bilibiliVariant,
+  });
+  const manifestSrc = sabrEnabled
+    ? (sabrManifest.src ?? { src: "", type: "video/mp4" })
+    : fallbackSrc;
 
   const handleError = useCallback(() => {
     if (sabrEnabled) {
