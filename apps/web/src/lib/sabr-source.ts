@@ -51,6 +51,15 @@ function pickAudio(stream: VideoStream): AudioStreamItem | null {
   return audios.find((item) => isSabrCandidate(item) && item.codec === "mp4a.40.2") ?? null;
 }
 
+function searchParam(source: string | null | undefined, name: string): string | null {
+  if (!source) return null;
+  try {
+    return new URL(source, "https://typetype.invalid").searchParams.get(name);
+  } catch {
+    return null;
+  }
+}
+
 function directDashManifestUrl(
   sessionUrl: string,
   video: VideoStreamItem,
@@ -61,7 +70,11 @@ function directDashManifestUrl(
     url.pathname = url.pathname.replace("/sabr/session/", "/sabr/manifest/");
     url.searchParams.set("format", "dash");
     url.searchParams.set("videoItag", String(video.itag));
-    if (audio) url.searchParams.set("audioItag", String(audio.itag));
+    if (audio) {
+      url.searchParams.set("audioItag", String(audio.itag));
+      const audioTrackId = searchParam(audio.sabrSessionUrl, "audioTrackId");
+      if (audioTrackId) url.searchParams.set("audioTrackId", audioTrackId);
+    }
     url.searchParams.delete("session");
     url.searchParams.delete("playerTimeMs");
     return toApiUrl(`${url.pathname}${url.search}`);
