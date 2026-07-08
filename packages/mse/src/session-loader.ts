@@ -27,6 +27,13 @@ type LoadSessionArgs = {
   signal: AbortSignal;
 };
 
+type PlaybackWindowRequestArgs = Pick<
+  LoadSessionArgs,
+  "response" | "videoItag" | "audioItag" | "audioTrackId" | "policy"
+> & {
+  media: Pick<MediaSourceController, "bufferedRanges">;
+};
+
 class PlaybackWindowTerminalError extends Error {
   constructor(message: string) {
     super(message);
@@ -98,10 +105,7 @@ export async function refreshPlaybackWindow(
 }
 
 function playbackWindowRequest(
-  args: Pick<
-    LoadSessionArgs,
-    "response" | "videoItag" | "audioItag" | "audioTrackId" | "media" | "policy"
-  >,
+  args: PlaybackWindowRequestArgs,
   playerTimeMs: number,
 ): PlaybackWindowRequest {
   return {
