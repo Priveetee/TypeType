@@ -58,7 +58,8 @@ export function resolveManifestSrc(
   const allowLegacyServerManifests = allowServerManifests;
 
   if (provider === "youtube" && !isLive && !isShort) {
-    return resolveSabrSrc(stream) ?? { src: "", type: "video/mp4" };
+    const sabrSrc = resolveSabrSrc(stream);
+    if (sabrSrc) return sabrSrc;
   }
 
   if (stream.hlsUrl && !options?.hlsFailed && (isLive || isSignedHlsManifestUrl(stream.hlsUrl))) {
