@@ -1,0 +1,25 @@
+{
+  "name": "@typetype/mse",
+  "version": "0.1.0",
+  "description": "MSE playback engine for TypeType",
+  "license": "MIT",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "build": "bun run build:types && bun build src/index.ts --target browser --format esm --outfile dist/index.js",
+    "build:types": "tsc --emitDeclarationOnly",
+    "check": "biome check . && tsc --noEmit",
+    "format": "biome format --write .",
+    "test": "bun test"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.1",
+    "typescript": "~6.0.3"
+  }
+}
