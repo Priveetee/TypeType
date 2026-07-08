@@ -3,8 +3,6 @@ import {
   type LoadedSession,
   loadPlaybackSession,
   PlaybackWindowRecoveryError,
-  PlaybackWindowTerminalError,
-  PlaybackWindowTimeoutError,
 } from "./session-loader";
 import type { TypeTypeMseConfig, TypeTypeMseQuality } from "./types";
 
@@ -76,6 +74,7 @@ async function recoverWithFreshSessions(
   selection: TrackSelection,
   retryVideoItags: number[],
 ): Promise<LoadedSession> {
+  let lastError: unknown = null;
   for (const videoItag of retryVideoItags) {
     if (videoItag === selection.videoItag) continue;
     try {
@@ -92,18 +91,11 @@ async function recoverWithFreshSessions(
       return await loadSelectedSession(args, response, { ...selection, videoItag });
     } catch (error) {
       if (isAbortError(error)) throw error;
-      if (!isRecoverableFreshSessionError(error)) throw error;
+      lastError = error;
     }
   }
+  if (lastError instanceof Error) throw lastError;
   throw new Error("Playback window recovery failed");
-}
-
-function isRecoverableFreshSessionError(error: unknown): boolean {
-  return (
-    error instanceof PlaybackWindowRecoveryError ||
-    error instanceof PlaybackWindowTerminalError ||
-    error instanceof PlaybackWindowTimeoutError
-  );
 }
 
 function isAbortError(error: unknown): boolean {

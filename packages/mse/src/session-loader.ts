@@ -27,7 +27,7 @@ type LoadSessionArgs = {
   signal: AbortSignal;
 };
 
-export class PlaybackWindowTerminalError extends Error {
+class PlaybackWindowTerminalError extends Error {
   constructor(message: string) {
     super(message);
     this.name = "PlaybackWindowTerminalError";
@@ -45,7 +45,7 @@ export class PlaybackWindowRecoveryError extends PlaybackWindowTerminalError {
   }
 }
 
-export class PlaybackWindowTimeoutError extends Error {
+class PlaybackWindowTimeoutError extends Error {
   constructor() {
     super("Playback window was not ready in time");
     this.name = "PlaybackWindowTimeoutError";

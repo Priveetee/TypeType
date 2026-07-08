@@ -42,6 +42,7 @@ test("recovers terminal seek windows with a fresh lower video itag session", asy
       playback: {
         create: async (request) => {
           createVideoItags.push(request.videoItag);
+          if (request.videoItag === 248) throw new Error("No SABR video for this video");
           return response(`fresh-${request.videoItag}`, request.videoId);
         },
         window: async (sessionId, request): Promise<PlaybackWindow> => {
@@ -54,7 +55,7 @@ test("recovers terminal seek windows with a fresh lower video itag session", asy
               retryAfterMs: null,
               terminalError: "video:137:12 status=3 protected no-media",
               recoveryAction: "retry_fresh_session_lower_video_itag",
-              retryVideoItags: [136, 135, 134],
+              retryVideoItags: [248, 136, 135],
               manifest: null,
             };
           }
@@ -99,7 +100,7 @@ test("recovers terminal seek windows with a fresh lower video itag session", asy
   expect(session.response.sessionId).toBe("fresh-136");
   expect(session.videoItag).toBe(136);
   expect(video.currentTime).toBe(60);
-  expect(createVideoItags).toEqual([136]);
+  expect(createVideoItags).toEqual([248, 136]);
   expect(attached).toHaveLength(1);
   expect(requests.map((request) => request.videoItag)).toEqual([137, 136]);
 });
