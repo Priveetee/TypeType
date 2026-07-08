@@ -1,5 +1,4 @@
 export type {
-  AnyMediaProvider,
   MediaContext,
   MediaProviderAdapter,
   MediaProviderLoader,

@@ -6,6 +6,7 @@ export class MediaSourceController {
   private objectUrl: string | null = null;
   private audioQueue: AppendQueue | null = null;
   private videoQueue: AppendQueue | null = null;
+  private mediaSource: MediaSource | null = null;
 
   constructor(private readonly video: HTMLVideoElement) {}
 
@@ -19,11 +20,16 @@ export class MediaSourceController {
   async attach(manifest: PlaybackManifest): Promise<void> {
     this.detach();
     const mediaSource = new MediaSource();
+    this.mediaSource = mediaSource;
     this.objectUrl = URL.createObjectURL(mediaSource);
     this.video.src = this.objectUrl;
-    await new Promise<void>((resolve) => {
-      mediaSource.addEventListener("sourceopen", () => resolve(), { once: true });
+    await new Promise<void>((resolve, reject) => {
+      const sourceOpen = () => resolve();
+      const sourceClose = () => reject(new DOMException("Operation aborted", "AbortError"));
+      mediaSource.addEventListener("sourceopen", sourceOpen, { once: true });
+      mediaSource.addEventListener("sourceclose", sourceClose, { once: true });
     });
+    if (this.mediaSource !== mediaSource) throw new DOMException("Operation aborted", "AbortError");
     mediaSource.duration = manifest.durationMs > 0 ? manifest.durationMs / 1000 : Number.NaN;
     this.audioQueue = new AppendQueue(mediaSource.addSourceBuffer(manifest.audio.mime));
     this.videoQueue = new AppendQueue(mediaSource.addSourceBuffer(manifest.video.mime));
@@ -51,12 +57,14 @@ export class MediaSourceController {
   detach(): void {
     this.audioQueue?.destroy();
     this.videoQueue?.destroy();
+    const hadObjectUrl = this.objectUrl !== null;
     this.audioQueue = null;
     this.videoQueue = null;
+    this.mediaSource = null;
     if (this.objectUrl) URL.revokeObjectURL(this.objectUrl);
     this.objectUrl = null;
     this.video.removeAttribute("src");
-    this.video.load();
+    if (hadObjectUrl) this.video.load();
   }
 
   track(kind: TrackKind, manifest: PlaybackManifest): ManifestTrack {

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { isIosDevice } from "../lib/ios-device";
 import { SABR_VIDEO_PROVIDER_LOADERS, sabrMediaSrc } from "../lib/sabr-vidstack-loader";
-import type { AnyMediaProvider } from "../lib/vidstack";
+import type { MediaProviderAdapter } from "../lib/vidstack";
 import { isVideoProvider, MediaPlayer, MediaProvider } from "../lib/vidstack";
 import { patchVidstackProviderLoaders } from "../lib/vidstack-provider-loader-patch";
 import { AudioCenterToggle } from "./audio-center-toggle";
@@ -68,7 +68,7 @@ export function VideoPlayer({
 }: VideoPlayerProps) {
   const ios = isIosDevice();
   const playerClassName = videoPlayerClassName(audioOnly, className);
-  const [sabrProvider, setSabrProvider] = useState<AnyMediaProvider | null>(null);
+  const [sabrProvider, setSabrProvider] = useState<MediaProviderAdapter | null>(null);
   const activeSrc = sabrConfig ? sabrMediaSrc(sabrConfig.videoId) : src;
   const { handleProviderChange, handleError, handleEnded } = useVideoPlayerEvents({
     src: activeSrc,
@@ -76,7 +76,7 @@ export function VideoPlayer({
     onEnded,
   });
 
-  function handlePlayerProviderChange(provider: AnyMediaProvider | null) {
+  function handlePlayerProviderChange(provider: MediaProviderAdapter | null) {
     handleProviderChange(provider);
     setSabrProvider(sabrConfig && isVideoProvider(provider) ? provider : null);
   }
