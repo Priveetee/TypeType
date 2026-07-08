@@ -7,6 +7,7 @@
     "strict": true,
     "declaration": true,
     "emitDeclarationOnly": false,
+    "rootDir": "src",
     "outDir": "dist",
     "skipLibCheck": true,
     "noUncheckedIndexedAccess": true,

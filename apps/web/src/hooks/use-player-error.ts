@@ -29,6 +29,8 @@ type UsePlayerErrorReturn = {
   seekStartTime: number | null;
 };
 
+const SABR_PLACEHOLDER_SRC: MediaSrc = { src: "", type: "video/mp4" };
+
 export function usePlayerError(
   stream: VideoStream,
   isLive: boolean,
@@ -79,7 +81,7 @@ export function usePlayerError(
     allowServerManifests: preferServerManifests,
     bilibiliVariant,
   });
-  const manifestSrc = sabrEnabled ? { src: "", type: "video/mp4" } : fallbackSrc;
+  const manifestSrc = sabrEnabled ? SABR_PLACEHOLDER_SRC : fallbackSrc;
   const handleError = useCallback(() => {
     if (sabrEnabled) {
       recordClientEvent("player.sabr_failed", { video: debugVideo });
