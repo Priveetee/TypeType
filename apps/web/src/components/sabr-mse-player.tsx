@@ -1,6 +1,7 @@
 import { TypeTypeMsePlayer, type TypeTypeMseQuality } from "@typetype/mse";
 import { useEffect, useRef } from "react";
 import { toAbsoluteApiUrl } from "../lib/env";
+import { playWithMuteFallback } from "../lib/sabr-playback-retry";
 import type { SabrPlaybackConfig } from "../lib/sabr-source";
 import { registerSabrVidstackControls } from "../lib/sabr-vidstack-bridge";
 import { useAuthStore } from "../stores/auth-store";
@@ -124,7 +125,9 @@ export function SabrMsePlayer({
     void engine
       .load()
       .then(() => {
-        if (autoplay || pendingPlayRef.current) void engine.play().catch(() => undefined);
+        if (autoplay || pendingPlayRef.current) {
+          void playWithMuteFallback(engine, video).catch(() => undefined);
+        }
       })
       .catch((error: unknown) => {
         if (!isAbortError(error)) handlersRef.current.onError();
