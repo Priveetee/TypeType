@@ -74,7 +74,6 @@ async function attachSession(
   if (!MediaSourceController.supported(manifest)) throw new Error("MSE codecs are not supported");
   args.scheduler.reset();
   await args.media.attach(manifest);
-  if (args.startTimeMs > 0) args.video.currentTime = args.startTimeMs / 1000;
   await args.scheduler.appendInit(manifest, args.signal);
   return {
     response,

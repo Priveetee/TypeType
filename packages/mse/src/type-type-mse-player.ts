@@ -1,3 +1,4 @@
+import { decodeStartMs, runDecodePreroll } from "./decode-preroll";
 import { EventEmitter } from "./event-emitter";
 import { createPlayerDeps, type PlayerDeps } from "./player-deps";
 import { emitManifest, emitQuality } from "./player-events";
@@ -131,6 +132,7 @@ export class TypeTypeMsePlayer {
     signal: AbortSignal,
     quality?: TypeTypeMseQuality,
   ): Promise<LoadedSession> {
+    const resumePlayback = !this.video.paused;
     const session = await loadPlayerSession({
       deps: this.deps,
       config: this.config,
@@ -142,8 +144,13 @@ export class TypeTypeMsePlayer {
       signal,
     });
     if (!this.isCurrent(revision)) throw new DOMException("Operation aborted", "AbortError");
+    const startMs = decodeStartMs(session.manifest, startTimeMs);
+    if (startTimeMs > 0) this.video.currentTime = startMs / 1000;
     this.session = session;
     await this.deps.loop.fillOnce();
+    if (startTimeMs > startMs) {
+      await runDecodePreroll(this.video, startTimeMs, resumePlayback, signal);
+    }
     this.deps.loop.start();
     emitManifest(this.emitter, session.response, session);
     this.setState("ready");
