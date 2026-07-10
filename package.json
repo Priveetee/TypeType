@@ -18,8 +18,8 @@
     "format": "biome format --write .",
     "knip": "knip",
     "sherif": "sherif",
-    "test": "bun run --cwd packages/mse test",
-    "test:coverage": "bun run --cwd packages/mse test:coverage"
+    "test": "bun run --cwd packages/mse test && bun run --cwd apps/web test",
+    "test:coverage": "bun run --cwd packages/mse test:coverage && bun run --cwd apps/web test:coverage"
   },
   "workspaces": [
     "apps/*",
