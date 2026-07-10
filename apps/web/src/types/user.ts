@@ -123,6 +123,7 @@ export type SettingsItem = {
   sponsorBlockSkipNonMusicOnlyOnMusicVideos: boolean;
   sponsorBlockMuteInsteadOfSkip: boolean;
   disableWatchHistory: boolean;
+  deArrowEnabled: boolean;
   hideContinueWatching: boolean;
   hideHomeRecommendations: boolean;
   hideRelatedVideos: boolean;

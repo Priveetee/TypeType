@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { memo, useEffect, useRef } from "react";
 import { useClientLocale } from "../hooks/use-client-locale";
+import { useDeArrow } from "../hooks/use-dearrow";
 import { useVideoCardPreview } from "../hooks/use-video-card-preview";
 import { formatDuration, formatPublishedDate, formatViews } from "../lib/format";
 import { watchListSearch } from "../lib/watch-url";
@@ -23,6 +24,9 @@ function VideoCardComponent({ stream, onOpen, onImpression, listId }: Props) {
   const locale = useClientLocale();
   const rootRef = useRef<HTMLElement | null>(null);
   const preview = useVideoCardPreview(stream);
+  const deArrow = useDeArrow(stream.id).data;
+  const title = deArrow?.title ?? stream.title;
+  const thumbnail = deArrow?.thumbnailUrl ?? stream.thumbnail;
   const publishedText = formatPublishedDate(stream.publishedAt, undefined, locale);
   const watchSearch = watchListSearch(stream.id, listId);
 
@@ -64,8 +68,8 @@ function VideoCardComponent({ stream, onOpen, onImpression, listId }: Props) {
       >
         <div className="relative aspect-video overflow-hidden rounded-xl bg-surface-strong sm:rounded-lg">
           <img
-            src={stream.thumbnail}
-            alt={stream.title}
+            src={thumbnail}
+            alt={title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
             loading="lazy"
             decoding="async"
@@ -110,7 +114,7 @@ function VideoCardComponent({ stream, onOpen, onImpression, listId }: Props) {
             onTouchStart={onOpen}
             onClick={onOpen}
           >
-            {stream.title}
+            {title}
           </Link>
           {stream.channelUrl ? (
             <ChannelRouteLink

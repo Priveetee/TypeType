@@ -33,6 +33,7 @@ const DEFAULTS: SettingsItem = {
   sponsorBlockSkipNonMusicOnlyOnMusicVideos: false,
   sponsorBlockMuteInsteadOfSkip: false,
   disableWatchHistory: false,
+  deArrowEnabled: false,
   hideContinueWatching: false,
   hideHomeRecommendations: false,
   hideRelatedVideos: false,

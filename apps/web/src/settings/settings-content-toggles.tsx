@@ -31,6 +31,7 @@ function useHideEverythingTrigger() {
 type ToggleKey = Extract<
   keyof SettingsItem,
   | "autoplay"
+  | "deArrowEnabled"
   | "hideContinueWatching"
   | "hideHomeRecommendations"
   | "hideRelatedVideos"
@@ -67,6 +68,12 @@ const WATCH_OPTIONS: ToggleOption[] = [
 ];
 
 const DISCOVERY_OPTIONS: ToggleOption[] = [
+  {
+    key: "deArrowEnabled",
+    label: "DeArrow titles and thumbnails",
+    description: "Use community-written titles and representative thumbnails for YouTube videos.",
+    area: "YouTube",
+  },
   {
     key: "hideContinueWatching",
     label: "Continue watching",

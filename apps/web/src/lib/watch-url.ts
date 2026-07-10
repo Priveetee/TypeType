@@ -30,6 +30,11 @@ function youtubeVideoIdFromUrl(value: string): string | null {
   }
 }
 
+export function youtubeVideoId(value: string): string | null {
+  const trimmed = value.trim();
+  return YOUTUBE_VIDEO_ID_PATTERN.test(trimmed) ? trimmed : youtubeVideoIdFromUrl(trimmed);
+}
+
 export function toWatchSourceUrl(value: string): string {
   const trimmed = value.trim();
   if (YOUTUBE_VIDEO_ID_PATTERN.test(trimmed)) {
