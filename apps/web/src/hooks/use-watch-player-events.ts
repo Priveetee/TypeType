@@ -9,9 +9,17 @@ type Args = {
   mutate: (positionMs: number) => void;
   onPlay?: () => void;
   onEnded: () => void;
+  onTimeUpdate?: (positionMs: number) => void;
 };
 
-export function useWatchPlayerEvents({ stream, isLive, mutate, onPlay, onEnded }: Args) {
+export function useWatchPlayerEvents({
+  stream,
+  isLive,
+  mutate,
+  onPlay,
+  onEnded,
+  onTimeUpdate,
+}: Args) {
   const playingRef = useRef(false);
   const streamIdRef = useRef(stream.id);
   if (streamIdRef.current !== stream.id) {
@@ -41,7 +49,10 @@ export function useWatchPlayerEvents({ stream, isLive, mutate, onPlay, onEnded }
   return {
     positionRef,
     shouldAutoplay: () => playingRef.current,
-    handleTimeUpdate: sessionReporting.handleTimeUpdate,
+    handleTimeUpdate: (positionMs: number) => {
+      sessionReporting.handleTimeUpdate(positionMs);
+      onTimeUpdate?.(positionMs);
+    },
     handlePlay,
     handlePause: handleTrackedPause,
     handleSeeked: sessionReporting.handleSeeked,

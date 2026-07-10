@@ -149,6 +149,7 @@ export function useWatchEndedNavigation({
   }, [settingsReady, autoplay, skipPlaylistAutoplayScreen, delayMs, navigate]);
 
   return {
+    nextTarget,
     handleEnded,
     autoplayState: target
       ? {

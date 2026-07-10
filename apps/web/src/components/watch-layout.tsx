@@ -8,9 +8,8 @@ import { useSabrPlaybackConfig } from "../hooks/use-sabr-playback-config";
 import { useSettings } from "../hooks/use-settings";
 import { useVolumeSync } from "../hooks/use-volume-sync";
 import { useWatchAudioOnlyPlayback } from "../hooks/use-watch-audio-only-playback";
-import { useWatchEndedNavigation } from "../hooks/use-watch-ended-navigation";
 import { useWatchVttAssets } from "../hooks/use-watch-layout-assets";
-import { useWatchPlayerEvents } from "../hooks/use-watch-player-events";
+import { useWatchPlaybackFlow } from "../hooks/use-watch-playback-flow";
 import { useWatchPlayerSourceState } from "../hooks/use-watch-player-source-state";
 import { useWatchPlaylist } from "../hooks/use-watch-playlist";
 import { useWatchSponsorBlock } from "../hooks/use-watch-sponsorblock";
@@ -57,24 +56,17 @@ export function WatchLayout({
     sponsor.segments,
     settings.sponsorBlockShowChapters,
   );
-  const autoplay = useWatchEndedNavigation({
+  const { autoplay, playerEvents } = useWatchPlaybackFlow({
+    stream,
+    settings,
     settingsReady,
-    autoplay: settings.autoplay,
-    countdownSeconds: settings.autoplayCountdownSeconds,
-    skipPlaylistAutoplayScreen: settings.skipPlaylistAutoplayScreen,
-    hideRelatedVideos: settings.hideRelatedVideos,
+    isLive,
     nextParam: playlist.nextParam,
     nextVideo: playlist.nextVideo,
     list,
     shuffle,
-    related: stream.related,
-  });
-  const playerEvents = useWatchPlayerEvents({
-    stream,
-    isLive,
     mutate: save.mutate,
     onPlay: player.clearFailed,
-    onEnded: autoplay.handleEnded,
   });
   const audioOnly = useWatchAudioOnlyPlayback({
     currentParam,
