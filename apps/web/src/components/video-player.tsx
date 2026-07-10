@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { isIosDevice } from "../lib/ios-device";
+import { adaptiveSourceNeedsVideoProvider } from "../lib/media-source-view-type";
 import { SABR_VIDEO_PROVIDER_LOADERS, sabrMediaSrc } from "../lib/sabr-vidstack-loader";
 import type { MediaProviderAdapter } from "../lib/vidstack";
 import { isVideoProvider, MediaPlayer, MediaProvider } from "../lib/vidstack";
@@ -72,6 +73,7 @@ export function VideoPlayer({
   const sabrVideoId = sabrConfig?.videoId;
   const sabrSrc = useMemo(() => (sabrVideoId ? sabrMediaSrc(sabrVideoId) : null), [sabrVideoId]);
   const activeSrc = sabrSrc ?? src;
+  const viewType = audioOnly && !adaptiveSourceNeedsVideoProvider(activeSrc) ? "audio" : "video";
   const { handleProviderChange, handleError, handleEnded } = useVideoPlayerEvents({
     src: activeSrc,
     onError,
@@ -87,7 +89,7 @@ export function VideoPlayer({
     <MediaPlayer
       className={playerClassName}
       src={activeSrc}
-      viewType={audioOnly ? "audio" : "video"}
+      viewType={viewType}
       streamType={streamType}
       logLevel="warn"
       crossOrigin
