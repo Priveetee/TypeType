@@ -12,10 +12,12 @@ export { MEMBER_ONLY_MESSAGE };
 export function streamQueryOptions(url: string, useAuthenticatedStream = false, enabled = true) {
   return queryOptions({
     queryKey: ["stream", url, useAuthenticatedStream ? "auth" : "anon"],
-    queryFn: () =>
-      fetchStream(url, useAuthenticatedStream ? "authenticated_first" : "anonymous_first").then(
-        (r) => mapStreamResponse(r, url),
-      ),
+    queryFn: ({ signal }) =>
+      fetchStream(
+        url,
+        useAuthenticatedStream ? "authenticated_first" : "anonymous_first",
+        signal,
+      ).then((r) => mapStreamResponse(r, url)),
     enabled: enabled && url.startsWith("http"),
     staleTime: 3 * 60 * 1000,
     gcTime: 30 * 60 * 1000,

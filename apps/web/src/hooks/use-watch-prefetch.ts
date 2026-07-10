@@ -5,9 +5,9 @@ import { useInstance } from "./use-instance";
 import { useSettings } from "./use-settings";
 import { streamQueryOptions } from "./use-stream";
 
-const HOVER_DELAY_MS = 220;
+const HOVER_DELAY_MS = 90;
 const PREFETCH_COOLDOWN_MS = 10 * 1000;
-const MAX_IN_FLIGHT_PREFETCH = 2;
+const MAX_IN_FLIGHT_PREFETCH = 3;
 
 const inFlight = new Set<string>();
 const prefetchedAt = new Map<string, number>();

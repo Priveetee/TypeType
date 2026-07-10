@@ -7,34 +7,36 @@ import { API_BASE as BASE } from "./env";
 
 type StreamFetchMode = "anonymous_first" | "authenticated_first";
 
-function streamInit(token: string | null): RequestInit {
-  if (!token) return { cache: "no-store" };
+function streamInit(token: string | null, signal?: AbortSignal): RequestInit {
+  if (!token) return { cache: "no-store", signal };
   return {
     cache: "no-store",
     headers: { Authorization: `Bearer ${token}` },
+    signal,
   };
 }
 
 export async function fetchStream(
   url: string,
   mode: StreamFetchMode = "anonymous_first",
+  signal?: AbortSignal,
 ): Promise<StreamResponse> {
   const endpoint = `${BASE}/streams?url=${encodeURIComponent(url)}`;
   const token = useAuthStore.getState().token;
   const video = sanitizeVideoContext(url) ?? "unknown";
   if (token && mode === "authenticated_first") {
     recordClientEvent("stream.fetch_start", { authed: true, video });
-    return request<StreamResponse>(endpoint, streamInit(token));
+    return request<StreamResponse>(endpoint, streamInit(token, signal));
   }
   recordClientEvent("stream.fetch_start", { authed: false, video });
   try {
-    const result = await request<StreamResponse>(endpoint, streamInit(null));
+    const result = await request<StreamResponse>(endpoint, streamInit(null, signal));
     recordClientEvent("stream.fetch_success", { authed: false, video, hasHls: !!result.hlsUrl });
     return result;
   } catch (error) {
     if (!token || !(error instanceof ApiError)) throw error;
     recordClientEvent("stream.fetch_authenticated_fallback", { status: error.status, video });
-    const result = await request<StreamResponse>(endpoint, streamInit(token));
+    const result = await request<StreamResponse>(endpoint, streamInit(token, signal));
     recordClientEvent("stream.fetch_success", { authed: true, video, hasHls: !!result.hlsUrl });
     return result;
   }
