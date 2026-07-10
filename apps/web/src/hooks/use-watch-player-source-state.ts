@@ -1,5 +1,6 @@
 import { type MutableRefObject, useRef } from "react";
 import type { MediaSrc } from "../lib/vidstack";
+import { consumeWatchAutoplayIntent } from "../lib/watch-autoplay-intent";
 import { buildWatchPlayerKey } from "../lib/watch-player-key";
 import { useWatchInitialAudioSource } from "./use-watch-initial-audio-source";
 import { useWatchSourceStartTime } from "./use-watch-source-start-time";
@@ -60,7 +61,10 @@ export function useWatchPlayerSourceState(args: Args) {
     autoplayRef.current = {
       playerKey,
       settingsReady: args.settingsReady,
-      autoplay: args.retryKey === 0 && args.settingsReady && args.shouldAutoplay(),
+      autoplay:
+        args.retryKey === 0 &&
+        args.settingsReady &&
+        (args.shouldAutoplay() || consumeWatchAutoplayIntent()),
     };
   }
   const waitForInitialAudioSource = useWatchInitialAudioSource(args);
