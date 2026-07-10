@@ -69,10 +69,8 @@ export function VideoPlayer({
   const ios = isIosDevice();
   const playerClassName = videoPlayerClassName(audioOnly, className);
   const [sabrProvider, setSabrProvider] = useState<MediaProviderAdapter | null>(null);
-  const sabrSrc = useMemo(
-    () => (sabrConfig ? sabrMediaSrc(sabrConfig.videoId) : null),
-    [sabrConfig],
-  );
+  const sabrVideoId = sabrConfig?.videoId;
+  const sabrSrc = useMemo(() => (sabrVideoId ? sabrMediaSrc(sabrVideoId) : null), [sabrVideoId]);
   const activeSrc = sabrSrc ?? src;
   const { handleProviderChange, handleError, handleEnded } = useVideoPlayerEvents({
     src: activeSrc,

@@ -1,7 +1,9 @@
 import { TypeTypeMsePlayer, type TypeTypeMseQuality } from "@typetype/mse";
 import { useEffect, useRef } from "react";
+import { useLatestValue } from "../hooks/use-latest-value";
+import { useSabrQualitySwitch } from "../hooks/use-sabr-quality-switch";
 import { toAbsoluteApiUrl } from "../lib/env";
-import { playWithMuteFallback } from "../lib/sabr-playback-retry";
+import { isAbortError, playWithMuteFallback } from "../lib/sabr-playback-retry";
 import type { SabrPlaybackConfig } from "../lib/sabr-source";
 import { registerSabrVidstackControls } from "../lib/sabr-vidstack-bridge";
 import { useAuthStore } from "../stores/auth-store";
@@ -41,12 +43,6 @@ function runSeek(
     });
 }
 
-function isAbortError(error: unknown): boolean {
-  return error instanceof DOMException
-    ? error.name === "AbortError"
-    : error instanceof Error && error.name === "AbortError";
-}
-
 export function SabrMsePlayer({
   config,
   video,
@@ -65,16 +61,15 @@ export function SabrMsePlayer({
   const qualityRef = useRef<TypeTypeMseQuality | null>(null);
   const pendingPlayRef = useRef(false);
   const seekingRef = useRef(false);
-  const handlersRef = useRef({
+  const latestConfig = useLatestValue(config);
+  const latestHandlers = useLatestValue({
+    autoplay,
     onError,
     onSeekReady,
     onPositionReaderChange,
+    onVolumeChange,
   });
-  handlersRef.current = {
-    onError,
-    onSeekReady,
-    onPositionReaderChange,
-  };
+  useSabrQualitySwitch(config, engineRef, qualityRef, seekingRef);
   useEffect(() => {
     if (!video || !settingsReady) return;
     video.volume = Math.min(1, Math.max(0, initialVolume));
@@ -82,23 +77,28 @@ export function SabrMsePlayer({
   }, [initialMuted, initialVolume, settingsReady, video]);
   useEffect(() => {
     if (!video) return;
+    const initialConfig = latestConfig();
     const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
     const engine = new TypeTypeMsePlayer(video, {
       endpoint: toAbsoluteApiUrl(""),
       videoId: config.videoId,
-      videoItag: config.videoItag,
-      audioItag: config.audioItag,
-      audioTrackId: config.audioTrackId,
+      videoItag: initialConfig.videoItag,
+      audioItag: initialConfig.audioItag,
+      audioTrackId: initialConfig.audioTrackId,
       startTimeMs: Math.max(0, Math.round(startTime)),
       headers,
     });
     engineRef.current = engine;
-    qualityRef.current = { videoItag: config.videoItag };
-    const offError = engine.on("error", () => handlersRef.current.onError());
-    const volumeChange = () => onVolumeChange?.(video.volume, video.muted);
+    qualityRef.current = {
+      videoItag: initialConfig.videoItag,
+      audioItag: initialConfig.audioItag,
+      audioTrackId: initialConfig.audioTrackId,
+    };
+    const offError = engine.on("error", () => latestHandlers().onError());
+    const volumeChange = () => latestHandlers().onVolumeChange?.(video.volume, video.muted);
     const seeking = () => {
       const next = positionMs(video);
-      if (!seekingRef.current) runSeek(engine, next, seekingRef, handlersRef.current.onError);
+      if (!seekingRef.current) runSeek(engine, next, seekingRef, latestHandlers().onError);
     };
     video.addEventListener("volumechange", volumeChange);
     video.addEventListener("seeking", seeking);
@@ -118,32 +118,32 @@ export function SabrMsePlayer({
           engine,
           Math.max(0, Math.round(seconds * 1000)),
           seekingRef,
-          handlersRef.current.onError,
+          latestHandlers().onError,
         ),
     });
     seekingRef.current = true;
     void engine
       .load()
       .then(() => {
-        if (autoplay || pendingPlayRef.current) {
+        if (latestHandlers().autoplay || pendingPlayRef.current) {
           void playWithMuteFallback(engine, video).catch(() => undefined);
         }
       })
       .catch((error: unknown) => {
-        if (!isAbortError(error)) handlersRef.current.onError();
+        if (!isAbortError(error)) latestHandlers().onError();
       })
       .finally(() => {
         seekingRef.current = false;
       });
-    handlersRef.current.onSeekReady((seconds) =>
+    latestHandlers().onSeekReady((seconds) =>
       runSeek(
         engine,
         Math.max(0, Math.round(seconds * 1000)),
         seekingRef,
-        handlersRef.current.onError,
+        latestHandlers().onError,
       ),
     );
-    handlersRef.current.onPositionReaderChange(() => positionMs(video));
+    latestHandlers().onPositionReaderChange(() => positionMs(video));
     return () => {
       offError();
       unregisterControls();
@@ -153,23 +153,8 @@ export function SabrMsePlayer({
       engineRef.current = null;
       pendingPlayRef.current = false;
       video.autoplay = false;
-      handlersRef.current.onPositionReaderChange(null);
+      latestHandlers().onPositionReaderChange(null);
     };
-  }, [autoplay, config, onVolumeChange, startTime, token, video]);
-  useEffect(() => {
-    const quality = { videoItag: config.videoItag, audioItag: config.audioItag };
-    const previous = qualityRef.current;
-    if (!previous || previous.videoItag === quality.videoItag) return;
-    qualityRef.current = quality;
-    seekingRef.current = true;
-    void engineRef.current
-      ?.setQuality(quality)
-      .catch((error: unknown) => {
-        if (!isAbortError(error)) handlersRef.current.onError();
-      })
-      .finally(() => {
-        seekingRef.current = false;
-      });
-  }, [config.audioItag, config.videoItag]);
+  }, [config.videoId, latestConfig, latestHandlers, startTime, token, video]);
   return null;
 }

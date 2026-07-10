@@ -4,12 +4,8 @@ import { createPlayerDeps, type PlayerDeps } from "./player-deps";
 import { emitManifest, emitQuality } from "./player-events";
 import { ensureCurrentOperation, ensurePlayerAlive } from "./player-operation";
 import { loadPlayerSession } from "./player-session-loader";
-import {
-  bufferedEndMs,
-  createSnapshot,
-  currentTimeMs,
-  type TypeTypeMseSnapshot,
-} from "./player-snapshot";
+import { createSnapshot, currentTimeMs, type TypeTypeMseSnapshot } from "./player-snapshot";
+import { PlayerState } from "./player-state";
 import { SeekController } from "./seek-controller";
 import type { LoadedSession } from "./session-loader";
 import type {
@@ -17,18 +13,17 @@ import type {
   TypeTypeMseEventType,
   TypeTypeMseListener,
   TypeTypeMseQuality,
-  TypeTypeMseState,
 } from "./types";
 
 export class TypeTypeMsePlayer {
   private readonly emitter = new EventEmitter();
   private readonly deps: PlayerDeps;
+  private readonly playerState = new PlayerState(this.emitter);
   private readonly seekController = new SeekController();
   private session: LoadedSession | null = null;
   private operation = new AbortController();
   private revision = 0;
   private destroyed = false;
-  private state: TypeTypeMseState = "idle";
 
   constructor(
     private readonly video: HTMLVideoElement,
@@ -40,8 +35,10 @@ export class TypeTypeMsePlayer {
       emitter: this.emitter,
       session: () => this.session,
       signal: () => this.operation.signal,
-      state: (state) => this.setState(state),
-      error: (error) => this.handleError(error),
+      state: (state) => this.playerState.set(state),
+      error: (error) => {
+        if (!this.destroyed) this.playerState.fail(error);
+      },
     });
     this.deps.mediaEvents.start();
   }
@@ -53,7 +50,7 @@ export class TypeTypeMsePlayer {
     ensurePlayerAlive(this.destroyed);
     const revision = this.nextRevision();
     const signal = this.operation.signal;
-    this.setState("loading");
+    this.playerState.set("loading");
     const startTimeMs = Math.max(0, Math.round(this.config.startTimeMs ?? 0));
     const response = await this.deps.playback.create(
       {
@@ -70,12 +67,12 @@ export class TypeTypeMsePlayer {
   async play(): Promise<void> {
     ensurePlayerAlive(this.destroyed);
     await this.video.play();
-    this.setState("playing");
+    this.playerState.set("playing");
   }
 
   pause(): void {
     this.video.pause();
-    this.setState("ready");
+    this.playerState.set("ready");
   }
   async seek(positionMs: number): Promise<void> {
     const resumePlayback = !this.video.paused;
@@ -93,7 +90,7 @@ export class TypeTypeMsePlayer {
   }
 
   snapshot(): TypeTypeMseSnapshot {
-    return createSnapshot(this.video, this.state, this.session, bufferedEndMs(this.video));
+    return createSnapshot(this.video, this.playerState.value, this.session);
   }
 
   destroy(): void {
@@ -103,7 +100,7 @@ export class TypeTypeMsePlayer {
     this.seekController.reset();
     this.deps.destroy();
     this.emitter.clear();
-    this.state = "destroyed";
+    this.playerState.destroy();
   }
 
   private async performSeek(
@@ -118,23 +115,31 @@ export class TypeTypeMsePlayer {
     const signal = this.operation.signal;
     const targetMs = Math.max(0, Math.round(positionMs));
     this.deps.loop.stop();
-    this.setState("seeking");
+    this.playerState.set("seeking");
     this.emitter.emit({ type: "seek", positionMs: targetMs });
-    const response = await this.deps.playback.seek(
-      current.response.sessionId,
-      targetMs,
-      quality,
-      signal,
-    );
-    const session = await this.switchSession(
-      response,
-      targetMs,
-      revision,
-      signal,
-      resumePlayback,
-      quality,
-    );
-    if (quality) emitQuality(this.emitter, session);
+    try {
+      const response = await this.deps.playback.seek(
+        current.response.sessionId,
+        targetMs,
+        quality,
+        signal,
+      );
+      const session = await this.switchSession(
+        response,
+        targetMs,
+        revision,
+        signal,
+        resumePlayback,
+        quality,
+      );
+      if (quality) emitQuality(this.emitter, session);
+    } catch (error) {
+      if (!this.destroyed && this.session === current) {
+        this.deps.loop.start();
+        this.playerState.set(this.video.paused ? "ready" : "playing");
+      }
+      throw error;
+    }
   }
 
   private async switchSession(
@@ -165,20 +170,8 @@ export class TypeTypeMsePlayer {
     }
     this.deps.loop.start();
     emitManifest(this.emitter, session.response, session);
-    this.setState("ready");
+    this.playerState.set("ready");
     return session;
-  }
-
-  private setState(state: TypeTypeMseState): void {
-    if (this.state === state) return;
-    this.state = state;
-    this.emitter.emit({ type: "state", state });
-  }
-
-  private handleError(error: Error): void {
-    if (this.destroyed || error.name === "AbortError") return;
-    this.setState("error");
-    this.emitter.emit({ type: "error", error });
   }
 
   private nextRevision(): number {
