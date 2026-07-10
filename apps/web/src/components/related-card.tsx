@@ -26,6 +26,7 @@ function RelatedCardComponent({ stream }: Props) {
       <Link
         to="/watch"
         search={watchRouteSearch(stream.id)}
+        preload="intent"
         className="relative w-40 aspect-video rounded-md overflow-hidden bg-surface-strong flex-shrink-0"
         onMouseEnter={prefetch.onMouseEnter}
         onMouseLeave={prefetch.onMouseLeave}
@@ -57,6 +58,7 @@ function RelatedCardComponent({ stream }: Props) {
         <Link
           to="/watch"
           search={watchRouteSearch(stream.id)}
+          preload="intent"
           className="text-xs font-medium text-fg line-clamp-2 leading-snug hover:text-fg-strong"
           onMouseEnter={prefetch.onMouseEnter}
           onMouseLeave={prefetch.onMouseLeave}

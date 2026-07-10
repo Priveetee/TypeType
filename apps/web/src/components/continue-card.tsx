@@ -44,6 +44,7 @@ export function ContinueCard({ item }: ContinueCardProps) {
       <Link
         to="/watch"
         search={watchRouteSearch(item.url)}
+        preload="intent"
         className="group flex flex-col gap-2"
         onMouseEnter={prefetch.onMouseEnter}
         onMouseLeave={prefetch.onMouseLeave}
