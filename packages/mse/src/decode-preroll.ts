@@ -4,10 +4,14 @@ const PREROLL_RATE = 16;
 const TARGET_TOLERANCE_MS = 80;
 
 export function decodeStartMs(manifest: PlaybackManifest, targetMs: number): number {
-  const segment = manifest.video.segments.find(
+  const video = manifest.video.segments.find(
     (item) => item.startMs <= targetMs && item.startMs + item.durationMs > targetMs,
   );
-  return segment?.startMs ?? targetMs;
+  if (!video) return targetMs;
+  const audio = manifest.audio.segments.find(
+    (item) => item.startMs <= targetMs && item.startMs + item.durationMs > targetMs,
+  );
+  return Math.max(video.startMs, audio?.startMs ?? video.startMs);
 }
 
 export async function runDecodePreroll(
