@@ -98,7 +98,7 @@ export function SabrMsePlayer({
     const volumeChange = () => latestHandlers().onVolumeChange?.(video.volume, video.muted);
     const seeking = () => {
       const next = positionMs(video);
-      runSeek(engine, next, seekingRef, latestHandlers().onError);
+      if (!seekingRef.current) runSeek(engine, next, seekingRef, latestHandlers().onError);
     };
     video.addEventListener("volumechange", volumeChange);
     video.addEventListener("seeking", seeking);
