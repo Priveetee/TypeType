@@ -1,12 +1,7 @@
-import {
-  DefaultAudioLayout,
-  DefaultVideoLayout,
-  defaultLayoutIcons,
-  Time,
-  TimeSlider,
-} from "../lib/vidstack";
+import { DefaultAudioLayout, DefaultVideoLayout, defaultLayoutIcons, Time } from "../lib/vidstack";
 import { AudioPlayButton } from "./audio-play-button";
 import { AudioSeekButton } from "./audio-seek-button";
+import { AudioTimeSlider } from "./audio-time-slider";
 import { AudioTrackSelector } from "./audio-track-selector";
 import { CinemaModeControl } from "./cinema-mode-control";
 import { FormatSelector } from "./format-selector";
@@ -44,15 +39,7 @@ export function VideoPlayerLayout({
               <Time type="duration" />
             </div>
           ),
-          timeSlider: (
-            <TimeSlider.Root className="typetype-audio-time-slider">
-              <TimeSlider.Track className="typetype-audio-time-slider-track">
-                <TimeSlider.Progress className="typetype-audio-time-slider-progress" />
-                <TimeSlider.TrackFill className="typetype-audio-time-slider-fill" />
-              </TimeSlider.Track>
-              <TimeSlider.Thumb className="typetype-audio-time-slider-thumb" />
-            </TimeSlider.Root>
-          ),
+          timeSlider: <AudioTimeSlider />,
           seekBackwardButton: <AudioSeekButton direction="backward" />,
           playButton: <AudioPlayButton />,
           seekForwardButton: <AudioSeekButton direction="forward" />,

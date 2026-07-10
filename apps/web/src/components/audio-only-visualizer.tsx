@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
-import { useMediaState } from "../lib/vidstack";
+import { audioSpectrum, frequencyLevel } from "../lib/audio-spectrum";
+import { useMediaPlayer, useMediaState } from "../lib/vidstack";
 
 type VisualizerColors = {
   top: string;
@@ -17,7 +18,8 @@ function resizeCanvas(canvas: HTMLCanvasElement) {
 function drawBars(
   context: CanvasRenderingContext2D,
   levels: Float32Array,
-  tick: number,
+  spectrum: Uint8Array | null,
+  mediaTime: number,
   active: boolean,
   colors: VisualizerColors,
 ) {
@@ -34,9 +36,9 @@ function drawBars(
   context.fillStyle = gradient;
 
   for (let index = 0; index < bars; index += 1) {
-    const pulse = (Math.sin(tick * 0.0026 + index * 0.34) + 1) / 2;
-    const drift = (Math.sin(tick * 0.0018 + index * 0.11) + 1) / 2;
-    const target = active ? 0.12 + pulse * 0.28 + drift * 0.08 : 0.035 + pulse * 0.055;
+    const fallback = (Math.sin(mediaTime * 5.2 + index * 0.34) + 1) / 2;
+    const measured = spectrum ? frequencyLevel(spectrum, index, bars) : fallback * 0.4;
+    const target = active ? 0.07 + measured * 0.68 : 0.025;
     levels[index] += (target - levels[index]) * (active ? 0.16 : 0.08);
     const edgeFade = 0.65 + Math.sin((index / bars) * Math.PI) * 0.35;
     const barHeight = Math.max(height * 0.025, levels[index] * edgeFade * height * 0.58);
@@ -66,7 +68,7 @@ function visualizerColors(element: Element): VisualizerColors {
 
 export function AudioOnlyVisualizer() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const paused = useMediaState("paused");
+  const player = useMediaPlayer();
   const canPlay = useMediaState("canPlay");
 
   useEffect(() => {
@@ -78,12 +80,27 @@ export function AudioOnlyVisualizer() {
     const observer = new ResizeObserver(() => resizeCanvas(canvas));
     observer.observe(canvas);
     const levels = new Float32Array(112);
+    const media = player?.el?.querySelector<HTMLMediaElement>("audio,video") ?? null;
+    let spectrum = media && !media.paused ? audioSpectrum(media) : null;
     let colors = visualizerColors(canvas);
     let animation = 0;
     let frame = 0;
-    const render = (time: number) => {
+    const activate = () => {
+      if (!media) return;
+      spectrum ??= audioSpectrum(media);
+      if (spectrum?.context.state === "suspended") {
+        void spectrum.context.resume().catch(() => undefined);
+      }
+    };
+    media?.addEventListener("playing", activate);
+    activate();
+    const render = () => {
       if (frame % 30 === 0) colors = visualizerColors(canvas);
-      drawBars(context, levels, time, !paused && canPlay, colors);
+      const active = Boolean(media && !media.paused && canPlay);
+      if (active && spectrum?.context.state === "running") {
+        spectrum.analyser.getByteFrequencyData(spectrum.data);
+      }
+      drawBars(context, levels, spectrum?.data ?? null, media?.currentTime ?? 0, active, colors);
       frame += 1;
       animation = requestAnimationFrame(render);
     };
@@ -92,8 +109,9 @@ export function AudioOnlyVisualizer() {
     return () => {
       cancelAnimationFrame(animation);
       observer.disconnect();
+      media?.removeEventListener("playing", activate);
     };
-  }, [canPlay, paused]);
+  }, [canPlay, player]);
 
   return <canvas ref={canvasRef} className="typetype-audio-visualizer" />;
 }
