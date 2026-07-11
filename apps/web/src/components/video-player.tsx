@@ -145,7 +145,7 @@ export function VideoPlayer({
         onPreviousVideo={onPreviousVideo}
         onNextVideo={onNextVideo}
       />
-      <PlayerSeeker startTime={startTime} />
+      {!sabrConfig && <PlayerSeeker startTime={startTime} />}
       <VolumeRestorer
         initialVolume={initialVolume}
         initialMuted={initialMuted}
