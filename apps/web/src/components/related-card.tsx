@@ -19,7 +19,12 @@ type Props = {
 function RelatedCardComponent({ stream }: Props) {
   const locale = useClientLocale();
   const prefetch = useWatchPrefetch(stream.id);
-  const { title, thumbnail } = useDeArrowBranding(stream.id, stream.title, stream.thumbnail);
+  const { title, thumbnail } = useDeArrowBranding(
+    stream.id,
+    stream.title,
+    stream.thumbnail,
+    stream.duration,
+  );
   const publishedText = formatPublishedDate(stream.publishedAt, undefined, locale);
   const metadata = [formatViews(stream.views), publishedText].filter(Boolean).join(" · ");
 

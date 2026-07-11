@@ -48,7 +48,12 @@ export function HistoryCard({ item, onRemove, index }: HistoryCardProps) {
   const delay = Math.min(index * 45, 270);
   const prefetch = useWatchPrefetch(item.url);
   const watched = isVideoWatched(item.progress, item.duration);
-  const branding = useDeArrowBranding(item.url, item.title, proxyImage(item.thumbnail));
+  const branding = useDeArrowBranding(
+    item.url,
+    item.title,
+    proxyImage(item.thumbnail),
+    item.duration,
+  );
 
   return (
     <div

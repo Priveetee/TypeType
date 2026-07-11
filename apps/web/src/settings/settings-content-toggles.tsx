@@ -4,6 +4,7 @@ import { useSettings } from "../hooks/use-settings";
 import { allowHideEverything } from "../lib/hide-everything";
 import type { SettingsItem } from "../types/user";
 import { HideEverythingToggle } from "./hide-everything-toggle";
+import { SettingsDeArrowOptions } from "./settings-dearrow-options";
 import { ROW, ToggleSwitch } from "./settings-toggle-switch";
 
 const HIDE_KEYS = [
@@ -135,6 +136,7 @@ export function SettingsDiscoveryToggles() {
         Discovery surfaces
       </div>
       <ToggleRows options={DISCOVERY_OPTIONS} />
+      <SettingsDeArrowOptions />
       <HideEverythingToggle />
     </>
   );

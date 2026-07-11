@@ -47,7 +47,7 @@ export function PlaylistVideoRow({ video, onRemove, reorderable, listId, onDragS
   const prefetch = useWatchPrefetch(video.url);
   const rawThumbnail = video.thumbnail.trim();
   const fallbackThumbnail = rawThumbnail.length > 0 ? proxyImage(rawThumbnail) : "";
-  const branding = useDeArrowBranding(video.url, video.title, fallbackThumbnail);
+  const branding = useDeArrowBranding(video.url, video.title, fallbackThumbnail, video.duration);
   const thumbnail = branding.thumbnail || null;
   const watched = video.watched || isVideoWatched(video.watchPosition, video.duration);
   const rawChannelName = video.channelName?.trim() ?? "";

@@ -24,7 +24,12 @@ function VideoCardComponent({ stream, onOpen, onImpression, listId }: Props) {
   const locale = useClientLocale();
   const rootRef = useRef<HTMLElement | null>(null);
   const preview = useVideoCardPreview(stream);
-  const { title, thumbnail } = useDeArrowBranding(stream.id, stream.title, stream.thumbnail);
+  const { title, thumbnail } = useDeArrowBranding(
+    stream.id,
+    stream.title,
+    stream.thumbnail,
+    stream.duration,
+  );
   const publishedText = formatPublishedDate(stream.publishedAt, undefined, locale);
   const watchSearch = watchListSearch(stream.id, listId);
 

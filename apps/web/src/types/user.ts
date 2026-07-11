@@ -2,6 +2,9 @@ export type ServiceId = 0 | 5 | 6;
 export type SponsorBlockMode = "auto_skip" | "mark_only" | "disabled";
 export type SponsorBlockCategoryAction = "auto_skip" | "mark_only" | "disabled";
 export type AccessMode = "unrestricted" | "allow_list";
+export type DeArrowTitleMode = "original" | "dearrow";
+export type DeArrowThumbnailMode = "original" | "dearrow" | "random" | "dearrow_or_random";
+export type DeArrowTrustMode = "accepted" | "locked";
 type SponsorBlockCategoryActions = Record<string, SponsorBlockCategoryAction>;
 
 export type HistoryItem = {
@@ -124,6 +127,9 @@ export type SettingsItem = {
   sponsorBlockMuteInsteadOfSkip: boolean;
   disableWatchHistory: boolean;
   deArrowEnabled: boolean;
+  deArrowTitleMode: DeArrowTitleMode;
+  deArrowThumbnailMode: DeArrowThumbnailMode;
+  deArrowTrustMode: DeArrowTrustMode;
   hideContinueWatching: boolean;
   hideHomeRecommendations: boolean;
   hideRelatedVideos: boolean;

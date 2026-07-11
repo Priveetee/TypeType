@@ -21,7 +21,12 @@ export function ContinueCard({ item }: ContinueCardProps) {
   const locale = useClientLocale();
   const prefetch = useWatchPrefetch(item.url);
   const uploaderVerified = item.uploaderVerified ?? false;
-  const branding = useDeArrowBranding(item.url, item.title, proxyImage(item.thumbnail));
+  const branding = useDeArrowBranding(
+    item.url,
+    item.title,
+    proxyImage(item.thumbnail),
+    item.duration,
+  );
   const thumbnail = branding.thumbnail;
   const publishedText = formatPublishedDate(item.publishedAt, undefined, locale);
   const viewsText = item.viewCount === undefined ? "" : formatViews(item.viewCount);
