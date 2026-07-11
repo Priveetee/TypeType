@@ -65,7 +65,9 @@ function RegisterPage() {
       goto(postAuthTarget);
     } catch (error) {
       if (error instanceof ApiError && error.status === 403) {
-        setError("Registrations are currently closed.");
+        setError(
+          `Registration was rejected by the server. Add ${window.location.origin} to ALLOWED_ORIGINS without a trailing slash, then restart typetype-server.`,
+        );
       } else {
         setError("Unable to create account.");
       }
