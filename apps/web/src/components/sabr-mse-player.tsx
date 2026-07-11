@@ -109,8 +109,9 @@ export function SabrMsePlayer({
     let autoplayStartTime = 0;
     let autoplayAttemptAt = 0;
     let autoplayRecoveryAttempts = 0;
+    let engineLoaded = false;
     const startAutoplay = () => {
-      if (autoplayConfirmedRef.current || video.readyState < 3) return;
+      if (!engineLoaded || autoplayConfirmedRef.current || video.readyState < 3) return;
       if (autoplayStartedRef.current) {
         if (!video.paused && video.currentTime >= autoplayStartTime + 0.25) {
           autoplayConfirmedRef.current = true;
@@ -169,7 +170,10 @@ export function SabrMsePlayer({
     });
     void engine
       .load()
-      .then(startAutoplay)
+      .then(() => {
+        engineLoaded = true;
+        startAutoplay();
+      })
       .catch((error: unknown) => {
         if (!isAbortError(error)) latestHandlers().onError();
       });
