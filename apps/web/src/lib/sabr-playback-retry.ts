@@ -16,11 +16,6 @@ export async function playWithMuteFallback(
   } catch (error) {
     if (isAbortError(error)) throw error;
   }
-  const muted = video.muted;
   video.muted = true;
-  try {
-    await player.play();
-  } finally {
-    video.muted = muted;
-  }
+  await player.play();
 }
