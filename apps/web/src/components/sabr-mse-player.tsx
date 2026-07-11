@@ -61,6 +61,7 @@ export function SabrMsePlayer({
   const qualityRef = useRef<TypeTypeMseQuality | null>(null);
   const pendingPlayRef = useRef(false);
   const autoplayStartedRef = useRef(false);
+  const autoplayConfirmedRef = useRef(false);
   const seekingRef = useRef(false);
   const latestConfig = useLatestValue(config);
   const latestHandlers = useLatestValue({
@@ -104,14 +105,20 @@ export function SabrMsePlayer({
     video.addEventListener("volumechange", volumeChange);
     video.addEventListener("seeking", seeking);
     const startAutoplay = () => {
-      if (autoplayStartedRef.current || video.readyState < 3) return;
+      if (autoplayStartedRef.current || autoplayConfirmedRef.current || video.readyState < 3)
+        return;
       if (!latestHandlers().autoplay && !pendingPlayRef.current) return;
       autoplayStartedRef.current = true;
       void playWithMuteFallback(engine, video).catch(() => {
         autoplayStartedRef.current = false;
       });
     };
+    const confirmAutoplay = () => {
+      autoplayConfirmedRef.current = true;
+    };
     video.addEventListener("canplay", startAutoplay);
+    video.addEventListener("play", confirmAutoplay);
+    const autoplayTimer = window.setInterval(startAutoplay, 250);
     const unregisterControls = registerSabrVidstackControls(video, {
       play: () => {
         pendingPlayRef.current = true;
@@ -158,22 +165,16 @@ export function SabrMsePlayer({
       video.removeEventListener("volumechange", volumeChange);
       video.removeEventListener("seeking", seeking);
       video.removeEventListener("canplay", startAutoplay);
+      video.removeEventListener("play", confirmAutoplay);
+      window.clearInterval(autoplayTimer);
       engine.destroy();
       engineRef.current = null;
       pendingPlayRef.current = false;
       autoplayStartedRef.current = false;
+      autoplayConfirmedRef.current = false;
       video.autoplay = false;
       latestHandlers().onPositionReaderChange(null);
     };
   }, [config.videoId, latestConfig, latestHandlers, startTime, token, video]);
-  useEffect(() => {
-    const engine = engineRef.current;
-    if (!autoplay || !engine || !video || video.readyState < 3 || autoplayStartedRef.current)
-      return;
-    autoplayStartedRef.current = true;
-    void playWithMuteFallback(engine, video).catch(() => {
-      autoplayStartedRef.current = false;
-    });
-  }, [autoplay, video]);
   return null;
 }
