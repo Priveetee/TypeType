@@ -25,6 +25,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6.0.2
 
+      - uses: oven-sh/setup-bun@v2.2.0
+        with:
+          bun-version: 1.3.14
+
+      - name: Resolve build metadata
+        id: build-info
+        run: |
+          base_version="$(bun -e 'console.log(require("./apps/web/package.json").version)')"
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            version="${GITHUB_REF_NAME#v}"
+          else
+            channel="${GITHUB_REF_NAME//[^0-9A-Za-z-]/-}"
+            version="$base_version-$channel.$GITHUB_RUN_NUMBER"
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "build-time=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_OUTPUT"
+
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v4.1.0
         with:
@@ -62,6 +79,10 @@ jobs:
         uses: docker/build-push-action@v7.1.0
         with:
           context: .
+          build-args: |
+            BUILD_VERSION=${{ steps.build-info.outputs.version }}
+            BUILD_REVISION=${{ github.sha }}
+            BUILD_TIME=${{ steps.build-info.outputs.build-time }}
           platforms: linux/amd64,linux/arm64
           push: true
           pull: true
