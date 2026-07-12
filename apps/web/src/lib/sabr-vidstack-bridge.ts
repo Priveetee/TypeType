@@ -1,6 +1,6 @@
 export type SabrVidstackControls = {
   play: () => Promise<void>;
-  pause: () => void;
+  pause: (userInitiated?: boolean) => void;
   seek: (seconds: number) => void;
 };
 
@@ -28,6 +28,7 @@ export function getSabrVidstackControls(video: HTMLVideoElement): SabrVidstackCo
 export function requestSabrVidstackPlayback(
   video: HTMLVideoElement,
   playing: boolean,
+  userInitiated = false,
 ): Promise<void> {
   const controls = getSabrVidstackControls(video);
   video.autoplay = playing;
@@ -38,6 +39,6 @@ export function requestSabrVidstackPlayback(
   }
   pendingPlaybackByVideo.delete(video);
   if (playing) return controls.play();
-  controls.pause();
+  controls.pause(userInitiated);
   return Promise.resolve();
 }
