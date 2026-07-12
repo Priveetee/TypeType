@@ -1,4 +1,4 @@
-import { type CSSProperties, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { secondsFromSliderPercent } from "../lib/sabr-player-seek";
 import { requestSabrSeek } from "../lib/sabr-vidstack-bridge";
 import { TimeSlider } from "../lib/vidstack";
@@ -13,10 +13,7 @@ export function AudioTimeSlider({ disabled = false, video = null }: Props) {
   useEffect(() => {
     if (!disabled) setSeekTarget(null);
   }, [disabled]);
-  const style =
-    seekTarget === null
-      ? undefined
-      : ({ "--typetype-seek-target": `${seekTarget}%` } as CSSProperties);
+  const style = seekTarget === null ? undefined : { "--typetype-seek-target": `${seekTarget}%` };
 
   return (
     <TimeSlider.Root
