@@ -130,7 +130,7 @@ export function WatchLayout({
         isLive={isLive}
         settingsReady={settingsReady}
         autoplay={sourceState.autoplay}
-        navigating={navigating || sourceState.waitForInitialAudioSource || player.manifestLoading}
+        navigating={navigating || player.manifestLoading}
         originalLocale={getOriginalAudioLocale(stream)}
         overlay={
           <WatchLayoutPlayerOverlay
