@@ -70,7 +70,9 @@ export function SabrMsePlayer({
     const volumeChange = () => latestHandlers().onVolumeChange?.(video.volume, video.muted);
     let ignoreInitialSeek = true;
     const playerRoot = video.parentElement?.parentElement;
-    const acceptSeekIntent = () => {
+    const acceptSeekIntent = (event: Event) => {
+      if (!(event.target instanceof Element)) return;
+      if (!event.target.closest('media-time-slider,[role="slider"][aria-label="Seek"]')) return;
       ignoreInitialSeek = false;
     };
     video.addEventListener("volumechange", volumeChange);
