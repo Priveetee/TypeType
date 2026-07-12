@@ -1,3 +1,5 @@
+import { useEffect, useRef } from "react";
+
 type Args = {
   streamId: string;
   settingsReady: boolean;
@@ -8,9 +10,26 @@ type Args = {
 };
 
 export function useWatchInitialAudioSource({
+  streamId,
+  settingsReady,
+  navigating,
   audioOnlyEnabled,
   audioOnlyLoading,
   hasAudioOnlySource,
-}: Args): boolean {
-  return audioOnlyEnabled && audioOnlyLoading && !hasAudioOnlySource;
+}: Args) {
+  const renderedPlayerRef = useRef(false);
+  const renderedStreamRef = useRef(streamId);
+
+  if (renderedStreamRef.current !== streamId) {
+    renderedStreamRef.current = streamId;
+    renderedPlayerRef.current = false;
+  }
+
+  useEffect(() => {
+    if (!settingsReady || navigating) return;
+    if (audioOnlyEnabled && !hasAudioOnlySource) return;
+    renderedPlayerRef.current = true;
+  }, [audioOnlyEnabled, hasAudioOnlySource, navigating, settingsReady]);
+
+  return audioOnlyLoading && !renderedPlayerRef.current;
 }
