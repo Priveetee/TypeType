@@ -54,18 +54,6 @@ const WATCH_OPTIONS: ToggleOption[] = [
     description: "Automatically continue with the first item in the suggestions column.",
     area: "Watch",
   },
-  {
-    key: "hideRelatedVideos",
-    label: "Related videos",
-    description: "Hide the suggestions column on watch pages.",
-    area: "Watch",
-  },
-  {
-    key: "hideComments",
-    label: "Comments and danmaku",
-    description: "Stop loading watch comments, Shorts comments, and bullet comments.",
-    area: "Watch + Shorts",
-  },
 ];
 
 const DISCOVERY_OPTIONS: ToggleOption[] = [
@@ -86,6 +74,18 @@ const DISCOVERY_OPTIONS: ToggleOption[] = [
     label: "Home recommendations",
     description: "Hide personalized recommendations from the home page.",
     area: "Home",
+  },
+  {
+    key: "hideRelatedVideos",
+    label: "Related videos",
+    description: "Hide the suggestions column on watch pages.",
+    area: "Watch",
+  },
+  {
+    key: "hideComments",
+    label: "Comments and danmaku",
+    description: "Stop loading watch comments, Shorts comments, and bullet comments.",
+    area: "Watch + Shorts",
   },
   {
     key: "hideShorts",
