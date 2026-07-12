@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { audioSpectrum, waveformLevel } from "../lib/audio-spectrum";
+import { audioSpectrum, waveformEnergy, waveformLevel } from "../lib/audio-spectrum";
 
 type VisualizerColors = {
   top: string;
@@ -32,9 +32,10 @@ function drawBars(
   gradient.addColorStop(0.48, colors.mid);
   gradient.addColorStop(1, colors.bottom);
   context.fillStyle = gradient;
+  const energy = spectrum ? waveformEnergy(spectrum) : 0;
 
   for (let index = 0; index < bars; index += 1) {
-    const measured = spectrum ? waveformLevel(spectrum, index, bars) : 0;
+    const measured = spectrum ? waveformLevel(spectrum, index, bars, energy) : 0;
     const target = active ? 0.06 + measured * 0.78 : 0.025;
     levels[index] += (target - levels[index]) * (active ? 0.16 : 0.08);
     const edgeFade = 0.65 + Math.sin((index / bars) * Math.PI) * 0.35;
