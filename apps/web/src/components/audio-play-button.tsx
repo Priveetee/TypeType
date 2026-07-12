@@ -20,7 +20,10 @@ export function AudioPlayButton({ video = null }: { video?: HTMLVideoElement | n
       className="typetype-audio-play-button"
       aria-label={label}
       title={label}
-      onClick={() => void togglePlayback().catch(() => {})}
+      onClick={(event) => {
+        event.stopPropagation();
+        void togglePlayback().catch(() => {});
+      }}
     >
       <Icon size={32} />
     </button>

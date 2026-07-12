@@ -17,7 +17,10 @@ export function AudioCenterToggle({ video = null }: { video?: HTMLVideoElement |
       type="button"
       className="typetype-audio-center-toggle"
       aria-label={label}
-      onClick={() => void togglePlayback().catch(() => {})}
+      onClick={(event) => {
+        event.stopPropagation();
+        void togglePlayback().catch(() => {});
+      }}
     />
   );
 }
