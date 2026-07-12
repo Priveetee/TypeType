@@ -13,7 +13,7 @@
 .vds-time-slider[data-seeking] .vds-slider-thumb,
 .typetype-audio-time-slider[data-seeking] .typetype-audio-time-slider-thumb {
   left: var(--typetype-seek-target, var(--slider-fill, 0%));
-  background: #fff;
+  opacity: 0;
 }
 
 .vds-time-slider[data-seeking] .vds-slider-progress,
@@ -28,22 +28,25 @@
   top: 50%;
   right: 0;
   left: var(--typetype-seek-target, var(--slider-fill, 0%));
-  height: var(--track-height, 5px);
+  height: 4px;
   border-radius: 999px;
-  background: repeating-linear-gradient(115deg, #f8fafc 0 10px, #94a3b8 10px 16px);
-  background-size: 32px 100%;
+  background: repeating-linear-gradient(125deg, #f8fafc 0 5px, #111827 5px 9px);
+  background-size: 14px 100%;
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 12%),
+    0 1px 5px rgb(0 0 0 / 35%);
   content: "";
   transform: translateY(-50%);
-  animation: typetype-seek-barber-pole 1s linear infinite;
+  animation: typetype-seek-stripes 900ms linear infinite;
 }
 
 .typetype-audio-time-slider[data-seeking]::after {
-  height: 4px;
+  height: 3px;
 }
 
-@keyframes typetype-seek-barber-pole {
+@keyframes typetype-seek-stripes {
   to {
-    background-position-x: 32px;
+    background-position-x: 14px;
   }
 }
 
