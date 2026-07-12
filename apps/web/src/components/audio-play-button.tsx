@@ -9,7 +9,7 @@ export function AudioPlayButton({ video = null }: { video?: HTMLVideoElement | n
   const label = paused ? "Play" : "Pause";
 
   const togglePlayback = async () => {
-    if (video) return requestSabrVidstackPlayback(video, paused, true);
+    if (video) return requestSabrVidstackPlayback(video, video.paused, true);
     if (paused) await remote.play();
     else await remote.pause();
   };
