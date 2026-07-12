@@ -42,7 +42,7 @@ export function audioSpectrum(media: HTMLMediaElement): AudioSpectrum | null {
 
 export function waveformLevel(data: Uint8Array, index: number, total: number): number {
   if (data.length === 0 || total <= 1) return 0;
-  const position = index / (total - 1);
+  const position = Math.abs((index / (total - 1)) * 2 - 1);
   const center = Math.min(data.length - 1, Math.round(position * (data.length - 1)));
   const radius = Math.max(1, Math.floor(data.length / total / 2));
   let peak = 0;
