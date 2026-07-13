@@ -59,8 +59,3 @@ export async function bestSabrItag(
   scored.sort((left, right) => right.score - left.score);
   return scored[0]?.option.itag ?? fallback;
 }
-
-export function browserSabrCodecProbe(): SabrCodecProbe | undefined {
-  if (typeof navigator === "undefined" || !navigator.mediaCapabilities) return undefined;
-  return (configuration) => navigator.mediaCapabilities.decodingInfo(configuration);
-}
