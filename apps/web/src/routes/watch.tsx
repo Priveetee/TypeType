@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useRef } from "react";
-import { PageSpinner } from "../components/page-spinner";
 import { StreamError } from "../components/stream-error";
+import { WatchPageSkeleton } from "../components/watch-page-skeleton";
 import { useAuth } from "../hooks/use-auth";
 import { useDocumentTitle } from "../hooks/use-document-title";
 import { useHistory } from "../hooks/use-history";
@@ -24,19 +24,6 @@ import { youtubeSessionReturnToForWatch } from "../lib/youtube-session-route";
 const WatchLayout = lazy(() =>
   import("../components/watch-layout").then((module) => ({ default: module.WatchLayout })),
 );
-
-function PlayerOnlyLoader() {
-  return (
-    <div className="flex flex-col gap-6 lg:flex-row lg:items-start [animation:page-fade-in_0.2s_ease-out]">
-      <div className="flex-[2] min-w-0 max-w-[133.333vh] flex flex-col gap-4">
-        <div className="aspect-video w-full overflow-hidden rounded-lg bg-black">
-          <PageSpinner fullScreen={false} />
-        </div>
-      </div>
-      <div className="w-full lg:flex-1 lg:min-w-64" />
-    </div>
-  );
-}
 
 function WatchPage() {
   const { v, list, shuffle } = Route.useSearch();
@@ -91,8 +78,8 @@ function WatchPage() {
     });
   }, [progressFetch.data?.position, stream]);
 
-  if (isLoading && !stream) return <PlayerOnlyLoader />;
-  if (!authReady) return <PlayerOnlyLoader />;
+  if (isLoading && !stream) return <WatchPageSkeleton />;
+  if (!authReady) return <WatchPageSkeleton />;
 
   if (isError || !stream) {
     const genericExtractorError =
@@ -144,7 +131,7 @@ function WatchPage() {
   const navigating = toPublicWatchParam(stream.id) !== publicParam;
 
   return (
-    <Suspense fallback={<PlayerOnlyLoader />}>
+    <Suspense fallback={<WatchPageSkeleton />}>
       <WatchLayout
         key={stream.id}
         stream={stream}

@@ -2,7 +2,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { VideoStream } from "../types/stream";
 import { isMemberOnlyApiError, streamQueryOptions } from "./use-stream";
-import { useWatchPrefetch } from "./use-watch-prefetch";
 
 const PREVIEW_DELAY_MS = 5000;
 
@@ -12,7 +11,6 @@ export function useVideoCardPreview(stream: VideoStream) {
   const [previewStream, setPreviewStream] = useState<VideoStream>();
   const [showPreview, setShowPreview] = useState(false);
   const [memberOnly, setMemberOnly] = useState(false);
-  const { onMouseEnter: startPrefetch, onMouseLeave: cancelPrefetch } = useWatchPrefetch(stream.id);
 
   const fetchStreamData = useCallback(async () => {
     const options = streamQueryOptions(stream.id);
@@ -32,18 +30,16 @@ export function useVideoCardPreview(stream: VideoStream) {
   }, [queryClient, stream.id]);
 
   const onMouseEnter = useCallback(() => {
-    startPrefetch();
     timer.current = setTimeout(() => {
       void fetchStreamData().then(() => setShowPreview(true));
     }, PREVIEW_DELAY_MS);
-  }, [fetchStreamData, startPrefetch]);
+  }, [fetchStreamData]);
 
   const onMouseLeave = useCallback(() => {
-    cancelPrefetch();
     if (timer.current) clearTimeout(timer.current);
     timer.current = null;
     setShowPreview(false);
-  }, [cancelPrefetch]);
+  }, []);
 
   useEffect(() => onMouseLeave, [onMouseLeave]);
 

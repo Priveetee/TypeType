@@ -1,7 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useClientLocale } from "../hooks/use-client-locale";
 import { useDeArrowBranding } from "../hooks/use-dearrow";
-import { useWatchPrefetch } from "../hooks/use-watch-prefetch";
 import { formatDuration, formatPublishedDate, formatViews } from "../lib/format";
 import { proxyImage } from "../lib/proxy";
 import { watchRouteSearch } from "../lib/watch-url";
@@ -19,7 +18,6 @@ type ContinueCardProps = {
 
 export function ContinueCard({ item }: ContinueCardProps) {
   const locale = useClientLocale();
-  const prefetch = useWatchPrefetch(item.url);
   const uploaderVerified = item.uploaderVerified ?? false;
   const branding = useDeArrowBranding(
     item.url,
@@ -53,8 +51,6 @@ export function ContinueCard({ item }: ContinueCardProps) {
         search={watchRouteSearch(item.url)}
         preload="intent"
         className="group flex flex-col gap-2"
-        onMouseEnter={prefetch.onMouseEnter}
-        onMouseLeave={prefetch.onMouseLeave}
       >
         <div className="relative aspect-video overflow-hidden rounded-lg bg-surface-strong">
           <img

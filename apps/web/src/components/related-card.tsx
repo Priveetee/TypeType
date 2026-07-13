@@ -2,7 +2,6 @@ import { Link } from "@tanstack/react-router";
 import { memo } from "react";
 import { useClientLocale } from "../hooks/use-client-locale";
 import { useDeArrowBranding } from "../hooks/use-dearrow";
-import { useWatchPrefetch } from "../hooks/use-watch-prefetch";
 import { formatDuration, formatPublishedDate, formatViews } from "../lib/format";
 import { watchRouteSearch } from "../lib/watch-url";
 import type { VideoStream } from "../types/stream";
@@ -18,7 +17,6 @@ type Props = {
 
 function RelatedCardComponent({ stream }: Props) {
   const locale = useClientLocale();
-  const prefetch = useWatchPrefetch(stream.id);
   const { title, thumbnail } = useDeArrowBranding(
     stream.id,
     stream.title,
@@ -29,14 +27,12 @@ function RelatedCardComponent({ stream }: Props) {
   const metadata = [formatViews(stream.views), publishedText].filter(Boolean).join(" · ");
 
   return (
-    <div className="flex gap-2 group">
+    <article className="flex gap-2 group">
       <Link
         to="/watch"
         search={watchRouteSearch(stream.id)}
         preload="intent"
         className="relative w-40 aspect-video rounded-md overflow-hidden bg-surface-strong flex-shrink-0"
-        onMouseEnter={prefetch.onMouseEnter}
-        onMouseLeave={prefetch.onMouseLeave}
       >
         <img
           src={thumbnail}
@@ -67,8 +63,6 @@ function RelatedCardComponent({ stream }: Props) {
           search={watchRouteSearch(stream.id)}
           preload="intent"
           className="text-xs font-medium text-fg line-clamp-2 leading-snug hover:text-fg-strong"
-          onMouseEnter={prefetch.onMouseEnter}
-          onMouseLeave={prefetch.onMouseLeave}
         >
           {title}
         </Link>
@@ -103,7 +97,7 @@ function RelatedCardComponent({ stream }: Props) {
         <p className="text-xs text-fg-soft">{metadata}</p>
       </div>
       <VideoCardFeedbackMenu stream={stream} />
-    </div>
+    </article>
   );
 }
 
