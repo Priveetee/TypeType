@@ -37,7 +37,7 @@ export function useSabrQualitySwitch(
       .catch((error: unknown) => {
         if (revision !== revisionRef.current || isAbortError(error)) return;
         const store = useSabrQualityStore.getState();
-        if (store.streamId) store.selectQuality(store.streamId, previous.videoItag);
+        if (store.streamId) store.restoreQuality(store.streamId, previous.videoItag);
       })
       .finally(() => {
         if (revision === revisionRef.current) seekingRef.current = false;

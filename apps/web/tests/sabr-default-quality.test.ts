@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import { automaticSabrQuality, defaultSabrItag } from "../src/lib/sabr-source";
-import type { SabrQualityOption } from "../src/stores/sabr-quality-store";
+import { type SabrQualityOption, useSabrQualityStore } from "../src/stores/sabr-quality-store";
 
 function option(itag: number, height: number): SabrQualityOption {
   return {
@@ -28,4 +28,32 @@ test("chooses automatic quality from display and network constraints", () => {
   expect(automaticSabrQuality(1440, 2)).toBe("2160p");
   expect(automaticSabrQuality(2160, 1, true, "4g")).toBe("360p");
   expect(automaticSabrQuality(2160, 1, false, "3g")).toBe("720p");
+});
+
+test("upgrades an automatic startup selection to the preferred resolution", () => {
+  useSabrQualityStore.setState({
+    streamId: null,
+    options: [],
+    selectedItag: null,
+    manuallySelected: false,
+  });
+  const store = useSabrQualityStore.getState();
+  store.setOptions("video", [option(136, 720)], 136);
+  store.setOptions("video", options, 137);
+  expect(useSabrQualityStore.getState().selectedItag).toBe(137);
+});
+
+test("keeps an explicit quality selection during metadata enrichment", () => {
+  const store = useSabrQualityStore.getState();
+  store.setOptions("manual-video", options, 137);
+  store.selectQuality("manual-video", 136);
+  store.setOptions("manual-video", options, 137);
+  expect(useSabrQualityStore.getState().selectedItag).toBe(136);
+});
+
+test("does not turn an automatic quality rollback into a manual preference", () => {
+  const store = useSabrQualityStore.getState();
+  store.restoreQuality("manual-video", 136);
+  store.setOptions("manual-video", options, 137);
+  expect(useSabrQualityStore.getState().selectedItag).toBe(137);
 });
