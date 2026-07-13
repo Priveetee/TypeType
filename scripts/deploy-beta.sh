@@ -37,7 +37,8 @@ services=(
   garage
 )
 
-docker compose --env-file "$root/.env" -f "$source_root/docker-compose.dev.yml" config -q
+docker compose --project-directory "$root" --env-file "$root/.env" \
+  -f "$source_root/docker-compose.dev.yml" config -q
 rollback_root="$root/.deploy-rollbacks"
 backup="$rollback_root/$(date -u +'%Y%m%dT%H%M%SZ')-$$"
 mkdir -p "$backup/scripts"
