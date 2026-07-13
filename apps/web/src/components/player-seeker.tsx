@@ -27,9 +27,10 @@ export function PlayerSeeker({ startTime }: { startTime: number }) {
     const target = startTime / 1000;
     const root = player?.el;
     let timeout = 0;
+    let applying = false;
 
     function seekMedia(media: HTMLMediaElement) {
-      if (seeked.current) return;
+      if (seeked.current || applying) return;
       if (!seekable(media, target)) {
         recordClientEvent("player.seek_wait", {
           targetMs: Math.round(target * 1000),
@@ -38,6 +39,7 @@ export function PlayerSeeker({ startTime }: { startTime: number }) {
         });
         return;
       }
+      applying = true;
       try {
         media.currentTime = target;
       } catch {}
@@ -48,6 +50,7 @@ export function PlayerSeeker({ startTime }: { startTime: number }) {
         tag: media.tagName,
       });
       timeout = window.setTimeout(() => {
+        applying = false;
         if (Math.abs(media.currentTime - target) <= 1.5 || media.currentTime > target) {
           recordClientEvent("player.seek_settled", {
             targetMs: Math.round(target * 1000),

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { secondsFromSliderPercent } from "../lib/sabr-player-seek";
 import { requestSabrSeek } from "../lib/sabr-vidstack-bridge";
-import { TimeSlider } from "../lib/vidstack";
+import { TimeSlider, useMediaRemote, useMediaState } from "../lib/vidstack";
 
 type Props = {
   disabled?: boolean;
@@ -10,6 +10,8 @@ type Props = {
 
 export function AudioTimeSlider({ disabled = false, video = null }: Props) {
   const [seekTarget, setSeekTarget] = useState<number | null>(null);
+  const remote = useMediaRemote();
+  const mediaDuration = useMediaState("duration");
   useEffect(() => {
     if (!disabled) setSeekTarget(null);
   }, [disabled]);
@@ -24,8 +26,10 @@ export function AudioTimeSlider({ disabled = false, video = null }: Props) {
       data-seeking={disabled ? "true" : undefined}
       onDragEnd={(percent) => {
         setSeekTarget(percent);
-        const seconds = video ? secondsFromSliderPercent(video.duration, percent) : null;
-        if (video && !disabled && seconds !== null) requestSabrSeek(video, seconds);
+        const seconds = secondsFromSliderPercent(video?.duration ?? mediaDuration, percent);
+        if (disabled || seconds === null) return;
+        if (video && requestSabrSeek(video, seconds)) return;
+        remote.seek(seconds);
       }}
     >
       <TimeSlider.Track className="typetype-audio-time-slider-track">

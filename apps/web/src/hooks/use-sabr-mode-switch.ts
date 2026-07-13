@@ -1,5 +1,6 @@
 import type { TypeTypeMsePlayer } from "@typetype/mse";
 import { type RefObject, useEffect, useRef } from "react";
+import { recordClientEvent } from "../lib/client-debug-log";
 import { isAbortError } from "../lib/sabr-playback-retry";
 
 type ModeSwitchHandlers = {
@@ -31,7 +32,11 @@ export function useSabrModeSwitch(
         if (revision === revisionRef.current) appliedRef.current = audioOnly;
       })
       .catch((error: unknown) => {
-        if (revision === revisionRef.current && !isAbortError(error)) handlers().onError();
+        if (revision !== revisionRef.current || isAbortError(error)) return;
+        recordClientEvent("player.sabr_mode_switch_failed", {
+          error: error instanceof Error ? error.message : String(error),
+        });
+        handlers().onError();
       })
       .finally(() => {
         if (revision !== revisionRef.current) return;
