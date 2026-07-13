@@ -10,7 +10,6 @@ import { resolveLegacyFallbackSrc } from "./stream-fallback-src";
 import type { MediaSrc } from "./vidstack";
 
 type ResolveManifestOptions = {
-  preferNativeManifest?: boolean;
   compactAudioTracks?: boolean;
   preferredAudioLanguage?: string;
   preferOriginalLanguage?: boolean;
@@ -37,26 +36,34 @@ export function resolveHlsManifestUrl(stream: VideoStream): string {
   return proxyDashManifest(`${BASE}/streams/hls-manifest?url=${encodeURIComponent(stream.id)}`);
 }
 
+export function shouldUseClassicHls(
+  hlsUrl: string | undefined,
+  isLive: boolean,
+  hlsFailed: boolean,
+  legacyDashPair: boolean,
+): boolean {
+  return Boolean(
+    hlsUrl && !hlsFailed && (isLive || isSignedHlsManifestUrl(hlsUrl) || !legacyDashPair),
+  );
+}
+
 export function resolveManifestSrc(
   stream: VideoStream,
   isLive: boolean,
-  nativeFailed: boolean,
   qualityFailed: boolean,
   options?: ResolveManifestOptions,
 ): MediaSrc {
   const isShort = Boolean(stream.isShortFormContent) || stream.id.includes("/shorts/");
   const compatibilityMode = options?.compatibilityMode ?? false;
-  const preferNativeManifest = (options?.preferNativeManifest ?? !isShort) && !compatibilityMode;
   const compactAudioTracks = options?.compactAudioTracks ?? isShort;
   const maxCompactAudioTracks = options?.maxCompactAudioTracks ?? (isShort ? 3 : 8);
   const allowServerManifests = options?.allowServerManifests ?? true;
   const provider = detectProvider(stream.id);
-  const isFirefox = typeof navigator !== "undefined" && navigator.userAgent.includes("Firefox/");
   const safeMaxHeight = qualityFailed ? 720 : 1080;
   const legacyDashPair = hasLegacyDashPair(stream);
   const allowLegacyServerManifests = allowServerManifests;
 
-  if (stream.hlsUrl && !options?.hlsFailed && (isLive || isSignedHlsManifestUrl(stream.hlsUrl))) {
+  if (shouldUseClassicHls(stream.hlsUrl, isLive, options?.hlsFailed ?? false, legacyDashPair)) {
     return {
       src: resolveHlsManifestUrl(stream),
       type: "application/x-mpegurl",
@@ -100,23 +107,6 @@ export function resolveManifestSrc(
   ) {
     return {
       src: proxyDashManifest(`${BASE}/streams/manifest?url=${encodeURIComponent(stream.id)}`),
-      type: "application/dash+xml",
-    };
-  }
-
-  if (
-    !isLive &&
-    legacyDashPair &&
-    !nativeFailed &&
-    preferNativeManifest &&
-    allowLegacyServerManifests &&
-    !isFirefox &&
-    !compatibilityMode
-  ) {
-    return {
-      src: proxyDashManifest(
-        `${BASE}/streams/native-manifest?url=${encodeURIComponent(stream.id)}`,
-      ),
       type: "application/dash+xml",
     };
   }

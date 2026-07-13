@@ -34,14 +34,3 @@ export function hasLegacyDashPair(stream: VideoStream): boolean {
 export function hasSabrPlayback(stream: VideoStream): boolean {
   return hasSabrSession(stream);
 }
-
-export function hasMultipleAudioLanguages(stream: VideoStream): boolean {
-  const languages = new Set<string>();
-  for (const track of stream.audioStreams ?? []) {
-    const [language] = (track.audioLocale ?? "").toLowerCase().split("-");
-    if (!language) continue;
-    languages.add(language);
-    if (languages.size > 1) return true;
-  }
-  return false;
-}

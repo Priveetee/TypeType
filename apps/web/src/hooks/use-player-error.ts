@@ -6,11 +6,10 @@ import { isIosDevice } from "../lib/ios-device";
 import { detectProvider } from "../lib/provider";
 import {
   hasLegacyDashPair,
-  hasMultipleAudioLanguages,
   hasSabrPlayback,
   legacyProgressiveStreams,
 } from "../lib/stream-delivery";
-import { isSignedHlsManifestUrl, resolveManifestSrc } from "../lib/stream-src";
+import { resolveManifestSrc, shouldUseClassicHls } from "../lib/stream-src";
 import type { MediaSrc } from "../lib/vidstack";
 import type { VideoStream } from "../types/stream";
 import { useInstance } from "./use-instance";
@@ -42,8 +41,6 @@ export function usePlayerError(
   const { playbackMode } = usePlaybackMode();
   const playbackSourceId = stream.id.length === 0 ? "" : `${stream.id}:${playbackMode}`;
   const preferServerManifests = instance?.guestAllowed !== false;
-  const preferNativeManifest =
-    preferServerManifests && !iosDevice && !hasMultipleAudioLanguages(stream);
   const legacyDashPair = hasLegacyDashPair(stream);
   const hasLegacyPlaybackFallback = legacyDashPair || legacyProgressiveStreams(stream).length > 0;
   const highQualityEnabled =
@@ -54,11 +51,9 @@ export function usePlayerError(
     !stream.hlsUrl &&
     legacyDashPair &&
     provider === "youtube";
-  const nativeEnabled = preferServerManifests && !isLive && legacyDashPair && preferNativeManifest;
-  const hlsEnabled = Boolean(stream.hlsUrl && (isLive || isSignedHlsManifestUrl(stream.hlsUrl)));
+  const hlsEnabled = shouldUseClassicHls(stream.hlsUrl, isLive, false, legacyDashPair);
   const [hlsFailed, setHlsFailed] = useState(false);
   const [highQualityFailed, setHighQualityFailed] = useState(false);
-  const [nativeFailed, setNativeFailed] = useState(false);
   const [qualityFailed, setQualityFailed] = useState(false);
   const [compatibilityFallback, setCompatibilityFallback] = useState(false);
   const [bilibiliVariant, setBilibiliVariant] = useState(0);
@@ -71,8 +66,7 @@ export function usePlayerError(
   const sabrSelected = provider === "youtube" && !isLive && playbackMode === "sabr";
   const sabrEnabled = sabrSelected && hasSabrPlayback(stream);
 
-  const fallbackSrc = resolveManifestSrc(stream, isLive, nativeFailed, qualityFailed, {
-    preferNativeManifest,
+  const fallbackSrc = resolveManifestSrc(stream, isLive, qualityFailed, {
     compatibilityMode: compatibilityFallback,
     enableHighQualityPlayback: highQualityEnabled,
     highQualityFailed,
@@ -101,10 +95,6 @@ export function usePlayerError(
       recordClientEvent("player.high_quality_failed", { video: debugVideo });
       setHighQualityFailed(true);
       setRetryKey((k) => k + 1);
-    } else if (nativeEnabled && !nativeFailed) {
-      recordClientEvent("player.native_manifest_failed", { video: debugVideo });
-      setNativeFailed(true);
-      setRetryKey((k) => k + 1);
     } else if (legacyDashPair && !qualityFailed) {
       recordClientEvent("player.quality_failed", { video: debugVideo });
       setQualityFailed(true);
@@ -128,8 +118,6 @@ export function usePlayerError(
     bilibiliVariants,
     highQualityEnabled,
     highQualityFailed,
-    nativeEnabled,
-    nativeFailed,
     legacyDashPair,
     qualityFailed,
     compatibilityFallback,
@@ -139,7 +127,6 @@ export function usePlayerError(
   const reset = useCallback(() => {
     setHlsFailed(false);
     setHighQualityFailed(false);
-    setNativeFailed(false);
     setQualityFailed(false);
     setCompatibilityFallback(false);
     setBilibiliVariant(0);
@@ -152,7 +139,6 @@ export function usePlayerError(
     if (playbackSourceId.length === 0) return;
     setHlsFailed(false);
     setHighQualityFailed(false);
-    setNativeFailed(false);
     setQualityFailed(false);
     setCompatibilityFallback(false);
     setBilibiliVariant(0);

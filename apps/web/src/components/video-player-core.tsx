@@ -35,6 +35,36 @@ const loadHlsLibrary = (): Promise<HlsLibraryModule> => {
   return hlsLibraryPromise;
 };
 
+function configureDashPlayer(player: dashjs.MediaPlayerClass, library: typeof dashjs): void {
+  const onDashUpdate = () => notifyDashPlayer();
+  player.on(library.MediaPlayer.events.STREAM_INITIALIZED, onDashUpdate);
+  player.on(library.MediaPlayer.events.TRACK_CHANGE_RENDERED, onDashUpdate);
+  player.on(library.MediaPlayer.events.QUALITY_CHANGE_RENDERED, onDashUpdate);
+  player.updateSettings({
+    streaming: {
+      buffer: {
+        bufferTimeAtTopQuality: DASH_TOP_QUALITY_BUFFER_SECONDS,
+        bufferTimeAtTopQualityLongForm: DASH_TOP_QUALITY_BUFFER_SECONDS,
+        bufferToKeep: DASH_BACK_BUFFER_SECONDS,
+      },
+      cmcd: { enabled: false },
+      retryAttempts: {
+        MPD: 5,
+        MediaSegment: 3,
+        InitializationSegment: 3,
+        IndexSegment: 3,
+      },
+      retryIntervals: {
+        MPD: 500,
+        MediaSegment: 500,
+        InitializationSegment: 500,
+        IndexSegment: 500,
+      },
+    },
+  });
+  notifyDashPlayer();
+}
+
 export function ChaptersTrack({ src }: { src: string }) {
   const duration = useMediaState("duration");
   if (!Number.isFinite(duration) || duration <= 0) return null;
@@ -58,8 +88,6 @@ export function onProviderChange(provider: MediaProviderAdapter | null) {
   }
   provider.library = loadDashLibrary;
   provider.onInstance((player) => {
-    const library = dashLibrary;
-    if (!library) return;
     const addAuthHeader: DashRequestInterceptor = (request) => {
       const token = useAuthStore.getState().token;
       if (!token) return request;
@@ -71,31 +99,8 @@ export function onProviderChange(provider: MediaProviderAdapter | null) {
     };
     setDashPlayer(player);
     player.addRequestInterceptor(addAuthHeader);
-    const onDashUpdate = () => notifyDashPlayer();
-    player.on(library.MediaPlayer.events.STREAM_INITIALIZED, onDashUpdate);
-    player.on(library.MediaPlayer.events.TRACK_CHANGE_RENDERED, onDashUpdate);
-    player.on(library.MediaPlayer.events.QUALITY_CHANGE_RENDERED, onDashUpdate);
-    player.updateSettings({
-      streaming: {
-        buffer: {
-          bufferTimeAtTopQuality: DASH_TOP_QUALITY_BUFFER_SECONDS,
-          bufferTimeAtTopQualityLongForm: DASH_TOP_QUALITY_BUFFER_SECONDS,
-          bufferToKeep: DASH_BACK_BUFFER_SECONDS,
-        },
-        cmcd: { enabled: false },
-        retryAttempts: {
-          MPD: 5,
-          MediaSegment: 3,
-          InitializationSegment: 3,
-          IndexSegment: 3,
-        },
-        retryIntervals: {
-          MPD: 500,
-          MediaSegment: 500,
-          InitializationSegment: 500,
-          IndexSegment: 500,
-        },
-      },
-    });
+    if (dashLibrary) configureDashPlayer(player, dashLibrary);
+    else
+      void loadDashLibrary().then(({ default: library }) => configureDashPlayer(player, library));
   });
 }
