@@ -22,7 +22,7 @@ const DEFAULTS: SettingsItem = {
   defaultSubtitleLanguage: "",
   defaultAudioLanguage: "",
   preferOriginalLanguage: true,
-  enableHighQualityPlayback: false,
+  enableHighQualityPlayback: true,
   sponsorBlockMode: "auto_skip",
   sponsorBlockCategoryActions: DEFAULT_SPONSORBLOCK_CATEGORY_ACTIONS,
   sponsorBlockMinimumDuration: 0,

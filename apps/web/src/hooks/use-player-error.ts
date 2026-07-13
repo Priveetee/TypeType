@@ -29,11 +29,7 @@ type UsePlayerErrorReturn = {
   seekStartTime: number | null;
 };
 
-export function usePlayerError(
-  stream: VideoStream,
-  isLive: boolean,
-  enableHighQualityPlayback = false,
-): UsePlayerErrorReturn {
+export function usePlayerError(stream: VideoStream, isLive: boolean): UsePlayerErrorReturn {
   const debugVideo = sanitizeVideoContext(stream.id) ?? "unknown";
   const provider = detectProvider(stream.id);
   const iosDevice = isIosDevice();
@@ -44,7 +40,6 @@ export function usePlayerError(
   const legacyDashPair = hasLegacyDashPair(stream);
   const hasLegacyPlaybackFallback = legacyDashPair || legacyProgressiveStreams(stream).length > 0;
   const highQualityEnabled =
-    enableHighQualityPlayback &&
     !isLive &&
     !iosDevice &&
     preferServerManifests &&

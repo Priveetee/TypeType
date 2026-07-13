@@ -38,7 +38,7 @@ export function WatchLayout({
   const branding = useDeArrowBranding(stream.id, stream.title, stream.thumbnail, stream.duration);
   const displayStream = { ...stream, ...branding };
   const isLive = stream.streamType === "live_stream" || stream.streamType === "audio_live_stream";
-  const player = usePlayerError(stream, isLive, settings.enableHighQualityPlayback);
+  const player = usePlayerError(stream, isLive);
   const { on: bulletCommentsOn } = useDanmakuStore();
   const { isNicoNico, bulletComments } = useWatchBulletComments(stream.id, settings.hideComments);
   const sponsor = useWatchSponsorBlock(stream, settings);
@@ -95,7 +95,7 @@ export function WatchLayout({
     startTime: retryStartTime > 0 ? retryStartTime : (audioOnly.switchPositionMs ?? startTime),
     manifestSrc: audioOnly.src ?? player.manifestSrc,
     positionRef: playerEvents.positionRef,
-    highQuality: settings.enableHighQualityPlayback,
+    highQuality: true,
     hasThumbnails: Boolean(thumbnailVtt),
     hasChapters: Boolean(chaptersVtt),
     audioOnlyEnabled: audioOnly.enabled,

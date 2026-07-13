@@ -125,14 +125,6 @@ export function SettingsPlayback() {
           />
         </div>
         <PlaybackToggleRow
-          title="Enable high quality playback"
-          description="Allows VP9/AV1 adaptive streams when supported. May not work on all browsers or devices."
-          checked={settings.enableHighQualityPlayback}
-          onClick={() =>
-            update.mutate({ enableHighQualityPlayback: !settings.enableHighQualityPlayback })
-          }
-        />
-        <PlaybackToggleRow
           title="SABR playback"
           description="Recommended for YouTube as classic DASH and HLS extraction becomes less reliable"
           checked={sabrEnabled}
