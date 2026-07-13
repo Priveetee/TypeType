@@ -1,16 +1,17 @@
 services:
   typetype:
-    image: ghcr.io/priveetee/typetype-beta:latest
+    image: ${TYPETYPE_WEB_BETA_IMAGE:-ghcr.io/priveetee/typetype-beta:latest}
     ports:
       - "${HOST_PORT_WEB_BETA:-18082}:80"
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
-      - typetype-server
+      typetype-server:
+        condition: service_healthy
     restart: unless-stopped
 
   typetype-server:
-    image: ghcr.io/priveetee/typetype-server-beta:latest
+    image: ${TYPETYPE_SERVER_BETA_IMAGE:-ghcr.io/priveetee/typetype-server-beta:latest}
     ports:
       - "${HOST_PORT_SERVER_BETA:-18080}:8080"
     env_file: .env
@@ -31,15 +32,17 @@ services:
       postgres-init:
         condition: service_completed_successfully
       dragonfly:
-        condition: service_started
+        condition: service_healthy
       typetype-token:
-        condition: service_started
+        condition: service_healthy
       typetype-downloader:
         condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8080/health"]
     restart: unless-stopped
 
   typetype-downloader:
-    image: ghcr.io/priveetee/typetype-downloader-beta:latest
+    image: ${TYPETYPE_DOWNLOADER_BETA_IMAGE:-ghcr.io/priveetee/typetype-downloader-beta:latest}
     ports:
       - "${HOST_PORT_DOWNLOADER_BETA:-19093}:18093"
     environment:
@@ -71,15 +74,15 @@ services:
       postgres-init:
         condition: service_completed_successfully
       dragonfly:
-        condition: service_started
+        condition: service_healthy
       garage:
         condition: service_started
       typetype-token:
-        condition: service_started
+        condition: service_healthy
     restart: unless-stopped
 
   typetype-token:
-    image: ghcr.io/priveetee/typetype-token-beta:latest
+    image: ${TYPETYPE_TOKEN_BETA_IMAGE:-ghcr.io/priveetee/typetype-token-beta:latest}
     ports:
       - "${HOST_PORT_TOKEN_BETA:-18081}:8081"
     init: true
@@ -92,6 +95,8 @@ services:
       YOUTUBE_REMOTE_LOGIN_MAX_SESSIONS: ${YOUTUBE_REMOTE_LOGIN_MAX_SESSIONS:-2}
       YOUTUBE_REMOTE_LOGIN_FRAME_FPS: ${YOUTUBE_REMOTE_LOGIN_FRAME_FPS:-10}
       YOUTUBE_REMOTE_LOGIN_MAX_FRAME_BYTES: ${YOUTUBE_REMOTE_LOGIN_MAX_FRAME_BYTES:-524288}
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent http://127.0.0.1:8081/health > /dev/null"]
     restart: unless-stopped
 
   postgres:
@@ -102,13 +107,17 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-typetype}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      retries: 30
     restart: unless-stopped
 
   postgres-init:
     image: postgres:17
     depends_on:
       postgres:
-        condition: service_started
+        condition: service_healthy
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-typetype}
       POSTGRES_USER: ${POSTGRES_USER:-typetype}
@@ -128,6 +137,8 @@ services:
     image: docker.dragonflydb.io/dragonflydb/dragonfly:latest
     ulimits:
       memlock: -1
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
     restart: unless-stopped
 
   garage:

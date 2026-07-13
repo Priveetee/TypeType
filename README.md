@@ -83,7 +83,7 @@ Update only the beta stack:
 ```sh
 cd ~/typetype-beta-stack
 docker compose -f docker-compose.dev.yml --env-file .env pull
-docker compose -f docker-compose.dev.yml --env-file .env up -d --force-recreate
+docker compose -f docker-compose.dev.yml --env-file .env up -d --wait --wait-timeout 180
 docker compose -f docker-compose.dev.yml --env-file .env ps
 ```
 
@@ -256,13 +256,29 @@ Manual Docker Compose flow:
 ```sh
 cp .env.example .env
 ./scripts/bootstrap-env.sh
+docker compose config -q
 docker compose pull
 ./scripts/bootstrap-garage.sh
-docker compose up -d
+docker compose up -d --wait --wait-timeout 180
 docker compose ps
 ```
 
+The script-free guide gives the equivalent one-time secret generation and Garage provisioning commands. Once Garage is provisioned, updates and verification only require Docker Compose and curl:
+
+```sh
+docker compose config -q
+docker compose pull
+docker compose up -d --wait --wait-timeout 180
+docker compose ps
+curl -fsS http://localhost:8080/health
+curl -fsS http://localhost:8081/health
+curl -fsS "http://localhost:8081/potoken?videoId=dQw4w9WgXcQ"
+curl -fsS http://localhost:8082/api/downloader/health/deep
+```
+
 If you do the manual flow, edit `.env` before exposing the stack outside localhost. In particular, keep the generated downloader S3 access key, downloader S3 secret key, Garage RPC secret, YouTube remote login token, and YouTube session encryption key private.
+
+For a controlled update, set `TYPETYPE_WEB_IMAGE`, `TYPETYPE_SERVER_IMAGE`, `TYPETYPE_DOWNLOADER_IMAGE`, and `TYPETYPE_TOKEN_IMAGE` in `.env` to immutable `sha-<commit>` image tags. Keep the previous four values before changing them. Restoring those values and running `docker compose up -d --wait --wait-timeout 180` rolls the application services back without changing the data volumes. Beta uses the corresponding variables ending in `_BETA_IMAGE`.
 
 ## Updating
 
@@ -272,7 +288,7 @@ Update the whole stack:
 cd ~/typetype-stack
 ./scripts/bootstrap-env.sh
 docker compose pull
-docker compose up -d --force-recreate
+docker compose up -d --wait --wait-timeout 180
 docker compose ps
 ```
 

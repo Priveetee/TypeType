@@ -1,16 +1,16 @@
 services:
   typetype:
-    image: ghcr.io/priveetee/typetype:latest
+    image: ${TYPETYPE_WEB_IMAGE:-ghcr.io/priveetee/typetype:latest}
     ports:
       - "${HOST_PORT_WEB:-8082}:80"
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
-      - typetype-server
+      typetype-server:
+        condition: service_healthy
     restart: unless-stopped
-
   typetype-server:
-    image: ghcr.io/priveetee/typetype-server:latest
+    image: ${TYPETYPE_SERVER_IMAGE:-ghcr.io/priveetee/typetype-server:latest}
     ports:
       - "${HOST_PORT_SERVER:-8080}:8080"
     environment:
@@ -39,11 +39,13 @@ services:
       postgres-init:
         condition: service_completed_successfully
       dragonfly:
-        condition: service_started
+        condition: service_healthy
       typetype-token:
-        condition: service_started
+        condition: service_healthy
       typetype-downloader:
         condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8080/health"]
     restart: unless-stopped
 
   typetype-secrets:
@@ -70,7 +72,7 @@ services:
     restart: "no"
 
   typetype-downloader:
-    image: ghcr.io/priveetee/typetype-downloader:latest
+    image: ${TYPETYPE_DOWNLOADER_IMAGE:-ghcr.io/priveetee/typetype-downloader:latest}
     environment:
       HTTP_PORT: "18093"
       PUBLIC_BASE_URL: /api/downloader
@@ -98,15 +100,15 @@ services:
       postgres-init:
         condition: service_completed_successfully
       dragonfly:
-        condition: service_started
+        condition: service_healthy
       garage:
         condition: service_started
       typetype-token:
-        condition: service_started
+        condition: service_healthy
     restart: unless-stopped
 
   typetype-token:
-    image: ghcr.io/priveetee/typetype-token:latest
+    image: ${TYPETYPE_TOKEN_IMAGE:-ghcr.io/priveetee/typetype-token:latest}
     ports:
       - "${HOST_PORT_TOKEN:-8081}:8081"
     init: true
@@ -125,6 +127,8 @@ services:
     depends_on:
       typetype-secrets:
         condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent http://127.0.0.1:8081/health > /dev/null"]
     restart: unless-stopped
 
   postgres:
@@ -135,13 +139,17 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-typetype}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      retries: 30
     restart: unless-stopped
 
   postgres-init:
     image: postgres:17
     depends_on:
       postgres:
-        condition: service_started
+        condition: service_healthy
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-typetype}
       POSTGRES_USER: ${POSTGRES_USER:-typetype}
@@ -161,6 +169,8 @@ services:
     image: docker.dragonflydb.io/dragonflydb/dragonfly:latest
     ulimits:
       memlock: -1
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
     restart: unless-stopped
   garage:
     image: dxflrs/garage:v2.2.0
