@@ -20,6 +20,7 @@ import { ApiError } from "../lib/api";
 import { isYoutubeSessionReconnectError } from "../lib/api-youtube-session";
 import { toPublicWatchParam, toWatchSourceUrl } from "../lib/watch-url";
 import { youtubeSessionReturnToForWatch } from "../lib/youtube-session-route";
+import { useWatchNavigationStore } from "../stores/watch-navigation-store";
 
 const WatchLayout = lazy(() =>
   import("../components/watch-layout").then((module) => ({ default: module.WatchLayout })),
@@ -33,6 +34,7 @@ function WatchPage() {
   const { authReady, isAuthed } = useAuth();
   const { data: instance, isPending: instancePending } = useInstance();
   const { settings, settingsReady } = useSettings();
+  const navigationSnapshot = useWatchNavigationStore((state) => state.snapshot);
   const { playbackMode } = usePlaybackMode();
   const useAuthenticatedStream =
     isAuthed && (settings.accessMode === "allow_list" || instance?.guestAllowed === false);
@@ -47,6 +49,18 @@ function WatchPage() {
   const { add } = useHistory();
   const progressFetch = useProgress(sourceUrl);
   useDocumentTitle(stream?.title);
+  const previewMatches =
+    navigationSnapshot && toPublicWatchParam(navigationSnapshot.stream.id) === publicParam;
+  const previewStream = previewMatches ? navigationSnapshot.stream : undefined;
+  const previewRelated = previewMatches ? navigationSnapshot.relatedStreams : [];
+  const loadingPage = (
+    <WatchPageSkeleton
+      stream={previewStream}
+      relatedStreams={previewRelated}
+      videoUrl={sourceUrl}
+      showComments={!settings.hideComments}
+    />
+  );
 
   const addToHistoryRef = useRef(add.mutate);
   addToHistoryRef.current = add.mutate;
@@ -78,8 +92,8 @@ function WatchPage() {
     });
   }, [progressFetch.data?.position, stream]);
 
-  if (isLoading && !stream) return <WatchPageSkeleton />;
-  if (!authReady) return <WatchPageSkeleton />;
+  if (isLoading && !stream) return loadingPage;
+  if (!authReady) return loadingPage;
 
   if (isError || !stream) {
     const genericExtractorError =
@@ -131,7 +145,16 @@ function WatchPage() {
   const navigating = toPublicWatchParam(stream.id) !== publicParam;
 
   return (
-    <Suspense fallback={<WatchPageSkeleton />}>
+    <Suspense
+      fallback={
+        <WatchPageSkeleton
+          stream={stream}
+          relatedStreams={stream.related}
+          videoUrl={sourceUrl}
+          showComments={!settings.hideComments}
+        />
+      }
+    >
       <WatchLayout
         key={stream.id}
         stream={stream}

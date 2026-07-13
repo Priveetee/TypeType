@@ -4,6 +4,7 @@ import { useDeArrowBranding } from "../hooks/use-dearrow";
 import { formatDuration, formatPublishedDate, formatViews } from "../lib/format";
 import { proxyImage } from "../lib/proxy";
 import { watchRouteSearch } from "../lib/watch-url";
+import { useWatchNavigationStore } from "../stores/watch-navigation-store";
 import type { VideoStream } from "../types/stream";
 import type { HistoryItem } from "../types/user";
 import { ChannelRouteLink } from "./channel-route-link";
@@ -18,6 +19,7 @@ type ContinueCardProps = {
 
 export function ContinueCard({ item }: ContinueCardProps) {
   const locale = useClientLocale();
+  const setNavigation = useWatchNavigationStore((state) => state.setNavigation);
   const uploaderVerified = item.uploaderVerified ?? false;
   const branding = useDeArrowBranding(
     item.url,
@@ -51,6 +53,7 @@ export function ContinueCard({ item }: ContinueCardProps) {
         search={watchRouteSearch(item.url)}
         preload="intent"
         className="group flex flex-col gap-2"
+        onClick={() => setNavigation(menuStream)}
       >
         <div className="relative aspect-video overflow-hidden rounded-lg bg-surface-strong">
           <img

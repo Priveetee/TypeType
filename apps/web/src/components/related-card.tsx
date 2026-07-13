@@ -4,6 +4,7 @@ import { useClientLocale } from "../hooks/use-client-locale";
 import { useDeArrowBranding } from "../hooks/use-dearrow";
 import { formatDuration, formatPublishedDate, formatViews } from "../lib/format";
 import { watchRouteSearch } from "../lib/watch-url";
+import { useWatchNavigationStore } from "../stores/watch-navigation-store";
 import type { VideoStream } from "../types/stream";
 import { ChannelAvatar } from "./channel-avatar";
 import { ChannelRouteLink } from "./channel-route-link";
@@ -13,10 +14,12 @@ import { VerifiedBadgeIcon } from "./watch-icons";
 
 type Props = {
   stream: VideoStream;
+  relatedStreams?: VideoStream[];
 };
 
-function RelatedCardComponent({ stream }: Props) {
+function RelatedCardComponent({ stream, relatedStreams }: Props) {
   const locale = useClientLocale();
+  const setNavigation = useWatchNavigationStore((state) => state.setNavigation);
   const { title, thumbnail } = useDeArrowBranding(
     stream.id,
     stream.title,
@@ -33,6 +36,7 @@ function RelatedCardComponent({ stream }: Props) {
         search={watchRouteSearch(stream.id)}
         preload="intent"
         className="relative w-40 aspect-video rounded-md overflow-hidden bg-surface-strong flex-shrink-0"
+        onClick={() => setNavigation(stream, relatedStreams)}
       >
         <img
           src={thumbnail}
@@ -63,6 +67,7 @@ function RelatedCardComponent({ stream }: Props) {
           search={watchRouteSearch(stream.id)}
           preload="intent"
           className="text-xs font-medium text-fg line-clamp-2 leading-snug hover:text-fg-strong"
+          onClick={() => setNavigation(stream, relatedStreams)}
         >
           {title}
         </Link>
