@@ -22,18 +22,18 @@ jobs:
   verify:
     uses: ./.github/workflows/ci.yml
 
-  build-and-push:
+  prepare-image:
     needs: verify
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64, arko, typetype]
     permissions:
       contents: read
-      packages: write
     outputs:
-      digest: ${{ steps.build.outputs.digest }}
       image: ${{ steps.build-info.outputs.image }}
+      labels: ${{ steps.meta.outputs.labels }}
+      metadata-json: ${{ steps.meta.outputs.json }}
       release-tag: ${{ steps.build-info.outputs.release-tag }}
-      revision: ${{ github.sha }}
       version: ${{ steps.build-info.outputs.version }}
+      build-time: ${{ steps.build-info.outputs.build-time }}
 
     steps:
       - name: Checkout
@@ -68,13 +68,6 @@ jobs:
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "build-time=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_OUTPUT"
 
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v4.1.0
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v6.0.0
@@ -95,7 +88,35 @@ jobs:
             type=raw,value=latest,enable=${{ github.ref_name == 'dev' }}
             type=raw,value=beta,enable=${{ github.ref_name == 'dev' }}
 
+  build-platform:
+    needs: prepare-image
+    runs-on: [self-hosted, Linux, X64, arko, typetype]
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux/amd64
+            arch: amd64
+          - platform: linux/arm64
+            arch: arm64
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.2
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v4.1.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Set up QEMU
+        if: matrix.arch == 'arm64'
         uses: docker/setup-qemu-action@v4.1.0
         with:
           platforms: arm64
@@ -110,21 +131,121 @@ jobs:
         with:
           context: .
           build-args: |
-            BUILD_VERSION=${{ steps.build-info.outputs.version }}
+            BUILD_VERSION=${{ needs.prepare-image.outputs.version }}
             BUILD_REVISION=${{ github.sha }}
-            BUILD_TIME=${{ steps.build-info.outputs.build-time }}
-          platforms: linux/amd64,linux/arm64
-          push: true
+            BUILD_TIME=${{ needs.prepare-image.outputs.build-time }}
+          platforms: ${{ matrix.platform }}
           pull: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          labels: ${{ needs.prepare-image.outputs.labels }}
+          outputs: type=image,name=${{ needs.prepare-image.outputs.image }},push-by-digest=true,name-canonical=true,push=true
+          provenance: false
+          cache-from: type=gha,scope=typetype-${{ matrix.arch }}
+          cache-to: type=gha,mode=max,scope=typetype-${{ matrix.arch }}
+
+      - name: Export digest
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          rm -rf /tmp/typetype-digests
+          mkdir -p /tmp/typetype-digests
+          touch "/tmp/typetype-digests/${DIGEST#sha256:}"
+
+      - name: Upload digest
+        uses: actions/upload-artifact@v7
+        with:
+          name: digests-${{ matrix.arch }}
+          path: /tmp/typetype-digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  build-and-push:
+    needs: [prepare-image, build-platform]
+    runs-on: [self-hosted, Linux, X64, arko, typetype]
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      digest: ${{ steps.manifest.outputs.digest }}
+      image: ${{ needs.prepare-image.outputs.image }}
+      release-tag: ${{ needs.prepare-image.outputs.release-tag }}
+      revision: ${{ github.sha }}
+      version: ${{ needs.prepare-image.outputs.version }}
+
+    steps:
+      - name: Prepare digest directory
+        run: rm -rf /tmp/typetype-digests
+
+      - name: Download digests
+        uses: actions/download-artifact@v8.0.1
+        with:
+          path: /tmp/typetype-digests
+          pattern: digests-*
+          merge-multiple: true
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v4.1.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4.0.0
+
+      - name: Create manifest list and push
+        id: manifest
+        env:
+          IMAGE: ${{ needs.prepare-image.outputs.image }}
+          METADATA_JSON: ${{ needs.prepare-image.outputs.metadata-json }}
+        working-directory: /tmp/typetype-digests
+        run: |
+          mapfile -t digests < <(find . -maxdepth 1 -type f -printf '%f\n' | sort)
+          if [[ "${#digests[@]}" -ne 2 ]]; then
+            echo "Expected two platform digests, found ${#digests[@]}"
+            exit 1
+          fi
+
+          mapfile -t tags < <(jq -r '.tags[]' <<< "$METADATA_JSON")
+          if [[ "${#tags[@]}" -eq 0 ]]; then
+            echo "No image tags were generated"
+            exit 1
+          fi
+
+          tag_args=()
+          for tag in "${tags[@]}"; do
+            tag_args+=(--tag "$tag")
+          done
+
+          source_args=()
+          for digest in "${digests[@]}"; do
+            source_args+=("$IMAGE@sha256:$digest")
+          done
+
+          docker buildx imagetools create "${tag_args[@]}" "${source_args[@]}"
+          manifest_json="$(docker buildx imagetools inspect "${tags[0]}" --format '{{json .Manifest}}')"
+          digest="$(jq -r '.digest' <<< "$manifest_json")"
+          if [[ "$digest" != sha256:* ]]; then
+            echo "Published manifest has no valid digest"
+            exit 1
+          fi
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+
+      - name: Verify manifest platforms
+        env:
+          IMAGE: ${{ needs.prepare-image.outputs.image }}
+          VERSION: ${{ needs.prepare-image.outputs.version }}
+        run: |
+          platforms="$(docker buildx imagetools inspect "$IMAGE:$VERSION" --format '{{json .Manifest}}' | jq -r '.manifests[].platform | "\(.os)/\(.architecture)"' | sort -u)"
+          if [[ "$platforms" != $'linux/amd64\nlinux/arm64' ]]; then
+            printf 'Unexpected manifest platforms:\n%s\n' "$platforms"
+            exit 1
+          fi
 
   deploy-stable:
     needs: build-and-push
     if: github.ref_name == 'main'
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64, arko, typetype]
     environment: stable
     outputs:
       deployed: ${{ steps.deploy-result.outputs.deployed }}
@@ -156,10 +277,9 @@ jobs:
           TYPE_TYPE_DEPLOY_PORT: ${{ secrets.TYPE_TYPE_DEPLOY_PORT }}
           TYPE_TYPE_DEPLOY_SSH_KEY: ${{ secrets.TYPE_TYPE_DEPLOY_SSH_KEY }}
         run: |
-          install -m 700 -d ~/.ssh
-          install -m 600 /dev/null ~/.ssh/typetype_deploy_key
-          printf '%s\n' "$TYPE_TYPE_DEPLOY_SSH_KEY" > ~/.ssh/typetype_deploy_key
-          ssh-keyscan -p "$TYPE_TYPE_DEPLOY_PORT" "$TYPE_TYPE_DEPLOY_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          install -m 600 /dev/null "$RUNNER_TEMP/typetype_deploy_key"
+          printf '%s\n' "$TYPE_TYPE_DEPLOY_SSH_KEY" > "$RUNNER_TEMP/typetype_deploy_key"
+          ssh-keyscan -p "$TYPE_TYPE_DEPLOY_PORT" "$TYPE_TYPE_DEPLOY_HOST" > "$RUNNER_TEMP/known_hosts" 2>/dev/null
 
       - name: Deploy stable stack
         if: steps.deploy-config.outputs.configured == 'true'
@@ -177,7 +297,7 @@ jobs:
             scripts/bootstrap-env.sh \
             scripts/bootstrap-garage.sh \
             scripts/deploy-stable.sh \
-            | ssh -i ~/.ssh/typetype_deploy_key -p "$TYPE_TYPE_DEPLOY_PORT" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes "$TYPE_TYPE_DEPLOY_USER@$TYPE_TYPE_DEPLOY_HOST" 'source_root=$(mktemp -d); trap '\''rm -rf "$source_root"'\'' EXIT; tar -xzf - -C "$source_root"; "$source_root/scripts/deploy-stable.sh" "$source_root"'
+            | ssh -i "$RUNNER_TEMP/typetype_deploy_key" -p "$TYPE_TYPE_DEPLOY_PORT" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/known_hosts" "$TYPE_TYPE_DEPLOY_USER@$TYPE_TYPE_DEPLOY_HOST" 'source_root=$(mktemp -d); trap '\''rm -rf "$source_root"'\'' EXIT; tar -xzf - -C "$source_root"; "$source_root/scripts/deploy-stable.sh" "$source_root"'
           curl --fail --silent --show-error https://watch.typetype.video/api/health
           curl --fail --silent --show-error https://watch.typetype.video/api/downloader/health
 
@@ -189,7 +309,7 @@ jobs:
   deploy-beta:
     needs: build-and-push
     if: github.ref_name == 'dev'
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64, arko, typetype]
     environment: beta
     outputs:
       deployed: ${{ steps.deploy-result.outputs.deployed }}
@@ -216,10 +336,9 @@ jobs:
           TYPE_TYPE_DEPLOY_PORT: ${{ secrets.TYPE_TYPE_DEPLOY_PORT }}
           TYPE_TYPE_DEPLOY_SSH_KEY: ${{ secrets.TYPE_TYPE_DEPLOY_SSH_KEY }}
         run: |
-          install -m 700 -d ~/.ssh
-          install -m 600 /dev/null ~/.ssh/typetype_deploy_key
-          printf '%s\n' "$TYPE_TYPE_DEPLOY_SSH_KEY" > ~/.ssh/typetype_deploy_key
-          ssh-keyscan -p "$TYPE_TYPE_DEPLOY_PORT" "$TYPE_TYPE_DEPLOY_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          install -m 600 /dev/null "$RUNNER_TEMP/typetype_deploy_key"
+          printf '%s\n' "$TYPE_TYPE_DEPLOY_SSH_KEY" > "$RUNNER_TEMP/typetype_deploy_key"
+          ssh-keyscan -p "$TYPE_TYPE_DEPLOY_PORT" "$TYPE_TYPE_DEPLOY_HOST" > "$RUNNER_TEMP/known_hosts" 2>/dev/null
 
       - name: Deploy beta stack
         if: steps.deploy-config.outputs.configured == 'true'
@@ -228,7 +347,7 @@ jobs:
           TYPE_TYPE_DEPLOY_PORT: ${{ secrets.TYPE_TYPE_DEPLOY_PORT }}
           TYPE_TYPE_DEPLOY_USER: ${{ secrets.TYPE_TYPE_DEPLOY_USER }}
         run: |
-          ssh -i ~/.ssh/typetype_deploy_key -p "$TYPE_TYPE_DEPLOY_PORT" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes "$TYPE_TYPE_DEPLOY_USER@$TYPE_TYPE_DEPLOY_HOST" "/usr/local/sbin/typetype-beta-update"
+          ssh -i "$RUNNER_TEMP/typetype_deploy_key" -p "$TYPE_TYPE_DEPLOY_PORT" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/known_hosts" "$TYPE_TYPE_DEPLOY_USER@$TYPE_TYPE_DEPLOY_HOST" "/usr/local/sbin/typetype-beta-update"
           curl --fail --retry 12 --retry-delay 2 --retry-all-errors --silent --show-error https://beta.typetype.video/api/health
           curl --fail --retry 12 --retry-delay 2 --retry-all-errors --silent --show-error https://beta.typetype.video/api/downloader/health
 
@@ -240,7 +359,7 @@ jobs:
   prerelease:
     needs: [build-and-push, deploy-beta]
     if: github.ref_name == 'dev' && needs.deploy-beta.outputs.deployed == 'true'
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64, arko, typetype]
     permissions:
       contents: write
     steps:
@@ -310,7 +429,7 @@ jobs:
   release:
     needs: [build-and-push, deploy-stable]
     if: github.ref_name == 'main' && needs.deploy-stable.outputs.deployed == 'true'
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64, arko, typetype]
     permissions:
       contents: write
     steps:

@@ -11,7 +11,7 @@ env:
 
 jobs:
   coverage:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64, arko, typetype]
     steps:
       - uses: actions/checkout@v6.0.2
 
