@@ -25,4 +25,4 @@ source_root=$(mktemp -d)
 trap 'rm -rf "$source_root"' EXIT
 curl -fsSL "https://codeload.github.com/Priveetee/TypeType/tar.gz/$revision" \
   | tar -xz -C "$source_root" --strip-components=1
-"$source_root/scripts/deploy-stable.sh" "$source_root"
+bash "$source_root/scripts/deploy-stable.sh" "$source_root"
