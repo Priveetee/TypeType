@@ -253,7 +253,10 @@ jobs:
           RELEASE_VERSION: ${{ needs.build-and-push.outputs.version }}
           REVISION: ${{ needs.build-and-push.outputs.revision }}
         run: |
-          existing_tag="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$RELEASE_TAG" --jq '.object.sha' 2>/dev/null || true)"
+          existing_tag=""
+          if resolved_tag="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$RELEASE_TAG" --jq '.object.sha' 2>/dev/null)"; then
+            existing_tag="$resolved_tag"
+          fi
           if [[ -n "$existing_tag" && "$existing_tag" != "$REVISION" ]]; then
             echo "$RELEASE_TAG already targets another commit"
             exit 1
@@ -286,7 +289,10 @@ jobs:
           RELEASE_VERSION: ${{ needs.build-and-push.outputs.version }}
           REVISION: ${{ needs.build-and-push.outputs.revision }}
         run: |
-          existing_tag="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$RELEASE_TAG" --jq '.object.sha' 2>/dev/null || true)"
+          existing_tag=""
+          if resolved_tag="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$RELEASE_TAG" --jq '.object.sha' 2>/dev/null)"; then
+            existing_tag="$resolved_tag"
+          fi
           if [[ -n "$existing_tag" && "$existing_tag" != "$REVISION" ]]; then
             echo "$RELEASE_TAG already targets another commit; bump the product version"
             exit 1
