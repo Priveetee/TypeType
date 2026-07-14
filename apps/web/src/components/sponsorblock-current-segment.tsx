@@ -1,5 +1,6 @@
 import { BadgeInfo, SkipForward } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { seekSponsorBlockSegment } from "../lib/sponsorblock-seek";
 import {
   getSponsorBlockCategoryLabel,
   getSponsorBlockEndTime,
@@ -14,6 +15,7 @@ import { useMediaPlayer, useMediaRemote } from "../lib/vidstack";
 import type { SponsorBlockSegmentItem } from "../types/api";
 
 type Props = {
+  sabrVideo: HTMLVideoElement | null;
   segments: SponsorBlockSegmentItem[];
   autoSkipSegments?: SponsorBlockSegmentItem[];
   manualSkipSegments?: SponsorBlockSegmentItem[];
@@ -35,6 +37,7 @@ function includesSegment(
 }
 
 export function SponsorBlockCurrentSegment({
+  sabrVideo,
   segments,
   autoSkipSegments,
   manualSkipSegments,
@@ -109,7 +112,11 @@ export function SponsorBlockCurrentSegment({
       automatic: false,
       toEnd: isSponsorBlockEndSkip(endTime, duration),
     });
-    remote.seek(sponsorBlockSkipTarget(endTime, duration));
+    seekSponsorBlockSegment(
+      sabrVideo,
+      (seconds) => remote.seek(seconds),
+      sponsorBlockSkipTarget(endTime, duration),
+    );
   }
 
   return (

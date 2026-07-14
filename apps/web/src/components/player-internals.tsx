@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { isIosDevice } from "../lib/ios-device";
+import { seekSponsorBlockSegment } from "../lib/sponsorblock-seek";
 import { getSponsorBlockEndTime, getSponsorBlockStartTime } from "../lib/sponsorblock-settings";
 import {
   emitSponsorBlockSkip,
@@ -40,9 +41,11 @@ export function PlayerFocuser() {
 export function SponsorBlockSkipper({
   segments,
   muteInsteadOfSkip,
+  sabrVideo,
 }: {
   segments: SponsorBlockSegmentItem[];
   muteInsteadOfSkip: boolean;
+  sabrVideo: HTMLVideoElement | null;
 }) {
   const player = useMediaPlayer();
   const remote = useMediaRemote();
@@ -97,7 +100,11 @@ export function SponsorBlockSkipper({
               toEnd: isSponsorBlockEndSkip(endTime, duration),
             });
             pendingSkipRef.current = { key, startTime, endTime };
-            remote.seek(sponsorBlockSkipTarget(endTime, duration));
+            seekSponsorBlockSegment(
+              sabrVideo,
+              (seconds) => remote.seek(seconds),
+              sponsorBlockSkipTarget(endTime, duration),
+            );
             break;
           }
           activeMute = `${seg.category}:${seg.startTime}`;
@@ -149,6 +156,6 @@ export function SponsorBlockSkipper({
       observer.disconnect();
       cleanup?.();
     };
-  }, [canPlay, muteInsteadOfSkip, player, segments, remote]);
+  }, [canPlay, muteInsteadOfSkip, player, segments, remote, sabrVideo]);
   return null;
 }

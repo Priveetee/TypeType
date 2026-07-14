@@ -4,6 +4,7 @@ import {
   requestSabrSeek,
   requestSabrVidstackPlayback,
 } from "../src/lib/sabr-vidstack-bridge";
+import { seekSponsorBlockSegment } from "../src/lib/sponsorblock-seek";
 
 test("replays a pending SABR play request when MSE controls register", async () => {
   let plays = 0;
@@ -54,4 +55,20 @@ test("sends only explicit SABR seek requests to registered MSE controls", () => 
 
   expect(requestSabrSeek(video, 95)).toBe(true);
   expect(positions).toEqual([95]);
+});
+
+test("routes SponsorBlock seeks through registered SABR controls", () => {
+  const positions: number[] = [];
+  const fallbacks: number[] = [];
+  const video = { autoplay: false, pause: () => {} } as HTMLVideoElement;
+  registerSabrVidstackControls(video, {
+    play: async () => {},
+    pause: () => {},
+    seek: (seconds) => positions.push(seconds),
+  });
+
+  seekSponsorBlockSegment(video, (seconds) => fallbacks.push(seconds), 154.7);
+
+  expect(positions).toEqual([154.7]);
+  expect(fallbacks).toEqual([]);
 });
