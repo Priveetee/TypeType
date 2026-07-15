@@ -7,7 +7,7 @@ import { useWatchVttAssets } from "../hooks/use-watch-layout-assets";
 import { getOriginalAudioLocale } from "../lib/audio-track";
 import type { VideoStream } from "../types/stream";
 import { toPublicWatchParam } from "../lib/watch-url";
-import { EmbedPlayer } from "./embed-player";
+import { EmbedVideoPlayer } from "./embed-player";
 
 type Props = {
   stream: VideoStream;
@@ -51,7 +51,7 @@ export function EmbedPlayerShell({ stream, sourceUrl, startTime, autoplay, isAut
   ].join(":");
 
   return (
-    <EmbedPlayer
+    <EmbedVideoPlayer
       playerKey={playerKey}
       src={player.manifestSrc}
       sabrConfig={sabrConfig}

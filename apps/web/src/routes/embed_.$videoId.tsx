@@ -49,7 +49,7 @@ function EmbedError({ message }: { message: string }) {
   );
 }
 
-function EmbedAuthRequired({ watchUrl }: { watchUrl: string }) {
+function EmbedGuestRequired({ watchUrl }: { watchUrl: string }) {
   return (
     <div className="w-full h-full bg-black flex items-center justify-center px-4">
       <div className="flex max-w-sm flex-col items-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900 px-5 py-6 text-center">
@@ -102,7 +102,7 @@ function EmbedPage() {
 
   if (instancePending || !instance) return <EmbedLoading />;
 
-  if (!guestAllowed && !isAuthed) return <EmbedAuthRequired watchUrl={watchUrl} />;
+  if (!guestAllowed && !isAuthed) return <EmbedGuestRequired watchUrl={watchUrl} />;
 
   const pending = streamQuery.isLoading || bootstrap.isLoading;
   if (!activeStream && (!streamEnabled || pending)) return <EmbedLoading />;
@@ -113,7 +113,7 @@ function EmbedPage() {
       activeError instanceof ApiError &&
       (activeError.status === 401 || activeError.status === 403)
     ) {
-      return <EmbedAuthRequired watchUrl={watchUrl} />;
+      return <EmbedGuestRequired watchUrl={watchUrl} />;
     }
     const message =
       activeError instanceof ApiError && (activeError.status === 400 || activeError.status === 422)

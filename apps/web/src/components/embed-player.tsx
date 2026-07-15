@@ -6,7 +6,7 @@ type Props = VideoPlayerProps & {
   watchUrl?: string;
 };
 
-export function EmbedPlayer({ playerKey, watchUrl, ...props }: Props) {
+export function EmbedVideoPlayer({ playerKey, watchUrl, ...props }: Props) {
   const overlay =
     props.title && watchUrl ? (
       <a
