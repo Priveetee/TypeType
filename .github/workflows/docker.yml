@@ -68,6 +68,18 @@ jobs:
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "build-time=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_OUTPUT"
 
+      - name: Validate stable release notes
+        if: github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/v')
+        env:
+          RELEASE_VERSION: ${{ steps.build-info.outputs.version }}
+        run: |
+          expected_heading="# TypeType $RELEASE_VERSION"
+          actual_heading="$(sed -n '1p' RELEASE_NOTES.md)"
+          if [[ "$actual_heading" != "$expected_heading" ]]; then
+            echo "RELEASE_NOTES.md must start with: $expected_heading"
+            exit 1
+          fi
+
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v6.0.0
@@ -420,6 +432,9 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.2
+
       - name: Publish GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -441,15 +456,16 @@ jobs:
             exit 0
           fi
           notes_file="$RUNNER_TEMP/release-notes.md"
+          cp RELEASE_NOTES.md "$notes_file"
           {
-            echo "## Release"
+            echo "## Technical details"
             echo
             echo "- Version: \`$RELEASE_VERSION\`"
             echo "- Commit: [\`${REVISION:0:7}\`]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/commit/$REVISION)"
             echo "- Container image: \`$IMAGE_NAME@$IMAGE_DIGEST\`"
             echo
-            echo "For full release notes, go to [typetype.video/releases](https://typetype.video/releases)."
-          } > "$notes_file"
+            echo "For the complete release history, see [typetype.video/releases](https://typetype.video/releases)."
+          } >> "$notes_file"
           gh release create "$RELEASE_TAG" \
             --repo "$GITHUB_REPOSITORY" \
             --target "$REVISION" \
