@@ -1,0 +1,98 @@
+name: Component image
+
+on:
+  repository_dispatch:
+    types: [component-image]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+concurrency:
+  group: typetype-beta-coordination
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: [self-hosted, Linux, X64, arko, typetype]
+    outputs:
+      channel: ${{ steps.payload.outputs.channel }}
+      component: ${{ steps.payload.outputs.component }}
+      digest: ${{ steps.payload.outputs.digest }}
+      image: ${{ steps.payload.outputs.image }}
+      revision: ${{ steps.payload.outputs.revision }}
+      version: ${{ steps.payload.outputs.version }}
+    steps:
+      - name: Validate payload
+        id: payload
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PAYLOAD: ${{ toJSON(github.event.client_payload) }}
+        run: |
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            {
+              echo "channel=beta"
+              echo "component=all"
+              echo "digest=manual"
+              echo "image=all beta images"
+              echo "revision=$GITHUB_SHA"
+              echo "version=manual"
+            } >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          channel="$(jq -er '.channel' <<< "$PAYLOAD")"
+          component="$(jq -er '.component' <<< "$PAYLOAD")"
+          digest="$(jq -er '.digest' <<< "$PAYLOAD")"
+          image="$(jq -er '.image' <<< "$PAYLOAD")"
+          revision="$(jq -er '.revision' <<< "$PAYLOAD")"
+          version="$(jq -er '.version' <<< "$PAYLOAD")"
+
+          case "$component" in
+            frontend) image_name="typetype" ;;
+            server) image_name="typetype-server" ;;
+            downloader) image_name="typetype-downloader" ;;
+            token) image_name="typetype-token" ;;
+            *) exit 64 ;;
+          esac
+          case "$channel" in
+            beta) expected_image="ghcr.io/typetype-video/${image_name}-beta" ;;
+            stable) expected_image="ghcr.io/typetype-video/${image_name}" ;;
+            *) exit 64 ;;
+          esac
+
+          [[ "$image" == "$expected_image" ]]
+          [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]
+          [[ "$revision" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$version" =~ ^[0-9A-Za-z][0-9A-Za-z._+-]{0,127}$ ]]
+
+          {
+            echo "channel=$channel"
+            echo "component=$component"
+            echo "digest=$digest"
+            echo "image=$image"
+            echo "revision=$revision"
+            echo "version=$version"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Record component version
+        env:
+          CHANNEL: ${{ steps.payload.outputs.channel }}
+          COMPONENT: ${{ steps.payload.outputs.component }}
+          DIGEST: ${{ steps.payload.outputs.digest }}
+          IMAGE: ${{ steps.payload.outputs.image }}
+          REVISION: ${{ steps.payload.outputs.revision }}
+          VERSION: ${{ steps.payload.outputs.version }}
+        run: |
+          {
+            echo "## Component image"
+            echo
+            echo "- Channel: \`$CHANNEL\`"
+            echo "- Component: \`$COMPONENT\`"
+            echo "- Version: \`$VERSION\`"
+            echo "- Revision: \`$REVISION\`"
+            echo "- Image: \`$IMAGE@$DIGEST\`"
+          } >> "$GITHUB_STEP_SUMMARY"
