@@ -39,7 +39,7 @@ For manual installation and operating instructions, use the documentation:
 | [TypeType-Downloader](https://github.com/TypeType-Video/TypeType-Downloader) | Download jobs and artifacts | GPL-3.0-or-later |
 | [Docs-TypeType](https://github.com/TypeType-Video/Docs-TypeType) | User and self-hosting documentation | MIT |
 
-Development changes land on each component's `dev` branch. Component images published from `dev` notify this repository, which coordinates the beta update. Stable images are recorded without starting a production update.
+Development changes land on each component's `dev` branch. Component images notify this repository with their exact digest. Component CI does not deploy beta or production instances.
 
 The public component repositories are also available here as Git submodules. Clone the complete source tree with:
 
