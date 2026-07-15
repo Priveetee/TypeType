@@ -41,6 +41,12 @@ For manual installation and operating instructions, use the documentation:
 
 Development changes land on each component's `dev` branch. Component images published from `dev` notify this repository, which coordinates the beta update. Stable images are recorded without starting a production update.
 
+The public component repositories are also available here as Git submodules. Clone the complete source tree with:
+
+```bash
+git clone --recurse-submodules https://github.com/TypeType-Video/TypeType.git
+```
+
 ## Privacy And Disclaimer
 
 TypeType is designed to provide a private, self-hosted way to use supported media services. The project does not add telemetry or collect usage data. Instance operators control their own deployment, accounts, logs, storage, and network configuration.

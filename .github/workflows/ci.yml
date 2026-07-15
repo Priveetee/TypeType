@@ -20,6 +20,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6.0.2
+        with:
+          submodules: true
       - run: ./scripts/validate-stack.sh
 
   validate-trusted:
@@ -27,4 +29,6 @@ jobs:
     runs-on: [self-hosted, Linux, X64, arko, typetype]
     steps:
       - uses: actions/checkout@v6.0.2
+        with:
+          submodules: true
       - run: ./scripts/validate-stack.sh

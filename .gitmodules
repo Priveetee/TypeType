@@ -1,0 +1,24 @@
+[submodule "TypeType-Frontend"]
+	path = TypeType-Frontend
+	url = https://github.com/TypeType-Video/TypeType-Frontend.git
+	branch = dev
+[submodule "TypeType-Server"]
+	path = TypeType-Server
+	url = https://github.com/TypeType-Video/TypeType-Server.git
+	branch = dev
+[submodule "TypeType-Player"]
+	path = TypeType-Player
+	url = https://github.com/TypeType-Video/TypeType-Player.git
+	branch = dev
+[submodule "TypeType-Token"]
+	path = TypeType-Token
+	url = https://github.com/TypeType-Video/TypeType-Token.git
+	branch = dev
+[submodule "TypeType-Downloader"]
+	path = TypeType-Downloader
+	url = https://github.com/TypeType-Video/TypeType-Downloader.git
+	branch = dev
+[submodule "Docs-TypeType"]
+	path = Docs-TypeType
+	url = https://github.com/TypeType-Video/Docs-TypeType.git
+	branch = dev
