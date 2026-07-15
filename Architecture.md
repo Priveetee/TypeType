@@ -1,150 +1,45 @@
 # Architecture
 
-## Overview
+TypeType is split into independently versioned repositories. This repository owns the product stack and coordinates releases; it does not contain component source code or Git submodules.
 
-TypeType is a frontend SPA. It renders client-side and talks to backend services over HTTP.
+## Runtime
 
-Runtime responsibilities:
+```text
+Browser
+  |
+  v
+TypeType-Frontend
+  |
+  v
+TypeType-Server --------> TypeType-Token
+  |
+  +---------------------> TypeType-Downloader
+                              |
+                              v
+                           Garage
 
-- TypeType frontend (this repo): UI, routing, state, playback UX
-- TypeType-Server: extraction, auth, user data
-- TypeType-Token: PO token and subtitle helper for YouTube flows
-
-## System Boundary
-
-```
-PipePipeExtractor (Java, GPL v3)
-        |
-        v
-TypeType-Server (Kotlin/Ktor, GPL v3)
-        |
-        v
-TypeType frontend (TypeScript/React, MIT)
-```
-
-The frontend and backend are separate programs. The REST API is the boundary.
-
-## Frontend Stack
-
-| Role | Tool |
-|---|---|
-| Language | TypeScript (strict) |
-| Runtime / Package manager | Bun |
-| Build | Vite |
-| Framework | React |
-| Routing | TanStack Router |
-| Server state | TanStack Query |
-| Client state | Zustand |
-| Video player | Vidstack |
-| Styling | Tailwind CSS |
-| Components | shadcn/ui + Radix UI |
-| Lint / Format | Biome |
-
-## Repository Structure
-
-```
-TypeType/
-├── apps/
-│   └── web/
-│       ├── src/
-│       │   ├── components/
-│       │   ├── hooks/
-│       │   ├── lib/
-│       │   ├── routes/
-│       │   └── types/
-│       └── public/
-├── Dockerfile
-├── docker-compose.yml
-└── nginx.conf
+TypeType-Server --------> PostgreSQL
+TypeType-Server --------> Dragonfly
 ```
 
-## Runtime Data Flow
+The frontend and backend communicate over HTTP. TypeType-Server accesses TypeType-Token and TypeType-Downloader through internal HTTP endpoints. Each component owns its implementation and tests.
 
-```
-User action
-    |
-    v
-Route / Hook
-    |
-    v
-TanStack Query / fetch
-    |
-    v
-TypeType-Server HTTP API
-    |
-    v
-JSON response
-    |
-    v
-UI render update
-```
+## Repository Ownership
 
-## Authentication Model
+| Repository | Owns |
+| --- | --- |
+| TypeType | Compose files, installer, stack updates, release coordination |
+| TypeType-Frontend | Web UI and browser playback integration |
+| TypeType-Server | Extraction API, authentication, and user data |
+| TypeType-Player | MSE and SABR playback package |
+| TypeType-Token | YouTube player decoding and token generation |
+| TypeType-Downloader | Download jobs, media assembly, and artifacts |
+| Docs-TypeType | User and self-hosting documentation |
 
-TypeType uses JWT auth from TypeType-Server.
+## Release Coordination
 
-Auth routes:
-
-- `POST /auth/register`
-- `POST /auth/login`
-- `POST /auth/refresh`
-- `GET /auth/me`
-- `POST /auth/guest`
-- `POST /auth/reset-password`
-
-Protected routes use:
-
-- `Authorization: Bearer <token>`
-
-## API Surface (frontend usage)
-
-Base URL is `VITE_API_URL` (defaults to `/api` in app runtime).
-
-Public data routes:
-
-- `/streams`, `/streams/manifest`, `/streams/native-manifest`
-- `/search`, `/suggestions`, `/trending`
-- `/comments`, `/comments/replies`, `/bullet-comments`, `/channel`
-- `/proxy`, `/proxy/storyboard`, `/proxy/nicovideo`
-
-Protected user routes:
-
-- `/history`, `/subscriptions`, `/subscriptions/feed`, `/subscriptions/shorts`
-- `/playlists`, `/watch-later`, `/progress`, `/favorites`, `/settings`
-- `/search-history`, `/blocked/channels`, `/blocked/videos`
-- `/recommendations/home`, `/recommendations/shorts`
-- `/recommendations/home/metrics`, `/restore/pipepipe`, `/imports/youtube-takeout`, `/bug-reports`
-
-Protected admin routes:
-
-- `/admin/users`, `/admin/settings`, `/admin/bug-reports`
-
-## Notable Behavior Contracts
-
-- `GET /progress/{videoUrl}` can return `404` when no position exists; frontend treats this as position `0`
-- YouTube uses `/streams/native-manifest` first, then fallback to `/streams/manifest` on `422`
-- NicoNico can return `422` on `/streams/manifest`; expected for non-DASH cases
-- `GET /search-history` supports backend pagination: `page` and `limit`, total from `X-Total-Count`
-- Home and Shorts recommendations are fetched without client event reporting
-
-## Recommendation and Privacy Flow
-
-- Home feed requests call `/recommendations/home` with `intent` (currently default `auto`).
-- Shorts feed requests call `/recommendations/shorts` with `intent` (currently default `auto`).
-- Optional offline quality metrics are available via `/recommendations/home/metrics`.
-
-## Import and Restore Flow
-
-- YouTube import (`/imports/youtube-takeout`) is job-based:
-  - create upload job,
-  - poll status,
-  - fetch preview,
-  - commit import,
-  - read final report.
-- PipePipe restore uses `POST /restore/pipepipe?timeMode=raw|normalized` and returns restore counts plus watchedAt range details.
+Component repositories build and publish their own artifacts. A successful `dev` image publication sends its component, version, revision, image, and digest to the `TypeType` repository. The central workflow validates this payload and serializes beta updates. Stable component notifications are recorded without triggering an update.
 
 ## License Boundary
 
-TypeType-Server is GPL v3. This frontend is MIT.
-
-No backend source code, classes, or shared modules are imported into the frontend. Integration is HTTP-only.
+Every repository keeps its own license. TypeType-Server and TypeType-Downloader are GPL components. The web frontend is an independent MIT program and communicates with the backend only through HTTP.
