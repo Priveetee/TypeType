@@ -19,7 +19,7 @@ services:
       DATABASE_USER: ${DATABASE_USER:-${POSTGRES_USER:-typetype}}
       DATABASE_PASSWORD: ${DATABASE_PASSWORD:-${POSTGRES_PASSWORD:-typetype}}
       DRAGONFLY_URL: ${DRAGONFLY_URL:-redis://dragonfly:6379}
-      GITHUB_REPO: ${GITHUB_REPO:-TypeType-Video/TypeType-Server}
+      GITHUB_REPO: ${GITHUB_REPO:-TypeType-Video/TypeType}
       GITHUB_ISSUE_TEMPLATE: ${GITHUB_ISSUE_TEMPLATE:-bug_report_backend.md}
       DOWNLOADER_SERVICE_URL: http://typetype-downloader:18093
       YOUTUBE_REMOTE_LOGIN_ENABLED: ${YOUTUBE_REMOTE_LOGIN_ENABLED:-true}
