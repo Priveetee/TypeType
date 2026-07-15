@@ -104,6 +104,9 @@ function EmbedPage() {
 
   if (!guestAllowed && !isAuthed) return <EmbedAuthRequired watchUrl={watchUrl} />;
 
+  const pending = streamQuery.isLoading || bootstrap.isLoading;
+  if (!activeStream && (!streamEnabled || pending)) return <EmbedLoading />;
+
   if (!activeStream) {
     const activeError = streamQuery.error ?? bootstrap.error;
     if (
