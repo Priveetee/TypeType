@@ -6,7 +6,7 @@ embeddable player, and several library and availability improvements.
 ## What changed
 
 - Play YouTube livestreams through stateful SABR with live-edge following,
-  DVR seeking, quality changes, and playback recovery.
+  DVR seeking, and playback recovery.
 - Add an embed route with start-time parameters, guest access control, and a
   manual retry action.
 - Add Watch Later directly to video menus.
